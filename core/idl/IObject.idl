@@ -7,7 +7,7 @@ package joint.core
 		u32 AddRef();
 		u32 Release();
 
-		T Cast<interface T>();
+		T Cast<T>();
 
 		u32 GetHashCode();
 		string ToString();
