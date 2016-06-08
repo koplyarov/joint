@@ -1,0 +1,15 @@
+//(46813baf-46f5-42d3-b8f3-a4a0e171d125)
+
+package joint.core
+{
+	interface IObject
+	{
+		u32 AddRef();
+		u32 Release();
+
+		T Cast<interface T>();
+
+		u32 GetHashCode();
+		string ToString();
+	}
+}
