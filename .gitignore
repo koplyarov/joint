@@ -1,5 +1,7 @@
 *.pyc
 *.swo
 *.swp
+/.buildSettings
+/build
 tags
 types_*.taghl
