@@ -2,6 +2,7 @@
 #define CORE_JOINT_INTEROP_PYTHONMODULE_HPP
 
 
+#include <joint/core/ISomeInterface.hpp>
 #include <joint/interop/PythonUtils.hpp>
 
 #include <string>
@@ -11,14 +12,6 @@
 
 namespace joint
 {
-
-	struct ISomeInterface
-	{
-		virtual ~ISomeInterface() { }
-
-		virtual void AddRef() = 0;
-		virtual void Release() = 0;
-	};
 
 	class PythonModule
 	{

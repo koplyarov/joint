@@ -1,5 +1,10 @@
 #include <joint/interop/PythonModule.hpp>
 
+#include <joint/core/SomeInterfaceWrapper.hpp>
+#include <joint/utils/ArrayView.hpp>
+#include <joint/utils/MakeUnique.hpp>
+
+#include <array>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
@@ -29,103 +34,92 @@ namespace joint
 	}
 
 
-	struct IObjectWrapper
-	{
-		virtual ~IObjectWrapper() { }
-
-		virtual void InvokeMethod(int index) = 0;
-	};
-	using IObjectWrapperPtr = std::unique_ptr<IObjectWrapper>;
-
-
-	class MethodDescription
+	class PythonVariant : public IVariant
 	{
 	private:
-		std::string		_name;
+		PyObjectPtr		_obj;
 
 	public:
-		explicit MethodDescription(std::string name)
-			: _name(std::move(name))
+		PythonVariant(PyObjectPtr obj)
+			: _obj(std::move(obj))
 		{ }
 
-		std::string GetName() const { return _name; }
-	};
+		std::string AsString() const
+		{
+			PyObjectPtr py_bytes(PyUnicode_AsUTF8String(_obj));
+			if (!py_bytes)
+				PYTHON_ERROR("PyUnicode_AsUTF8String failed!");
+			const char* str_data = PyBytes_AsString(py_bytes);
+			if (!str_data)
+				PYTHON_ERROR("PyBytes_AsString failed!");
+			return std::string(str_data);
+		}
 
+		int32_t AsI32() const
+		{
+			int overflow = 0;
+			long result = PyLong_AsLongAndOverflow(_obj, &overflow);
+			if (overflow != 0)
+				PYTHON_ERROR("Overflow in PyLong_AsLongAndOverflow");
+			return result;
+		}
 
-	class InterfaceDescription
-	{
-	public:
-		using Methods = std::vector<MethodDescription>;
-
-	private:
-		std::string		_name;
-		Methods			_methods;
-
-	public:
-		explicit InterfaceDescription(std::string name, Methods methods)
-			: _name(std::move(name)), _methods(std::move(methods))
-		{ }
-
-		std::string GetName() const { return _name; }
-		const Methods& GetMethods() const { return _methods; }
+		virtual IObjectWrapperPtr AsObject() const;
 	};
 
 
 	class PythonObjectWrapper : public IObjectWrapper
 	{
 	private:
-		const InterfaceDescription*	_interfaceDesc;
-		PyObjectPtr					_obj;
+		PyObjectPtr		_obj;
 
 	public:
-		PythonObjectWrapper(const InterfaceDescription& interfaceDesc, PyObjectPtr obj)
-			: _interfaceDesc(&interfaceDesc), _obj(std::move(obj))
+		PythonObjectWrapper(PyObjectPtr obj)
+			: _obj(std::move(obj))
 		{ }
 
-		virtual void InvokeMethod(int index)
+		virtual IVariantPtr InvokeMethod(int index, ArrayView<const ParamVariant> params)
 		{
-			std::string method_name = _interfaceDesc->GetMethods().at(index).GetName();
+			std::string method_name = "methodCall";
 
 			PyObjectPtr py_function(PyObject_GetAttrString(_obj, method_name.c_str()));
 			if (!py_function)
 				PYTHON_ERROR("Could not find method AddRef");
 
-			PyObjectPtr py_args(PyTuple_New(0));
+			PyObjectPtr py_args(PyTuple_New(1 + params.size()));
 			if (!py_args)
 				PYTHON_ERROR("Could not create args tuple");
 
-			//Py_INCREF(_obj);
-			//if (PyTuple_SetItem(py_args, 0, _obj))
-				//PYTHON_ERROR("Could set tuple item");
+			if (PyTuple_SetItem(py_args, 0, PyLong_FromLong(index))) // TODO: Use PyTuple_SET_ITEM
+				PYTHON_ERROR("Could not set tuple item");
+
+			for (size_t i = 0; i < params.size(); ++i)
+			{
+				auto p = params[i];
+
+				PyObject* py_p = nullptr;
+				switch (p.GetType())
+				{
+				case ParamVariant::Type::I32: py_p = PyLong_FromLong(p.AsI32()); break;
+				case ParamVariant::Type::String: py_p = PyUnicode_FromString(p.AsString()); break;
+				default: throw std::runtime_error("Unknown parameter type");
+				}
+
+				if (PyTuple_SetItem(py_args, i + 1, py_p)) // TODO: Use PyTuple_SET_ITEM
+					PYTHON_ERROR("Could not set tuple item");
+			}
 
 			PyObjectPtr py_result(PyObject_CallObject(py_function, py_args));
 			if (!py_result)
 				PYTHON_ERROR("Could not invoke method");
+
+			return MakeUnique<PythonVariant>(py_result);
 		}
 	};
 
-	class SomeInterfaceWrapper : public ISomeInterface
-	{
-	private:
-		IObjectWrapperPtr		_obj;
 
-	public:
-		SomeInterfaceWrapper(IObjectWrapperPtr obj)
-			: _obj(std::move(obj))
-		{ }
-
-		virtual void AddRef()
-		{ _obj->InvokeMethod(0); }
-
-		virtual void Release()
-		{ _obj->InvokeMethod(1); }
-
-		static const InterfaceDescription& GetInterfaceDescription()
-		{
-			static InterfaceDescription desc("ISomeInterface", { MethodDescription("AddRef"), MethodDescription("Release") });
-			return desc;
-		}
-	};
+	IObjectWrapperPtr PythonVariant::AsObject() const
+	{ return MakeUnique<PythonObjectWrapper>(_obj); }
 
 
 	ISomeInterface* PythonModule::InvokeFunction(const std::string& functionName)
@@ -141,7 +135,7 @@ namespace joint
 		if (!py_result)
 			PYTHON_ERROR(functionName + " in python module " + _moduleName + " invokation failed");
 
-		return new SomeInterfaceWrapper(IObjectWrapperPtr(new PythonObjectWrapper(SomeInterfaceWrapper::GetInterfaceDescription(), std::move(py_result))));
+		return new SomeInterfaceWrapper(MakeUnique<PythonObjectWrapper>(std::move(py_result)));
 	}
 
 }

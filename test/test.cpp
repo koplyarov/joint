@@ -17,6 +17,15 @@ int main()
 		{
 			std::cout << "obj is not null" << std::endl;
 			obj->AddRef();
+
+			auto s = obj->ToString();
+			std::cout << "ToString result: " << s << std::endl;
+			obj->PrintInt(2);
+			obj->PrintString("OLOLO");
+
+			auto other = obj->ReturnOther();
+			other->Func();
+
 			obj->Release();
 			obj->Release();
 		}
