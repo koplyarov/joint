@@ -1,4 +1,4 @@
-#include <joint/interop/PythonModule.hpp>
+#include <../bindings/python/PythonModule.hpp>
 
 #include <iostream>
 

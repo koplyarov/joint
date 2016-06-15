@@ -2,7 +2,7 @@
 #define JOINT_CORE_ISOMEINTERFACE_HPP
 
 
-#include <joint/interop/IObjectWrapper.hpp>
+#include <joint/IObjectWrapper.hpp>
 
 
 namespace joint

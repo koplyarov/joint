@@ -2,12 +2,13 @@
 #define CORE_JOINT_INTEROP_PYTHONMODULE_HPP
 
 
-#include <joint/core/ISomeInterface.hpp>
-#include <joint/interop/PythonUtils.hpp>
+#include <joint/ISomeInterface.hpp>
 
 #include <string>
 
 #include <Python.h>
+
+#include "PythonUtils.hpp"
 
 
 namespace joint

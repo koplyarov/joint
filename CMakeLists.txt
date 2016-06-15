@@ -18,7 +18,7 @@ else()
 endif()
 
 set(JOINT_CORE_SRC
-	core/joint/interop/PythonModule.cpp
+	bindings/python/PythonModule.cpp
 )
 
 add_library(joint-core ${JOINT_CORE_SRC})
