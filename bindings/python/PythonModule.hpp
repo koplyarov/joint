@@ -9,6 +9,7 @@
 #include <Python.h>
 
 #include "PythonUtils.hpp"
+#include "PythonContext.hpp"
 
 
 namespace joint
@@ -16,16 +17,6 @@ namespace joint
 
 	class PythonModule
 	{
-		class PyContext
-		{
-		public:
-			PyContext() { Py_Initialize(); }
-			~PyContext() { Py_Finalize(); }
-
-			PyContext(const PyContext&) = delete;
-			PyContext& operator = (const PyContext&) = delete;
-		};
-
 	private:
 		PyContext		_pyCtx;
 		PyObjectPtr		_pyModule;
