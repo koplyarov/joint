@@ -11,24 +11,20 @@ int main()
 	{
 		PythonModule m("test_module");
 		ISomeInterface* obj = m.InvokeFunction("func");
-		if (!obj)
-			std::cout << "obj is null" << std::endl;
-		else
-		{
-			std::cout << "obj is not null" << std::endl;
-			obj->AddRef();
 
-			auto s = obj->ToString();
-			std::cout << "ToString result: " << s << std::endl;
-			obj->PrintInt(2);
-			obj->PrintString("OLOLO");
+		std::cout << "obj is not null" << std::endl;
+		obj->AddRef();
 
-			auto other = obj->ReturnOther();
-			other->Func();
+		auto s = obj->ToString();
+		std::cout << "ToString result: " << s << std::endl;
+		obj->PrintInt(2);
+		obj->PrintString("OLOLO");
 
-			obj->Release();
-			obj->Release();
-		}
+		auto other = obj->ReturnOther();
+		other->Func();
+
+		obj->Release();
+		obj->Release();
 	}
 	catch (const std::exception& ex)
 	{
