@@ -101,8 +101,8 @@ extern "C"
 	};
 
 
-	typedef Joint_Error Joint_GetRootObject_Func(void* bindingUserData, const char* getterName, Joint_ObjectHandleInternal* outObject);
-	typedef Joint_Error Joint_InvokeMethod_Func(void* bindingUserData, Joint_ObjectHandleInternal obj, int methodId, const Joint_Parameter* params, Joint_SizeT paramsCount);
+	typedef Joint_Error Joint_GetRootObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, const char* getterName, Joint_ObjectHandleInternal* outObject);
+	typedef Joint_Error Joint_InvokeMethod_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, int methodId, const Joint_Parameter* params, Joint_SizeT paramsCount);
 
 	typedef Joint_Error Joint_LoadModule_Func(void* bindingUserData, const char* moduleName, Joint_ModuleHandleInternal* outModule);
 	typedef Joint_Error Joint_UnloadModule_Func(void* bindingUserData, Joint_ModuleHandleInternal module);

@@ -11,7 +11,13 @@
 #define JOINT_CPP_WRAP_END \
 				return JOINT_ERROR_NONE; \
 			} \
-			catch (const joint::JointException& ex) { return ex.GetError(); } \
-			catch (const std::exception& ex) { return JOINT_ERROR_GENERIC; }
+			catch (const joint::JointException& ex) { \
+				Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint", "%s failed: %s", __func__, Joint_ErrorToString(ex.GetError())); \
+				return ex.GetError(); \
+			} \
+			catch (const std::exception& ex) { \
+				Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint", "%s failed: %s", __func__, ex.what()); \
+				return JOINT_ERROR_GENERIC; \
+			}
 
 #endif

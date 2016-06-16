@@ -17,10 +17,16 @@ int main()
 {
 	try
 	{
-		JointPython_Register();
+		JOINT_CALL( JointPython_Register() );
 
 		Joint_ModuleHandle module;
 		JOINT_CALL( Joint_LoadModule("python", "test_module", &module) );
+
+		Joint_ObjectHandle obj;
+		JOINT_CALL( Joint_GetRootObject(module, "func", &obj) );
+
+		JOINT_CALL( Joint_InvokeMethod(obj, 0, nullptr, 0) );
+
 		JOINT_CALL( Joint_UnloadModule(module) );
 
 		//PythonModule m("test_module");
@@ -39,7 +45,7 @@ int main()
 
 		//obj->Release();
 		//obj->Release();
-		JointPython_Unregister();
+		JOINT_CALL( JointPython_Unregister() );
 	}
 	catch (const std::exception& ex)
 	{

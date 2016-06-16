@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <atomic>
 #include <memory>
+#include <mutex>
 #include <stdexcept>
 #include <string.h>
 #include <vector>
@@ -19,9 +20,10 @@ static void DefaultLogCallback(const char* message)
 { printf("%s\n", message); }
 
 
-static joint::JointCore              g_core;
-static Joint_LogCallback_Func*       g_logCallback = &DefaultLogCallback;
-static std::atomic<Joint_LogLevel>   g_logLevel(JOINT_LOGLEVEL_DEBUG);
+static joint::JointCore               g_core;
+static std::mutex                     g_mutex;
+static Joint_LogCallback_Func*        g_logCallback = &DefaultLogCallback;
+static std::atomic<Joint_LogLevel>    g_logLevel(JOINT_LOGLEVEL_DEBUG);
 
 extern "C"
 {
@@ -29,6 +31,7 @@ extern "C"
 	Joint_Error Joint_SetLogCallback(Joint_LogCallback_Func* logCallback)
 	{
 		JOINT_CPP_WRAP_BEGIN
+		std::lock_guard<std::mutex> l(g_mutex);
 		g_logCallback = (logCallback == nullptr) ? &DefaultLogCallback : logCallback;
 		JOINT_CPP_WRAP_END
 	}
@@ -67,6 +70,7 @@ extern "C"
 		vsnprintf(&message[ofs], sizeof(message), format, argptr);
 		va_end(argptr);
 
+		std::lock_guard<std::mutex> l(g_mutex);
 		g_logCallback(message);
 	}
 
@@ -90,6 +94,7 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 		*outBinding = g_core.RegisterBinding(desc, userData);
+		Joint_Log(JOINT_LOGLEVEL_INFO, "Joint", "RegisterBinding(name: \"%s\"): %p", desc.name, *outBinding);
 		JOINT_CPP_WRAP_END
 	}
 
@@ -97,6 +102,7 @@ extern "C"
 	Joint_Error Joint_UnregisterBinding(Joint_BindingHandle handle)
 	{
 		JOINT_CPP_WRAP_BEGIN
+		Joint_Log(JOINT_LOGLEVEL_INFO, "Joint", "UnregisterBinding(binding: %p)", handle);
 		g_core.UnregisterBinding(handle);
 		JOINT_CPP_WRAP_END
 	}
@@ -106,6 +112,7 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 		*outModule = g_core.LoadModule(bindingName, moduleName);
+		Joint_Log(JOINT_LOGLEVEL_INFO, "Joint", "LoadModule(bindingName: \"%s\", moduleName: \"%s\"): %p", bindingName, moduleName, *outModule);
 		JOINT_CPP_WRAP_END
 	}
 
@@ -113,20 +120,30 @@ extern "C"
 	Joint_Error Joint_UnloadModule(Joint_ModuleHandle handle)
 	{
 		JOINT_CPP_WRAP_BEGIN
+		Joint_Log(JOINT_LOGLEVEL_INFO, "Joint", "UnloadModule(module: %p)", handle);
 		g_core.UnloadModule(handle);
 		JOINT_CPP_WRAP_END
 	}
 
 
-	//Joint_Error Joint_GetRootObject(Joint_ModuleHandle module, const char* getterName, Joint_ObjectHandle* outObject)
-	//{
-		//return JOINT_ERROR_NOT_IMPLEMENTED;
-	//}
+	Joint_Error Joint_GetRootObject(Joint_ModuleHandle module, const char* getterName, Joint_ObjectHandle* outObject)
+	{
+		JOINT_CPP_WRAP_BEGIN
+		Joint_ObjectHandleInternal internal;
+		Joint_Error ret = module->binding->desc.getRootObject(module->binding->userData, module->internal, getterName, &internal);
+		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+		*outObject = new Joint_Object{ internal, module };
+		Joint_Log(JOINT_LOGLEVEL_DEBUG, "Joint", "GetRootObject(module: %p, getterName: \"%s\"): %p", module, getterName, *outObject);
+		JOINT_CPP_WRAP_END
+	}
 
 
-	//Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, int methodId, const Joint_Parameter* params, Joint_SizeT paramsCount)
-	//{
-		//return JOINT_ERROR_NOT_IMPLEMENTED;
-	//}
+	Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, int methodId, const Joint_Parameter* params, Joint_SizeT paramsCount)
+	{
+		JOINT_CPP_WRAP_BEGIN
+		Joint_Error ret = obj->module->binding->desc.invokeMethod(obj->module->binding->userData, obj->module->internal, obj->internal, methodId, params, paramsCount);
+		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+		JOINT_CPP_WRAP_END
+	}
 
 }

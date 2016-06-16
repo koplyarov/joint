@@ -11,8 +11,16 @@
 namespace joint
 {
 
-#define JOINT_THROW(...) throw ::joint::MakeException(__VA_ARGS__)
-#define JOINT_CHECK(Expr_, ...) do { if (!(Expr_)) JOINT_THROW(__VA_ARGS__); } while (false)
+#define JOINT_PP_CAT1(A_, B_) A_##B_
+#define JOINT_PP_CAT(A_, B_) JOINT_PP_CAT1(A_, B_)
+
+#define JOINT_PP_STR1(...) #__VA_ARGS__
+#define JOINT_PP_STR(...) JOINT_PP_STR1(__VA_ARGS__)
+
+#define JOINT_SOURCE_LOCATION __FILE__ ":" JOINT_PP_STR(__LINE__)
+
+#define JOINT_THROW(...) do { throw ::joint::MakeException(__VA_ARGS__); } while (false)
+#define JOINT_CHECK(Expr_, ...) do { if (!(Expr_)) { Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint", "JOINT_CHECK failed: %s in function %s at %s", #Expr_, __func__, JOINT_SOURCE_LOCATION); JOINT_THROW(__VA_ARGS__); } } while (false)
 
 	class JointException : public std::exception
 	{

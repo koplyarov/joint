@@ -21,7 +21,7 @@ public:
 	PythonModule(const std::string& moduleName);
 	~PythonModule();
 
-	//ISomeInterface* InvokeFunction(const std::string& functionName);
+	PyObjectPtr InvokeFunction(const std::string& functionName);
 };
 
 

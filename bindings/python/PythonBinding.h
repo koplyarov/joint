@@ -8,8 +8,8 @@
 extern "C"
 {
 
-	void JointPython_Register();
-	void JointPython_Unregister();
+	Joint_Error JointPython_Register();
+	Joint_Error JointPython_Unregister();
 
 }
 
