@@ -21,8 +21,7 @@ PythonModule::PythonModule(const std::string& moduleName)
 	PyObjectPtr py_module_name(PyUnicode_FromString(moduleName.c_str()));
 	_pyModule.reset(PyImport_Import(py_module_name));
 
-	if (!_pyModule)
-		PYTHON_ERROR("Could not import python module " + moduleName);
+	PYTHON_CHECK(_pyModule, "Could not import python module " + moduleName);
 
 	Joint_Log(JOINT_LOGLEVEL_DEBUG, "PythonBinding", "Loaded python module %s", _moduleName.c_str());
 }
@@ -126,15 +125,11 @@ PythonModule::~PythonModule()
 PyObjectPtr PythonModule::InvokeFunction(const std::string& functionName)
 {
 	PyObjectPtr py_function(PyObject_GetAttrString(_pyModule, functionName.c_str()));
-	if (!py_function)
-		PYTHON_ERROR("Could not find function " + functionName + " in python module " + _moduleName);
-
-	if (!PyCallable_Check(py_function))
-		PYTHON_ERROR(functionName + " in python module " + _moduleName + " is not a function");
+	PYTHON_CHECK(py_function, "Could not find function " + functionName + " in python module " + _moduleName);
+	PYTHON_CHECK(PyCallable_Check(py_function), functionName + " in python module " + _moduleName + " is not a function");
 
 	PyObjectPtr py_result(PyObject_CallObject(py_function, nullptr));
-	if (!py_result)
-		PYTHON_ERROR(functionName + " in python module " + _moduleName + " invokation failed");
+	PYTHON_CHECK(py_result, functionName + " in python module " + _moduleName + " invokation failed");
 
 	return std::move(py_result);
 }

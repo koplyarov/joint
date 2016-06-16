@@ -30,8 +30,9 @@ target_link_libraries(joint-core ${CMAKE_THREAD_LIBS_INIT})
 ################################################################################
 
 set(JOINT_PYTHON_BINDING_SRC
-	bindings/python/PythonModule.cpp
 	bindings/python/PythonBinding.cpp
+	bindings/python/PythonModule.cpp
+	bindings/python/PythonObject.cpp
 )
 
 add_library(joint-python SHARED ${JOINT_PYTHON_BINDING_SRC})

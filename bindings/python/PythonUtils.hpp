@@ -52,6 +52,7 @@ public:
 
 
 #define PYTHON_ERROR(...) do { PyErr_Print(); throw std::runtime_error(__VA_ARGS__); } while (false)
+#define PYTHON_CHECK(Expr_, ...) do { if (!(Expr_)) PYTHON_ERROR(__VA_ARGS__); } while (false)
 
 
 #endif

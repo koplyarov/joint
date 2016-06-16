@@ -9,6 +9,7 @@
 
 #include "PythonContext.hpp"
 #include "PythonModule.hpp"
+#include "PythonObject.hpp"
 
 
 class PythonBinding
@@ -43,7 +44,6 @@ public:
 	static Joint_Error UnloadModule(void* bindingUserData, Joint_ModuleHandleInternal module)
 	{
 		JOINT_CPP_WRAP_BEGIN
-		JOINT_CHECK(module, JOINT_ERROR_INVALID_PARAMETER);
 		delete reinterpret_cast<PythonModule*>(module);
 		JOINT_CPP_WRAP_END
 	}
@@ -53,14 +53,15 @@ public:
 		JOINT_CPP_WRAP_BEGIN
 		auto m = reinterpret_cast<PythonModule*>(module);
 		PyObjectPtr py_obj = m->InvokeFunction(getterName);
-		*outObject = new PyObjectPtr(py_obj);
+		*outObject = new PythonObject(py_obj);
 		JOINT_CPP_WRAP_END
 	}
 
-	static Joint_Error InvokeMethod(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, int methodId, const Joint_Parameter* params, Joint_SizeT paramsCount)
+	static Joint_Error InvokeMethod(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount)
 	{
 		JOINT_CPP_WRAP_BEGIN
-		return JOINT_ERROR_NOT_IMPLEMENTED;
+		auto o = reinterpret_cast<PythonObject*>(obj);
+		o->InvokeMethod(methodId, joint::ArrayView<const Joint_Parameter>(params, paramsCount));
 		JOINT_CPP_WRAP_END
 	}
 };

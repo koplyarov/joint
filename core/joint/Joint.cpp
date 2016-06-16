@@ -79,11 +79,12 @@ extern "C"
 	{
 		switch (err)
 		{
-		case JOINT_ERROR_NONE:                return "JOINT_ERROR_NONE";
-		case JOINT_ERROR_NOT_IMPLEMENTED:     return "JOINT_ERROR_NOT_IMPLEMENTED";
-		case JOINT_ERROR_INVALID_PARAMETER:   return "JOINT_ERROR_INVALID_PARAMETER";
-		case JOINT_ERROR_OUT_OF_MEMORY:       return "JOINT_ERROR_OUT_OF_MEMORY ";
-		case JOINT_ERROR_GENERIC:             return "JOINT_ERROR_GENERIC ";
+		case JOINT_ERROR_NONE:                    return "JOINT_ERROR_NONE";
+		case JOINT_ERROR_GENERIC:                 return "JOINT_ERROR_GENERIC ";
+		case JOINT_ERROR_NOT_IMPLEMENTED:         return "JOINT_ERROR_NOT_IMPLEMENTED";
+		case JOINT_ERROR_INVALID_PARAMETER:       return "JOINT_ERROR_INVALID_PARAMETER";
+		case JOINT_ERROR_OUT_OF_MEMORY:           return "JOINT_ERROR_OUT_OF_MEMORY ";
+		case JOINT_ERROR_IMPLEMENTATION_ERROR:    return "JOINT_ERROR_IMPLEMENTATION_ERROR";
 		}
 
 		return "Unknown error";
@@ -93,8 +94,12 @@ extern "C"
 	Joint_Error Joint_RegisterBinding(Joint_BindingDesc desc, void* userData, Joint_BindingHandle* outBinding)
 	{
 		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(outBinding, JOINT_ERROR_INVALID_PARAMETER);
+
 		*outBinding = g_core.RegisterBinding(desc, userData);
 		Joint_Log(JOINT_LOGLEVEL_INFO, "Joint", "RegisterBinding(name: \"%s\"): %p", desc.name, *outBinding);
+
 		JOINT_CPP_WRAP_END
 	}
 
@@ -102,8 +107,12 @@ extern "C"
 	Joint_Error Joint_UnregisterBinding(Joint_BindingHandle handle)
 	{
 		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(handle, JOINT_ERROR_INVALID_PARAMETER);
+
 		Joint_Log(JOINT_LOGLEVEL_INFO, "Joint", "UnregisterBinding(binding: %p)", handle);
 		g_core.UnregisterBinding(handle);
+
 		JOINT_CPP_WRAP_END
 	}
 
@@ -111,8 +120,14 @@ extern "C"
 	Joint_Error Joint_LoadModule(const char* bindingName, const char* moduleName, Joint_ModuleHandle* outModule)
 	{
 		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(bindingName, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(moduleName, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outModule, JOINT_ERROR_INVALID_PARAMETER);
+
 		*outModule = g_core.LoadModule(bindingName, moduleName);
 		Joint_Log(JOINT_LOGLEVEL_INFO, "Joint", "LoadModule(bindingName: \"%s\", moduleName: \"%s\"): %p", bindingName, moduleName, *outModule);
+
 		JOINT_CPP_WRAP_END
 	}
 
@@ -120,8 +135,12 @@ extern "C"
 	Joint_Error Joint_UnloadModule(Joint_ModuleHandle handle)
 	{
 		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(handle, JOINT_ERROR_INVALID_PARAMETER);
+
 		Joint_Log(JOINT_LOGLEVEL_INFO, "Joint", "UnloadModule(module: %p)", handle);
 		g_core.UnloadModule(handle);
+
 		JOINT_CPP_WRAP_END
 	}
 
@@ -129,20 +148,32 @@ extern "C"
 	Joint_Error Joint_GetRootObject(Joint_ModuleHandle module, const char* getterName, Joint_ObjectHandle* outObject)
 	{
 		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(module, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(getterName, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outObject, JOINT_ERROR_INVALID_PARAMETER);
+
 		Joint_ObjectHandleInternal internal;
 		Joint_Error ret = module->binding->desc.getRootObject(module->binding->userData, module->internal, getterName, &internal);
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
 		*outObject = new Joint_Object{ internal, module };
 		Joint_Log(JOINT_LOGLEVEL_DEBUG, "Joint", "GetRootObject(module: %p, getterName: \"%s\"): %p", module, getterName, *outObject);
+
 		JOINT_CPP_WRAP_END
 	}
 
 
-	Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, int methodId, const Joint_Parameter* params, Joint_SizeT paramsCount)
+	Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount)
 	{
 		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(obj, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(params || paramsCount == 0, JOINT_ERROR_INVALID_PARAMETER);
+
 		Joint_Error ret = obj->module->binding->desc.invokeMethod(obj->module->binding->userData, obj->module->internal, obj->internal, methodId, params, paramsCount);
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+
 		JOINT_CPP_WRAP_END
 	}
 

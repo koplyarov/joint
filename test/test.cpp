@@ -26,6 +26,18 @@ int main()
 		JOINT_CALL( Joint_GetRootObject(module, "func", &obj) );
 
 		JOINT_CALL( Joint_InvokeMethod(obj, 0, nullptr, 0) );
+		JOINT_CALL( Joint_InvokeMethod(obj, 1, nullptr, 0) );
+		JOINT_CALL( Joint_InvokeMethod(obj, 2, nullptr, 0) );
+
+		Joint_Parameter PrintInt_params[1];
+		PrintInt_params[0].variant.i32 = 42;
+		PrintInt_params[0].type = JOINT_PARAMETER_TYPE_I32;
+		JOINT_CALL( Joint_InvokeMethod(obj, 3, PrintInt_params, 1) );
+
+		Joint_Parameter PrintString_params[1];
+		PrintString_params[0].variant.utf8 = "qwe";
+		PrintString_params[0].type = JOINT_PARAMETER_TYPE_UTF8;
+		JOINT_CALL( Joint_InvokeMethod(obj, 4, PrintString_params, 1) );
 
 		JOINT_CALL( Joint_UnloadModule(module) );
 

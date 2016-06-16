@@ -45,6 +45,7 @@ namespace joint
 		Joint_ModuleHandleInternal internal = JOINT_NULL_HANDLE;
 		Joint_Error ret = (*binding_it)->desc.loadModule((*binding_it)->userData, moduleName, &internal);
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
 
 		return new Joint_Module{ internal, binding_it->get() };
 	}

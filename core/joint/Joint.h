@@ -28,10 +28,11 @@ extern "C"
 	enum Joint_Error
 	{
 		JOINT_ERROR_NONE = 0,
-		JOINT_ERROR_NOT_IMPLEMENTED = 1,
-		JOINT_ERROR_INVALID_PARAMETER = 2,
-		JOINT_ERROR_OUT_OF_MEMORY = 3,
-		JOINT_ERROR_GENERIC = 4
+		JOINT_ERROR_GENERIC = 1,
+		JOINT_ERROR_NOT_IMPLEMENTED = 2,
+		JOINT_ERROR_INVALID_PARAMETER = 3,
+		JOINT_ERROR_OUT_OF_MEMORY = 4,
+		JOINT_ERROR_IMPLEMENTATION_ERROR = 5
 	};
 
 	const char* Joint_ErrorToString(Joint_Error err);
@@ -102,7 +103,7 @@ extern "C"
 
 
 	typedef Joint_Error Joint_GetRootObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, const char* getterName, Joint_ObjectHandleInternal* outObject);
-	typedef Joint_Error Joint_InvokeMethod_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, int methodId, const Joint_Parameter* params, Joint_SizeT paramsCount);
+	typedef Joint_Error Joint_InvokeMethod_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount);
 
 	typedef Joint_Error Joint_LoadModule_Func(void* bindingUserData, const char* moduleName, Joint_ModuleHandleInternal* outModule);
 	typedef Joint_Error Joint_UnloadModule_Func(void* bindingUserData, Joint_ModuleHandleInternal module);
@@ -129,7 +130,7 @@ extern "C"
 	Joint_Error Joint_UnloadModule(Joint_ModuleHandle handle);
 
 	Joint_Error Joint_GetRootObject(Joint_ModuleHandle module, const char* getterName, Joint_ObjectHandle* outObject);
-	Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, int methodId, const Joint_Parameter* params, Joint_SizeT paramsCount);
+	Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount);
 }
 
 #endif
