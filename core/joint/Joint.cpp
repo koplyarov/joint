@@ -85,6 +85,7 @@ extern "C"
 		case JOINT_ERROR_INVALID_PARAMETER:       return "JOINT_ERROR_INVALID_PARAMETER";
 		case JOINT_ERROR_OUT_OF_MEMORY:           return "JOINT_ERROR_OUT_OF_MEMORY ";
 		case JOINT_ERROR_IMPLEMENTATION_ERROR:    return "JOINT_ERROR_IMPLEMENTATION_ERROR";
+		case JOINT_ERROR_UNEXPECTED_TYPE:         return "JOINT_ERROR_UNEXPECTED_TYPE";
 		}
 
 		return "Unknown error";
@@ -164,15 +165,41 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount)
+	Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
 		JOINT_CHECK(obj, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(params || paramsCount == 0, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outRetValue, JOINT_ERROR_INVALID_PARAMETER);
 
-		Joint_Error ret = obj->module->binding->desc.invokeMethod(obj->module->binding->userData, obj->module->internal, obj->internal, methodId, params, paramsCount);
+		Joint_Error ret = obj->module->binding->desc.invokeMethod(obj->module->binding->userData, obj->module->internal, obj->internal, methodId, params, paramsCount, retType, outRetValue);
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+
+		JOINT_CHECK(outRetValue->releaseValue, JOINT_ERROR_IMPLEMENTATION_ERROR);
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_ObtainRetValue(Joint_RetValue value, Joint_Variant* outValue)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(outValue, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(value.releaseValue, JOINT_ERROR_INVALID_PARAMETER);
+
+		*outValue = value.variant;
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_ReleaseRetValue(Joint_RetValue value)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		return value.releaseValue(value.variant);
 
 		JOINT_CPP_WRAP_END
 	}

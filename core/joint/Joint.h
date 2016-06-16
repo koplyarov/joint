@@ -32,7 +32,8 @@ extern "C"
 		JOINT_ERROR_NOT_IMPLEMENTED = 2,
 		JOINT_ERROR_INVALID_PARAMETER = 3,
 		JOINT_ERROR_OUT_OF_MEMORY = 4,
-		JOINT_ERROR_IMPLEMENTATION_ERROR = 5
+		JOINT_ERROR_IMPLEMENTATION_ERROR = 5,
+		JOINT_ERROR_UNEXPECTED_TYPE = 6
 	};
 
 	const char* Joint_ErrorToString(Joint_Error err);
@@ -53,63 +54,71 @@ extern "C"
 	void Joint_Log(Joint_LogLevel logLevel, const char* subsystem, const char* format, ...);
 
 
-	enum Joint_ParameterType
+	enum Joint_Type
 	{
-		JOINT_PARAMETER_TYPE_BOOL    = 0,
+		JOINT_TYPE_VOID    = 1,
 
-		JOINT_PARAMETER_TYPE_I8      = 1,
-		JOINT_PARAMETER_TYPE_U8      = 2,
-		JOINT_PARAMETER_TYPE_I16     = 3,
-		JOINT_PARAMETER_TYPE_U16     = 4,
-		JOINT_PARAMETER_TYPE_I32     = 5,
-		JOINT_PARAMETER_TYPE_U32     = 6,
-		JOINT_PARAMETER_TYPE_I64     = 7,
-		JOINT_PARAMETER_TYPE_U64     = 8,
+		JOINT_TYPE_BOOL    = 2,
 
-		JOINT_PARAMETER_TYPE_F32     = 9,
-		JOINT_PARAMETER_TYPE_F64     = 10,
+		JOINT_TYPE_I8      = 3,
+		JOINT_TYPE_U8      = 4,
+		JOINT_TYPE_I16     = 5,
+		JOINT_TYPE_U16     = 6,
+		JOINT_TYPE_I32     = 7,
+		JOINT_TYPE_U32     = 8,
+		JOINT_TYPE_I64     = 9,
+		JOINT_TYPE_U64     = 10,
 
-		JOINT_PARAMETER_TYPE_UTF8    = 11,
+		JOINT_TYPE_F32     = 11,
+		JOINT_TYPE_F64     = 12,
 
-		JOINT_PARAMETER_TYPE_OBJ     = 12,
+		JOINT_TYPE_UTF8    = 13,
+
+		JOINT_TYPE_OBJ     = 14,
 	};
 
 
-	struct Joint_Parameter
+	struct Joint_Variant
 	{
 		union
 		{
-			bool            b;
+			bool                 b;
 
-			int8_t          i8;
-			uint8_t         u8;
-			int16_t         i16;
-			uint16_t        u16;
-			int32_t         i32;
-			uint32_t        u32;
-			int64_t         i64;
-			uint64_t        u64;
+			int8_t               i8;
+			uint8_t              u8;
+			int16_t              i16;
+			uint16_t             u16;
+			int32_t              i32;
+			uint32_t             u32;
+			int64_t              i64;
+			uint64_t             u64;
 
-			float           f32;
-			double          f64;
+			float                f32;
+			double               f64;
 
-			const char*     utf8;
+			const char*          utf8;
 
-			void*           obj;
-		} variant;
+			Joint_ObjectHandle   obj;
+		} value;
 
-		Joint_ParameterType type;
+		Joint_Type type;
+	};
+
+
+	typedef Joint_Error Joint_ReleaseRetValue_Func(Joint_Variant value);
+
+	struct Joint_RetValue
+	{
+		Joint_Variant                   variant;
+		Joint_ReleaseRetValue_Func*     releaseValue;
 	};
 
 
 	typedef Joint_Error Joint_GetRootObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, const char* getterName, Joint_ObjectHandleInternal* outObject);
-	typedef Joint_Error Joint_InvokeMethod_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount);
-
+	typedef Joint_Error Joint_InvokeMethod_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
 	typedef Joint_Error Joint_LoadModule_Func(void* bindingUserData, const char* moduleName, Joint_ModuleHandleInternal* outModule);
 	typedef Joint_Error Joint_UnloadModule_Func(void* bindingUserData, Joint_ModuleHandleInternal module);
-
 	typedef Joint_Error Joint_DeinitBinding_Func(void* bindingUserData);
-
 
 	struct Joint_BindingDesc
 	{
@@ -130,7 +139,9 @@ extern "C"
 	Joint_Error Joint_UnloadModule(Joint_ModuleHandle handle);
 
 	Joint_Error Joint_GetRootObject(Joint_ModuleHandle module, const char* getterName, Joint_ObjectHandle* outObject);
-	Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount);
+	Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
+	Joint_Error Joint_ObtainRetValue(Joint_RetValue value, Joint_Variant* outValue);
+	Joint_Error Joint_ReleaseRetValue(Joint_RetValue value);
 }
 
 #endif

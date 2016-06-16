@@ -6,7 +6,7 @@ PythonObject::PythonObject(PyObjectPtr obj)
 { }
 
 
-void PythonObject::InvokeMethod(size_t index, joint::ArrayView<const Joint_Parameter> params)
+PyObjectPtr PythonObject::InvokeMethod(size_t index, joint::ArrayView<const Joint_Variant> params)
 {
 	std::string method_name = "methodCall";
 
@@ -26,8 +26,8 @@ void PythonObject::InvokeMethod(size_t index, joint::ArrayView<const Joint_Param
 		PyObject* py_p = nullptr;
 		switch (p.type)
 		{
-		case JOINT_PARAMETER_TYPE_I32:   py_p = PyLong_FromLong(p.variant.i32); break;
-		case JOINT_PARAMETER_TYPE_UTF8:  py_p = PyUnicode_FromString(p.variant.utf8); break;
+		case JOINT_TYPE_I32:   py_p = PyLong_FromLong(p.value.i32); break;
+		case JOINT_TYPE_UTF8:  py_p = PyUnicode_FromString(p.value.utf8); break;
 		default: throw std::runtime_error("Unknown parameter type");
 		}
 
@@ -37,4 +37,5 @@ void PythonObject::InvokeMethod(size_t index, joint::ArrayView<const Joint_Param
 
 	PyObjectPtr py_result(PyObject_CallObject(py_function, py_args));
 	PYTHON_CHECK(py_result, "Could not invoke method");
+	return py_result;
 }

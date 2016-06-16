@@ -4,6 +4,7 @@
 #include <joint/utils/CppWrappers.hpp>
 
 #include <memory>
+#include <string.h>
 
 #include <stdio.h>
 
@@ -57,11 +58,63 @@ public:
 		JOINT_CPP_WRAP_END
 	}
 
-	static Joint_Error InvokeMethod(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount)
+	static Joint_Error InvokeMethod(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
 	{
 		JOINT_CPP_WRAP_BEGIN
 		auto o = reinterpret_cast<PythonObject*>(obj);
-		o->InvokeMethod(methodId, joint::ArrayView<const Joint_Parameter>(params, paramsCount));
+		auto py_res = o->InvokeMethod(methodId, joint::ArrayView<const Joint_Variant>(params, paramsCount));
+
+		switch (retType)
+		{
+		case JOINT_TYPE_VOID:
+			break;
+		case JOINT_TYPE_I32:
+			{
+				int overflow = 0;
+				long result = PyLong_AsLongAndOverflow(py_res, &overflow);
+				if (overflow != 0)
+					PYTHON_ERROR("Overflow in PyLong_AsLongAndOverflow");
+				 outRetValue->variant.value.i32 = result;
+			}
+			break;
+		case JOINT_TYPE_UTF8:
+			{
+				PyObjectPtr py_bytes(PyUnicode_AsUTF8String(py_res));
+				if (!py_bytes)
+					PYTHON_ERROR("PyUnicode_AsUTF8String failed!");
+				const char* str_data = PyBytes_AsString(py_bytes);
+				if (!str_data)
+					PYTHON_ERROR("PyBytes_AsString failed!");
+				char* result_str = new char[strlen(str_data)];
+				strcpy(result_str, str_data);
+				outRetValue->variant.value.utf8 = result_str;
+			}
+			break;
+		default:
+			JOINT_THROW(std::runtime_error("Unknown type"));
+		}
+
+		outRetValue->variant.type = retType;
+		outRetValue->releaseValue = &PythonBinding::ReleaseRetValue;
+
+		JOINT_CPP_WRAP_END
+	}
+
+	static Joint_Error ReleaseRetValue(Joint_Variant value)
+	{
+		JOINT_CPP_WRAP_BEGIN
+		switch(value.type)
+		{
+		case JOINT_TYPE_VOID:
+		case JOINT_TYPE_I32:
+			break;
+		case JOINT_TYPE_UTF8:
+			delete[] value.value.utf8;
+			break;
+		default:
+			JOINT_THROW(JOINT_ERROR_GENERIC);
+			break;
+		}
 		JOINT_CPP_WRAP_END
 	}
 };
