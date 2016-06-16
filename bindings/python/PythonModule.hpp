@@ -9,26 +9,20 @@
 #include <Python.h>
 
 #include "PythonUtils.hpp"
-#include "PythonContext.hpp"
 
 
-namespace joint
+class PythonModule
 {
+private:
+	PyObjectPtr		_pyModule;
+	std::string		_moduleName;
 
-	class PythonModule
-	{
-	private:
-		PyContext		_pyCtx;
-		PyObjectPtr		_pyModule;
-		std::string		_moduleName;
+public:
+	PythonModule(const std::string& moduleName);
+	~PythonModule();
 
-	public:
-		PythonModule(const std::string& moduleName);
-		~PythonModule();
+	//ISomeInterface* InvokeFunction(const std::string& functionName);
+};
 
-		ISomeInterface* InvokeFunction(const std::string& functionName);
-	};
-
-}
 
 #endif

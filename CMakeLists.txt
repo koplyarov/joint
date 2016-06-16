@@ -17,12 +17,27 @@ else()
 	add_definitions(-std=c++11)
 endif()
 
+################################################################################
+
 set(JOINT_CORE_SRC
-	bindings/python/PythonModule.cpp
+	core/joint/Joint.cpp
+	core/joint/core/JointCore.cpp
 )
 
-add_library(joint-core ${JOINT_CORE_SRC})
-target_link_libraries(joint-core ${CMAKE_THREAD_LIBS_INIT} ${PYTHON_LIBRARIES})
+add_library(joint-core SHARED ${JOINT_CORE_SRC})
+target_link_libraries(joint-core ${CMAKE_THREAD_LIBS_INIT})
+
+################################################################################
+
+set(JOINT_PYTHON_BINDING_SRC
+	bindings/python/PythonModule.cpp
+	bindings/python/PythonBinding.cpp
+)
+
+add_library(joint-python SHARED ${JOINT_PYTHON_BINDING_SRC})
+target_link_libraries(joint-python joint-core ${PYTHON_LIBRARIES})
+
+################################################################################
 
 add_executable(joint-test ${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp)
-target_link_libraries(joint-test joint-core)
+target_link_libraries(joint-test joint-python)
