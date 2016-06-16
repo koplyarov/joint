@@ -90,6 +90,9 @@ public:
 				outRetValue->variant.value.utf8 = result_str;
 			}
 			break;
+		case JOINT_TYPE_OBJ:
+			JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
+			break;
 		default:
 			JOINT_THROW(std::runtime_error("Unknown type"));
 		}
@@ -106,10 +109,23 @@ public:
 		switch(value.type)
 		{
 		case JOINT_TYPE_VOID:
+		case JOINT_TYPE_BOOL:
+		case JOINT_TYPE_I8:
+		case JOINT_TYPE_U8:
+		case JOINT_TYPE_I16:
+		case JOINT_TYPE_U16:
 		case JOINT_TYPE_I32:
+		case JOINT_TYPE_U32:
+		case JOINT_TYPE_I64:
+		case JOINT_TYPE_U64:
+		case JOINT_TYPE_F32:
+		case JOINT_TYPE_F64:
 			break;
 		case JOINT_TYPE_UTF8:
 			delete[] value.value.utf8;
+			break;
+		case JOINT_TYPE_OBJ:
+			JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); // TODO: ???
 			break;
 		default:
 			JOINT_THROW(JOINT_ERROR_GENERIC);
