@@ -103,6 +103,17 @@ public:
 		JOINT_CPP_WRAP_END
 	}
 
+
+	static Joint_Error ReleaseObject(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		delete reinterpret_cast<PythonObject*>(obj);
+
+		JOINT_CPP_WRAP_END
+	}
+
+
 	static Joint_Error ReleaseRetValue(Joint_VariantInternal value)
 	{
 		JOINT_CPP_WRAP_BEGIN
@@ -150,6 +161,7 @@ extern "C"
 		binding_desc.unloadModule    = &PythonBinding::UnloadModule;
 		binding_desc.getRootObject   = &PythonBinding::GetRootObject;
 		binding_desc.invokeMethod    = &PythonBinding::InvokeMethod;
+		binding_desc.releaseObject   = &PythonBinding::ReleaseObject;
 
 		std::unique_ptr<PythonBinding> binding(new PythonBinding);
 		Joint_Error ret = Joint_RegisterBinding(binding_desc, binding.get(), &g_bindingHandle);

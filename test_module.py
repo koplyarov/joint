@@ -27,6 +27,9 @@ class PyOtherInterface(IOtherInterface):
     def __init__(self):
         super(PyOtherInterface, self).__init__()
 
+    def __del__(self):
+        print("PyOtherInterface: del")
+
     def Func(self):
         print("PY: Func")
 
@@ -34,6 +37,9 @@ class PyOtherInterface(IOtherInterface):
 class PySomeInterface(ISomeInterface):
     def __init__(self):
         super(PySomeInterface, self).__init__()
+
+    def __del__(self):
+        print("PySomeInterface: del")
 
     def Method1(self):
         print("PY: Method1")

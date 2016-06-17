@@ -13,13 +13,14 @@ namespace joint
 	Joint_BindingHandle JointCore::RegisterBinding(Joint_BindingDesc desc, void* userData)
 	{
 		JOINT_CHECK(desc.name != nullptr, JOINT_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(desc.deinitBinding != nullptr, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(desc.invokeMethod != nullptr, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(desc.releaseObject != nullptr, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(desc.getRootObject != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(desc.loadModule != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(desc.unloadModule != nullptr, JOINT_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(desc.getRootObject != nullptr, JOINT_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(desc.invokeMethod != nullptr, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(desc.deinitBinding != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 
-		BindingPtr binding(new Joint_Binding{desc, userData});
+		BindingPtr binding(new Joint_Binding{userData, desc});
 		Joint_BindingHandle result = binding.get();
 		_bindings.push_back(std::move(binding));
 		return result;

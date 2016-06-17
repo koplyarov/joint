@@ -42,6 +42,9 @@ public:
 		: _obj(obj)
 	{ }
 
+	~OtherInterfaceWrapper()
+	{ JOINT_CALL( Joint_DecRefObject(_obj) ); }
+
 	virtual void Func()
 	{
 		Joint_RetValue ret_val;
@@ -60,6 +63,9 @@ public:
 	SomeInterfaceWrapper(Joint_ObjectHandle obj)
 		: _obj(obj)
 	{ }
+
+	~SomeInterfaceWrapper()
+	{ JOINT_CALL( Joint_DecRefObject(_obj) ); }
 
 	virtual void Method1()
 	{
@@ -172,6 +178,9 @@ int main()
 
 		IOtherInterface* other = obj->ReturnOther();
 		other->Func();
+
+		delete other;
+		delete obj;
 
 		JOINT_CALL( JointPython_Unregister() );
 	}

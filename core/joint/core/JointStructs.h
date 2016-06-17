@@ -4,14 +4,16 @@
 
 #include <joint/Joint.h>
 
+#include <atomic>
+
 
 extern "C"
 {
 
 	struct Joint_Binding
 	{
-		Joint_BindingDesc           desc;
 		void*                       userData;
+		Joint_BindingDesc           desc;
 	};
 
 
@@ -26,6 +28,11 @@ extern "C"
 	{
 		Joint_ObjectHandleInternal  internal;
 		Joint_Module*               module;
+		std::atomic<int>			refCount;
+
+		Joint_Object(Joint_ObjectHandleInternal internal, Joint_Module* module)
+			: internal(internal), module(module), refCount(1)
+		{ }
 	};
 
 }

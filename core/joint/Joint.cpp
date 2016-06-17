@@ -109,7 +109,7 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		JOINT_CHECK(handle, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 
 		Joint_Log(JOINT_LOGLEVEL_INFO, "Joint", "UnregisterBinding(binding: %p)", handle);
 		g_core.UnregisterBinding(handle);
@@ -137,7 +137,7 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		JOINT_CHECK(handle, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 
 		Joint_Log(JOINT_LOGLEVEL_INFO, "Joint", "UnloadModule(module: %p)", handle);
 		g_core.UnloadModule(handle);
@@ -150,7 +150,7 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		JOINT_CHECK(module, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(module != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(getterName, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(outObject, JOINT_ERROR_INVALID_PARAMETER);
 
@@ -158,7 +158,7 @@ extern "C"
 		Joint_Error ret = module->binding->desc.getRootObject(module->binding->userData, module->internal, getterName, &internal);
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
-		*outObject = new Joint_Object{ internal, module };
+		*outObject = new Joint_Object(internal, module);
 		Joint_Log(JOINT_LOGLEVEL_DEBUG, "Joint", "GetRootObject(module: %p, getterName: \"%s\"): %p", module, getterName, *outObject);
 
 		JOINT_CPP_WRAP_END
@@ -169,7 +169,7 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		JOINT_CHECK(obj, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(obj != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(params || paramsCount == 0, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(outRetValue, JOINT_ERROR_INVALID_PARAMETER);
 
@@ -183,7 +183,7 @@ extern "C"
 		memcpy(&outRetValue->internal, &ret_value_internal, sizeof(outRetValue->internal));
 		memcpy(&outRetValue->variant, &outRetValue->internal.variant, sizeof(outRetValue->variant));
 		if (outRetValue->internal.variant.type == JOINT_TYPE_OBJ)
-			outRetValue->variant.value.obj = new Joint_Object{ outRetValue->internal.variant.value.obj, obj->module };
+			outRetValue->variant.value.obj = new Joint_Object(outRetValue->internal.variant.value.obj, obj->module);
 
 		JOINT_CPP_WRAP_END
 	}
@@ -208,6 +208,31 @@ extern "C"
 		JOINT_CHECK(value.internal.releaseValue, JOINT_ERROR_INVALID_PARAMETER);
 
 		return value.internal.releaseValue(value.internal.variant);
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_IncRefObject(Joint_ObjectHandle handle)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		++handle->refCount;
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_DecRefObject(Joint_ObjectHandle handle)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		auto refs = --handle->refCount;
+		if (refs == 0)
+			handle->module->binding->desc.releaseObject(handle->module->binding->userData, handle->module->internal, handle->internal);
+		JOINT_CHECK(refs >= 0, JOINT_ERROR_INVALID_PARAMETER);
 
 		JOINT_CPP_WRAP_END
 	}
