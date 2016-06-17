@@ -1,6 +1,5 @@
-#include <joint/ISomeInterface.hpp>
-
 #include <iostream>
+#include <memory>
 
 #include <../bindings/python/PythonBinding.h>
 #include <../bindings/python/PythonModule.hpp>
@@ -13,8 +12,27 @@
 				throw std::runtime_error(std::string(#__VA_ARGS__ " failed: ") + Joint_ErrorToString(ret)); \
 		} while (false)
 
+struct IOtherInterface
+{
+	virtual ~IOtherInterface() { }
 
-class OtherInterfaceWrapper : public joint::IOtherInterface
+	virtual void Func() = 0;
+};
+
+struct ISomeInterface
+{
+	virtual ~ISomeInterface() { }
+
+	virtual void Method1() = 0;
+	virtual void Method2() = 0;
+	virtual std::string ToString() = 0;
+	virtual void PrintInt(int i) = 0;
+	virtual void PrintString(const std::string& s) = 0;
+	virtual IOtherInterface* ReturnOther() = 0;
+};
+
+
+class OtherInterfaceWrapper : public IOtherInterface
 {
 private:
 	Joint_ObjectHandle		_obj;
@@ -33,7 +51,7 @@ public:
 };
 
 
-class SomeInterfaceWrapper : public joint::ISomeInterface
+class SomeInterfaceWrapper : public ISomeInterface
 {
 private:
 	Joint_ObjectHandle		_obj;
@@ -43,14 +61,14 @@ public:
 		: _obj(obj)
 	{ }
 
-	virtual void AddRef()
+	virtual void Method1()
 	{
 		Joint_RetValue ret_val;
 		JOINT_CALL( Joint_InvokeMethod(_obj, 0, nullptr, 0, JOINT_TYPE_VOID, &ret_val) );
 		JOINT_CALL( Joint_ReleaseRetValue(ret_val) );
 	}
 
-	virtual void Release()
+	virtual void Method2()
 	{
 		Joint_RetValue ret_val;
 		JOINT_CALL( Joint_InvokeMethod(_obj, 1, nullptr, 0, JOINT_TYPE_VOID, &ret_val) );
@@ -86,11 +104,11 @@ public:
 		JOINT_CALL( Joint_ReleaseRetValue(ret_val) );
 	}
 
-	virtual joint::IOtherInterface* ReturnOther()
+	virtual IOtherInterface* ReturnOther()
 	{
 		Joint_RetValue ret_val;
 		JOINT_CALL( Joint_InvokeMethod(_obj, 5, nullptr, 0, JOINT_TYPE_OBJ, &ret_val) );
-		std::unique_ptr<joint::IOtherInterface> result(new OtherInterfaceWrapper(ret_val.variant.value.obj));;
+		std::unique_ptr<IOtherInterface> result(new OtherInterfaceWrapper(ret_val.variant.value.obj));;
 		JOINT_CALL( Joint_ReleaseRetValue(ret_val) );
 		return result.release();
 	}
@@ -123,7 +141,7 @@ public:
 		}
 	}
 
-	joint::ISomeInterface* GetRootObject(const std::string& getterName) const
+	ISomeInterface* GetRootObject(const std::string& getterName) const
 	{
 		Joint_ObjectHandle obj;
 		JOINT_CALL( Joint_GetRootObject(_module, "func", &obj) );
@@ -143,16 +161,16 @@ int main()
 
 		JointModule m("python", "test_module");
 
-		joint::ISomeInterface* obj = m.GetRootObject("func");
-		obj->AddRef();
-		obj->Release();
+		ISomeInterface* obj = m.GetRootObject("func");
+		obj->Method1();
+		obj->Method2();
 		auto s = obj->ToString();
 		std::cout << "obj.ToString(): " << s << std::endl;
 
 		obj->PrintInt(42);
 		obj->PrintString("qwe");
 
-		joint::IOtherInterface* other = obj->ReturnOther();
+		IOtherInterface* other = obj->ReturnOther();
 		other->Func();
 
 		JOINT_CALL( JointPython_Unregister() );

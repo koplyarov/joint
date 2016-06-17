@@ -1,7 +1,6 @@
 #include "PythonModule.hpp"
 
 #include <joint/Joint.h>
-#include <joint/SomeInterfaceWrapper.hpp>
 #include <joint/utils/ArrayView.hpp>
 #include <joint/utils/MakeUnique.hpp>
 

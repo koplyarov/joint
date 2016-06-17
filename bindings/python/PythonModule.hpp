@@ -2,8 +2,6 @@
 #define CORE_JOINT_INTEROP_PYTHONMODULE_HPP
 
 
-#include <joint/ISomeInterface.hpp>
-
 #include <string>
 
 #include <Python.h>

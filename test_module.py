@@ -9,9 +9,9 @@ class IOtherInterface:
 class ISomeInterface:
     def methodCall(self, methodId, *args):
         if methodId == 0:
-            return self.AddRef(*args)
+            return self.Method1(*args)
         elif methodId == 1:
-            return self.Release(*args)
+            return self.Method2(*args)
         elif methodId == 2:
             return self.ToString(*args)
         elif methodId == 3:
@@ -35,11 +35,11 @@ class PySomeInterface(ISomeInterface):
     def __init__(self):
         super(PySomeInterface, self).__init__()
 
-    def AddRef(self):
-        print("PY: AddRef")
+    def Method1(self):
+        print("PY: Method1")
 
-    def Release(self):
-        print("PY: Release")
+    def Method2(self):
+        print("PY: Method2")
 
     def ToString(self):
         print("PY: ToString")
