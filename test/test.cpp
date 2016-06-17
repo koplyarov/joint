@@ -89,7 +89,7 @@ public:
 	virtual joint::IOtherInterface* ReturnOther()
 	{
 		Joint_RetValue ret_val;
-		JOINT_CALL( Joint_InvokeMethod(_obj, 2, nullptr, 0, JOINT_TYPE_OBJ, &ret_val) );
+		JOINT_CALL( Joint_InvokeMethod(_obj, 5, nullptr, 0, JOINT_TYPE_OBJ, &ret_val) );
 		std::unique_ptr<joint::IOtherInterface> result(new OtherInterfaceWrapper(ret_val.variant.value.obj));;
 		JOINT_CALL( Joint_ReleaseRetValue(ret_val) );
 		return result.release();

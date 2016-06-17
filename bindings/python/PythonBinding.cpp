@@ -58,7 +58,7 @@ public:
 		JOINT_CPP_WRAP_END
 	}
 
-	static Joint_Error InvokeMethod(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
+	static Joint_Error InvokeMethod(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValueInternal* outRetValue)
 	{
 		JOINT_CPP_WRAP_BEGIN
 		auto o = reinterpret_cast<PythonObject*>(obj);
@@ -91,7 +91,7 @@ public:
 			}
 			break;
 		case JOINT_TYPE_OBJ:
-			JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
+			outRetValue->variant.value.obj = new PythonObject(py_res);
 			break;
 		default:
 			JOINT_THROW(std::runtime_error("Unknown type"));
@@ -103,7 +103,7 @@ public:
 		JOINT_CPP_WRAP_END
 	}
 
-	static Joint_Error ReleaseRetValue(Joint_Variant value)
+	static Joint_Error ReleaseRetValue(Joint_VariantInternal value)
 	{
 		JOINT_CPP_WRAP_BEGIN
 		switch(value.type)
@@ -125,7 +125,6 @@ public:
 			delete[] value.value.utf8;
 			break;
 		case JOINT_TYPE_OBJ:
-			JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); // TODO: ???
 			break;
 		default:
 			JOINT_THROW(JOINT_ERROR_GENERIC);

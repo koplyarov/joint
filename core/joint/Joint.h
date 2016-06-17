@@ -78,6 +78,33 @@ extern "C"
 	};
 
 
+	struct Joint_VariantInternal
+	{
+		union
+		{
+			bool                 b;
+
+			int8_t               i8;
+			uint8_t              u8;
+			int16_t              i16;
+			uint16_t             u16;
+			int32_t              i32;
+			uint32_t             u32;
+			int64_t              i64;
+			uint64_t             u64;
+
+			float                f32;
+			double               f64;
+
+			const char*          utf8;
+
+			Joint_ObjectHandleInternal   obj;
+		} value;
+
+		Joint_Type type;
+	};
+
+
 	struct Joint_Variant
 	{
 		union
@@ -105,17 +132,23 @@ extern "C"
 	};
 
 
-	typedef Joint_Error Joint_ReleaseRetValue_Func(Joint_Variant value);
+	typedef Joint_Error Joint_ReleaseRetValue_Func(Joint_VariantInternal value);
+
+	struct Joint_RetValueInternal
+	{
+		Joint_VariantInternal           variant;
+		Joint_ReleaseRetValue_Func*     releaseValue;
+	};
 
 	struct Joint_RetValue
 	{
 		Joint_Variant                   variant;
-		Joint_ReleaseRetValue_Func*     releaseValue;
+		Joint_RetValueInternal			internal;
 	};
 
 
 	typedef Joint_Error Joint_GetRootObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, const char* getterName, Joint_ObjectHandleInternal* outObject);
-	typedef Joint_Error Joint_InvokeMethod_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
+	typedef Joint_Error Joint_InvokeMethod_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValueInternal* outRetValue);
 	typedef Joint_Error Joint_LoadModule_Func(void* bindingUserData, const char* moduleName, Joint_ModuleHandleInternal* outModule);
 	typedef Joint_Error Joint_UnloadModule_Func(void* bindingUserData, Joint_ModuleHandleInternal module);
 	typedef Joint_Error Joint_DeinitBinding_Func(void* bindingUserData);

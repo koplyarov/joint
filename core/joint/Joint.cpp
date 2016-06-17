@@ -173,10 +173,17 @@ extern "C"
 		JOINT_CHECK(params || paramsCount == 0, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(outRetValue, JOINT_ERROR_INVALID_PARAMETER);
 
-		Joint_Error ret = obj->module->binding->desc.invokeMethod(obj->module->binding->userData, obj->module->internal, obj->internal, methodId, params, paramsCount, retType, outRetValue);
+		Joint_RetValueInternal ret_value_internal;
+		Joint_Error ret = obj->module->binding->desc.invokeMethod(obj->module->binding->userData, obj->module->internal, obj->internal, methodId, params, paramsCount, retType, &ret_value_internal);
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 
-		JOINT_CHECK(outRetValue->releaseValue, JOINT_ERROR_IMPLEMENTATION_ERROR);
+		JOINT_CHECK(ret_value_internal.releaseValue, JOINT_ERROR_IMPLEMENTATION_ERROR);
+
+		static_assert(sizeof(outRetValue->variant) == sizeof(outRetValue->internal.variant) && alignof(outRetValue->variant) == alignof(outRetValue->internal.variant), "Sizes or alignments do not match for Joint_Variant and Joint_VariantInternal");
+		memcpy(&outRetValue->internal, &ret_value_internal, sizeof(outRetValue->internal));
+		memcpy(&outRetValue->variant, &outRetValue->internal.variant, sizeof(outRetValue->variant));
+		if (outRetValue->internal.variant.type == JOINT_TYPE_OBJ)
+			outRetValue->variant.value.obj = new Joint_Object{ outRetValue->internal.variant.value.obj, obj->module };
 
 		JOINT_CPP_WRAP_END
 	}
@@ -187,7 +194,6 @@ extern "C"
 		JOINT_CPP_WRAP_BEGIN
 
 		JOINT_CHECK(outValue, JOINT_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(value.releaseValue, JOINT_ERROR_INVALID_PARAMETER);
 
 		*outValue = value.variant;
 
@@ -199,7 +205,9 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		return value.releaseValue(value.variant);
+		JOINT_CHECK(value.internal.releaseValue, JOINT_ERROR_INVALID_PARAMETER);
+
+		return value.internal.releaseValue(value.internal.variant);
 
 		JOINT_CPP_WRAP_END
 	}
