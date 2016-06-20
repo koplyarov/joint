@@ -38,6 +38,17 @@ set(JOINT_PYTHON_BINDING_SRC
 add_library(joint-python SHARED ${JOINT_PYTHON_BINDING_SRC})
 target_link_libraries(joint-python joint-core ${PYTHON_LIBRARIES})
 
+set(PY_JOINT_SRC
+	bindings/python/PyJoint.cpp
+)
+
+add_library(pyjoint SHARED ${PY_JOINT_SRC})
+set_target_properties(pyjoint PROPERTIES PREFIX "")
+if (WIN32)
+	set_target_properties(pyjoint PROPERTIES SUFFIX "pyd")
+endif()
+target_link_libraries(pyjoint joint-python joint-core ${PYTHON_LIBRARIES})
+
 ################################################################################
 
 add_executable(joint-test ${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp)
