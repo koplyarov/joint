@@ -66,45 +66,44 @@ static PyTypeObject pyjoint_Object_type = {
 
 static PyObject* Object_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 {
+	PYJOINT_CPP_WRAP_BEGIN
+
 	pyjoint_Object* self = (pyjoint_Object*)type->tp_alloc(type, 0);
-	if (self == NULL)
-		return NULL;
+	PYJOINT_CHECK(self, "Could not create pyjoint_Object");
 
 	self->handle = JOINT_NULL_HANDLE;
 
-	return (PyObject *)self;
+	PYJOINT_CPP_WRAP_END((PyObject*)self, NULL)
 }
 
 
 static void Object_del(PyObject* self)
 {
+	PYJOINT_CPP_WRAP_BEGIN
+
 	auto m = reinterpret_cast<pyjoint_Object*>(self);
 	if (m && m->handle)
 	{
 		Joint_DecRefObject(m->handle);
 		m->handle = JOINT_NULL_HANDLE;
 	}
+
+	PYJOINT_CPP_WRAP_END_VOID()
 }
 
 
 static PyObject* Object_InvokeMethod(PyObject* self, PyObject* args, PyObject* kwds)
 {
+	PYJOINT_CPP_WRAP_BEGIN
+
 	auto o = reinterpret_cast<pyjoint_Object*>(self);
-	PY_CHECK_RET_NONE(o && o->handle, "Uninitialized object");
+	PYJOINT_CHECK(o && o->handle, "Uninitialized object");
 
 	auto tuple_size = PyTuple_Size(args);
-	PY_CHECK_RET_NONE(tuple_size >= 2, "Could not parse arguments");
+	PYJOINT_CHECK(tuple_size >= 2, "Could not parse arguments");
 
-	PyObject* py_method_id = PyTuple_GetItem(args, 0);
-	PyObject* py_ret_type = PyTuple_GetItem(args, 1);
-	PY_CHECK_RET_NONE(py_method_id && py_ret_type, "Could not parse arguments");
-
-	int overflow = 0;
-	int method_id = PyLong_AsLongAndOverflow(py_method_id, &overflow);
-	PY_CHECK_RET_NONE(!overflow, "Could not parse arguments");
-
-	Joint_Type ret_type = Joint_Type(PyLong_AsLongAndOverflow(py_ret_type, &overflow));
-	PY_CHECK_RET_NONE(!overflow, "Could not parse arguments");
+	auto method_id = FromPyLong<int>(PyTuple_GetItem(args, 0));
+	Joint_Type ret_type = FromPyLong<Joint_Type>(PyTuple_GetItem(args, 1));
 
 	std::vector<Joint_Variant> params;
 	params.reserve(tuple_size - 2);
@@ -112,36 +111,30 @@ static PyObject* Object_InvokeMethod(PyObject* self, PyObject* args, PyObject* k
 	for (int i = 2; i < tuple_size; ++i)
 	{
 		PyObject* py_param_tuple = PyTuple_GetItem(args, i);
-		PY_CHECK_RET_NONE(py_param_tuple, "Could not parse arguments"); // TODO: check if there are any leaks
-
-		PyObject* py_param_type = PyTuple_GetItem(py_param_tuple, 0);
-		PyObject* py_param = PyTuple_GetItem(py_param_tuple, 1);
-
-		int overflow = 0;
-		Joint_Type param_type = static_cast<Joint_Type>(PyLong_AsLongAndOverflow(py_param_type, &overflow));
-		PY_CHECK_RET_NONE(!overflow, "Could not parse arguments");
+		PYJOINT_CHECK(py_param_tuple, "Could not parse arguments"); // TODO: check if there are any leaks
 
 		Joint_Variant v = { };
-		v.type = param_type;
+		v.type = FromPyLong<Joint_Type>(PyTuple_GetItem(py_param_tuple, 0));
 
-		switch (param_type)
+		switch (v.type)
 		{
 		case JOINT_TYPE_I32:
-			v.value.i32 = PyLong_AsLongAndOverflow(py_param, &overflow);
-			PY_CHECK_RET_NONE(!overflow, "Could not parse arguments");
-			params.push_back(v);
+			v.value.i32 = FromPyLong<int32_t>(PyTuple_GetItem(py_param_tuple, 1));
 			break;
 		default:
-			PY_ERROR_RET_NONE("Unknown parameter type");
+			PYJOINT_THROW("Unknown parameter type");
 			break;
 		}
+
+		params.push_back(v);
 	}
 
 	Joint_RetValue ret_value;
 	Joint_Error ret = Joint_InvokeMethod(o->handle, method_id, params.data(), params.size(), ret_type, &ret_value);
-	PY_CHECK_RET_NONE(ret == JOINT_ERROR_NONE, (std::string("Joint_GetRootObject failed: ") + Joint_ErrorToString(ret)).c_str());
+	PYJOINT_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_GetRootObject failed: ") + Joint_ErrorToString(ret)).c_str());
 
 	Py_RETURN_NONE;
+	PYJOINT_CPP_WRAP_END(TerminateOnInvoke<PyObject*>(), NULL)
 }
 
 
