@@ -4,6 +4,7 @@
 
 #include <stdexcept>
 #include <type_traits>
+#include <utility>
 
 #include <Python.h>
 
@@ -34,6 +35,32 @@ static PyObject* g_error = nullptr;
 				__VA_ARGS__ \
 			}
 
+namespace Detail
+{
+	template < typename Func_ >
+	class ScopeGuard
+	{
+	private:
+		Func_   _func;
+		bool    _moved;
+
+	public:
+		ScopeGuard(Func_ func) : _func(std::move(func)), _moved(false) { }
+		~ScopeGuard() { if (!_moved) _func(); }
+
+		ScopeGuard(ScopeGuard&& other) : _func(std::move(other._func)), _moved(false) { other._moved = true; }
+
+		ScopeGuard(const ScopeGuard&) = delete;
+		ScopeGuard& operator = (const ScopeGuard&) = delete;
+	};
+}
+
+
+template < typename Func_ >
+Detail::ScopeGuard<Func_> ScopeExit(Func_ f)
+{ return Detail::ScopeGuard<Func_>(std::move(f)); }
+
+
 template < typename T_ >
 T_ TerminateOnInvoke()
 {
@@ -50,6 +77,17 @@ T_ FromPyLong(PyObject* pyLong)
 	T_ result = static_cast<T_>(long_result);
 	PYJOINT_CHECK(static_cast<long>(result) == long_result, "T_ value overflow");
 	return result;
+}
+
+
+const char* Utf8FromPyUnicode(PyObject* pyStr)
+{
+	PyObject* py_bytes(PyUnicode_AsUTF8String(pyStr));
+	PYJOINT_CHECK(py_bytes, "PyUnicode_AsUTF8String failed!");
+	auto sg = ScopeExit([&]{ Py_DECREF(py_bytes); });
+	const char* str_data = PyBytes_AsString(py_bytes);
+	PYJOINT_CHECK(str_data, "PyBytes_AsString failed!");
+	return str_data;
 }
 
 

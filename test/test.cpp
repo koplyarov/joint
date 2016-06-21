@@ -150,7 +150,7 @@ public:
 	ISomeInterface* GetRootObject(const std::string& getterName) const
 	{
 		Joint_ObjectHandle obj;
-		JOINT_CALL( Joint_GetRootObject(_module, "func", &obj) );
+		JOINT_CALL( Joint_GetRootObject(_module, getterName.c_str(), &obj) );
 		return new SomeInterfaceWrapper(obj);
 	}
 
@@ -167,7 +167,7 @@ int main()
 
 		JointModule m("python", "test_module");
 
-		ISomeInterface* obj = m.GetRootObject("func");
+		ISomeInterface* obj = m.GetRootObject("CreateSomeInterface");
 		obj->Method1();
 		obj->Method2();
 		auto s = obj->ToString();

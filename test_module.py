@@ -1,29 +1,6 @@
-class IOtherInterface:
-    def methodCall(self, methodId, *args):
-        if methodId == 0:
-            return self.Func(*args)
-        else:
-            raise RuntimeError('No such method!')
+from SomeInterface import *
 
-
-class ISomeInterface:
-    def methodCall(self, methodId, *args):
-        if methodId == 0:
-            return self.Method1(*args)
-        elif methodId == 1:
-            return self.Method2(*args)
-        elif methodId == 2:
-            return self.ToString(*args)
-        elif methodId == 3:
-            return self.PrintInt(*args)
-        elif methodId == 4:
-            return self.PrintString(*args)
-        elif methodId == 5:
-            return self.ReturnOther(*args)
-        else:
-            raise RuntimeError('No such method!')
-
-class PyOtherInterface(IOtherInterface):
+class PyOtherInterface(OtherInterface_implementation):
     def __init__(self):
         super(PyOtherInterface, self).__init__()
 
@@ -34,7 +11,7 @@ class PyOtherInterface(IOtherInterface):
         print("PY: Func")
 
 
-class PySomeInterface(ISomeInterface):
+class PySomeInterface(SomeInterface_implementation):
     def __init__(self):
         super(PySomeInterface, self).__init__()
 
@@ -64,6 +41,6 @@ class PySomeInterface(ISomeInterface):
         return PyOtherInterface()
 
 
-def func():
-    print("PY: func")
+def CreateSomeInterface():
+    print("PY: CreateSomeInterface")
     return PySomeInterface()
