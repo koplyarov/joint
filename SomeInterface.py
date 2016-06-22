@@ -39,7 +39,7 @@ class SomeInterface_implementation:
         elif methodId == 5:
             return self.ReturnOther(*args)
         elif methodId == 6:
-            real_args = ( OtherInterface(args[0]) )
+            real_args = ( OtherInterface(args[0]), )
             return self.AcceptOther(*real_args)
         else:
             raise RuntimeError('No such method!')

@@ -1,4 +1,6 @@
-#include "PythonObject.hpp"
+#include <binding/PythonObject.hpp>
+
+#include <pyjoint/Object.h>
 
 
 PythonObject::PythonObject(PyObjectPtr obj)
@@ -26,10 +28,20 @@ PyObjectPtr PythonObject::InvokeMethod(size_t index, joint::ArrayView<const Join
 		PyObject* py_p = nullptr;
 		switch (p.type)
 		{
-		case JOINT_TYPE_I32:   py_p = PyLong_FromLong(p.value.i32); break;
-		case JOINT_TYPE_UTF8:  py_p = PyUnicode_FromString(p.value.utf8); break;
+		case JOINT_TYPE_I32:
+			py_p = PyLong_FromLong(p.value.i32);
+			break;
+		case JOINT_TYPE_UTF8:
+			py_p = PyUnicode_FromString(p.value.utf8);
+			break;
 		case JOINT_TYPE_OBJ:
-		default: throw std::runtime_error("Unknown parameter type");
+			py_p = PyObject_CallObject((PyObject*)&pyjoint_Object_type, NULL);
+			PYJOINT_CHECK(py_p, "Could not create joint.Object");
+			PYJOINT_CHECK(Joint_IncRefObject(p.value.obj) == JOINT_ERROR_NONE, "Joint_IncRefObject failed!");
+			reinterpret_cast<pyjoint_Object*>(py_p)->handle = p.value.obj;
+			break;
+		default:
+			throw std::runtime_error("Unknown parameter type");
 		}
 
 		if (PyTuple_SetItem(py_args, i + 1, py_p)) // TODO: Use PyTuple_SET_ITEM

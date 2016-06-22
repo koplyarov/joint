@@ -24,4 +24,5 @@ other.Func()
 
 obj.AcceptOther(other)
 
+del other
 del obj

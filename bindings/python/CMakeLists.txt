@@ -10,6 +10,9 @@ set(JOINT_PYTHON_CORE_SRC
 	binding/PythonBinding.cpp
 	binding/PythonModule.cpp
 	binding/PythonObject.cpp
+	pyjoint/Common.cpp
+	pyjoint/Module.cpp
+	pyjoint/Object.cpp
 )
 
 add_library(joint-python-core SHARED ${JOINT_PYTHON_CORE_SRC})

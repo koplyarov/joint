@@ -2,6 +2,8 @@
 #define BINDINGS_PYTHON_PYJOINT_COMMON_H
 
 
+#include <joint/Joint.h>
+
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
@@ -9,7 +11,7 @@
 #include <Python.h>
 
 
-static PyObject* g_error = nullptr;
+extern PyObject* g_error;
 
 
 #define PYJOINT_THROW(Message_) do { throw std::runtime_error(Message_); } while (false)
@@ -81,7 +83,7 @@ T_ FromPyLong(PyObject* pyLong)
 }
 
 
-const char* Utf8FromPyUnicode(PyObject* pyStr)
+inline const char* Utf8FromPyUnicode(PyObject* pyStr)
 {
 	PyObject* py_bytes(PyUnicode_AsUTF8String(pyStr));
 	PYJOINT_CHECK(py_bytes, "PyUnicode_AsUTF8String failed!");
