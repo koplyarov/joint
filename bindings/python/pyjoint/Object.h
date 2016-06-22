@@ -116,13 +116,17 @@ static PyObject* Object_InvokeMethod(PyObject* self, PyObject* args, PyObject* k
 		Joint_Variant v = { };
 		v.type = FromPyLong<Joint_Type>(PyTuple_GetItem(py_param_tuple, 0));
 
+		auto py_param = PyTuple_GetItem(py_param_tuple, 1);
 		switch (v.type)
 		{
 		case JOINT_TYPE_I32:
-			v.value.i32 = FromPyLong<int32_t>(PyTuple_GetItem(py_param_tuple, 1));
+			v.value.i32 = FromPyLong<int32_t>(py_param);
 			break;
 		case JOINT_TYPE_UTF8:
-			v.value.utf8 = Utf8FromPyUnicode(PyTuple_GetItem(py_param_tuple, 1));
+			v.value.utf8 = Utf8FromPyUnicode(py_param);
+			break;
+		case JOINT_TYPE_OBJ:
+			v.value.obj = CastPyObject<pyjoint_Object>(py_param, &pyjoint_Object_type)->handle;
 			break;
 		default:
 			PYJOINT_THROW("Unknown parameter type");

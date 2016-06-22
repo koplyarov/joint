@@ -24,6 +24,7 @@ static PyObject* g_error = nullptr;
 			} \
 			catch (const std::exception& ex) { \
 				Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.Python", "%s failed: %s", __func__, ex.what()); \
+				PyErr_SetString(g_error, ex.what()); \
 				__VA_ARGS__ \
 				return RetError_; \
 			}
@@ -88,6 +89,15 @@ const char* Utf8FromPyUnicode(PyObject* pyStr)
 	const char* str_data = PyBytes_AsString(py_bytes);
 	PYJOINT_CHECK(str_data, "PyBytes_AsString failed!");
 	return str_data;
+}
+
+template < typename T_ >
+T_* CastPyObject(PyObject* pyObj, PyTypeObject* pyType)
+{
+	PYJOINT_CHECK(pyObj && pyType, "Invalid arguments to CastPyObject");
+	PYJOINT_CHECK(PyObject_TypeCheck(pyObj, pyType), std::string("Could not cast object to ") + pyType->tp_name);
+
+	return reinterpret_cast<T_*>(pyObj);
 }
 
 

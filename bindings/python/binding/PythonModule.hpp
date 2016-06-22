@@ -6,7 +6,7 @@
 
 #include <Python.h>
 
-#include "PythonUtils.hpp"
+#include <utils/PythonUtils.hpp>
 
 
 class PythonModule

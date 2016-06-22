@@ -5,7 +5,8 @@ call g:cpp_plugin.indexer.builder.addCustomRegex('python', '/[ \t]*self\.([A-Za-
 call g:buildsystem.setAvailableBuildConfigs( { 'host': CMakeBuildConfig(4, './build/') } )
 
 set path+=core
-let g:include_directories = [ 'core' ]
+set path+=bindings/python
+let g:include_directories = [ 'core', 'bindings/python' ]
 
 function! GetCppNamespaceFromPath(path)
 	let res = []

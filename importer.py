@@ -22,4 +22,6 @@ obj.PrintString('ohohoho')
 other = obj.ReturnOther()
 other.Func()
 
+obj.AcceptOther(other)
+
 del obj

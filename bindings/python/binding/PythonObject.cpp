@@ -28,6 +28,7 @@ PyObjectPtr PythonObject::InvokeMethod(size_t index, joint::ArrayView<const Join
 		{
 		case JOINT_TYPE_I32:   py_p = PyLong_FromLong(p.value.i32); break;
 		case JOINT_TYPE_UTF8:  py_p = PyUnicode_FromString(p.value.utf8); break;
+		case JOINT_TYPE_OBJ:
 		default: throw std::runtime_error("Unknown parameter type");
 		}
 

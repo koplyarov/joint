@@ -2,12 +2,10 @@ project(joint)
 cmake_minimum_required(VERSION 2.8.12)
 
 find_package(Threads)
-find_package(PythonLibs REQUIRED)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/core)
 
 if (MSVC)
@@ -29,25 +27,7 @@ target_link_libraries(joint-core ${CMAKE_THREAD_LIBS_INIT})
 
 ################################################################################
 
-set(JOINT_PYTHON_BINDING_SRC
-	bindings/python/PythonBinding.cpp
-	bindings/python/PythonModule.cpp
-	bindings/python/PythonObject.cpp
-)
-
-add_library(joint-python SHARED ${JOINT_PYTHON_BINDING_SRC})
-target_link_libraries(joint-python joint-core ${PYTHON_LIBRARIES})
-
-set(PY_JOINT_SRC
-	bindings/python/PyJoint.cpp
-)
-
-add_library(pyjoint SHARED ${PY_JOINT_SRC})
-set_target_properties(pyjoint PROPERTIES PREFIX "")
-if (WIN32)
-	set_target_properties(pyjoint PROPERTIES SUFFIX "pyd")
-endif()
-target_link_libraries(pyjoint joint-python joint-core ${PYTHON_LIBRARIES})
+add_subdirectory(bindings/python)
 
 ################################################################################
 

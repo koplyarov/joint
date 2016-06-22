@@ -1,8 +1,7 @@
 #include <iostream>
 #include <memory>
 
-#include <../bindings/python/PythonBinding.h>
-#include <../bindings/python/PythonModule.hpp>
+#include <../bindings/python/JointPython.h>
 
 
 #define JOINT_CALL(...) \

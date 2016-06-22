@@ -8,7 +8,7 @@ class PyOtherInterface(OtherInterface_implementation):
         print("PyOtherInterface: del")
 
     def Func(self):
-        print("PY: Func")
+        print("Py: Func")
 
 
 class PySomeInterface(SomeInterface_implementation):
@@ -19,13 +19,13 @@ class PySomeInterface(SomeInterface_implementation):
         print("PySomeInterface: del")
 
     def Method1(self):
-        print("PY: Method1")
+        print("Py: Method1")
 
     def Method2(self):
-        print("PY: Method2")
+        print("Py: Method2")
 
     def ToString(self):
-        print("PY: ToString")
+        print("Py: ToString")
         return "PySomeInterface"
 
     def PrintInt(self, i):
@@ -40,7 +40,11 @@ class PySomeInterface(SomeInterface_implementation):
         print("Py: ReturnOther")
         return PyOtherInterface()
 
+    def AcceptOther(self, other):
+        print("Py: AcceptOther")
+        other.Func()
+
 
 def CreateSomeInterface():
-    print("PY: CreateSomeInterface")
+    print("Py: CreateSomeInterface")
     return PySomeInterface()

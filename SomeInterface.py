@@ -1,3 +1,5 @@
+import sys
+
 JOINT_TYPE_VOID    = 1
 JOINT_TYPE_BOOL    = 2
 JOINT_TYPE_I8      = 3
@@ -36,6 +38,9 @@ class SomeInterface_implementation:
             return self.PrintString(*args)
         elif methodId == 5:
             return self.ReturnOther(*args)
+        elif methodId == 6:
+            real_args = ( OtherInterface(args[0]) )
+            return self.AcceptOther(*real_args)
         else:
             raise RuntimeError('No such method!')
 
@@ -43,7 +48,8 @@ class SomeInterface_implementation:
 class OtherInterface:
     def __init__(self, jointObj):
         self.__obj = jointObj
-
+    def __del__(self):
+        del self.__obj
     def Func(self):
         self.__obj.InvokeMethod(0, JOINT_TYPE_VOID)
 
@@ -51,26 +57,19 @@ class OtherInterface:
 class SomeInterface:
     def __init__(self, jointObj):
         self.__obj = jointObj
-
     def __del__(self):
         del self.__obj
-
     def Method1(self):
         self.__obj.InvokeMethod(0, JOINT_TYPE_VOID)
-
     def Method2(self):
         self.__obj.InvokeMethod(1, JOINT_TYPE_VOID)
-
     def ToString(self):
         return self.__obj.InvokeMethod(2, JOINT_TYPE_UTF8)
-
     def PrintInt(self, i):
         self.__obj.InvokeMethod(3, JOINT_TYPE_VOID, (JOINT_TYPE_I32, i))
-
     def PrintString(self, s):
         self.__obj.InvokeMethod(4, JOINT_TYPE_VOID, (JOINT_TYPE_UTF8, s))
-
     def ReturnOther(self):
         return OtherInterface(self.__obj.InvokeMethod(5, JOINT_TYPE_OBJ))
-
-
+    def AcceptOther(self, other):
+        self.__obj.InvokeMethod(6, JOINT_TYPE_VOID, (JOINT_TYPE_OBJ, other._OtherInterface__obj))
