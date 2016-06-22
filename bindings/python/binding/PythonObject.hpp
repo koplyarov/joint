@@ -12,6 +12,7 @@ class PythonObject
 {
 private:
 	PyObjectPtr		_obj;
+	PyObjectPtr		_methods;
 
 public:
 	PythonObject(PyObjectPtr obj);

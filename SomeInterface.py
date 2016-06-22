@@ -1,75 +1,51 @@
 import sys
-
-JOINT_TYPE_VOID    = 1
-JOINT_TYPE_BOOL    = 2
-JOINT_TYPE_I8      = 3
-JOINT_TYPE_U8      = 4
-JOINT_TYPE_I16     = 5
-JOINT_TYPE_U16     = 6
-JOINT_TYPE_I32     = 7
-JOINT_TYPE_U32     = 8
-JOINT_TYPE_I64     = 9
-JOINT_TYPE_U64     = 10
-JOINT_TYPE_F32     = 11
-JOINT_TYPE_F64     = 12
-JOINT_TYPE_UTF8    = 13
-JOINT_TYPE_OBJ     = 14
+from functools import partial
 
 
 class OtherInterface_implementation:
-    def methodCall(self, methodId, *args):
-        if methodId == 0:
-            return self.Func(*args)
-        else:
-            raise RuntimeError('No such method!')
+    def __init__(self):
+        self.methods = ( self.EmptyFunc, self.Func )
 
 
 class SomeInterface_implementation:
-    def methodCall(self, methodId, *args):
-        if methodId == 0:
-            return self.Method1(*args)
-        elif methodId == 1:
-            return self.Method2(*args)
-        elif methodId == 2:
-            return self.ToString(*args)
-        elif methodId == 3:
-            return self.PrintInt(*args)
-        elif methodId == 4:
-            return self.PrintString(*args)
-        elif methodId == 5:
-            return self.ReturnOther(*args)
-        elif methodId == 6:
-            real_args = ( OtherInterface(args[0]), )
-            return self.AcceptOther(*real_args)
-        else:
-            raise RuntimeError('No such method!')
+    def __init__(self):
+        self.methods = ( self.Method1, self.Method2, self.ToString, self.PrintInt, self.PrintString, self.ReturnOther, self.AcceptOther )
 
 
 class OtherInterface:
     def __init__(self, jointObj):
         self.__obj = jointObj
+        self._InvokeMethod = self.__obj.InvokeMethod
+        self.EmptyFunc = partial(self.__obj.InvokeMethod, 0, 1)
+        self.Func = partial(self.__obj.InvokeMethod, 1, 1)
     def __del__(self):
         del self.__obj
-    def Func(self):
-        self.__obj.InvokeMethod(0, JOINT_TYPE_VOID)
+    #def EmptyFunc(self):
+        #self._InvokeMethod(0, 1)
+    #def Func(self):
+        #self._InvokeMethod(1, 1)
 
 
 class SomeInterface:
     def __init__(self, jointObj):
         self.__obj = jointObj
+        self._InvokeMethod = self.__obj.InvokeMethod
+        self.Method1 = partial(self.__obj.InvokeMethod, 0, 1)
+        self.Method2 = partial(self.__obj.InvokeMethod, 1, 1)
+        self.ToString = partial(self.__obj.InvokeMethod, 2, 13)
     def __del__(self):
         del self.__obj
-    def Method1(self):
-        self.__obj.InvokeMethod(0, JOINT_TYPE_VOID)
-    def Method2(self):
-        self.__obj.InvokeMethod(1, JOINT_TYPE_VOID)
-    def ToString(self):
-        return self.__obj.InvokeMethod(2, JOINT_TYPE_UTF8)
+    #def Method1(self):
+        #self._InvokeMethod(0, 1)
+    #def Method2(self):
+        #self._InvokeMethod(1, 1)
+    #def ToString(self):
+        #return self._InvokeMethod(2, 13)
     def PrintInt(self, i):
-        self.__obj.InvokeMethod(3, JOINT_TYPE_VOID, (JOINT_TYPE_I32, i))
+        self._InvokeMethod(3, 1, (7, i))
     def PrintString(self, s):
-        self.__obj.InvokeMethod(4, JOINT_TYPE_VOID, (JOINT_TYPE_UTF8, s))
+        self._InvokeMethod(4, 1, (13, s))
     def ReturnOther(self):
-        return OtherInterface(self.__obj.InvokeMethod(5, JOINT_TYPE_OBJ))
+        return OtherInterface(self._InvokeMethod(5, 14))
     def AcceptOther(self, other):
-        self.__obj.InvokeMethod(6, JOINT_TYPE_VOID, (JOINT_TYPE_OBJ, other._OtherInterface__obj))
+        self._InvokeMethod(6, 1, (14, other._OtherInterface__obj))
