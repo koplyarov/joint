@@ -9,7 +9,9 @@ class OtherInterface_implementation:
 
 class SomeInterface_implementation:
     def __init__(self):
-        self.methods = ( self.Method1, self.Method2, self.ToString, self.PrintInt, self.PrintString, self.ReturnOther, self.AcceptOther )
+        self.methods = ( self.Method1, self.Method2, self.ToString, self.PrintInt, self.PrintString, self.ReturnOther, self.AcceptOther_bridge )
+    def AcceptOther_bridge(self, other):
+        self.AcceptOther(OtherInterface(other))
 
 
 class OtherInterface:
