@@ -15,6 +15,7 @@ namespace joint
 		JOINT_CHECK(desc.name != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(desc.invokeMethod != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(desc.releaseObject != nullptr, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(desc.castObject != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(desc.getRootObject != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(desc.loadModule != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(desc.unloadModule != nullptr, JOINT_ERROR_INVALID_PARAMETER);

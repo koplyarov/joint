@@ -10,6 +10,7 @@
 
 #include <binding/PythonModule.hpp>
 #include <binding/PythonObject.hpp>
+#include <pyjoint/Common.h>
 
 
 PythonBinding::PythonBinding()
@@ -109,6 +110,59 @@ Joint_Error PythonBinding::ReleaseObject(void* bindingUserData, Joint_ModuleHand
 	JOINT_CPP_WRAP_BEGIN
 
 	delete reinterpret_cast<PythonObject*>(obj);
+
+	JOINT_CPP_WRAP_END
+}
+
+
+static PyObjectPtr FindBaseById(PyObject* type, const char* interfaceId)
+{
+	PyObjectPtr bases(PyObject_GetAttrString(type, "__bases__"));
+	PyObjectPtr seq(PySequence_Fast((PyObject*)bases, "A sequence expected!"));
+	int len = PySequence_Size(seq);
+	for (int i = 0; i < len; ++i)
+	{
+		PyObject* base = PySequence_Fast_GET_ITEM((PyObject*)seq, i);
+		JOINT_CHECK(base, "None base class???");
+
+		if (!PyObject_HasAttrString(base, "interfaceId"))
+			continue;
+
+		PyObjectPtr py_base_interface_id(PyObject_GetAttrString(base, "interfaceId"));
+		JOINT_CHECK(py_base_interface_id, "No interfaceId attribute");
+
+		const char* base_interface_id = Utf8FromPyUnicode(py_base_interface_id);
+		if (strcmp(interfaceId, base_interface_id) == 0)
+		{
+			Py_INCREF(base);
+			return PyObjectPtr(base);
+		}
+
+		PyObjectPtr in_base = FindBaseById(base, interfaceId);
+		if (in_base)
+			return in_base;
+	}
+
+	return PyObjectPtr();
+}
+
+Joint_Error PythonBinding::CastObject(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_InterfaceId interfaceId, Joint_ObjectHandleInternal* outRetValue)
+{
+	JOINT_CPP_WRAP_BEGIN
+
+	auto py_accessor = reinterpret_cast<PythonObject*>(obj)->GetObject();
+	PyObjectPtr py_obj(PyObject_GetAttrString(py_accessor, "obj"));
+	JOINT_CHECK(py_obj, "No obj attribute!");
+	PyObjectPtr py_obj_type(PyObject_GetAttrString(py_obj, "__class__"));
+	auto base = FindBaseById(py_obj_type, interfaceId);
+	JOINT_CHECK(base, std::string("Could not cast object to ") + interfaceId);
+
+	PyObjectPtr base_accessor_type(PyObject_GetAttrString(base, "accessor"));
+	JOINT_CHECK(base_accessor_type, "No accessor attribute");
+
+	PyObjectPtr new_accessor(PyObject_CallObject(base_accessor_type, Py_BuildValue("(O)", (PyObject*)py_obj)));
+	JOINT_CHECK(new_accessor, "Could not wrap object");
+	*outRetValue = new PythonObject(new_accessor);
 
 	JOINT_CPP_WRAP_END
 }

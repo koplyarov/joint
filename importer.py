@@ -1,29 +1,19 @@
 #!/usr/bin/python3
 
 import timeit
-from SomeInterface import *
 
 import sys
 sys.path.append('build/bin')
 
+from Bridges import *
 import pyjoint
 
 m = pyjoint.Module('python', 'test_module')
-obj = SomeInterface(m.GetRootObject('CreateSomeInterface'))
+obj = IObject_proxy(m.GetRootObject('GetComponent'))
 
-obj.Method1()
-obj.Method2()
+p = pyjoint.Cast(obj, IPoint)
+print(p.GetX())
+print(p.GetY())
 
-s = obj.ToString()
-print('obj.ToString: {}'.format(s))
-
-obj.PrintInt(42)
-obj.PrintString('ohohoho')
-
-other = obj.ReturnOther()
-other.Func()
-
-obj.AcceptOther(other)
-
-del other
-del obj
+sr = pyjoint.Cast(obj, IStringRepresentable)
+print(sr.ToString())

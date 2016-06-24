@@ -125,11 +125,11 @@ static PyObject* Object_InvokeMethod(PyObject* self, PyObject* args, PyObject* k
 
 	Joint_RetValue ret_value;
 	Joint_Error ret = Joint_InvokeMethod(o->handle, method_id, params.data(), params.size(), ret_type, &ret_value);
-	PYJOINT_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_GetRootObject failed: ") + Joint_ErrorToString(ret)).c_str());
+	PYJOINT_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_InvokeMethod failed: ") + Joint_ErrorToString(ret)).c_str());
 
 	Joint_Variant ret_variant;
 	ret = Joint_ObtainRetValue(ret_value, &ret_variant);
-	PYJOINT_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_GetRootObject failed: ") + Joint_ErrorToString(ret)).c_str());
+	PYJOINT_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_ObtainRetValue failed: ") + Joint_ErrorToString(ret)).c_str());
 
 	auto sg(ScopeExit([&]{
 		Joint_Error ret = Joint_ReleaseRetValue(ret_value);
@@ -143,19 +143,20 @@ static PyObject* Object_InvokeMethod(PyObject* self, PyObject* args, PyObject* k
 	case JOINT_TYPE_VOID:
 		Py_RETURN_NONE;
 		break;
+	case JOINT_TYPE_I32:
+		result = PyLong_FromLong(ret_variant.value.i32);
+		break;
 	case JOINT_TYPE_UTF8:
 		result = PyUnicode_FromString(ret_variant.value.utf8);
-		return result;
+		break;
 	case JOINT_TYPE_OBJ:
 		result = PyObject_CallObject((PyObject*)&pyjoint_Object_type, NULL);
 		PYJOINT_CHECK(result, "Could not create joint.Object");
 		reinterpret_cast<pyjoint_Object*>(result)->handle = ret_variant.value.obj;
-		return result;
+		break;
 	default:
 		PYJOINT_THROW("Unknown return type: " + std::to_string(ret_type));
 	}
 
-	PYJOINT_CPP_WRAP_END(TerminateOnInvoke<PyObject*>(), NULL)
+	PYJOINT_CPP_WRAP_END(result, NULL)
 }
-
-

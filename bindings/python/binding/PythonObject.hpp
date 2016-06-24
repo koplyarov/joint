@@ -17,6 +17,9 @@ private:
 public:
 	PythonObject(PyObjectPtr obj);
 
+	PyObjectPtr GetObject() const
+	{ return _obj; }
+
 	PyObjectPtr InvokeMethod(size_t index, joint::ArrayView<const Joint_Variant> params);
 };
 

@@ -11,6 +11,7 @@ set(JOINT_PYTHON_CORE_SRC
 	binding/PythonModule.cpp
 	binding/PythonObject.cpp
 	pyjoint/Common.cpp
+	pyjoint/Globals.cpp
 	pyjoint/Module.cpp
 	pyjoint/Object.cpp
 )

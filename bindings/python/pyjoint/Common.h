@@ -15,7 +15,7 @@ extern PyObject* g_error;
 
 
 #define PYJOINT_THROW(Message_) do { throw std::runtime_error(Message_); } while (false)
-#define PYJOINT_CHECK(Expr_, Message_) do { if (!(Expr_)) PYJOINT_THROW(Message_); } while (false)
+#define PYJOINT_CHECK(Expr_, Message_) do { if (!(Expr_)) { PyErr_Print(); PYJOINT_THROW(Message_); } } while (false)
 
 
 #define PYJOINT_CPP_WRAP_BEGIN \

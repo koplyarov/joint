@@ -4,6 +4,7 @@
 #include <string>
 
 #include <binding/PythonBinding.hpp>
+#include <pyjoint/Globals.h>
 #include <pyjoint/Module.h>
 
 
@@ -23,6 +24,7 @@ extern "C"
 		binding_desc.getRootObject   = &PythonBinding::GetRootObject;
 		binding_desc.invokeMethod    = &PythonBinding::InvokeMethod;
 		binding_desc.releaseObject   = &PythonBinding::ReleaseObject;
+		binding_desc.castObject      = &PythonBinding::CastObject;
 
 		std::unique_ptr<PythonBinding> binding(new PythonBinding);
 		Joint_Error ret = Joint_RegisterBinding(binding_desc, binding.get(), &g_bindingHandle);
@@ -51,6 +53,7 @@ extern "C"
 
 
 static PyMethodDef g_methods[] = {
+	{"Cast", (PyCFunction)Cast, METH_VARARGS, "Cast" },
 	{NULL, NULL, 0, NULL}
 };
 

@@ -9,6 +9,8 @@ extern "C"
 {
 #define JOINT_NULL_HANDLE nullptr
 
+	typedef const char* Joint_InterfaceId;
+
 	struct Joint_Binding;
 	typedef Joint_Binding* Joint_BindingHandle;
 
@@ -150,6 +152,7 @@ extern "C"
 	typedef Joint_Error Joint_GetRootObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, const char* getterName, Joint_ObjectHandleInternal* outObject);
 	typedef Joint_Error Joint_ReleaseObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal object);
 	typedef Joint_Error Joint_InvokeMethod_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValueInternal* outRetValue);
+	typedef Joint_Error Joint_CastObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_InterfaceId interfaceId, Joint_ObjectHandleInternal* outRetValue);
 	typedef Joint_Error Joint_LoadModule_Func(void* bindingUserData, const char* moduleName, Joint_ModuleHandleInternal* outModule);
 	typedef Joint_Error Joint_UnloadModule_Func(void* bindingUserData, Joint_ModuleHandleInternal module);
 	typedef Joint_Error Joint_DeinitBinding_Func(void* bindingUserData);
@@ -158,6 +161,7 @@ extern "C"
 	{
 		Joint_InvokeMethod_Func*    invokeMethod;
 		Joint_ReleaseObject_Func*   releaseObject;
+		Joint_CastObject_Func*      castObject;
 		Joint_GetRootObject_Func*   getRootObject;
 		Joint_LoadModule_Func*      loadModule;
 		Joint_UnloadModule_Func*    unloadModule;
@@ -179,6 +183,7 @@ extern "C"
 	Joint_Error Joint_ReleaseRetValue(Joint_RetValue value);
 	Joint_Error Joint_IncRefObject(Joint_ObjectHandle handle);
 	Joint_Error Joint_DecRefObject(Joint_ObjectHandle handle);
+	Joint_Error Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_ObjectHandle* outHandle);
 }
 
 #endif

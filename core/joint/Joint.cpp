@@ -154,7 +154,7 @@ extern "C"
 		JOINT_CHECK(getterName, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(outObject, JOINT_ERROR_INVALID_PARAMETER);
 
-		Joint_ObjectHandleInternal internal;
+		Joint_ObjectHandleInternal internal = NULL;
 		Joint_Error ret = module->binding->desc.getRootObject(module->binding->userData, module->internal, getterName, &internal);
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
@@ -169,11 +169,13 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
+		//Joint_Log(JOINT_LOGLEVEL_DEBUG, "Joint", "InvokeMethod(obj: %p (internal: %p), methodId: %u)", obj, obj ? obj->internal : NULL, methodId);
+
 		JOINT_CHECK(obj != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(params || paramsCount == 0, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(outRetValue, JOINT_ERROR_INVALID_PARAMETER);
 
-		Joint_RetValueInternal ret_value_internal;
+		Joint_RetValueInternal ret_value_internal = { };
 		Joint_Error ret = obj->module->binding->desc.invokeMethod(obj->module->binding->userData, obj->module->internal, obj->internal, methodId, params, paramsCount, retType, &ret_value_internal);
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 
@@ -233,6 +235,25 @@ extern "C"
 		if (refs == 0)
 			handle->module->binding->desc.releaseObject(handle->module->binding->userData, handle->module->internal, handle->internal);
 		JOINT_CHECK(refs >= 0, JOINT_ERROR_INVALID_PARAMETER);
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_ObjectHandle* outHandle)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		//Joint_Log(JOINT_LOGLEVEL_DEBUG, "Joint", "CastObject(obj: %p (internal: %p), interfaceId: %s)", handle, handle ? handle->internal : NULL, interfaceId);
+
+		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(interfaceId, JOINT_ERROR_INVALID_PARAMETER);
+
+		Joint_ObjectHandleInternal internal = NULL;
+		Joint_Error ret = handle->module->binding->desc.castObject(handle->module->binding->userData, handle->module->internal, handle->internal, interfaceId, &internal);
+		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
+		*outHandle = new Joint_Object(internal, handle->module);
 
 		JOINT_CPP_WRAP_END
 	}

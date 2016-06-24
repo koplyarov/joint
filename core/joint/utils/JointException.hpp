@@ -41,6 +41,9 @@ namespace joint
 	template < typename T_, typename Enabler_ = typename std::enable_if<std::is_base_of<std::exception, T_>::value>::type >
 	T_ MakeException(T_&& ex) { return ex; }
 
+	template < typename T_, typename Enabler_ = typename std::enable_if<std::is_constructible<std::string, T_>::value>::type >
+	std::runtime_error MakeException(T_&& msg) { return std::runtime_error(std::string(msg)); }
+
 }
 
 #endif
