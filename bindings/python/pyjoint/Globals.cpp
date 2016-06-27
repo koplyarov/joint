@@ -1,6 +1,6 @@
-#include <pyjoint/Globals.h>
+#include <pyjoint/Globals.hpp>
 
-#include <pyjoint/Object.h>
+#include <pyjoint/Object.hpp>
 #include <utils/PyObjectHolder.hpp>
 #include <utils/PythonUtils.hpp>
 

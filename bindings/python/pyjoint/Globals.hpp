@@ -2,7 +2,7 @@
 #define PYJOINT_GLOBALS_H
 
 
-#include <pyjoint/Common.h>
+#include <pyjoint/Common.hpp>
 
 
 namespace joint_python {

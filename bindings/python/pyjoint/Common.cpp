@@ -1,4 +1,4 @@
-#include <pyjoint/Common.h>
+#include <pyjoint/Common.hpp>
 
 
 namespace joint_python {

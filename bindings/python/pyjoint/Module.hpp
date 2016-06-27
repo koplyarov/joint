@@ -2,17 +2,18 @@
 #define BINDINGS_PYTHON_PYJOINT_MODULE_H
 
 
-#include <pyjoint/Object.h>
+#include <pyjoint/Object.hpp>
 
 
 namespace joint_python {
 namespace pyjoint
 {
 
-	typedef struct {
+	struct Module
+	{
 		PyObject_HEAD
 		Joint_ModuleHandle		handle;
-	} Module;
+	};
 
 
 	extern PyTypeObject Module_type;

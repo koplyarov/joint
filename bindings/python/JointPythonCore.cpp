@@ -4,8 +4,8 @@
 #include <string>
 
 #include <binding/Binding.hpp>
-#include <pyjoint/Globals.h>
-#include <pyjoint/Module.h>
+#include <pyjoint/Globals.hpp>
+#include <pyjoint/Module.hpp>
 #include <utils/PyObjectHolder.hpp>
 
 

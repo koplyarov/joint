@@ -1,4 +1,4 @@
-#include <pyjoint/Module.h>
+#include <pyjoint/Module.hpp>
 
 #include <utils/PythonUtils.hpp>
 
@@ -20,7 +20,7 @@ namespace pyjoint
 	PyTypeObject Module_type = {
 		PyVarObject_HEAD_INIT(NULL, 0)
 		"pyjoint.Module",          // tp_name
-		sizeof(Module),    // tp_basicsize
+		sizeof(Module),            // tp_basicsize
 		0,                         // tp_itemsize
 		(destructor)Module_del,    // tp_dealloc
 		0,                         // tp_print
@@ -45,7 +45,7 @@ namespace pyjoint
 		0,                         // tp_weaklistoffset
 		0,                         // tp_iter
 		0,                         // tp_iternext
-		Module_methods,    // tp_methods
+		Module_methods,            // tp_methods
 		NULL,                      // tp_members
 		0,                         // tp_getset
 		0,                         // tp_base

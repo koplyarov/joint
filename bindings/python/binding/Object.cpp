@@ -1,6 +1,6 @@
 #include <binding/Object.hpp>
 
-#include <pyjoint/Object.h>
+#include <pyjoint/Object.hpp>
 
 
 namespace joint_python {

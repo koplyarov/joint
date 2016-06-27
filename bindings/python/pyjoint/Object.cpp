@@ -1,4 +1,6 @@
-#include <pyjoint/Object.h>
+#include <pyjoint/Object.hpp>
+
+#include <vector>
 
 #include <utils/PythonUtils.hpp>
 
@@ -19,7 +21,7 @@ namespace pyjoint
 	PyTypeObject Object_type = {
 		PyVarObject_HEAD_INIT(NULL, 0)
 		"pyjoint.Object",          // tp_name
-		sizeof(Object),    // tp_basicsize
+		sizeof(Object),            // tp_basicsize
 		0,                         // tp_itemsize
 		(destructor)Object_del,    // tp_dealloc
 		0,                         // tp_print
@@ -44,7 +46,7 @@ namespace pyjoint
 		0,                         // tp_weaklistoffset
 		0,                         // tp_iter
 		0,                         // tp_iternext
-		Object_methods,    // tp_methods
+		Object_methods,            // tp_methods
 		NULL,                      // tp_members
 		0,                         // tp_getset
 		0,                         // tp_base

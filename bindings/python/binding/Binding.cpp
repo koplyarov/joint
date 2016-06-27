@@ -10,7 +10,7 @@
 
 #include <binding/Module.hpp>
 #include <binding/Object.hpp>
-#include <pyjoint/Common.h>
+#include <pyjoint/Common.hpp>
 #include <utils/PythonUtils.hpp>
 
 
