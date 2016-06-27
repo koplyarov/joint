@@ -4,10 +4,13 @@ import joint
 import joint.generators
 
 idl_parser = joint.IdlParser()
-ast = idl_parser.parseFile("core/idl/IObject.idl")
 
-#print ast
-
-cpp_gen = joint.generators.CppGenerator()
-for l in cpp_gen.generate(ast):
-    print l
+gen = joint.generators.PythonGenerator()
+for l in gen.generatePreamble():
+    print(l)
+print('')
+print('')
+for f in  [ 'core/idl/IObject.idl', 'TestObjects.idl' ]:
+    ast = idl_parser.parseFile(f)
+    for l in gen.generate(ast):
+        print(l)
