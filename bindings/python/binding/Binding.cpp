@@ -33,7 +33,7 @@ namespace binding
 	Joint_Error Binding::Deinit(void* bindingUserData)
 	{
 		JOINT_CPP_WRAP_BEGIN
-		reinterpret_cast<Binding*>(bindingUserData)->~Binding();
+		delete reinterpret_cast<Binding*>(bindingUserData);
 		JOINT_CPP_WRAP_END
 	}
 
@@ -75,25 +75,14 @@ namespace binding
 		case JOINT_TYPE_VOID:
 			break;
 		case JOINT_TYPE_I32:
-			{
-				int overflow = 0;
-				long result = PyLong_AsLongAndOverflow(py_res, &overflow);
-				if (overflow != 0)
-					PYTHON_ERROR("Overflow in PyLong_AsLongAndOverflow");
-				 outRetValue->variant.value.i32 = result;
-			}
+			outRetValue->variant.value.i32 = FromPyLong<int32_t>(py_res);
 			break;
 		case JOINT_TYPE_UTF8:
 			{
-				PyObjectHolder py_bytes(PyUnicode_AsUTF8String(py_res));
-				if (!py_bytes)
-					PYTHON_ERROR("PyUnicode_AsUTF8String failed!");
-				const char* str_data = PyBytes_AsString(py_bytes);
-				if (!str_data)
-					PYTHON_ERROR("PyBytes_AsString failed!");
-				char* result_str = new char[strlen(str_data)];
-				strcpy(result_str, str_data);
-				outRetValue->variant.value.utf8 = result_str;
+				auto str_data = Utf8FromPyUnicode(py_res);
+				std::unique_ptr<char[]> result_str(new char[strlen(str_data.GetContent())]);
+				strcpy(result_str.get(), str_data.GetContent());
+				outRetValue->variant.value.utf8 = result_str.release();
 			}
 			break;
 		case JOINT_TYPE_OBJ:
@@ -127,7 +116,7 @@ namespace binding
 		int len = PySequence_Size(seq);
 		for (int i = 0; i < len; ++i)
 		{
-			PyObject* base = PySequence_Fast_GET_ITEM((PyObject*)seq, i);
+			PyObject* base = PySequence_Fast_GET_ITEM(seq.Get(), i);
 			JOINT_CHECK(base, "None base class???");
 
 			if (!PyObject_HasAttrString(base, "interfaceId"))
@@ -136,8 +125,8 @@ namespace binding
 			PyObjectHolder py_base_interface_id(PyObject_GetAttrString(base, "interfaceId"));
 			JOINT_CHECK(py_base_interface_id, "No interfaceId attribute");
 
-			const char* base_interface_id = Utf8FromPyUnicode(py_base_interface_id);
-			if (strcmp(interfaceId, base_interface_id) == 0)
+			auto base_interface_id = Utf8FromPyUnicode(py_base_interface_id);
+			if (strcmp(interfaceId, base_interface_id.GetContent()) == 0)
 			{
 				Py_INCREF(base);
 				return PyObjectHolder(base);
@@ -155,14 +144,14 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		auto py_accessor = reinterpret_cast<Object*>(obj)->GetObject();
+		PyObjectHolder py_accessor = reinterpret_cast<Object*>(obj)->GetObject();
 		PyObjectHolder py_obj(PyObject_GetAttrString(py_accessor, "obj"));
 		JOINT_CHECK(py_obj, "No obj attribute!");
 		PyObjectHolder py_obj_type(PyObject_GetAttrString(py_obj, "__class__"));
-		auto base = FindBaseById(py_obj_type, interfaceId);
-		JOINT_CHECK(base, std::string("Could not cast object to ") + interfaceId);
+		PyObjectHolder base_type = FindBaseById(py_obj_type, interfaceId);
+		JOINT_CHECK(base_type, std::string("Could not cast object to ") + interfaceId);
 
-		PyObjectHolder base_accessor_type(PyObject_GetAttrString(base, "accessor"));
+		PyObjectHolder base_accessor_type(PyObject_GetAttrString(base_type, "accessor"));
 		JOINT_CHECK(base_accessor_type, "No accessor attribute");
 
 		PyObjectHolder new_accessor(PyObject_CallObject(base_accessor_type, Py_BuildValue("(O)", (PyObject*)py_obj)));

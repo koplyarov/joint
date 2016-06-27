@@ -64,7 +64,7 @@ namespace pyjoint
 		PYJOINT_CPP_WRAP_BEGIN
 
 		Module* self = (Module*)type->tp_alloc(type, 0);
-		PYJOINT_CHECK(self, "Could not create Module");
+		PYTHON_CHECK(self, "Could not create Module");
 
 		self->handle = JOINT_NULL_HANDLE;
 
@@ -79,11 +79,11 @@ namespace pyjoint
 		const char* binding_name;
 		const char* module_name;
 
-		PYJOINT_CHECK(PyArg_ParseTuple(args, "ss", &binding_name, &module_name), "Could not parse arguments");
+		PYTHON_CHECK(PyArg_ParseTuple(args, "ss", &binding_name, &module_name), "Could not parse arguments");
 
 		Joint_ModuleHandle handle;
 		Joint_Error ret = Joint_LoadModule(binding_name, module_name, &handle);
-		PYJOINT_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_LoadModule failed: ") + Joint_ErrorToString(ret)).c_str());
+		NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_LoadModule failed: ") + Joint_ErrorToString(ret)).c_str());
 
 		reinterpret_cast<Module*>(self)->handle = handle;
 
@@ -98,7 +98,9 @@ namespace pyjoint
 		auto m = reinterpret_cast<Module*>(self);
 		if (m && m->handle)
 		{
-			Joint_UnloadModule(m->handle);
+			Joint_Error ret = Joint_UnloadModule(m->handle);
+			if (ret != JOINT_ERROR_NONE)
+				Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.Python", "Joint_UnloadModule failed: %s", Joint_ErrorToString(ret));
 			m->handle = JOINT_NULL_HANDLE;
 		}
 
@@ -111,21 +113,21 @@ namespace pyjoint
 		PYJOINT_CPP_WRAP_BEGIN
 
 		auto m = reinterpret_cast<Module*>(self);
-		PYJOINT_CHECK(m && m->handle, "Uninitialized module object");
+		NATIVE_CHECK(m && m->handle, "Uninitialized module object");
 
 		const char* getter_name;
-		PYJOINT_CHECK(PyArg_ParseTuple(args, "s", &getter_name), "Could not parse arguments");
+		PYTHON_CHECK(PyArg_ParseTuple(args, "s", &getter_name), "Could not parse arguments");
 
 		Joint_ObjectHandle obj;
 		Joint_Error ret = Joint_GetRootObject(m->handle, getter_name, &obj);
-		PYJOINT_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_GetRootObject failed: ") + Joint_ErrorToString(ret)).c_str());
+		NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_GetRootObject failed: ") + Joint_ErrorToString(ret)).c_str());
 
-		PyObject *py_obj = PyObject_CallObject((PyObject*)&Object_type, NULL);
-		PYJOINT_CHECK(py_obj, "Could not create joint.Object");
+		PyObjectHolder py_obj(PyObject_CallObject((PyObject*)&Object_type, NULL));
+		PYTHON_CHECK(py_obj, "Could not create joint.Object");
 
-		reinterpret_cast<Object*>(py_obj)->handle = obj;
+		reinterpret_cast<Object*>(py_obj.Get())->handle = obj;
 
-		PYJOINT_CPP_WRAP_END(py_obj, Py_None, Py_INCREF(Py_None);)
+		PYJOINT_CPP_WRAP_END(py_obj.Release(), Py_None, Py_INCREF(Py_None);)
 	}
 
 }}

@@ -14,6 +14,7 @@ set(JOINT_PYTHON_CORE_SRC
 	pyjoint/Globals.cpp
 	pyjoint/Module.cpp
 	pyjoint/Object.cpp
+	utils/PythonUtils.cpp
 )
 
 add_library(joint-python-core SHARED ${JOINT_PYTHON_CORE_SRC})

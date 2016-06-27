@@ -22,7 +22,7 @@ namespace binding
 		PySys_SetArgv(0, argv);
 
 		PyObjectHolder py_module_name(PyUnicode_FromString(moduleName.c_str()));
-		_pyModule.reset(PyImport_Import(py_module_name));
+		_pyModule.Reset(PyImport_Import(py_module_name));
 
 		PYTHON_CHECK(_pyModule, "Could not import python module " + moduleName);
 
@@ -32,7 +32,7 @@ namespace binding
 
 	Module::~Module()
 	{
-		_pyModule.reset();
+		_pyModule.Reset();
 		Joint_Log(JOINT_LOGLEVEL_DEBUG, "PythonBinding", "Unloaded python module %s", _moduleName.c_str());
 	}
 

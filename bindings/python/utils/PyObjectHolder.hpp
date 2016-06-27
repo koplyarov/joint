@@ -21,26 +21,26 @@ namespace joint_python
 		PyObjectHolder(const PyObjectHolder& other) : _obj(other._obj) { if (_obj) Py_INCREF(_obj); }
 		PyObjectHolder(PyObjectHolder&& other) : _obj(other._obj) { other._obj = nullptr; }
 
-		~PyObjectHolder() { reset(); }
+		~PyObjectHolder() { Reset(); }
 
 		PyObjectHolder& operator = (const PyObjectHolder& other)
 		{
 			PyObjectHolder tmp(other);
-			swap(tmp);
+			Swap(tmp);
 			return *this;
 		}
 
 		PyObjectHolder& operator = (PyObjectHolder&& other)
 		{
 			PyObjectHolder tmp(std::move(other));
-			swap(tmp);
+			Swap(tmp);
 			return *this;
 		}
 
-		void swap(PyObjectHolder& other)
+		void Swap(PyObjectHolder& other)
 		{ std::swap(_obj, other._obj); }
 
-		void reset(PyObject* obj = nullptr)
+		void Reset(PyObject* obj = nullptr)
 		{
 			if (_obj)
 				Py_DECREF(_obj);
@@ -48,8 +48,15 @@ namespace joint_python
 			_obj = obj;
 		}
 
+		PyObject* Release()
+		{
+			PyObject* result = _obj;
+			_obj = nullptr;
+			return result;
+		}
+
 		operator PyObject*() const { return _obj; }
-		PyObject* get() const { return _obj; }
+		PyObject* Get() const { return _obj; }
 	};
 
 }

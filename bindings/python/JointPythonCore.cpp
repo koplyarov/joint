@@ -6,6 +6,7 @@
 #include <binding/Binding.hpp>
 #include <pyjoint/Globals.h>
 #include <pyjoint/Module.h>
+#include <utils/PyObjectHolder.hpp>
 
 
 static Joint_BindingHandle g_bindingHandle = JOINT_NULL_HANDLE;
@@ -70,12 +71,13 @@ static struct PyModuleDef g_module = {
 
 PyMODINIT_FUNC JointPythonCore_InitModule_py3(void)
 {
+	using namespace joint_python;
 	using namespace joint_python::pyjoint;
 
 	JointPythonCore_RegisterBinding();
 
-	PyObject *m = PyModule_Create(&g_module);
-	if (m == NULL)
+	PyObjectHolder m(PyModule_Create(&g_module));
+	if (!m)
 		return NULL;
 
 	Module_type.tp_new = PyType_GenericNew;
@@ -83,17 +85,17 @@ PyMODINIT_FUNC JointPythonCore_InitModule_py3(void)
 		return NULL;
 
 	Py_INCREF(&Module_type);
-	PyModule_AddObject(m, "Module", (PyObject *)&Module_type);
+	PyModule_AddObject(m, "Module", reinterpret_cast<PyObject*>(&Module_type));
 
 	Object_type.tp_new = PyType_GenericNew;
 	if (PyType_Ready(&Object_type) < 0)
 		return NULL;
 
 	Py_INCREF(&Object_type);
-	PyModule_AddObject(m, "Object", (PyObject *)&Object_type);
+	PyModule_AddObject(m, "Object", reinterpret_cast<PyObject*>(&Object_type));
 
 	g_error = PyErr_NewException("pyjoint.error", NULL, NULL);
 	Py_INCREF(g_error);
 	PyModule_AddObject(m, "error", g_error);
-	return m;
+	return m.Release();
 }
