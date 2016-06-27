@@ -5,7 +5,13 @@
 #include <pyjoint/Common.h>
 
 
-PyObject* Cast(PyObject* self, PyObject* args, PyObject* kwds);
+namespace joint_python {
+namespace pyjoint
+{
+
+	PyObject* Cast(PyObject* self, PyObject* args, PyObject* kwds);
+
+}}
 
 
 #endif

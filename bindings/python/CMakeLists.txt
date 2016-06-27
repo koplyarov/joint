@@ -7,9 +7,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(JOINT_PYTHON_CORE_SRC
 	JointPythonCore.cpp
-	binding/PythonBinding.cpp
-	binding/PythonModule.cpp
-	binding/PythonObject.cpp
+	binding/Binding.cpp
+	binding/Module.cpp
+	binding/Object.cpp
 	pyjoint/Common.cpp
 	pyjoint/Globals.cpp
 	pyjoint/Module.cpp

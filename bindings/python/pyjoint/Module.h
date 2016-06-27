@@ -5,13 +5,19 @@
 #include <pyjoint/Object.h>
 
 
-typedef struct {
-	PyObject_HEAD
-	Joint_ModuleHandle		handle;
-} pyjoint_Module;
+namespace joint_python {
+namespace pyjoint
+{
+
+	typedef struct {
+		PyObject_HEAD
+		Joint_ModuleHandle		handle;
+	} Module;
 
 
-extern PyTypeObject pyjoint_Module_type;
+	extern PyTypeObject Module_type;
+
+}}
 
 
 #endif

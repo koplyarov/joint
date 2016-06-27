@@ -7,13 +7,18 @@
 #include <pyjoint/Common.h>
 
 
-typedef struct {
-	PyObject_HEAD
-	Joint_ObjectHandle		handle;
-} pyjoint_Object;
+namespace joint_python {
+namespace pyjoint
+{
+
+	typedef struct {
+		PyObject_HEAD
+		Joint_ObjectHandle		handle;
+	} Object;
 
 
-extern PyTypeObject pyjoint_Object_type;
+	extern PyTypeObject Object_type;
 
+}}
 
 #endif

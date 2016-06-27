@@ -5,25 +5,29 @@
 #include <Python.h>
 
 
-class PythonContext
+namespace joint_python
 {
-private:
-	bool	_needFinalize;
 
-public:
-	PythonContext()
-		: _needFinalize(Py_IsInitialized())
-	{ Py_Initialize(); }
-
-	~PythonContext()
+	class PythonContext
 	{
-		if (_needFinalize)
-			Py_Finalize();
-	}
+	private:
+		bool	_needFinalize;
 
-	PythonContext(const PythonContext&) = delete;
-	PythonContext& operator = (const PythonContext&) = delete;
-};
+	public:
+		PythonContext()
+			: _needFinalize(Py_IsInitialized())
+		{ Py_Initialize(); }
 
+		~PythonContext()
+		{
+			if (_needFinalize)
+				Py_Finalize();
+		}
+
+		PythonContext(const PythonContext&) = delete;
+		PythonContext& operator = (const PythonContext&) = delete;
+	};
+
+}
 
 #endif
