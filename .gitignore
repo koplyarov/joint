@@ -3,5 +3,6 @@
 *.swp
 /.buildSettings
 /build
+/test/python/TestObjects.py
 tags
 types_*.taghl

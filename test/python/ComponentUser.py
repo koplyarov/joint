@@ -5,10 +5,10 @@ import timeit
 import sys
 sys.path.append('build/bin')
 
-from Bridges import *
+from TestObjects import *
 import pyjoint
 
-m = pyjoint.Module('python', 'test_module')
+m = pyjoint.Module('python', 'Component')
 obj = joint_IObject_proxy(m.GetRootObject('GetComponent'))
 
 p = pyjoint.Cast(obj, test_IPoint)

@@ -33,8 +33,8 @@ add_subdirectory(bindings/python)
 
 include(joint.cmake)
 joint_import_directories(core/idl)
-joint_generate_adapters(python ${CMAKE_CURRENT_SOURCE_DIR}/Bridges.py TestObjects.idl)
-add_custom_target(test-adapters ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Bridges.py)
+joint_generate_adapters(python ${CMAKE_CURRENT_SOURCE_DIR}/test/python/TestObjects.py test/python/TestObjects.idl)
+add_custom_target(test-adapters ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/test/python/TestObjects.py)
 
 ################################################################################
 

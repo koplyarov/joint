@@ -1,5 +1,5 @@
 import pyjoint
-from Bridges import *
+from TestObjects import *
 
 def joint_MakeComponent(componentType, x, y):
     return joint_IObject_accessor(componentType(x, y))
