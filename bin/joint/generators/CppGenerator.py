@@ -2,9 +2,13 @@ class CppGenerator:
     def __init__(self):
         self.__typesMapping = { 'void': 'void', 'u32': 'uint32_t', 'string': 'std::string' }
 
+    def generatePreamble(self):
+        yield '#pragma once'
+        yield '#include <stdint.h>'
+
     def generate(self, ast):
         namespaces_count = 0
-        for n in ast['packageName']:
+        for n in ast['package']:
             namespaces_count += 1
             yield 'namespace {} {{'.format(n)
 
@@ -23,6 +27,7 @@ class CppGenerator:
             yield ''
 
         yield '}' * namespaces_count
+        yield ''
 
     def __mapType(self, type, genericParams):
         if type in genericParams:

@@ -2,6 +2,9 @@ from pyparsing import *
 
 class IdlParser:
     def __init__(self):
+        import_entry = Suppress('import') + SkipTo(LineEnd())
+        imports = ZeroOrMore(import_entry)('imports')
+
         type = Word(alphas, alphanums + '_')
         identifier = Word(alphas, alphanums + '_')
 
@@ -21,7 +24,7 @@ class IdlParser:
 
         package = Suppress('package') + package('package') + Suppress('{') + Group(ZeroOrMore(Group(interface)))('interfaces') + Suppress('}')
 
-        self.grammar = package
+        self.grammar = imports + package
         self.grammar.ignore(cppStyleComment)
 
     def parseFile(self, file):
