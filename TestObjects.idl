@@ -1,13 +1,13 @@
 package test
 {
-	interface IPoint : joint.IObject
+	interface IPoint
 	{
-    	i32 GetX();
-        i32 GetY();
+		i32 GetX();
+		i32 GetY();
 	}
 
-    interface IStringRepresentable
-    {
-    	string ToString();
-    }
+	interface IStringRepresentable
+	{
+		string ToString();
+	}
 }

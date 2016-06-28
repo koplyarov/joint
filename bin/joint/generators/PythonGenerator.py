@@ -20,26 +20,37 @@ class PythonGenerator:
     def generatePreamble(self):
         yield 'from functools import partial'
 
+    def __mangleType(self, package, type):
+        return '{}_{}'.format('_'.join(package), type)
+
     def generate(self, ast):
         namespaces_count = 0
-        package_prefix = "_".join(ast['packageName'])
         for ifc in ast['interfaces']:
-            yield 'class {}_{}_accessor:'.format(package_prefix, ifc['name']);
-            yield '\tdef __init(self, obj):'
+            name = ifc['name']
+            mangled_name = self.__mangleType(ast['package'], name)
+            methods = ifc['methods']
+
+            if mangled_name == 'joint_IObject':
+                bases = [ 'object' ]
+            else:
+                bases = [ self.__mangleType(b['package'], b['type']) for b in ifc['bases'] ] if 'bases' in ifc else [ 'joint_IObject' ]
+
+            yield 'class {}_accessor:'.format(mangled_name);
+            yield '\tdef __init__(self, obj):'
             yield '\t\tself.obj = obj'
-            yield '\t\tself.methods = {}'.format(self.__tuple([ 'obj.{}'.format(m['name']) for m in ifc['methods'] ]))
+            yield '\t\tself.methods = {}'.format(self.__tuple([ 'obj.{}'.format(m['name']) for m in methods ]))
             yield ''
 
-            yield 'class {}_{}_proxy:'.format(package_prefix, ifc['name']);
-            yield '\tdef __init(self, obj):'
+            yield 'class {}_proxy:'.format(mangled_name);
+            yield '\tdef __init__(self, obj):'
             yield '\t\tself.obj = obj'
             yield '\t\tself.InvokeMethod = self.obj.InvokeMethod'
-            for m_idx in xrange(0, len(ifc['methods'])):
-                m = ifc['methods'][m_idx]
+            for m_idx in xrange(0, len(methods)):
+                m = methods[m_idx]
                 if not m['params']:
                     yield '\t\tself.{} = partial(self.InvokeMethod, {}, {})'.format(m['name'], m_idx, self.__common.GetBuiltInTypeIndex(m['retType']))
-            for m_idx in xrange(0, len(ifc['methods'])):
-                m = ifc['methods'][m_idx]
+            for m_idx in xrange(0, len(methods)):
+                m = methods[m_idx]
                 params = m['params']
                 if params:
                     yield '\tdef {}(self, {}):'.format(m['name'], ', '.join([ p['name'] for p in params]))
@@ -51,10 +62,10 @@ class PythonGenerator:
                             )
             yield ''
 
-            yield 'class {}_{}({}):'.format(package_prefix, ifc['name'], 'object' if not 'bases' in ifc else 'TODO_IMPLEMENT')
-            yield '\tinterfaceId = \'{}.{}\''.format('.'.join(ast['packageName']), ifc['name'])
-            yield '\taccessor = {}_{}_accessor'.format(package_prefix, ifc['name'])
-            yield '\tproxy = {}_{}_proxy'.format(package_prefix, ifc['name'])
+            yield 'class {}({}):'.format(mangled_name, ', '.join(bases))
+            yield '\tinterfaceId = \'{}.{}\''.format('.'.join(ast['package']), name)
+            yield '\taccessor = {}_accessor'.format(mangled_name)
+            yield '\tproxy = {}_proxy'.format(mangled_name)
             yield ''
             yield ''
 

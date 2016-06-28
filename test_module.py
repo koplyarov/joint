@@ -2,9 +2,9 @@ import pyjoint
 from Bridges import *
 
 def joint_MakeComponent(componentType, x, y):
-    return IObject_accessor(componentType(x, y))
+    return joint_IObject_accessor(componentType(x, y))
 
-class Component(IPoint, IStringRepresentable):
+class Component(test_IPoint, test_IStringRepresentable):
     def __init__(self, x, y):
         super(Component, self).__init__()
         self.x = x
