@@ -48,15 +48,18 @@ try:
 
     gen = generators[args.languageId]()
 
+    out_file = open(args.output, 'w')
     for l in gen.generatePreamble():
-        print(l)
-    print('')
-    print('')
+        out_file.write(l)
+        out_file.write('\n')
+    out_file.write('\n')
+    out_file.write('\n')
 
     for f in idl_files:
         ast = idl_parser.parseFile(f)
         for l in gen.generate(ast):
-            print(l)
+            out_file.write(l)
+            out_file.write('\n')
 
 except CmdLineException as e:
     print(e.message)

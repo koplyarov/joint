@@ -31,5 +31,12 @@ add_subdirectory(bindings/python)
 
 ################################################################################
 
+include(joint.cmake)
+joint_import_directories(core/idl)
+joint_generate_adapters(python ${CMAKE_CURRENT_SOURCE_DIR}/Bridges.py TestObjects.idl)
+add_custom_target(test-adapters ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Bridges.py)
+
+################################################################################
+
 add_executable(joint-test ${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp)
 target_link_libraries(joint-test joint-python)
