@@ -38,5 +38,9 @@ add_custom_target(test-adapters ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/test/pyt
 
 ################################################################################
 
+
+joint_generate_adapters(c++ TestObjects.hpp test/python/TestObjects.idl)
+add_custom_target(test-adapters2 ALL DEPENDS TestObjects.hpp)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_executable(joint-test ${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp)
 target_link_libraries(joint-test joint-python)

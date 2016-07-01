@@ -31,7 +31,7 @@ namespace joint
 	void JointCore::UnregisterBinding(Joint_BindingHandle binding)
 	{
 		auto binding_it = std::find_if(_bindings.begin(), _bindings.end(), [&](const BindingPtr& b) { return b.get() == binding; });
-		JOINT_CHECK(binding_it != _bindings.end(), JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(binding_it != _bindings.end(), JOINT_ERROR_NO_SUCH_BINDING);
 
 		Joint_Error ret = (*binding_it)->desc.deinitBinding((*binding_it)->userData);
 		_bindings.erase(binding_it);
@@ -42,11 +42,11 @@ namespace joint
 	Joint_ModuleHandle JointCore::LoadModule(const char* bindingName, const char* moduleName)
 	{
 		auto binding_it = std::find_if(_bindings.begin(), _bindings.end(), [&](const BindingPtr& b) { return strcmp(b->desc.name, bindingName) == 0; });
-		JOINT_CHECK(binding_it != _bindings.end(), JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(binding_it != _bindings.end(), JOINT_ERROR_NO_SUCH_BINDING);
 
 		Joint_ModuleHandleInternal internal = JOINT_NULL_HANDLE;
 		Joint_Error ret = (*binding_it)->desc.loadModule((*binding_it)->userData, moduleName, &internal);
-		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+		JOINT_CHECK(ret == JOINT_ERROR_NONE, JOINT_ERROR_NO_SUCH_MODULE);
 		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
 
 		return new Joint_Module{ internal, binding_it->get() };

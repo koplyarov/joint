@@ -1,12 +1,12 @@
 package test
 {
-	interface IPoint
+	interface IPoint : joint.IObject
 	{
 		i32 GetX();
 		i32 GetY();
 	}
 
-	interface IStringRepresentable
+	interface IStringRepresentable : joint.IObject
 	{
 		string ToString();
 	}
