@@ -235,7 +235,10 @@ extern "C"
 		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 		auto refs = --handle->refCount;
 		if (refs == 0)
+		{
 			handle->module->binding->desc.releaseObject(handle->module->binding->userData, handle->module->internal, handle->internal);
+			delete handle;
+		}
 		JOINT_CHECK(refs >= 0, JOINT_ERROR_INVALID_PARAMETER);
 
 		JOINT_CPP_WRAP_END
