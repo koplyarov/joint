@@ -20,31 +20,12 @@ parser.add_argument('input', nargs='+', help='IDL files to process')
 
 args = parser.parse_args()
 
-def GetDependencies(idlFile, importDirectories):
-    idl_file_path = FindIdlFile(idlFile, importDirectories)
-    yield idl_file_path
-    ast = idl_parser.parseFile(idl_file_path)
-    if 'imports' in ast:
-        for idl in ast['imports']:
-            yield FindIdlFile(idl, importDirectories)
-
-def FindIdlFile(filename, importDirectories):
-    for import_dir in [ '' ] + [ '{}/'.format(d) for d in importDirectories ]:
-        idl_file = '{}{}'.format(import_dir, filename)
-        if os.path.isfile(idl_file):
-            return idl_file
-    raise CmdLineException('Cannot find idl file: {}'.format(filename))
-
 try:
     if not args.languageId in generators:
         raise CmdLineException('Unknown language id: {}'.format(args.languageId))
 
-    predefined_imports = [ 'joint/IObject.idl' ]
-
-    idl_files = []
-    for idl in [ idl for f in predefined_imports + args.input for idl in GetDependencies(f, args.importDir) ]:
-        if not idl in idl_files:
-            idl_files.append(idl)
+    idl_reader = joint.IdlReader(args.importDir)
+    idl_files = idl_reader.getFiles(args.input)
 
     gen = generators[args.languageId]()
 
