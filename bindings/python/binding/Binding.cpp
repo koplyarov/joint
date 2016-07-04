@@ -122,7 +122,12 @@ namespace binding
 			if (!PyObject_HasAttrString(base, "interfaceId"))
 				continue;
 
+#if PY_VERSION_HEX >= 0x03000000
 			PyObjectHolder py_base_interface_id(PyObject_GetAttrString(base, "interfaceId"));
+#else
+			PyObjectHolder py_base_interface_id_attr(PyObject_GetAttrString(base, "interfaceId"));
+			PyObjectHolder py_base_interface_id(PyObject_Unicode(py_base_interface_id_attr));
+#endif
 			JOINT_CHECK(py_base_interface_id, "No interfaceId attribute");
 
 			auto base_interface_id = Utf8FromPyUnicode(py_base_interface_id);
@@ -147,7 +152,7 @@ namespace binding
 		PyObjectHolder py_accessor = reinterpret_cast<Object*>(obj)->GetObject();
 		PyObjectHolder py_obj(PyObject_GetAttrString(py_accessor, "obj"));
 		JOINT_CHECK(py_obj, "No obj attribute!");
-		PyObjectHolder py_obj_type(PyObject_GetAttrString(py_obj, "__class__"));
+		PyObjectHolder py_obj_type(PyObject_Type(py_obj));
 		PyObjectHolder base_type = FindBaseById(py_obj_type, interfaceId);
 		JOINT_CHECK(base_type, std::string("Could not cast object to ") + interfaceId);
 

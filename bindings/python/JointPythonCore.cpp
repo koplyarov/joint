@@ -60,42 +60,97 @@ static PyMethodDef g_methods[] = {
 	{NULL, NULL, 0, NULL}
 };
 
+#if PY_VERSION_HEX >= 0x03000000
 static struct PyModuleDef g_module = {
-   PyModuleDef_HEAD_INIT,
+# if PY_VERSION_HEX >= 0x03020000
+	PyModuleDef_HEAD_INIT,
+# else
+	{
+		PyObject_HEAD_INIT(NULL)
+		NULL, /* m_init */
+		0,    /* m_index */
+		NULL, /* m_copy */
+	},
+# endif
    "pyjoint",
    NULL,
    -1,
    g_methods
 };
+#endif
 
 
+#if PY_VERSION_HEX >= 0x03000000
+#	define STR_LITERAL_TYPE const char*
+#	define RETURN_ERROR return NULL
 PyMODINIT_FUNC JointPythonCore_InitModule_py3(void)
+#else
+#	define STR_LITERAL_TYPE char*
+#	define RETURN_ERROR return
+PyMODINIT_FUNC JointPythonCore_InitModule_py2(void)
+#endif
 {
 	using namespace joint_python;
 	using namespace joint_python::pyjoint;
 
 	JointPythonCore_RegisterBinding();
 
+#if PY_VERSION_HEX >= 0x03000000
 	PyObjectHolder m(PyModule_Create(&g_module));
+#else
+	PyObjectHolder m(Py_InitModule((STR_LITERAL_TYPE) "pyjoint", g_methods));
+#endif
 	if (!m)
-		return NULL;
+	{
+		PyErr_SetString(PyExc_RuntimeError, "Import error: Could not initialize module object!");
+		RETURN_ERROR;
+	}
 
 	Module_type.tp_new = PyType_GenericNew;
 	if (PyType_Ready(&Module_type) < 0)
-		return NULL;
+	{
+		PyErr_SetString(PyExc_RuntimeError, "Import error: Could not initialize pyjoint.Module type!");
+		RETURN_ERROR;
+	}
 
 	Py_INCREF(&Module_type);
-	PyModule_AddObject(m, "Module", reinterpret_cast<PyObject*>(&Module_type));
+	if (PyModule_AddObject(m, "Module", reinterpret_cast<PyObject*>(&Module_type)) != 0)
+	{
+		PyErr_SetString(PyExc_RuntimeError, "Import error: Could not add pyjoint.Module type to the module!");
+		RETURN_ERROR;
+	}
 
 	Object_type.tp_new = PyType_GenericNew;
 	if (PyType_Ready(&Object_type) < 0)
-		return NULL;
+	{
+		PyErr_SetString(PyExc_RuntimeError, "Import error: Could not initialize pyjoint.Object type!");
+		RETURN_ERROR;
+	}
 
 	Py_INCREF(&Object_type);
-	PyModule_AddObject(m, "Object", reinterpret_cast<PyObject*>(&Object_type));
+	if (PyModule_AddObject(m, "Object", reinterpret_cast<PyObject*>(&Object_type)) != 0)
+	{
+		PyErr_SetString(PyExc_RuntimeError, "Import error: Could not add pyjoint.Object type to the module!");
+		RETURN_ERROR;
+	}
 
-	g_error = PyErr_NewException("pyjoint.error", NULL, NULL);
+	g_error = PyErr_NewException((STR_LITERAL_TYPE)"pyjoint.error", NULL, NULL);
+	if (!g_error)
+	{
+		PyErr_SetString(PyExc_RuntimeError, "Import error: Could not initialize pyjoint.error exception type!");
+		RETURN_ERROR;
+	}
+
 	Py_INCREF(g_error);
-	PyModule_AddObject(m, "error", g_error);
+	if (PyModule_AddObject(m, "error", g_error) != 0)
+	{
+		PyErr_SetString(PyExc_RuntimeError, "Import error: Could not add pyjoint.error type to the module!");
+		RETURN_ERROR;
+	}
+
+#if PY_VERSION_HEX >= 0x03000000
 	return m.Release();
+#else
+	m.Release();
+#endif
 }

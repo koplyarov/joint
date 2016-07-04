@@ -18,8 +18,13 @@ namespace binding
 	Module::Module(const std::string& moduleName)
 		: _moduleName(moduleName)
 	{
+#if PY_VERSION_HEX >= 0x03000000
 		wchar_t* argv[1];
 		PySys_SetArgv(0, argv);
+#else
+		char* argv[1];
+		PySys_SetArgv(0, argv);
+#endif
 
 		PyObjectHolder py_module_name(PyUnicode_FromString(moduleName.c_str()));
 		_pyModule.Reset(PyImport_Import(py_module_name));

@@ -13,6 +13,7 @@ extern "C"
 	Joint_Error JointPythonCore_UnregisterBinding();
 }
 
-PyMODINIT_FUNC JointPythonCore_InitModule_py3(void); // TODO: try to support both python 2 and 3
+PyMODINIT_FUNC JointPythonCore_InitModule_py3(void);
+PyMODINIT_FUNC JointPythonCore_InitModule_py2(void);
 
 #endif

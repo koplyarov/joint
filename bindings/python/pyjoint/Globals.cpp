@@ -21,7 +21,12 @@ namespace pyjoint
 		auto obj = CastPyObject<Object>(py_obj, &Object_type);
 
 		PyObject* py_interface = PyTuple_GetItem(args, 1);
+#if PY_VERSION_HEX >= 0x03000000
 		PyObjectHolder py_interface_id(PyObject_GetAttrString(py_interface, "interfaceId"));
+#else
+		PyObjectHolder py_interface_id_attr(PyObject_GetAttrString(py_interface, "interfaceId"));
+		PyObjectHolder py_interface_id(PyObject_Unicode(py_interface_id_attr));
+#endif
 		PYTHON_CHECK(py_interface_id, "No 'interfaceId' attribute");
 		auto interface_id = Utf8FromPyUnicode(py_interface_id);
 

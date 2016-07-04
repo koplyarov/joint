@@ -16,20 +16,52 @@ namespace joint_python
 
 		if (type)
 		{
+#if PY_VERSION_HEX >= 0x03000000
 			PyObjectHolder type_str(PyObject_Str(type));
+#else
+			PyObjectHolder type_str(PyObject_Unicode(type));
+#endif
 			if (type_str)
-				result << Utf8FromPyUnicode(type_str.Get()).GetContent();
+			{
+				PyObjectHolder py_bytes(PyUnicode_AsUTF8String(type_str));
+				if (py_bytes)
+				{
+					const char* content = PyBytes_AsString(py_bytes);
+					if (content)
+						result << content;
+					else
+						result << "<Could not obtain exception type: content == NULL>";
+				}
+				else
+					result << "<Could not obtain exception type: py_bytes == NULL>";
+			}
 		}
 
 		if (value)
 		{
+#if PY_VERSION_HEX >= 0x03000000
 			PyObjectHolder value_str(PyObject_Str(value));
+#else
+			PyObjectHolder value_str(PyObject_Unicode(value));
+#endif
 			if (value_str)
-				result << (type ? "\n" : "") << Utf8FromPyUnicode(value_str.Get()).GetContent();
+			{
+				PyObjectHolder py_bytes(PyUnicode_AsUTF8String(value_str));
+				if (py_bytes)
+				{
+					const char* content = PyBytes_AsString(py_bytes);
+					if (content)
+						result << (type ? "\n" : "") << content;
+					else
+						result << "<Could not obtain exception message: content == NULL>";
+				}
+				else
+					result << "<Could not obtain exception message: py_bytes == NULL>";
+			}
 		}
 
 		if (!type && !value)
-			result << "<could not obtain python error info>";
+			result << "<Could not obtain python error info: type == NULL && value == NULL>";
 
 		return result.str();
 	}

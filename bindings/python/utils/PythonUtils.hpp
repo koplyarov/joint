@@ -56,7 +56,12 @@ namespace joint_python
 
 	inline PyBytesHolder Utf8FromPyUnicode(PyObject* pyStr)
 	{
+#if PY_VERSION_HEX >= 0x03000000
 		PyObjectHolder py_bytes(PyUnicode_AsUTF8String(pyStr));
+#else
+		PyObjectHolder py_unicode(PyObject_Unicode(pyStr));
+		PyObjectHolder py_bytes(PyUnicode_AsUTF8String(py_unicode));
+#endif
 		PYTHON_CHECK(py_bytes, "PyUnicode_AsUTF8String failed!");
 		return py_bytes;
 	}
