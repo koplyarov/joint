@@ -5,6 +5,11 @@ find_package(PythonLibs REQUIRED)
 include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+if (MSVC)
+	add_definitions(-DMS_NO_COREDLL)
+	add_definitions(-DPy_ENABLE_SHARED)
+endif()
+
 set(JOINT_PYTHON_CORE_SRC
 	JointPythonCore.cpp
 	binding/Binding.cpp
@@ -38,6 +43,6 @@ set(PY_JOINT_SRC
 add_library(pyjoint SHARED ${PY_JOINT_SRC})
 set_target_properties(pyjoint PROPERTIES PREFIX "")
 if (WIN32)
-	set_target_properties(pyjoint PROPERTIES SUFFIX "pyd")
+	set_target_properties(pyjoint PROPERTIES SUFFIX ".pyd")
 endif()
 target_link_libraries(pyjoint joint-python-core)

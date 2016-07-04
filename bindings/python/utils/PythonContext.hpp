@@ -2,7 +2,7 @@
 #define BINDINGS_PYTHON_PYTHONCONTEXT_HPP
 
 
-#include <Python.h>
+#include <utils/PythonHeaders.h>
 
 
 namespace joint_python

@@ -5,6 +5,16 @@
 #include <stdint.h>
 
 
+#ifdef _MSC_VER
+#	ifdef joint_core_EXPORTS
+#		define JOINT_CORE_API __declspec(dllexport)
+#	else
+#		define JOINT_CORE_API __declspec(dllimport)
+#	endif
+#else
+#	define JOINT_CORE_API
+#endif
+
 extern "C"
 {
 #define JOINT_NULL_HANDLE nullptr
@@ -40,7 +50,7 @@ extern "C"
 		JOINT_ERROR_UNEXPECTED_TYPE = 8
 	};
 
-	const char* Joint_ErrorToString(Joint_Error err);
+	JOINT_CORE_API const char* Joint_ErrorToString(Joint_Error err);
 
 
 	enum Joint_LogLevel
@@ -52,10 +62,10 @@ extern "C"
 	};
 
 	typedef void Joint_LogCallback_Func(const char* message);
-	Joint_Error Joint_SetLogCallback(Joint_LogCallback_Func* logCallback);
-	Joint_Error Joint_SetLogLevel(Joint_LogLevel logLevel);
+	JOINT_CORE_API Joint_Error Joint_SetLogCallback(Joint_LogCallback_Func* logCallback);
+	JOINT_CORE_API Joint_Error Joint_SetLogLevel(Joint_LogLevel logLevel);
 
-	void Joint_Log(Joint_LogLevel logLevel, const char* subsystem, const char* format, ...);
+	JOINT_CORE_API void Joint_Log(Joint_LogLevel logLevel, const char* subsystem, const char* format, ...);
 
 
 	enum Joint_Type
@@ -173,19 +183,19 @@ extern "C"
 	};
 
 
-	Joint_Error Joint_RegisterBinding(Joint_BindingDesc desc, void* userData, Joint_BindingHandle* outBinding);
-	Joint_Error Joint_UnregisterBinding(Joint_BindingHandle handle);
+	JOINT_CORE_API Joint_Error Joint_RegisterBinding(Joint_BindingDesc desc, void* userData, Joint_BindingHandle* outBinding);
+	JOINT_CORE_API Joint_Error Joint_UnregisterBinding(Joint_BindingHandle handle);
 
-	Joint_Error Joint_LoadModule(const char* bindingName, const char* moduleName, Joint_ModuleHandle* outModule);
-	Joint_Error Joint_UnloadModule(Joint_ModuleHandle handle);
+	JOINT_CORE_API Joint_Error Joint_LoadModule(const char* bindingName, const char* moduleName, Joint_ModuleHandle* outModule);
+	JOINT_CORE_API Joint_Error Joint_UnloadModule(Joint_ModuleHandle handle);
 
-	Joint_Error Joint_GetRootObject(Joint_ModuleHandle module, const char* getterName, Joint_ObjectHandle* outObject);
-	Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
-	Joint_Error Joint_ObtainRetValue(Joint_RetValue value, Joint_Variant* outValue);
-	Joint_Error Joint_ReleaseRetValue(Joint_RetValue value);
-	Joint_Error Joint_IncRefObject(Joint_ObjectHandle handle);
-	Joint_Error Joint_DecRefObject(Joint_ObjectHandle handle);
-	Joint_Error Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_ObjectHandle* outHandle);
+	JOINT_CORE_API Joint_Error Joint_GetRootObject(Joint_ModuleHandle module, const char* getterName, Joint_ObjectHandle* outObject);
+	JOINT_CORE_API Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
+	JOINT_CORE_API Joint_Error Joint_ObtainRetValue(Joint_RetValue value, Joint_Variant* outValue);
+	JOINT_CORE_API Joint_Error Joint_ReleaseRetValue(Joint_RetValue value);
+	JOINT_CORE_API Joint_Error Joint_IncRefObject(Joint_ObjectHandle handle);
+	JOINT_CORE_API Joint_Error Joint_DecRefObject(Joint_ObjectHandle handle);
+	JOINT_CORE_API Joint_Error Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_ObjectHandle* outHandle);
 }
 
 #endif

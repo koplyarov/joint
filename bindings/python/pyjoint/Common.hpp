@@ -8,7 +8,7 @@
 #include <type_traits>
 #include <utility>
 
-#include <Python.h>
+#include <utils/PythonHeaders.h>
 #include <utils/ScopeExit.hpp>
 
 

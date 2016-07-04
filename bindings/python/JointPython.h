@@ -5,11 +5,22 @@
 #include <joint/Joint.h>
 
 
+#ifdef _MSC_VER
+#	ifdef joint_python_EXPORTS
+#		define JOINT_PYTHON_API __declspec(dllexport)
+#	else
+#		define JOINT_PYTHON_API __declspec(dllimport)
+#	endif
+#else
+#	define JOINT_PYTHON_API
+#endif
+
+
 extern "C"
 {
 
-	Joint_Error JointPython_Register();
-	Joint_Error JointPython_Unregister();
+	JOINT_PYTHON_API Joint_Error JointPython_Register();
+	JOINT_PYTHON_API Joint_Error JointPython_Unregister();
 
 }
 

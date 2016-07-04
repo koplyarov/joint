@@ -183,7 +183,7 @@ extern "C"
 
 		JOINT_CHECK(ret_value_internal.releaseValue, JOINT_ERROR_IMPLEMENTATION_ERROR);
 
-		static_assert(sizeof(outRetValue->variant) == sizeof(outRetValue->internal.variant) && alignof(outRetValue->variant) == alignof(outRetValue->internal.variant), "Sizes or alignments do not match for Joint_Variant and Joint_VariantInternal");
+		static_assert(sizeof(Joint_Variant) == sizeof(Joint_VariantInternal) && alignof(Joint_Variant) == alignof(Joint_VariantInternal), "Sizes or alignments do not match for Joint_Variant and Joint_VariantInternal");
 		memcpy(&outRetValue->internal, &ret_value_internal, sizeof(outRetValue->internal));
 		memcpy(&outRetValue->variant, &outRetValue->internal.variant, sizeof(outRetValue->variant));
 		if (outRetValue->internal.variant.type == JOINT_TYPE_OBJ)

@@ -4,6 +4,7 @@ import timeit
 
 import sys
 sys.path.append('build/bin')
+sys.path.append('build/bin/Debug')
 
 from TestObjects import *
 import pyjoint

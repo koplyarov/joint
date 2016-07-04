@@ -4,8 +4,8 @@
 
 #include <string>
 
-#include <Python.h>
 #include <utils/PyObjectHolder.hpp>
+#include <utils/PythonHeaders.h>
 #include <utils/PythonUtils.hpp>
 
 

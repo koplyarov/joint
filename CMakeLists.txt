@@ -17,16 +17,7 @@ endif()
 
 ################################################################################
 
-set(JOINT_CORE_SRC
-	core/joint/Joint.cpp
-	core/joint/core/JointCore.cpp
-)
-
-add_library(joint-core SHARED ${JOINT_CORE_SRC})
-target_link_libraries(joint-core ${CMAKE_THREAD_LIBS_INIT})
-
-################################################################################
-
+add_subdirectory(core)
 add_subdirectory(bindings/python)
 
 ################################################################################

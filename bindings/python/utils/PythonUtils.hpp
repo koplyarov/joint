@@ -6,8 +6,8 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <Python.h>
 #include <utils/PyObjectHolder.hpp>
+#include <utils/PythonHeaders.h>
 #include <utils/ScopeExit.hpp>
 
 
