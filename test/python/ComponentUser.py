@@ -18,3 +18,9 @@ print(p.GetY())
 
 sr = pyjoint.Cast(obj, test_IStringRepresentable)
 print(sr.ToString())
+
+del obj
+del p
+del sr
+
+del m
