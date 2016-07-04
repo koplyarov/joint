@@ -80,8 +80,15 @@ namespace binding
 		case JOINT_TYPE_UTF8:
 			{
 				auto str_data = Utf8FromPyUnicode(py_res);
-				std::unique_ptr<char[]> result_str(new char[strlen(str_data.GetContent())]);
+				std::unique_ptr<char[]> result_str(new char[strlen(str_data.GetContent()) + 1]);
+#ifdef _MSC_VER
+#	pragma warning(push)
+#	pragma warning(disable: 4996)
+#endif
 				strcpy(result_str.get(), str_data.GetContent());
+#ifdef _MSC_VER
+#	pragma warning(pop)
+#endif
 				outRetValue->variant.value.utf8 = result_str.release();
 			}
 			break;
