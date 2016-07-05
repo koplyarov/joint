@@ -39,21 +39,34 @@ class CppGenerator:
         yield '\t{ }'
         yield ''
         yield '\tstatic const char* _GetInterfaceId() {{ return "{}"; }}'.format(ifc.fullname)
-        yield ''
         for m in ifc.methods:
+            yield ''
             for l in self._generateMethod(m):
                 yield '\t{}'.format(l)
-            yield ''
         yield '};'
 
     def _generateMethod(self, m):
         yield '{} {}({})'.format(self._toCppType(m.retType), m.name, ', '.join('{} {}'.format(self._toCppType(p.type), p.name) for p in m.params))
         yield '{'
         yield '\tJoint_RetValue _joint_internal_ret_val;'
-        yield '\tJOINT_CALL( Joint_InvokeMethod(_obj, {}, nullptr, 0, (Joint_Type){}, &_joint_internal_ret_val) );'.format(m.index, m.retType.index)
+        if m.params:
+            yield '\tJoint_Variant params[{}];'.format(len(m.params))
+            for p in m.params:
+                yield '\tparams[{}].value.{} = {};'.format(p.index, p.type.variantName, self._toCppParamGetter(p))
+                yield '\tparams[{}].type = (Joint_Type){};'.format(p.index, p.type.index)
+        yield '\tJOINT_CALL( Joint_InvokeMethod(_obj, {}, {}, {}, (Joint_Type){}, &_joint_internal_ret_val) );'.format(m.index, 'params' if m.params else 'nullptr', len(m.params), m.retType.index)
         yield '\t::joint::RetValueGuard _joint_internal_rvg(_joint_internal_ret_val);'
         yield '\treturn _joint_internal_ret_val.variant.value.{};'.format(m.retType.variantName)
         yield '}'
+
+    def _toCppParamGetter(self, p):
+        if isinstance(p.type, BuiltinType):
+            if p.type.category == BuiltinTypeCategory.string:
+                return '{}.c_str()'.format(p.name)
+            else:
+                return p.name
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
 
     def _toCppType(self, type):
         if isinstance(type, BuiltinType):

@@ -3,7 +3,8 @@ from .IdlParser import IdlParser
 
 
 class Parameter:
-    def __init__(self, name, type):
+    def __init__(self, index, name, type):
+        self.index = index
         self.name = name
         self.type = type
 
@@ -129,8 +130,10 @@ class SemanticGraphBuilder:
                 for m_ast in ifc_ast['methods']:
                     m = Method(m_index, m_ast['name'], semanticsGraph.typeFromString(pkg, m_ast['retType']))
                     m_index += 1
+                    p_index = 0
                     for p_ast in m_ast['params']:
-                        p = Parameter(p_ast['name'], semanticsGraph.typeFromString(pkg, p_ast['type']))
+                        p = Parameter(p_index, p_ast['name'], semanticsGraph.typeFromString(pkg, p_ast['type']))
+                        p_index += 1
                         m.params.append(p)
                     ifc.methods.append(m)
 
