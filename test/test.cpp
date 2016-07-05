@@ -42,8 +42,10 @@ int main()
 
 		JOINT_CALL( JointPython_Register() );
 
-		Tests t(joint::Module("python", "Tests"));
-		t.RunBasicTests();
+		{
+			Tests t(joint::Module("python", "Tests"));
+			t.RunBasicTests();
+		}
 
 		JOINT_CALL( JointPython_Unregister() );
 	}
