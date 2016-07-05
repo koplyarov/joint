@@ -5,6 +5,8 @@
 #include <joint/Joint.h>
 
 #include <atomic>
+#include <string>
+#include <vector>
 
 
 extern "C"
@@ -33,6 +35,13 @@ extern "C"
 		Joint_Object(Joint_ObjectHandleInternal internal, Joint_Module* module)
 			: internal(internal), module(module), refCount(1)
 		{ }
+	};
+
+
+	struct Joint_Exception
+	{
+		std::string                 message;
+		std::vector<std::string>    backtrace;
 	};
 
 }

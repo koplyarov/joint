@@ -263,4 +263,97 @@ extern "C"
 		JOINT_CPP_WRAP_END
 	}
 
+
+	Joint_Error Joint_MakeException(const char* message, Joint_ExceptionHandle* outHandle)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(outHandle, JOINT_ERROR_INVALID_PARAMETER);
+
+		*outHandle = new Joint_Exception{message, {}};
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_ReleaseException(Joint_ExceptionHandle handle)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+
+		delete handle;
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_GetExceptionMessageSize(Joint_ExceptionHandle handle, Joint_SizeT* outSize)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outSize, JOINT_ERROR_INVALID_PARAMETER);
+
+		*outSize = handle->message.size() + 1;
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_GetExceptionMessage(Joint_ExceptionHandle handle, char* buf, Joint_SizeT bufSize)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(buf, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(bufSize >= handle->message.size() + 1, JOINT_ERROR_INVALID_PARAMETER);
+
+		strcpy(buf, handle->message.c_str());
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_GetExceptionBacktraceSize(Joint_ExceptionHandle handle, Joint_SizeT* outSize)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outSize, JOINT_ERROR_INVALID_PARAMETER);
+
+		*outSize = handle->backtrace.size();
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_GetExceptionBacktraceEntrySize(Joint_ExceptionHandle handle, Joint_SizeT index, Joint_SizeT* outSize)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outSize, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(index < handle->backtrace.size(), JOINT_ERROR_INVALID_PARAMETER);
+
+		*outSize = handle->backtrace[index].size() + 1;
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_GetExceptionBacktraceEntry(Joint_ExceptionHandle handle, Joint_SizeT index, char* buf, Joint_SizeT bufSize)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(index < handle->backtrace.size(), JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(buf, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(bufSize >= handle->backtrace[index].size() + 1, JOINT_ERROR_INVALID_PARAMETER);
+
+		strcpy(buf, handle->backtrace[index].c_str());
+
+		JOINT_CPP_WRAP_END
+	}
+
 }

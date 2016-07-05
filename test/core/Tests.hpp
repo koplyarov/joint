@@ -42,7 +42,7 @@
 			{ TEST_REPORT_ERROR(std::string("Expected this code not to throw: '" #__VA_ARGS__ "', got unknown exception")); } \
 		} while (false)
 
-#define TEST_DOES_NOT_THROW(...) \
+#define TEST_THROWS_NOTHING(...) \
 		do { \
 			TEST_DOES_NOT_THROW_INTERNAL(__VA_ARGS__; TEST_REPORT_SUCCESS(#__VA_ARGS__)); \
 		} while (false)

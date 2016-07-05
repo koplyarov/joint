@@ -30,6 +30,9 @@ extern "C"
 	struct Joint_Object;
 	typedef Joint_Object* Joint_ObjectHandle;
 
+	struct Joint_Exception;
+	typedef Joint_Exception* Joint_ExceptionHandle;
+
 
 	typedef uint32_t Joint_SizeT;
 
@@ -70,25 +73,27 @@ extern "C"
 
 	enum Joint_Type
 	{
-		JOINT_TYPE_VOID    = 1,
+		JOINT_TYPE_VOID       = 1,
 
-		JOINT_TYPE_BOOL    = 2,
+		JOINT_TYPE_BOOL       = 2,
 
-		JOINT_TYPE_I8      = 3,
-		JOINT_TYPE_U8      = 4,
-		JOINT_TYPE_I16     = 5,
-		JOINT_TYPE_U16     = 6,
-		JOINT_TYPE_I32     = 7,
-		JOINT_TYPE_U32     = 8,
-		JOINT_TYPE_I64     = 9,
-		JOINT_TYPE_U64     = 10,
+		JOINT_TYPE_I8         = 3,
+		JOINT_TYPE_U8         = 4,
+		JOINT_TYPE_I16        = 5,
+		JOINT_TYPE_U16        = 6,
+		JOINT_TYPE_I32        = 7,
+		JOINT_TYPE_U32        = 8,
+		JOINT_TYPE_I64        = 9,
+		JOINT_TYPE_U64        = 10,
 
-		JOINT_TYPE_F32     = 11,
-		JOINT_TYPE_F64     = 12,
+		JOINT_TYPE_F32        = 11,
+		JOINT_TYPE_F64        = 12,
 
-		JOINT_TYPE_UTF8    = 13,
+		JOINT_TYPE_UTF8       = 13,
 
-		JOINT_TYPE_OBJ     = 14,
+		JOINT_TYPE_OBJ        = 14,
+
+		JOINT_TYPE_EXCEPTION  = 15
 	};
 
 
@@ -96,23 +101,24 @@ extern "C"
 	{
 		union
 		{
-			bool                 b;
+			bool                         b;
 
-			int8_t               i8;
-			uint8_t              u8;
-			int16_t              i16;
-			uint16_t             u16;
-			int32_t              i32;
-			uint32_t             u32;
-			int64_t              i64;
-			uint64_t             u64;
+			int8_t                       i8;
+			uint8_t                      u8;
+			int16_t                      i16;
+			uint16_t                     u16;
+			int32_t                      i32;
+			uint32_t                     u32;
+			int64_t                      i64;
+			uint64_t                     u64;
 
-			float                f32;
-			double               f64;
+			float                        f32;
+			double                       f64;
 
-			const char*          utf8;
+			const char*                  utf8;
 
 			Joint_ObjectHandleInternal   obj;
+			Joint_ExceptionHandle        ex;
 		} value;
 
 		Joint_Type type;
@@ -123,23 +129,24 @@ extern "C"
 	{
 		union
 		{
-			bool                 b;
+			bool                    b;
 
-			int8_t               i8;
-			uint8_t              u8;
-			int16_t              i16;
-			uint16_t             u16;
-			int32_t              i32;
-			uint32_t             u32;
-			int64_t              i64;
-			uint64_t             u64;
+			int8_t                  i8;
+			uint8_t                 u8;
+			int16_t                 i16;
+			uint16_t                u16;
+			int32_t                 i32;
+			uint32_t                u32;
+			int64_t                 i64;
+			uint64_t                u64;
 
-			float                f32;
-			double               f64;
+			float                   f32;
+			double                  f64;
 
-			const char*          utf8;
+			const char*             utf8;
 
-			Joint_ObjectHandle   obj;
+			Joint_ObjectHandle      obj;
+			Joint_ExceptionHandle   ex;
 		} value;
 
 		Joint_Type type;
@@ -196,6 +203,14 @@ extern "C"
 	JOINT_CORE_API Joint_Error Joint_IncRefObject(Joint_ObjectHandle handle);
 	JOINT_CORE_API Joint_Error Joint_DecRefObject(Joint_ObjectHandle handle);
 	JOINT_CORE_API Joint_Error Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_ObjectHandle* outHandle);
+
+	JOINT_CORE_API Joint_Error Joint_MakeException(const char* message, Joint_ExceptionHandle* outHandle);
+	JOINT_CORE_API Joint_Error Joint_ReleaseException(Joint_ExceptionHandle handle);
+	JOINT_CORE_API Joint_Error Joint_GetExceptionMessageSize(Joint_ExceptionHandle handle, Joint_SizeT* outSize);
+	JOINT_CORE_API Joint_Error Joint_GetExceptionMessage(Joint_ExceptionHandle handle, char* buf, Joint_SizeT bufSize);
+	JOINT_CORE_API Joint_Error Joint_GetExceptionBacktraceSize(Joint_ExceptionHandle handle, Joint_SizeT* outSize);
+	JOINT_CORE_API Joint_Error Joint_GetExceptionBacktraceEntrySize(Joint_ExceptionHandle handle, Joint_SizeT index, Joint_SizeT* outSize);
+	JOINT_CORE_API Joint_Error Joint_GetExceptionBacktraceEntry(Joint_ExceptionHandle handle, Joint_SizeT index, char* buf, Joint_SizeT bufSize);
 }
 
 #endif

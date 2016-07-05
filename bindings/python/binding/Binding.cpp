@@ -68,7 +68,22 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 		auto o = reinterpret_cast<Object*>(obj);
-		auto py_res = o->InvokeMethod(methodId, joint::ArrayView<const Joint_Variant>(params, paramsCount));
+		PyObjectHolder py_res;
+		try
+		{
+			py_res = o->InvokeMethod(methodId, joint::ArrayView<const Joint_Variant>(params, paramsCount));
+		}
+		catch (const std::exception& ex) // TODO: reimplement this
+		{
+			Joint_ExceptionHandle joint_ex;
+			Joint_Error ret = Joint_MakeException(ex.what(), &joint_ex);
+			JOINT_CHECK(ret == JOINT_ERROR_NONE, std::string("Joint_MakeException failed: ") + Joint_ErrorToString(ret));
+			outRetValue->releaseValue = &Binding::ReleaseRetValue;
+			outRetValue->variant.type = JOINT_TYPE_EXCEPTION;
+			outRetValue->variant.value.ex = joint_ex;
+
+			return JOINT_ERROR_NONE;
+		}
 
 		switch (retType)
 		{
@@ -197,6 +212,13 @@ namespace binding
 			delete[] value.value.utf8;
 			break;
 		case JOINT_TYPE_OBJ:
+			break;
+		case JOINT_TYPE_EXCEPTION:
+			{
+				Joint_Error ret = Joint_ReleaseException(value.value.ex);
+				if (ret != JOINT_ERROR_NONE)
+					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.Python", (std::string("Joint_ReleaseException failed: ") + Joint_ErrorToString(ret)).c_str());
+			}
 			break;
 		default:
 			JOINT_THROW(JOINT_ERROR_GENERIC);
