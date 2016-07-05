@@ -8,7 +8,7 @@ class CppGenerator:
         yield '#pragma once'
         yield ''
 
-        yield '#include <joint/JointCpp.hpp>'
+        yield '#include <joint.cpp/detail/GeneratedCodePrologue.hpp>'
         yield ''
         yield '#include <stdint.h>'
         yield '#include <string>'
@@ -17,6 +17,10 @@ class CppGenerator:
         for p in self.semanticGraph.packages:
             for l in self._generatePackage(p):
                 yield l
+
+        yield ''
+        yield '#include <joint.cpp/detail/GeneratedCodeEpilogue.hpp>'
+        yield ''
 
     def _generatePackage(self, p):
         namespaces_count = 0
@@ -31,11 +35,11 @@ class CppGenerator:
         yield ''
 
     def _generateInterfaceProxy(self, ifc):
-        yield 'class {} : public virtual ::joint::ProxyBase{}'.format(ifc.name, ''.join(', public {}'.format(self._mangleType(b)) for b in ifc.bases))
+        yield 'class {} : public virtual ::joint::detail::ProxyBase{}'.format(ifc.name, ''.join(', public {}'.format(self._mangleType(b)) for b in ifc.bases))
         yield '{'
         yield 'public:'
         yield '\t{}(Joint_ObjectHandle obj)'.format(ifc.name);
-        yield '\t\t: ::joint::ProxyBase(obj){}'.format(''.join(', {}(obj)'.format(self._mangleType(b)) for b in ifc.bases))
+        yield '\t\t: ::joint::detail::ProxyBase(obj){}'.format(''.join(', {}(obj)'.format(self._mangleType(b)) for b in ifc.bases))
         yield '\t{ }'
         yield ''
         yield '\tstatic const char* _GetInterfaceId() {{ return "{}"; }}'.format(ifc.fullname)
@@ -55,7 +59,7 @@ class CppGenerator:
                 yield '\tparams[{}].value.{} = {};'.format(p.index, p.type.variantName, self._toCppParamGetter(p))
                 yield '\tparams[{}].type = (Joint_Type){};'.format(p.index, p.type.index)
         yield '\tJOINT_CALL( Joint_InvokeMethod(_obj, {}, {}, {}, (Joint_Type){}, &_joint_internal_ret_val) );'.format(m.index, 'params' if m.params else 'nullptr', len(m.params), m.retType.index)
-        yield '\t::joint::RetValueGuard _joint_internal_rvg(_joint_internal_ret_val);'
+        yield '\t::joint::detail::RetValueGuard _joint_internal_rvg(_joint_internal_ret_val);'
         if m.retType.name != 'void':
             yield '\treturn _joint_internal_ret_val.variant.value.{};'.format(m.retType.variantName)
         yield '}'

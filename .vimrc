@@ -6,8 +6,9 @@ call g:buildsystem.setAvailableBuildConfigs( { 'host': CMakeBuildConfig(4, './bu
 
 set path+=core
 set path+=bindings/python
+set path+=bindings/cpp
 set path+=build/test
-let g:include_directories = [ 'core', 'bindings/python', 'build' ]
+let g:include_directories = [ 'core', 'bindings/python', 'bindings/cpp', 'build' ]
 
 function! GetCppNamespaceFromPath(path)
 	let res = []
@@ -15,6 +16,14 @@ function! GetCppNamespaceFromPath(path)
 		if len(a:path) > 2 && a:path[1] == 'joint'
 			call add(res, 'joint')
 			if len(a:path) > 3 && a:path[2] == 'detail'
+				call add(res, 'detail')
+			endif
+		endif
+	endif
+	if len(a:path) > 1 && a:path[0] == 'bindings'
+		if len(a:path) > 2 && a:path[1] == 'cpp'
+			call add(res, 'joint')
+			if len(a:path) > 4 && a:path[3] == 'detail'
 				call add(res, 'detail')
 			endif
 		endif
