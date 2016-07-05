@@ -24,23 +24,13 @@ try:
     if not args.languageId in generators:
         raise CmdLineException('Unknown language id: {}'.format(args.languageId))
 
-    idl_reader = joint.IdlReader(args.importDir)
-    idl_files = idl_reader.getFiles(args.input)
+    semantic_graph_builder = joint.SemanticGraphBuilder(args.importDir)
 
-    gen = generators[args.languageId]()
-
+    gen = generators[args.languageId](semantic_graph_builder.build(args.input))
     out_file = open(args.output, 'w')
-    for l in gen.generatePreamble():
+    for l in gen.generate():
         out_file.write(l)
         out_file.write('\n')
-    out_file.write('\n')
-    out_file.write('\n')
-
-    for f in idl_files:
-        ast = idl_parser.parseFile(f)
-        for l in gen.generate(ast):
-            out_file.write(l)
-            out_file.write('\n')
 
 except CmdLineException as e:
     print(e.message)

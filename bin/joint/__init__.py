@@ -1,2 +1,2 @@
-from .IdlParser import IdlParser
-from .IdlParser import IdlReader
+from .IdlParser import *
+from .SemanticGraph import *
