@@ -16,6 +16,8 @@ endif()
 
 set(TEST_CORE_SRC
 	core/TestContext.cpp
+	core/TestEngine.cpp
+	core/ScopedTest.cpp
 	core/utils/Logger.cpp
 )
 
@@ -37,5 +39,4 @@ add_custom_target(test-adapters2 ALL DEPENDS Tests_adapters.hpp)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_executable(joint-test test.cpp)
-target_link_libraries(joint-test joint-python)
-
+target_link_libraries(joint-test test-core joint-python)

@@ -3,23 +3,44 @@
 
 #include <../bindings/python/JointPython.h>
 #include <Tests_adapters.hpp>
+#include <test/core/Tests.hpp>
+
+
+using namespace test;
+
+class Tests
+{
+private:
+	test::TestEngine		_engine;
+	joint::Module			_module;
+
+public:
+	Tests(joint::Module module)
+		: _module(std::move(module))
+	{ }
+
+	void RunBasicTests()
+	{
+		ScopedTest t(_engine, "Basic tests");
+
+		joint::Ptr<IBasicTests> basic = _module.GetRootObject<IBasicTests>("GetBasicTests");
+
+		TEST_DOES_NOT_THROW(basic->ReturnI32());
+		TEST_EQUALS(14, basic->AddI32(2, 12));
+	}
+};
 
 
 int main()
 {
 	try
 	{
-		using namespace test;
+		Joint_SetLogLevel(JOINT_LOGLEVEL_WARNING);
 
 		JOINT_CALL( JointPython_Register() );
 
-		{
-			joint::Module m("python", "Tests");
-
-			joint::Ptr<IBasicTests> basic = m.GetRootObject<IBasicTests>("GetBasicTests");
-			std::cout << "i32: " << basic->ReturnI32() << std::endl;
-			std::cout << "sum: " << basic->AddI32(2, 12) << std::endl;
-		}
+		Tests t(joint::Module("python", "Tests"));
+		t.RunBasicTests();
 
 		JOINT_CALL( JointPython_Unregister() );
 	}

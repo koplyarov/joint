@@ -2,28 +2,27 @@
 #define TEST_CORE_TESTCONTEXT_HPP
 
 
-#include <memory>
+#include <string>
+
+#include <test/core/TestEngine.hpp>
 
 
 namespace test
 {
 
-	struct ITestResultsListener
-	{
-		virtual ~ITestResultsListener() { }
-
-		virtual void TestFailed(const std::string& message) = 0;
-	};
-	using ITestResultsListenerPtr = std::unique_ptr<ITestResultsListener>;
-
-
 	class TestContext
 	{
 	private:
-		ITestResultsListenerPtr		_resultsListener;
+		TestEngine*		_engine;
+		std::string		_testName;
 
 	public:
-		TestContext();
+		TestContext(TestEngine* engine, std::string testName)
+			: _engine(engine), _testName(std::move(testName))
+		{ }
+
+		void TestSucceeded(const Location& location, const std::string& message);
+		void TestFailed(const Location& location, const std::string& message);
 	};
 
 }

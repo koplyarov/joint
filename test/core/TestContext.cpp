@@ -4,16 +4,14 @@
 namespace test
 {
 
-	class DefaultTestResultsListener : public ITestResultsListener
+	void TestContext::TestSucceeded(const Location& location, const std::string& message)
 	{
-	public:
-		virtual void TestFailed(const std::string& message)
-		{ printf("TEST FAILED: %s\n", message.c_str()); }
-	};
+		_engine->GetListener()->TestSucceeded(_testName, location, message);
+	}
 
-
-	TestContext::TestContext()
-		: _resultsListener(new DefaultTestResultsListener)
-	{ }
+	void TestContext::TestFailed(const Location& location, const std::string& message)
+	{
+		_engine->GetListener()->TestFailed(_testName, location, message);
+	}
 
 }
