@@ -7,14 +7,7 @@
 #include <Tests_adapters.hpp>
 
 
-template < typename Dst_, typename Src_ >
-Dst_* Cast(Src_* src)
-{
-	joint::ProxyBase *proxy_base = src;
-	Joint_ObjectHandle result_handle;
-	JOINT_CALL(Joint_CastObject(proxy_base->_GetObjectHandle(), Dst_::_GetInterfaceId(), &result_handle));
-	return new Dst_(result_handle);
-}
+class Dummy { };
 
 
 class JointModule
@@ -43,12 +36,16 @@ public:
 		}
 	}
 
-	joint::IObject* GetRootObject(const std::string& getterName) const
+	joint::Ptr<joint::IObject> GetRootObject(const std::string& getterName) const
 	{
 		Joint_ObjectHandle obj;
 		JOINT_CALL( Joint_GetRootObject(_module, getterName.c_str(), &obj) );
-		return new joint::IObject(obj);
+		return joint::Ptr<joint::IObject>(new joint::IObject(obj));
 	}
+
+	template < typename Interface_ >
+	joint::Ptr<Interface_> GetRootObject(const std::string& getterName, Dummy d = Dummy()) const
+	{ return joint::Cast<Interface_>(GetRootObject(getterName)); }
 
 	JointModule(const JointModule& other) = delete;
 	JointModule& operator = (const JointModule& other) = delete;
@@ -59,18 +56,16 @@ int main()
 {
 	try
 	{
+		using namespace test;
+
 		JOINT_CALL( JointPython_Register() );
 
 		{
 			JointModule m("python", "Tests");
 
-			joint::IObject* obj = m.GetRootObject("GetBasicTests");
-
-			test::IBasicTests* basic = Cast<test::IBasicTests>(obj);
+			joint::Ptr<IBasicTests> basic = m.GetRootObject<IBasicTests>("GetBasicTests");
 			std::cout << "i32: " << basic->ReturnI32() << std::endl;
 			std::cout << "sum: " << basic->AddI32(2, 12) << std::endl;
-
-			delete obj;
 		}
 
 		JOINT_CALL( JointPython_Unregister() );

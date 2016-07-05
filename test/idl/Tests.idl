@@ -5,4 +5,14 @@ package test
 		i32 ReturnI32();
 		i32 AddI32(i32 l, i32 r);
 	}
+
+	interface ILifetimeTestsListener
+	{
+		void OnObjectDestroyed();
+	}
+
+	interface ILifetimeTests
+	{
+		//void SetListener(ILifetimeTestsListener);
+	}
 }
