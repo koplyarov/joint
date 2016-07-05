@@ -6,7 +6,7 @@ call g:buildsystem.setAvailableBuildConfigs( { 'host': CMakeBuildConfig(4, './bu
 
 set path+=core
 set path+=bindings/python
-set path+=build
+set path+=build/test
 let g:include_directories = [ 'core', 'bindings/python', 'build' ]
 
 function! GetCppNamespaceFromPath(path)
