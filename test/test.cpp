@@ -64,9 +64,10 @@ int main()
 		{
 			JointModule m("python", "Tests");
 
-			joint::IObject* obj = m.GetRootObject("GetComponent");
+			joint::IObject* obj = m.GetRootObject("GetBasicTests");
 
 			test::IBasicTests* basic = Cast<test::IBasicTests>(obj);
+			std::cout << "i32: " << basic->ReturnI32() << std::endl;
 			std::cout << "sum: " << basic->AddI32(2, 12) << std::endl;
 
 			delete obj;
