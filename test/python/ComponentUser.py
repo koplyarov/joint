@@ -6,7 +6,7 @@ import sys
 sys.path.append('build/bin')
 sys.path.append('build/bin/Debug')
 
-from TestObjects import *
+from Tests_adapters import *
 import pyjoint
 
 m = pyjoint.Module('python', 'Component')

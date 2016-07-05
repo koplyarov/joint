@@ -4,7 +4,7 @@
 #include <memory>
 
 #include <../bindings/python/JointPython.h>
-#include <TestObjects.hpp>
+#include <Tests_adapters.hpp>
 
 
 template < typename Dst_, typename Src_ >
@@ -62,15 +62,12 @@ int main()
 		JOINT_CALL( JointPython_Register() );
 
 		{
-			JointModule m("python", "Component");
+			JointModule m("python", "Tests");
 
 			joint::IObject* obj = m.GetRootObject("GetComponent");
 
-			test::IPoint* p = Cast<test::IPoint>(obj);
-			std::cout << "x: " << p->GetX() << ", y: " << p->GetY() << std::endl;
-
-			test::IStringRepresentable* sr = Cast<test::IStringRepresentable>(obj);
-			std::cout << "str: " << sr->ToString() << std::endl;
+			test::IBasicTests* basic = Cast<test::IBasicTests>(obj);
+			std::cout << "sum: " << basic->AddI32(2, 12) << std::endl;
 
 			delete obj;
 		}
