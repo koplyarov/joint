@@ -27,6 +27,7 @@ public:
 
 		joint::Ptr<IBasicTests> basic = _module.GetRootObject<IBasicTests>("GetBasicTests");
 
+		TEST_THROWS_ANYTHING(basic->Throw());
 		TEST_DOES_NOT_THROW(basic->ReturnI32());
 		TEST_EQUALS(14, basic->AddI32(2, 12));
 	}

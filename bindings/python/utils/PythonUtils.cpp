@@ -70,7 +70,7 @@ namespace joint_python
 	{
 		PyObject *type = NULL, *value = NULL, *traceback = NULL;
 		PyErr_Fetch(&type, &value, &traceback);
-		auto sg = ScopeExit([&]{ PyErr_Restore(type, value, traceback); });
+		auto sg = ScopeExit([&]{ PyErr_Restore(type, value, traceback); PyErr_Clear(); });
 
 		if (type && value && traceback)
 		{
