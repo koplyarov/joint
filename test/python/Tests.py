@@ -10,6 +10,9 @@ class Tests(test_IBasicTests):
     def ReturnI32(self):
         return 42
 
+    def Throw(self):
+        raise RuntimeError('Requested exception')
+
     def AddI32(self, l, r):
         return l + r
 

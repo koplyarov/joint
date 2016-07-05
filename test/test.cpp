@@ -8,10 +8,12 @@
 
 using namespace test;
 
+
+test::TestEngine		g_engine;
+
 class Tests
 {
 private:
-	test::TestEngine		_engine;
 	joint::Module			_module;
 
 public:
@@ -21,7 +23,7 @@ public:
 
 	void RunBasicTests()
 	{
-		ScopedTest t(_engine, "Basic tests");
+		ScopedTest t(g_engine, "Basic tests");
 
 		joint::Ptr<IBasicTests> basic = _module.GetRootObject<IBasicTests>("GetBasicTests");
 

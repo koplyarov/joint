@@ -19,6 +19,7 @@ set(TEST_CORE_SRC
 	core/TestEngine.cpp
 	core/ScopedTest.cpp
 	core/utils/Logger.cpp
+	core/utils/TypeInfo.cpp
 )
 
 add_library(test-core ${TEST_CORE_SRC})

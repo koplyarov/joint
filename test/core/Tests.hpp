@@ -2,9 +2,10 @@
 #define TEST_CORE_TESTS_HPP
 
 
-#include <test/core/ScopedTest.hpp>
-
 #include <stdexcept>
+
+#include <test/core/ScopedTest.hpp>
+#include <test/core/utils/TypeInfo.hpp>
 
 
 #define TEST_REPORT_SUCCESS(Message_) \
@@ -13,19 +14,37 @@
 #define TEST_REPORT_ERROR(Message_) \
 		::test::ScopedTest::GetCurrentContext().TestFailed(TEST_LOCATION, Message_)
 
+
+#define TEST_THROWS_ANYTHING(...) \
+		do { \
+			try { __VA_ARGS__; TEST_REPORT_ERROR(std::string("Expected this code to throw: '" #__VA_ARGS__ "'")); } \
+			catch (...) \
+			{ TEST_REPORT_SUCCESS("'" #__VA_ARGS__ "' throws"); } \
+		} while (false)
+
+#define TEST_THROWS(ExceptionType_, ...) \
+		do { \
+			try { __VA_ARGS__; TEST_REPORT_ERROR(std::string("Expected this code to throw: '" #__VA_ARGS__ "'")); } \
+			catch (const ExceptionType_& ex) \
+			{ TEST_REPORT_SUCCESS("'" #__VA_ARGS__ "' throws " #ExceptionType_); } \
+			catch (const std::exception& ex) \
+			{ TEST_REPORT_ERROR(std::string("Expected this code to throw " #ExceptionType_ ": '" #__VA_ARGS__ "', got ") + ::test::TypeInfo(typeid(ex)).ToString() + (": ") + ex.what()); } \
+			catch (...) \
+			{ TEST_REPORT_ERROR(std::string("Expected this code to throw " #ExceptionType_ ": '" #__VA_ARGS__ "', got unknown exception")); } \
+		} while (false)
+
 #define TEST_DOES_NOT_THROW_INTERNAL(...) \
 		do { \
 			try { __VA_ARGS__; } \
-			catch(const std::exception& ex) \
-			{ TEST_REPORT_ERROR(std::string("Expected this code not to throw: '" #__VA_ARGS__ "', got exception: ") + ex.what()); break; } \
-			catch(...) \
-			{ TEST_REPORT_ERROR(std::string("Expected this code not to throw: '" #__VA_ARGS__ "', got unknown exception")); break; } \
+			catch (const std::exception& ex) \
+			{ TEST_REPORT_ERROR(std::string("Expected this code not to throw: '" #__VA_ARGS__ "', got exception: ") + ex.what()); } \
+			catch (...) \
+			{ TEST_REPORT_ERROR(std::string("Expected this code not to throw: '" #__VA_ARGS__ "', got unknown exception")); } \
 		} while (false)
 
 #define TEST_DOES_NOT_THROW(...) \
 		do { \
-			TEST_DOES_NOT_THROW_INTERNAL(__VA_ARGS__); \
-			TEST_REPORT_SUCCESS(#__VA_ARGS__); \
+			TEST_DOES_NOT_THROW_INTERNAL(__VA_ARGS__; TEST_REPORT_SUCCESS(#__VA_ARGS__)); \
 		} while (false)
 
 #define TEST_EQUALS(Val_, ...) \
