@@ -166,7 +166,8 @@ namespace binding
 		PyObjectHolder base_accessor_type(PyObject_GetAttrString(base_type, "accessor"));
 		JOINT_CHECK(base_accessor_type, "No accessor attribute");
 
-		PyObjectHolder new_accessor(PyObject_CallObject(base_accessor_type, Py_BuildValue("(O)", (PyObject*)py_obj)));
+		PyObjectHolder py_params(Py_BuildValue("(O)", (PyObject*)py_obj));
+		PyObjectHolder new_accessor(PyObject_CallObject(base_accessor_type, py_params));
 		JOINT_CHECK(new_accessor, "Could not wrap object");
 		*outRetValue = new Object(new_accessor);
 

@@ -56,7 +56,8 @@ class CppGenerator:
                 yield '\tparams[{}].type = (Joint_Type){};'.format(p.index, p.type.index)
         yield '\tJOINT_CALL( Joint_InvokeMethod(_obj, {}, {}, {}, (Joint_Type){}, &_joint_internal_ret_val) );'.format(m.index, 'params' if m.params else 'nullptr', len(m.params), m.retType.index)
         yield '\t::joint::RetValueGuard _joint_internal_rvg(_joint_internal_ret_val);'
-        yield '\treturn _joint_internal_ret_val.variant.value.{};'.format(m.retType.variantName)
+        if m.retType.name != 'void':
+            yield '\treturn _joint_internal_ret_val.variant.value.{};'.format(m.retType.variantName)
         yield '}'
 
     def _toCppParamGetter(self, p):
