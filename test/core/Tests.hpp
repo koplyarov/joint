@@ -33,22 +33,22 @@
 			{ TEST_REPORT_ERROR(std::string("Expected this code to throw " #ExceptionType_ ": '" #__VA_ARGS__ "', got unknown exception")); } \
 		} while (false)
 
-#define TEST_DOES_NOT_THROW_INTERNAL(...) \
+#define TEST_DOES_NOT_THROW_INTERNAL(Str_, ...) \
 		do { \
 			try { __VA_ARGS__; } \
 			catch (const std::exception& ex) \
-			{ TEST_REPORT_ERROR(std::string("Expected this code not to throw: '" #__VA_ARGS__ "', got exception: ") + ex.what()); } \
+			{ TEST_REPORT_ERROR(std::string("Expected this code not to throw: '" Str_ "', got exception: ") + ex.what()); } \
 			catch (...) \
-			{ TEST_REPORT_ERROR(std::string("Expected this code not to throw: '" #__VA_ARGS__ "', got unknown exception")); } \
+			{ TEST_REPORT_ERROR(std::string("Expected this code not to throw: '" Str_ "', got unknown exception")); } \
 		} while (false)
 
 #define TEST_THROWS_NOTHING(...) \
 		do { \
-			TEST_DOES_NOT_THROW_INTERNAL(__VA_ARGS__; TEST_REPORT_SUCCESS(#__VA_ARGS__)); \
+			TEST_DOES_NOT_THROW_INTERNAL(#__VA_ARGS__, __VA_ARGS__; TEST_REPORT_SUCCESS(#__VA_ARGS__)); \
 		} while (false)
 
 #define TEST_EQUALS(Val_, ...) \
-		TEST_DOES_NOT_THROW_INTERNAL({ \
+		TEST_DOES_NOT_THROW_INTERNAL("TEST_EQUALS(" #Val_ ", " #__VA_ARGS__ ")", { \
 				if (!(Val_ == __VA_ARGS__)) \
 					TEST_REPORT_ERROR(#Val_ " != " #__VA_ARGS__); \
 				else \
