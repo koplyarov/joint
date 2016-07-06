@@ -15,6 +15,8 @@ static Joint_BindingHandle g_bindingHandle = JOINT_NULL_HANDLE;
 extern "C"
 {
 
+	JOINT_DEVKIT_LOGGER("Joint.Python.Core")
+
 	Joint_Error JointPythonCore_RegisterBinding()
 	{
 		using namespace joint_python::binding;
@@ -32,7 +34,7 @@ extern "C"
 		std::unique_ptr<Binding> binding(new Binding);
 		Joint_Error ret = Joint_RegisterBinding(binding_desc, binding.get(), &g_bindingHandle);
 		if (ret != JOINT_ERROR_NONE)
-			Joint_Log(JOINT_LOGLEVEL_ERROR, "Binding", "Joint_RegisterBinding failed: %s", Joint_ErrorToString(ret));
+			GetLogger().Error() << "Joint_RegisterBinding failed: " << Joint_ErrorToString(ret);
 
 		binding.release();
 		return ret;
@@ -47,7 +49,7 @@ extern "C"
 		Joint_Error ret = Joint_UnregisterBinding(g_bindingHandle);
 		g_bindingHandle = JOINT_NULL_HANDLE;
 		if (ret != JOINT_ERROR_NONE)
-			Joint_Log(JOINT_LOGLEVEL_WARNING, "Binding", "Joint_UnregisterBinding failed: %s", Joint_ErrorToString(ret));
+			GetLogger().Error() << "Joint_UnregisterBinding failed: " << Joint_ErrorToString(ret);
 
 		return ret;
 	}

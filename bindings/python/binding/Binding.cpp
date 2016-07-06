@@ -19,15 +19,11 @@ namespace binding
 {
 
 	Binding::Binding()
-	{
-		Joint_Log(JOINT_LOGLEVEL_DEBUG, "Binding", "Created Binding");
-	}
+	{ GetLogger().Debug() << "Created"; }
 
 
 	Binding::~Binding()
-	{
-		Joint_Log(JOINT_LOGLEVEL_DEBUG, "Binding", "Destroyed Binding");
-	}
+	{ GetLogger().Debug() << "Destroying"; }
 
 
 	Joint_Error Binding::Deinit(void* bindingUserData)
@@ -131,7 +127,7 @@ namespace binding
 	}
 
 
-	static PyObjectHolder FindBaseById(PyObject* type, const char* interfaceId)
+	PyObjectHolder Binding::FindBaseById(PyObject* type, const char* interfaceId)
 	{
 		PyObjectHolder bases(PyObject_GetAttrString(type, "__bases__"));
 		PyObjectHolder seq(PySequence_Fast((PyObject*)bases, "A sequence expected!"));
@@ -217,7 +213,7 @@ namespace binding
 			{
 				Joint_Error ret = Joint_ReleaseException(value.value.ex);
 				if (ret != JOINT_ERROR_NONE)
-					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.Python", (std::string("Joint_ReleaseException failed: ") + Joint_ErrorToString(ret)).c_str());
+					GetLogger().Error() << "Joint_ReleaseException failed: " << Joint_ErrorToString(ret);
 			}
 			break;
 		default:

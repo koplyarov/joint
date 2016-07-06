@@ -1,14 +1,15 @@
 #include <joint/core/JointCore.hpp>
-
+#include <joint/devkit/Logger.hpp>
 #include <joint/utils/JointException.hpp>
 
 #include <algorithm>
-
 #include <string.h>
 
 
 namespace joint
 {
+
+	JOINT_DEVKIT_LOGGER("Joint.Core")
 
 	Joint_BindingHandle JointCore::RegisterBinding(Joint_BindingDesc desc, void* userData)
 	{

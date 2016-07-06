@@ -3,7 +3,9 @@
 
 
 #include <joint/Joint.h>
+#include <joint/devkit/Logger.hpp>
 
+#include <utils/PyObjectHolder.hpp>
 #include <utils/PythonContext.hpp>
 
 
@@ -13,6 +15,8 @@ namespace binding
 
 	class Binding
 	{
+		JOINT_DEVKIT_LOGGER("Joint.Python.Binding")
+
 	private:
 		PythonContext	_pyCtx;
 
@@ -28,6 +32,9 @@ namespace binding
 		static Joint_Error ReleaseObject(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj);
 		static Joint_Error CastObject(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_InterfaceId interfaceId, Joint_ObjectHandleInternal* outRetValue);
 		static Joint_Error ReleaseRetValue(Joint_VariantInternal value);
+
+	private:
+		static PyObjectHolder FindBaseById(PyObject* type, const char* interfaceId);
 	};
 
 }}

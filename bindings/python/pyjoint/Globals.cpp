@@ -1,5 +1,6 @@
-#include <pyjoint/Globals.hpp>
+#include <joint/devkit/Logger.hpp>
 
+#include <pyjoint/Globals.hpp>
 #include <pyjoint/Object.hpp>
 #include <utils/PyObjectHolder.hpp>
 #include <utils/PythonUtils.hpp>
@@ -8,6 +9,8 @@
 namespace joint_python {
 namespace pyjoint
 {
+
+	JOINT_DEVKIT_LOGGER("Joint.Python.PyJoint.Globals")
 
 	PyObject* Cast(PyObject* self, PyObject* args, PyObject* kwds)
 	{

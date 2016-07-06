@@ -17,7 +17,7 @@
 
 extern "C"
 {
-#define JOINT_NULL_HANDLE nullptr
+#define JOINT_NULL_HANDLE NULL
 
 	typedef const char* Joint_InterfaceId;
 
@@ -64,10 +64,13 @@ extern "C"
 		JOINT_LOGLEVEL_ERROR    = 3
 	};
 
-	typedef void Joint_LogCallback_Func(const char* message);
+	JOINT_CORE_API const char* Joint_LogLevelToString(Joint_LogLevel logLevel);
+
+	typedef void Joint_LogCallback_Func(Joint_LogLevel logLevel, const char* category, const char* message);
 	JOINT_CORE_API Joint_Error Joint_SetLogCallback(Joint_LogCallback_Func* logCallback);
 	JOINT_CORE_API Joint_Error Joint_SetLogLevel(Joint_LogLevel logLevel);
 
+	JOINT_CORE_API Joint_LogLevel Joint_GetLogLevel();
 	JOINT_CORE_API void Joint_Log(Joint_LogLevel logLevel, const char* subsystem, const char* format, ...);
 
 

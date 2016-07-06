@@ -1,6 +1,8 @@
 #include <joint/Joint.h>
 
+#include <joint/JointConfig.h>
 #include <joint/core/JointCore.hpp>
+#include <joint/devkit/Logger.hpp>
 #include <joint/utils/CppWrappers.hpp>
 #include <joint/utils/JointException.hpp>
 #include <joint/utils/MakeUnique.hpp>
@@ -16,8 +18,48 @@
 #include <stdarg.h>
 
 
-static void DefaultLogCallback(const char* message)
-{ printf("%s\n", message); }
+#if JOINT_PLATFORM_POSIX
+#	include <unistd.h>
+#endif
+
+
+JOINT_DEVKIT_LOGGER("Joint.Core")
+
+
+static void DefaultLogCallback(Joint_LogLevel logLevel, const char* subsystem, const char* message)
+{
+	const char* alignment = "        ";
+	const char* log_level_str = Joint_LogLevelToString(logLevel);
+#if JOINT_PLATFORM_POSIX
+	if (isatty(2))
+	{
+		const char* subsystem_ns_color = "\33[0;32m";
+		const char* subsystem_name_color = "\33[1;32m";
+		const char* log_color = "\33[0m";
+
+		switch (logLevel)
+		{
+		case JOINT_LOGLEVEL_DEBUG:    log_color = "\33[2;37m";  break;
+		case JOINT_LOGLEVEL_INFO:     log_color = "\33[0m";     break;
+		case JOINT_LOGLEVEL_WARNING:  log_color = "\33[1;33m";  break;
+		case JOINT_LOGLEVEL_ERROR:    log_color = "\33[1;31m";  break;
+		}
+
+		int subsystem_len = strlen(subsystem), subsystem_name_pos = subsystem_len;
+		while (subsystem_name_pos > 0 && subsystem[subsystem_name_pos] != '.')
+			--subsystem_name_pos;
+		if (subsystem[subsystem_name_pos] == '.')
+			++subsystem_name_pos;
+
+		fprintf(stderr, "%s[%s]%.*s%s[%.*s%s%s%s] %s%s\33[0m\n",
+			log_color, log_level_str, (int)(sizeof("Warning") - strlen(log_level_str)), alignment,
+			subsystem_ns_color, subsystem_name_pos, subsystem, subsystem_name_color, subsystem + subsystem_name_pos, subsystem_ns_color,
+			log_color, message);
+	}
+	else
+#endif
+		fprintf(stderr, "[%s]%.*s[%s] %s\n", Joint_LogLevelToString(logLevel), (int)(sizeof("Warning") - strlen(log_level_str)), alignment, subsystem, message);
+}
 
 
 static joint::JointCore               g_core;
@@ -27,6 +69,18 @@ static std::atomic<Joint_LogLevel>    g_logLevel(JOINT_LOGLEVEL_DEBUG);
 
 extern "C"
 {
+
+	const char* Joint_LogLevelToString(Joint_LogLevel logLevel)
+	{
+		switch (logLevel)
+		{
+		case JOINT_LOGLEVEL_DEBUG:    return "Debug";
+		case JOINT_LOGLEVEL_INFO:     return "Info";
+		case JOINT_LOGLEVEL_WARNING:  return "Warning";
+		case JOINT_LOGLEVEL_ERROR:    return "Error";
+		default:                      return "Unknown log level";
+		}
+	}
 
 	Joint_Error Joint_SetLogCallback(Joint_LogCallback_Func* logCallback)
 	{
@@ -46,32 +100,23 @@ extern "C"
 	}
 
 
+	Joint_LogLevel Joint_GetLogLevel()
+	{ return g_logLevel.load(std::memory_order_relaxed); }
+
+
 	void Joint_Log(Joint_LogLevel logLevel, const char* subsystem, const char* format, ...)
 	{
 		if (logLevel < g_logLevel.load(std::memory_order_relaxed))
 			return;
 
 		char message[1024];
-		int ofs = 0;
-
-		const char* log_level_str = "UNKNOWN LOG LEVEL";
-		switch (logLevel)
-		{
-		case JOINT_LOGLEVEL_DEBUG:    log_level_str = "Debug";    break;
-		case JOINT_LOGLEVEL_INFO:     log_level_str = "Info";     break;
-		case JOINT_LOGLEVEL_WARNING:  log_level_str = "Warning";  break;
-		case JOINT_LOGLEVEL_ERROR:    log_level_str = "Error";    break;
-		}
-
-		ofs += snprintf(&message[ofs], sizeof(message) - ofs, "[%s] [%s] ", log_level_str, subsystem);
-
 		va_list argptr;
 		va_start(argptr, format);
-		vsnprintf(&message[ofs], sizeof(message), format, argptr);
+		vsnprintf(message, sizeof(message), format, argptr);
 		va_end(argptr);
 
 		std::lock_guard<std::mutex> l(g_mutex);
-		g_logCallback(message);
+		g_logCallback(logLevel, subsystem, message);
 	}
 
 
@@ -101,7 +146,7 @@ extern "C"
 		JOINT_CHECK(outBinding, JOINT_ERROR_INVALID_PARAMETER);
 
 		*outBinding = g_core.RegisterBinding(desc, userData);
-		Joint_Log(JOINT_LOGLEVEL_INFO, "Joint", "RegisterBinding(name: \"%s\"): %p", desc.name, *outBinding);
+		GetLogger().Info() << "RegisterBinding(name: " << desc.name << "): " << *outBinding;
 
 		JOINT_CPP_WRAP_END
 	}
@@ -113,7 +158,7 @@ extern "C"
 
 		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 
-		Joint_Log(JOINT_LOGLEVEL_INFO, "Joint", "UnregisterBinding(binding: %p)", handle);
+		GetLogger().Info() << "UnregisterBinding(binding: " << handle << ")";
 		g_core.UnregisterBinding(handle);
 
 		JOINT_CPP_WRAP_END
@@ -124,12 +169,14 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
+		GetLogger().Info() << "LoadModule(bindingName: \"" << bindingName << "\", moduleName: \"" << moduleName << "\")";
+
 		JOINT_CHECK(bindingName, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(moduleName, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(outModule, JOINT_ERROR_INVALID_PARAMETER);
 
 		*outModule = g_core.LoadModule(bindingName, moduleName);
-		Joint_Log(JOINT_LOGLEVEL_INFO, "Joint", "LoadModule(bindingName: \"%s\", moduleName: \"%s\"): %p", bindingName, moduleName, *outModule);
+		GetLogger().Debug() << "  LoadModule.outModule: " << *outModule;
 
 		JOINT_CPP_WRAP_END
 	}
@@ -141,7 +188,7 @@ extern "C"
 
 		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 
-		Joint_Log(JOINT_LOGLEVEL_INFO, "Joint", "UnloadModule(module: %p)", handle);
+		GetLogger().Info() << "UnloadModule(module: " << handle << ")";
 		g_core.UnloadModule(handle);
 
 		JOINT_CPP_WRAP_END
@@ -152,6 +199,8 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
+		GetLogger().Debug() << "GetRootObject(module: " << module << ", getterName: \"" << getterName << "\")";
+
 		JOINT_CHECK(module != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(getterName, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(outObject, JOINT_ERROR_INVALID_PARAMETER);
@@ -161,7 +210,8 @@ extern "C"
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
 		*outObject = new Joint_Object(internal, module);
-		Joint_Log(JOINT_LOGLEVEL_DEBUG, "Joint", "GetRootObject(module: %p, getterName: \"%s\"): %p", module, getterName, *outObject);
+
+		GetLogger().Debug() << "  GetRootObject.outObject: " << *outObject << " (internal: " << internal << ")";
 
 		JOINT_CPP_WRAP_END
 	}
@@ -171,7 +221,7 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		//Joint_Log(JOINT_LOGLEVEL_DEBUG, "Joint", "InvokeMethod(obj: %p (internal: %p), methodId: %u)", obj, obj ? obj->internal : NULL, methodId);
+		GetLogger().Debug() << "InvokeMethod(obj: " << obj << " (internal: " << (obj ? obj->internal : NULL) << "), methodId: " << methodId << ")";
 
 		JOINT_CHECK(obj != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(params || paramsCount == 0, JOINT_ERROR_INVALID_PARAMETER);
@@ -249,7 +299,7 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		//Joint_Log(JOINT_LOGLEVEL_DEBUG, "Joint", "CastObject(obj: %p (internal: %p), interfaceId: %s)", handle, handle ? handle->internal : NULL, interfaceId);
+		GetLogger().Debug() << "CastObject(obj: " << handle << " (internal: " << (handle ? handle->internal : NULL) << "), interfaceId: " << interfaceId << ")";
 
 		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(interfaceId, JOINT_ERROR_INVALID_PARAMETER);
@@ -259,6 +309,8 @@ extern "C"
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
 		*outHandle = new Joint_Object(internal, handle->module);
+
+		GetLogger().Debug() << "  CastObject.outHandle: " << *outHandle << " (internal: " << internal << ")";
 
 		JOINT_CPP_WRAP_END
 	}

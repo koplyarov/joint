@@ -1,10 +1,13 @@
 #include <utils/PythonUtils.hpp>
 
 #include <joint/Joint.h>
+#include <joint/devkit/Logger.hpp>
 
 
 namespace joint_python
 {
+
+	JOINT_DEVKIT_LOGGER("Joint.Python.Utils")
 
 #define PYTHON_THROW_IN_ERROR_GETTER(Message_) do { throw std::runtime_error(Message_); } while (false)
 #define PYTHON_CHECK_IN_ERROR_GETTER(Expr_, Message_) do { if (!(Expr_)) PYTHON_THROW_IN_ERROR_GETTER(Message_); } while (false)
@@ -80,14 +83,14 @@ namespace joint_python
 			PyObjectHolder py_function(PyObject_GetAttrString(py_module, "format_exception"));
 			if (!py_function)
 			{
-				Joint_Log(JOINT_LOGLEVEL_WARNING, "Joint.Python", "Could not find function format_exception in python module traceback");
+				GetLogger().Warning() << "Could not find function format_exception in python module traceback";
 				return GetPythonErrorMessageFallback(type, value, traceback);
 			}
 
 			PyObjectHolder py_result(PyObject_CallObject(py_function, Py_BuildValue("(O,O,O)", type, value, traceback)));
 			if (!py_result)
 			{
-				Joint_Log(JOINT_LOGLEVEL_WARNING, "Joint.Python", "format_exception in python module traceback invokation failed");
+				GetLogger().Warning() << "format_exception in python module traceback invokation failed";
 				return GetPythonErrorMessageFallback(type, value, traceback);
 			}
 

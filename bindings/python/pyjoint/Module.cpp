@@ -1,11 +1,15 @@
 #include <pyjoint/Module.hpp>
 
+#include <joint/devkit/Logger.hpp>
+
 #include <utils/PythonUtils.hpp>
 
 
 namespace joint_python {
 namespace pyjoint
 {
+
+	JOINT_DEVKIT_LOGGER("Joint.Python.PyJoint.Module")
 
 	static PyObject* Module_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
 	static int Module_init(PyObject* self, PyObject* args, PyObject* kwds);
@@ -100,7 +104,7 @@ namespace pyjoint
 		{
 			Joint_Error ret = Joint_UnloadModule(m->handle);
 			if (ret != JOINT_ERROR_NONE)
-				Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.Python", "Joint_UnloadModule failed: %s", Joint_ErrorToString(ret));
+				GetLogger().Error() << "Joint_UnloadModule failed: " << Joint_ErrorToString(ret);
 			m->handle = JOINT_NULL_HANDLE;
 		}
 

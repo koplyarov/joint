@@ -2,6 +2,8 @@
 #define CORE_JOINT_INTEROP_PYTHONMODULE_HPP
 
 
+#include <joint/devkit/Logger.hpp>
+
 #include <string>
 
 #include <utils/PyObjectHolder.hpp>
@@ -15,6 +17,8 @@ namespace binding
 
 	class Module
 	{
+		JOINT_DEVKIT_LOGGER("Joint.Python.Module")
+
 	private:
 		PyObjectHolder		_pyModule;
 		std::string		_moduleName;

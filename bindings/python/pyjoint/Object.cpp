@@ -1,5 +1,7 @@
 #include <pyjoint/Object.hpp>
 
+#include <joint/devkit/Logger.hpp>
+
 #include <vector>
 
 #include <utils/PythonUtils.hpp>
@@ -8,6 +10,8 @@
 namespace joint_python {
 namespace pyjoint
 {
+
+	JOINT_DEVKIT_LOGGER("Joint.Python.PyJoint.Object")
 
 	static PyObject* Object_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
 	static void Object_del(PyObject* self);
@@ -82,7 +86,7 @@ namespace pyjoint
 		{
 			Joint_Error ret = Joint_DecRefObject(m->handle);
 			if (ret != JOINT_ERROR_NONE)
-				Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.Python", "Joint_DecRefObject failed: %s", Joint_ErrorToString(ret));
+				GetLogger().Error() << "Joint_DecRefObject failed: " << Joint_ErrorToString(ret);
 			m->handle = JOINT_NULL_HANDLE;
 		}
 
@@ -148,7 +152,7 @@ namespace pyjoint
 		auto sg(ScopeExit([&]{
 			Joint_Error ret = Joint_ReleaseRetValue(ret_value);
 			if (ret != JOINT_ERROR_NONE)
-				Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.Python", "Joint_ReleaseRetValue failed: %s", Joint_ErrorToString(ret));
+				GetLogger().Error() << "Joint_ReleaseRetValue failed: " << Joint_ErrorToString(ret);
 		}));
 
 		PyObjectHolder result;

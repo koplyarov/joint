@@ -25,7 +25,7 @@ namespace pyjoint
 				return RetSuccess_; \
 			} \
 			catch (const std::exception& ex) { \
-				Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.Python", "%s failed: %s", __func__, ex.what()); \
+				GetLogger().Error() << __func__ << " failed: " << ex; \
 				PyErr_SetString(g_error, ex.what()); \
 				__VA_ARGS__ \
 				return RetError_; \
@@ -34,7 +34,7 @@ namespace pyjoint
 #define PYJOINT_CPP_WRAP_END_VOID(...) \
 			} \
 			catch (const std::exception& ex) { \
-				Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.Python", "%s failed: %s", __func__, ex.what()); \
+				GetLogger().Error() << __func__ << " failed: " << ex; \
 				__VA_ARGS__ \
 			}
 
