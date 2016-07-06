@@ -31,14 +31,14 @@ namespace binding
 
 		PYTHON_CHECK(_pyModule, "Could not import python module " + moduleName);
 
-		GetLogger().Debug() << "Loaded python module" << _moduleName;
+		GetLogger().Debug() << "Loaded python module " << _moduleName;
 	}
 
 
 	Module::~Module()
 	{
 		_pyModule.Reset();
-		GetLogger().Debug() << "Unloaded python module" << _moduleName;
+		GetLogger().Debug() << "Unloaded python module " << _moduleName;
 	}
 
 
