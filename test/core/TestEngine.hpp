@@ -3,6 +3,7 @@
 
 
 #include <memory>
+#include <string>
 
 #include <test/core/Location.hpp>
 
