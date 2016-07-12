@@ -9,17 +9,17 @@
 #include <utils/PyObjectHolder.hpp>
 
 
-static Joint_BindingHandle g_bindingHandle = JOINT_NULL_HANDLE;
-
-
 extern "C"
 {
 
 	JOINT_DEVKIT_LOGGER("Joint.Python.Core")
 
-	Joint_Error JointPythonCore_RegisterBinding()
+
+	Joint_Error JointPythonCore_MakeBinding(Joint_BindingHandle* outBinding)
 	{
 		using namespace joint_python::binding;
+
+		GetLogger().Info() << "MakeBinding";
 
 		Joint_BindingDesc binding_desc = { };
 		binding_desc.name            = "python";
@@ -32,27 +32,23 @@ extern "C"
 		binding_desc.castObject      = &Binding::CastObject;
 
 		std::unique_ptr<Binding> binding(new Binding);
-		Joint_Error ret = Joint_RegisterBinding(binding_desc, binding.get(), &g_bindingHandle);
-		if (ret != JOINT_ERROR_NONE)
-			GetLogger().Error() << "Joint_RegisterBinding failed: " << Joint_ErrorToString(ret);
 
-		binding.release();
+		Joint_Error ret = Joint_MakeBinding(binding_desc, binding.get(), outBinding);
+		if (ret != JOINT_ERROR_NONE)
+			GetLogger().Error() << "Joint_MakeBinding failed: " << Joint_ErrorToString(ret);
+		else
+			binding.release();
+
 		return ret;
 	}
+
+
+	Joint_Error JointPythonCore_RegisterBinding()
+	{ return JOINT_ERROR_NOT_IMPLEMENTED; }
 
 
 	Joint_Error JointPythonCore_UnregisterBinding()
-	{
-		if (g_bindingHandle == JOINT_NULL_HANDLE)
-			return JOINT_ERROR_NONE;
-
-		Joint_Error ret = Joint_UnregisterBinding(g_bindingHandle);
-		g_bindingHandle = JOINT_NULL_HANDLE;
-		if (ret != JOINT_ERROR_NONE)
-			GetLogger().Error() << "Joint_UnregisterBinding failed: " << Joint_ErrorToString(ret);
-
-		return ret;
-	}
+	{ return JOINT_ERROR_NOT_IMPLEMENTED; }
 
 }
 
@@ -95,8 +91,6 @@ PyMODINIT_FUNC JointPythonCore_InitModule_py2(void)
 	using namespace joint_python;
 	using namespace joint_python::pyjoint;
 
-	JointPythonCore_RegisterBinding();
-
 #if PY_VERSION_HEX >= 0x03000000
 	PyObjectHolder m(PyModule_Create(&g_module));
 #else
@@ -133,20 +127,6 @@ PyMODINIT_FUNC JointPythonCore_InitModule_py2(void)
 	if (PyModule_AddObject(m, "Object", reinterpret_cast<PyObject*>(&Object_type)) != 0)
 	{
 		PyErr_SetString(PyExc_RuntimeError, "Import error: Could not add pyjoint.Object type to the module!");
-		RETURN_ERROR;
-	}
-
-	g_error = PyErr_NewException((STR_LITERAL_TYPE)"pyjoint.error", NULL, NULL);
-	if (!g_error)
-	{
-		PyErr_SetString(PyExc_RuntimeError, "Import error: Could not initialize pyjoint.error exception type!");
-		RETURN_ERROR;
-	}
-
-	Py_INCREF(g_error);
-	if (PyModule_AddObject(m, "error", g_error) != 0)
-	{
-		PyErr_SetString(PyExc_RuntimeError, "Import error: Could not add pyjoint.error type to the module!");
 		RETURN_ERROR;
 	}
 

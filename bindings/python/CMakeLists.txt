@@ -45,4 +45,18 @@ set_target_properties(pyjoint PROPERTIES PREFIX "")
 if (WIN32)
 	set_target_properties(pyjoint PROPERTIES SUFFIX ".pyd")
 endif()
-target_link_libraries(pyjoint joint-python-core)
+target_link_libraries(pyjoint joint joint-python-core)
+
+################################################################################
+
+set(PY_JOINT_LOADER_SRC
+	pyjoint_loader/Globals.cpp
+	pyjoint_loader/PyJointLoader.cpp
+)
+
+add_library(pyjoint_loader SHARED ${PY_JOINT_LOADER_SRC})
+set_target_properties(pyjoint_loader PROPERTIES PREFIX "")
+if (WIN32)
+	set_target_properties(pyjoint_loader PROPERTIES SUFFIX ".pyd")
+endif()
+target_link_libraries(pyjoint_loader joint)

@@ -16,8 +16,6 @@ namespace joint_python {
 namespace pyjoint
 {
 
-	extern PyObject* g_error;
-
 #define PYJOINT_CPP_WRAP_BEGIN \
 			try { \
 
@@ -26,7 +24,7 @@ namespace pyjoint
 			} \
 			catch (const std::exception& ex) { \
 				GetLogger().Error() << __func__ << " failed: " << ex; \
-				PyErr_SetString(g_error, ex.what()); \
+				PyErr_SetString(PyExc_RuntimeError, ex.what()); \
 				__VA_ARGS__ \
 				return RetError_; \
 			}

@@ -44,7 +44,8 @@ namespace pyjoint
 		PyObjectHolder py_proxy_type(PyObject_GetAttrString(py_interface, "proxy"));
 		PYTHON_CHECK(py_proxy_type, "No proxy attribute");
 
-		PyObjectHolder result(PyObject_CallObject(py_proxy_type, Py_BuildValue("(O)", result_obj.Get())));
+		PyObjectHolder py_params(Py_BuildValue("(O)", result_obj.Get()));
+		PyObjectHolder result(PyObject_CallObject(py_proxy_type, py_params));
 		PYTHON_CHECK(result, std::string("Could not create ") + interface_id.GetContent() + " proxy");
 
 		PYJOINT_CPP_WRAP_END(result.Release(), NULL)

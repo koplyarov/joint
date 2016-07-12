@@ -8,19 +8,13 @@ sys.path.append('build/bin/Debug')
 
 from Tests_adapters import *
 import pyjoint
+import pyjoint_loader
 
-m = pyjoint.Module('python', 'Component')
-obj = joint_IObject_proxy(m.GetRootObject('GetComponent'))
+m = pyjoint_loader.LoadModule('python', 'Tests')
+obj = joint_IObject_proxy(m.GetRootObject('GetBasicTests'))
 
-p = pyjoint.Cast(obj, test_IPoint)
-print(p.GetX())
-print(p.GetY())
+t = pyjoint.Cast(obj, test_IBasicTests)
+print(t.ReturnI32())
 
-sr = pyjoint.Cast(obj, test_IStringRepresentable)
-print(sr.ToString())
-
-del obj
-del p
-del sr
-
+del t
 del m

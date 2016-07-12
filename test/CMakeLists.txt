@@ -30,7 +30,7 @@ target_link_libraries(test-core ${CMAKE_THREAD_LIBS_INIT})
 
 
 include(${CMAKE_SOURCE_DIR}/joint.cmake)
-joint_import_directories(${CMAKE_SOURCE_DIR}/core/idl)
+joint_import_directories(${CMAKE_SOURCE_DIR}/joint/idl)
 
 joint_generate_adapters(python ${CMAKE_CURRENT_SOURCE_DIR}/python/Tests_adapters.py idl/Tests.idl)
 add_custom_target(test-adapters ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/python/Tests_adapters.py)
@@ -40,4 +40,4 @@ add_custom_target(test-adapters2 ALL DEPENDS Tests_adapters.hpp)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_executable(joint-test test.cpp)
-target_link_libraries(joint-test test-core joint-python)
+target_link_libraries(joint-test test-core joint)

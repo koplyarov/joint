@@ -87,7 +87,8 @@ namespace joint_python
 				return GetPythonErrorMessageFallback(type, value, traceback);
 			}
 
-			PyObjectHolder py_result(PyObject_CallObject(py_function, Py_BuildValue("(O,O,O)", type, value, traceback)));
+			PyObjectHolder py_params(Py_BuildValue("(O,O,O)", type, value, traceback));
+			PyObjectHolder py_result(PyObject_CallObject(py_function, py_params));
 			if (!py_result)
 			{
 				GetLogger().Warning() << "format_exception in python module traceback invokation failed";

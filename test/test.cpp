@@ -1,7 +1,7 @@
 #include <iostream>
 #include <memory>
 
-#include <../bindings/python/JointPython.h>
+//#include <../bindings/python/JointPython.h>
 #include <Tests_adapters.hpp>
 #include <test/core/Tests.hpp>
 
@@ -38,16 +38,12 @@ int main()
 {
 	try
 	{
-		Joint_SetLogLevel(JOINT_LOGLEVEL_WARNING);
+		//Joint_BindingHandle b;
+		//JOINT_CALL( JointPython_MakeBinding(&b) );
+		//joint::BindingHolder py(b);
 
-		JOINT_CALL( JointPython_Register() );
-
-		{
-			Tests t(joint::Module("python", "Tests"));
-			t.RunBasicTests();
-		}
-
-		JOINT_CALL( JointPython_Unregister() );
+		Tests t(joint::Module("python", "Tests"));
+		t.RunBasicTests();
 	}
 	catch (const std::exception& ex)
 	{

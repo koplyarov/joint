@@ -1,5 +1,5 @@
-#ifndef JOINT_JOINT_H
-#define JOINT_JOINT_H
+#ifndef JOINT_JOINTCORE_H
+#define JOINT_JOINTCORE_H
 
 
 #include <stdint.h>
@@ -193,10 +193,10 @@ extern "C"
 	};
 
 
-	JOINT_CORE_API Joint_Error Joint_RegisterBinding(Joint_BindingDesc desc, void* userData, Joint_BindingHandle* outBinding);
-	JOINT_CORE_API Joint_Error Joint_UnregisterBinding(Joint_BindingHandle handle);
+	JOINT_CORE_API Joint_Error Joint_MakeBinding(Joint_BindingDesc desc, void* userData, Joint_BindingHandle* outBinding);
+	JOINT_CORE_API Joint_Error Joint_ReleaseBinding(Joint_BindingHandle binding);
 
-	JOINT_CORE_API Joint_Error Joint_LoadModule(const char* bindingName, const char* moduleName, Joint_ModuleHandle* outModule);
+	JOINT_CORE_API Joint_Error Joint_LoadModule(Joint_BindingHandle binding, const char* moduleName, Joint_ModuleHandle* outModule);
 	JOINT_CORE_API Joint_Error Joint_UnloadModule(Joint_ModuleHandle handle);
 
 	JOINT_CORE_API Joint_Error Joint_GetRootObject(Joint_ModuleHandle module, const char* getterName, Joint_ObjectHandle* outObject);

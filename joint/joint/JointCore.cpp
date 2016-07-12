@@ -1,8 +1,7 @@
 #include <joint/Joint.h>
-
 #include <joint/JointConfig.h>
-#include <joint/core/JointCore.hpp>
 #include <joint/devkit/Logger.hpp>
+#include <joint/core/JointStructs.h>
 #include <joint/utils/CppWrappers.hpp>
 #include <joint/utils/JointException.hpp>
 #include <joint/utils/MakeUnique.hpp>
@@ -62,7 +61,6 @@ static void DefaultLogCallback(Joint_LogLevel logLevel, const char* subsystem, c
 }
 
 
-static joint::JointCore               g_core;
 static std::mutex                     g_mutex;
 static Joint_LogCallback_Func*        g_logCallback = &DefaultLogCallback;
 static std::atomic<Joint_LogLevel>    g_logLevel(JOINT_LOGLEVEL_DEBUG);
@@ -139,43 +137,57 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_RegisterBinding(Joint_BindingDesc desc, void* userData, Joint_BindingHandle* outBinding)
+	Joint_Error Joint_MakeBinding(Joint_BindingDesc desc, void* userData, Joint_BindingHandle* outBinding)
 	{
 		JOINT_CPP_WRAP_BEGIN
+
+		GetLogger().Info() << "MakeBinding(name: " << desc.name << ")";
 
 		JOINT_CHECK(outBinding, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(desc.name != nullptr, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(desc.invokeMethod != nullptr, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(desc.releaseObject != nullptr, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(desc.castObject != nullptr, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(desc.getRootObject != nullptr, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(desc.loadModule != nullptr, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(desc.unloadModule != nullptr, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(desc.deinitBinding != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 
-		*outBinding = g_core.RegisterBinding(desc, userData);
-		GetLogger().Info() << "RegisterBinding(name: " << desc.name << "): " << *outBinding;
-
-		JOINT_CPP_WRAP_END
-	}
-
-
-	Joint_Error Joint_UnregisterBinding(Joint_BindingHandle handle)
-	{
-		JOINT_CPP_WRAP_BEGIN
-
-		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
-
-		GetLogger().Info() << "UnregisterBinding(binding: " << handle << ")";
-		g_core.UnregisterBinding(handle);
+		*outBinding = new Joint_Binding{userData, desc};
 
 		JOINT_CPP_WRAP_END
 	}
 
 
-	Joint_Error Joint_LoadModule(const char* bindingName, const char* moduleName, Joint_ModuleHandle* outModule)
+	Joint_Error Joint_ReleaseBinding(Joint_BindingHandle binding)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		GetLogger().Info() << "LoadModule(bindingName: \"" << bindingName << "\", moduleName: \"" << moduleName << "\")";
+		GetLogger().Info() << "ReleaseBinding(binding: " << binding << " (userData: " << (binding ? binding->userData : NULL) << ")" << ")";
 
-		JOINT_CHECK(bindingName, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(binding != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_LoadModule(Joint_BindingHandle binding, const char* moduleName, Joint_ModuleHandle* outModule)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		GetLogger().Info() << "LoadModule(binding: " << binding << " (userData: " << (binding ? binding->userData : NULL) << "), moduleName: \"" << moduleName << "\")";
+
+		JOINT_CHECK(binding != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(moduleName, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(outModule, JOINT_ERROR_INVALID_PARAMETER);
 
-		*outModule = g_core.LoadModule(bindingName, moduleName);
+		Joint_ModuleHandleInternal internal = JOINT_NULL_HANDLE;
+		Joint_Error ret = binding->desc.loadModule(binding->userData, moduleName, &internal);
+		JOINT_CHECK(ret == JOINT_ERROR_NONE, JOINT_ERROR_NO_SUCH_MODULE);
+		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
+
+		*outModule = new Joint_Module{ internal, binding };
+
 		GetLogger().Debug() << "  LoadModule.outModule: " << *outModule;
 
 		JOINT_CPP_WRAP_END
@@ -186,10 +198,13 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
+		GetLogger().Info() << "UnloadModule(module: " << handle << ")";
+
 		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 
-		GetLogger().Info() << "UnloadModule(module: " << handle << ")";
-		g_core.UnloadModule(handle);
+		Joint_Error ret = handle->binding->desc.unloadModule(handle->binding->userData, handle->internal);
+		delete handle;
+		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 
 		JOINT_CPP_WRAP_END
 	}

@@ -42,6 +42,9 @@ namespace joint_python
 
 		void Reset(PyObject* obj = nullptr)
 		{
+			if (_obj == obj)
+				return;
+
 			if (_obj)
 				Py_DECREF(_obj);
 
@@ -57,6 +60,8 @@ namespace joint_python
 
 		operator PyObject*() const { return _obj; }
 		PyObject* Get() const { return _obj; }
+
+		PyObject** operator&() { return &_obj; }
 	};
 
 }

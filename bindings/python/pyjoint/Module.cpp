@@ -80,14 +80,10 @@ namespace pyjoint
 	{
 		PYJOINT_CPP_WRAP_BEGIN
 
-		const char* binding_name;
-		const char* module_name;
-
-		PYTHON_CHECK(PyArg_ParseTuple(args, "ss", &binding_name, &module_name), "Could not parse arguments");
-
-		Joint_ModuleHandle handle;
-		Joint_Error ret = Joint_LoadModule(binding_name, module_name, &handle);
-		NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_LoadModule failed: ") + Joint_ErrorToString(ret)).c_str());
+		PyObject* py_module_handle;
+		PYTHON_CHECK(PyArg_ParseTuple(args, "O", &py_module_handle), "Could not parse arguments");
+		NATIVE_CHECK(PyCapsule_IsValid(py_module_handle, "Joint.Module"), "Could not unwrap joint module handle");
+		Joint_ModuleHandle handle = reinterpret_cast<Joint_ModuleHandle>(PyCapsule_GetPointer(py_module_handle, "Joint.Module"));
 
 		reinterpret_cast<Module*>(self)->handle = handle;
 
