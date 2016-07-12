@@ -1,7 +1,6 @@
 #include <iostream>
 #include <memory>
 
-//#include <../bindings/python/JointPython.h>
 #include <Tests_adapters.hpp>
 #include <test/core/Tests.hpp>
 
@@ -38,10 +37,6 @@ int main()
 {
 	try
 	{
-		//Joint_BindingHandle b;
-		//JOINT_CALL( JointPython_MakeBinding(&b) );
-		//joint::BindingHolder py(b);
-
 		Tests t(joint::Module("python", "Tests"));
 		t.RunBasicTests();
 	}

@@ -23,7 +23,7 @@ set(JOINT_PYTHON_CORE_SRC
 )
 
 add_library(joint-python-core SHARED ${JOINT_PYTHON_CORE_SRC})
-target_link_libraries(joint-python-core joint-core ${PYTHON_LIBRARIES})
+target_link_libraries(joint-python-core joint ${PYTHON_LIBRARIES})
 
 ################################################################################
 
@@ -59,4 +59,4 @@ set_target_properties(pyjoint_loader PROPERTIES PREFIX "")
 if (WIN32)
 	set_target_properties(pyjoint_loader PROPERTIES SUFFIX ".pyd")
 endif()
-target_link_libraries(pyjoint_loader joint)
+target_link_libraries(pyjoint_loader joint-loader)

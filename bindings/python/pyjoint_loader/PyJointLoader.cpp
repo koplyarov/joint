@@ -1,7 +1,12 @@
+#include <joint/JointLoader.h>
+#include <joint/devkit/Logger.hpp>
+
 #include <Python.h>
 #include <pyjoint_loader/Globals.hpp>
 #include <utils/PyObjectHolder.hpp>
 
+
+JOINT_DEVKIT_LOGGER("Joint.Python.PyJointLoader")
 
 extern "C"
 {
@@ -41,6 +46,13 @@ static struct PyModuleDef g_module = {
 	PyMODINIT_FUNC initpyjoint_loader(void)
 #endif
 	{
+		Joint_Error ret = Joint_Init();
+		if (ret != JOINT_ERROR_NONE)
+		{
+			GetLogger().Error() << "Joint_Init failed: " << Joint_ErrorToString(ret);
+			RETURN_ERROR;
+		}
+
 		using namespace joint_python;
 		using namespace joint_python::pyjoint_loader;
 

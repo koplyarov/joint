@@ -5,7 +5,7 @@
 #include <joint.cpp/Ptr.hpp>
 #include <joint.cpp/detail/Dummy.hpp>
 #include <joint.cpp/detail/JointCall.hpp>
-#include <joint/Joint.h>
+#include <joint/JointLoader.h>
 
 
 namespace joint

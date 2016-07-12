@@ -1,4 +1,4 @@
-project(joint-core)
+project(joint)
 
 find_package(Threads)
 
@@ -14,17 +14,17 @@ endif()
 ################################################################################
 
 set(JOINT_CORE_SRC
-	joint/JointCore.cpp
+	joint/Joint.cpp
 )
 
-add_library(joint-core SHARED ${JOINT_CORE_SRC})
-target_link_libraries(joint-core ${CMAKE_THREAD_LIBS_INIT})
+add_library(joint SHARED ${JOINT_CORE_SRC})
+target_link_libraries(joint ${CMAKE_THREAD_LIBS_INIT})
 
 ################################################################################
 
 set(JOINT_SRC
-	joint/Joint.cpp
+	joint/JointLoader.cpp
 )
 
-add_library(joint SHARED ${JOINT_SRC})
-target_link_libraries(joint joint-core joint-python ${CMAKE_THREAD_LIBS_INIT})
+add_library(joint-loader SHARED ${JOINT_SRC})
+target_link_libraries(joint-loader joint joint-python ${CMAKE_THREAD_LIBS_INIT})

@@ -40,4 +40,4 @@ add_custom_target(test-adapters2 ALL DEPENDS Tests_adapters.hpp)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_executable(joint-test test.cpp)
-target_link_libraries(joint-test test-core joint)
+target_link_libraries(joint-test test-core joint-loader)

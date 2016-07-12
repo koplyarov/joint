@@ -1,6 +1,6 @@
 #include <pyjoint_loader/Globals.hpp>
 
-#include <joint/Joint.h>
+#include <joint/JointLoader.h>
 #include <joint/devkit/Logger.hpp>
 
 #include <pyjoint/Common.hpp>
