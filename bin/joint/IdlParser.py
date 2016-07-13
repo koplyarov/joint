@@ -1,6 +1,13 @@
 from pyparsing import *
 import os
 
+class IdlParserException(Exception):
+    def __init__(self, message, line, file, lineno, col):
+        self.message = message
+        self.line = line
+        self.file = file
+        self.lineno = lineno
+        self.col = col
 
 class IdlParser:
     def __init__(self):
@@ -28,6 +35,10 @@ class IdlParser:
 
         self.grammar = imports + package
         self.grammar.ignore(cppStyleComment)
+        self.grammar.parseWithTabs()
 
     def parseFile(self, file):
-        return self.grammar.parseFile(file).asDict()
+        try:
+            return self.grammar.parseFile(file).asDict()
+        except ParseException as e:
+            raise IdlParserException(str(e), e.line, file, e.lineno, e.col)

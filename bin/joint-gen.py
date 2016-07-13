@@ -32,6 +32,13 @@ try:
         out_file.write(l)
         out_file.write('\n')
 
+except joint.IdlParserException as e:
+    print('{}:{}:{}: {}'.format(e.file, e.lineno, e.col, e.message))
+    stripped_line = e.line.lstrip()
+    print(stripped_line)
+    print('{}^'.format(' ' * (e.col - 1 - (len(e.line) - len(stripped_line)))))
+    exit(1)
+
 except joint.SemanticGraphException as e:
     print(e.message)
     exit(1)
