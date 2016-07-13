@@ -32,15 +32,17 @@ try:
         out_file.write(l)
         out_file.write('\n')
 
-except joint.IdlParserException as e:
-    print('{}:{}:{}: {}'.format(e.file, e.lineno, e.col, e.message))
-    stripped_line = e.line.lstrip()
-    print(stripped_line)
-    print('{}^'.format(' ' * (e.col - 1 - (len(e.line) - len(stripped_line)))))
-    exit(1)
-
-except joint.SemanticGraphException as e:
-    print(e.message)
+except (joint.IdlParserException, joint.SemanticGraphException) as e:
+    l = e.location
+    if l:
+        print('{}:{}:{}: {}'.format(l['file'], l['lineno'], l['col'], e.message))
+        with open(l['file']) as f:
+            line = f.read().splitlines()[l['lineno'] - 1]
+        stripped_line = line.lstrip()
+        print(stripped_line)
+        print('{}^'.format(' ' * (l['col'] - 1 - (len(line) - len(stripped_line)))))
+    else:
+        print(e.message)
     exit(1)
 
 except CmdLineException as e:

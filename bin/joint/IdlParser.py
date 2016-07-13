@@ -2,20 +2,19 @@ from pyparsing import *
 import os
 
 class IdlParserException(Exception):
-    def __init__(self, message, line, file, lineno, col):
+    def __init__(self, message, location):
         self.message = message
-        self.line = line
-        self.file = file
-        self.lineno = lineno
-        self.col = col
+        self.location = location
 
 class IdlParser:
     def __init__(self):
-        import_entry = Suppress('import') + SkipTo(LineEnd())
+        self.locator = Empty().setParseAction(self.locatorParseAction)('location')
+
+        import_entry = Group(Suppress('import') - self.locator + SkipTo(LineEnd())('path'))
         imports = ZeroOrMore(import_entry)('imports')
 
-        type = Word(alphas, alphanums + '_')
-        identifier = Word(alphas, alphanums + '_')
+        type = self.locator + (Word(alphas, alphanums) + ZeroOrMore(Suppress('.') - Word(alphas, alphanums)))('name')
+        identifier = Word(alphas, alphanums)
 
         generic = Suppress('<') + (type + ZeroOrMore(Suppress(',') + type))('params') + Suppress('>')
 
@@ -25,11 +24,9 @@ class IdlParser:
         methodList = ZeroOrMore(Group(method))
 
         package = Group(identifier + ZeroOrMore(Suppress('.') + identifier))
-        #fullyQualifiedType = package('package') + Suppress('.') + type('type') # TODO: ???
-        fullyQualifiedType = Group(type)('package') + Suppress('.') + type('type')
 
-        basesList = Group(fullyQualifiedType) + ZeroOrMore(Suppress(',') + Group(fullyQualifiedType))
-        interface = Suppress('interface') + identifier('name') + Optional(Suppress(':') + basesList)('bases') + Suppress('{') + Group(methodList)('methods') + Suppress('}')
+        basesList = Group(type) + ZeroOrMore(Suppress(',') + Group(type))
+        interface = Suppress('interface') - identifier('name') + Optional(Suppress(':') - basesList)('bases') + Suppress('{') + Group(methodList)('methods') + Suppress('}')
 
         package = Suppress('package') + package('package') + Suppress('{') + Group(ZeroOrMore(Group(interface)))('interfaces') + Suppress('}')
 
@@ -37,8 +34,15 @@ class IdlParser:
         self.grammar.ignore(cppStyleComment)
         self.grammar.parseWithTabs()
 
+    def locatorParseAction(self, s, l, t):
+        str_head = s[:l]
+        return { 'lineno': str_head.count('\n') + 1, 'col': len(str_head) - str_head.rfind('\n'), 'file': self._file }
+
     def parseFile(self, file):
         try:
+            self._file = file
             return self.grammar.parseFile(file).asDict()
-        except ParseException as e:
-            raise IdlParserException(str(e), e.line, file, e.lineno, e.col)
+        except (ParseException, ParseSyntaxException) as e:
+            raise IdlParserException(str(e), { 'lineno': e.lineno, 'file': file, 'col': e.col})
+        finally:
+            self._file = None

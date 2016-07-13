@@ -2,6 +2,11 @@ import os
 from .IdlParser import IdlParser
 
 
+class SemanticGraphException:
+    def __init__(self, location, message):
+        self.location = location
+        self.message = message
+
 class Parameter:
     def __init__(self, index, name, type):
         self.index = index
@@ -20,6 +25,8 @@ class Method:
 class Interface:
     def __init__(self, name, packageNameList):
         self.name = name
+        self.variantName = 'obj'
+        self.index = 14
         self.packageNameList = packageNameList
         self.fullname = '{}.{}'.format('.'.join(packageNameList), name)
         self.methods = []
@@ -38,7 +45,7 @@ class Package:
     def findInterface(self, name):
         result = next((ifc for ifc in self.interfaces if ifc.name == name), None)
         if not result:
-            raise RuntimeError('Interface {}.{} was not declared!'.format('.'.join(self.nameList), name))
+            raise LookupError('Interface {}.{} was not declared!'.format('.'.join(self.nameList), name))
         return result
 
 
@@ -85,21 +92,28 @@ class SemanticGraph:
     def findPackage(self, nameList):
         result = next((p for p in self.packages if p.nameList == nameList), None)
         if not result:
-            raise RuntimeError('Package {} was not declared!'.format('.'.join(nameList)))
+            raise LookupError('Package {} was not declared!'.format('.'.join(nameList)))
         return result
 
     def findInterface(self, packageNameList, interfaceName):
         return self.findPackage(packageNameList).findInterface(interfaceName)
 
-    def typeFromString(self, currentPackage, typeStr):
+    def makeType(self, currentPackage, typeEntry):
+        typeList = typeEntry['name']
         try:
-            return self.builtInTypes[typeStr]
+            return self.builtInTypes['.'.join(typeList)]
         except KeyError:
-           raise RuntimeError('Unknown type: {}'.format(typeStr))
+            pkg = typeList[:-1]
+            typeName = typeList[-1]
+            for x in xrange(len(currentPackage.nameList), -1, -1):
+                pkg_to_check = currentPackage.nameList[:x] + pkg
+                try:
+                    p = self.findPackage(pkg_to_check)
+                    return p.findInterface(typeName)
+                except LookupError:
+                    continue
 
-class SemanticGraphException:
-    def __init__(self, message):
-        self.message = message
+            raise SemanticGraphException(typeEntry['location'], 'Unknown type: {}'.format('.'.join(typeList)))
 
 class SemanticGraphBuilder:
     def __init__(self, importDirectories):
@@ -132,11 +146,11 @@ class SemanticGraphBuilder:
                 ifc = pkg.findInterface(ifc_ast['name'])
                 m_index = 0
                 for m_ast in ifc_ast['methods']:
-                    m = Method(m_index, m_ast['name'], semanticsGraph.typeFromString(pkg, m_ast['retType']))
+                    m = Method(m_index, m_ast['name'], semanticsGraph.makeType(pkg, m_ast['retType']))
                     m_index += 1
                     p_index = 0
                     for p_ast in m_ast['params']:
-                        p = Parameter(p_index, p_ast['name'], semanticsGraph.typeFromString(pkg, p_ast['type']))
+                        p = Parameter(p_index, p_ast['name'], semanticsGraph.makeType(pkg, p_ast['type']))
                         p_index += 1
                         m.params.append(p)
                     ifc.methods.append(m)
@@ -151,16 +165,17 @@ class SemanticGraphBuilder:
             for idl in ast['imports']:
                 yield self._findIdlFile(idl)
 
-    def _findIdlFile(self, filename):
+    def _findIdlFile(self, importEntry):
+        path = importEntry['path']
         for import_dir in [ '' ] + [ '{}/'.format(d) for d in self._importDirectories ]:
-            idl_file = '{}{}'.format(import_dir, filename)
+            idl_file = '{}{}'.format(import_dir, path)
             if os.path.isfile(idl_file):
                 return idl_file
-        raise SemanticGraphException('Cannot find idl file: {}'.format(filename))
+        raise SemanticGraphException(importEntry['location'], 'Cannot find idl file: {}'.format(path))
 
     def _getFiles(self, filenames):
         idl_files = []
-        for idl in [ idl for f in self._predefinedImports + filenames for idl in self._getDependencies(f) ]:
+        for idl in [ idl for f in [ { 'path': p, 'location': None } for p in self._predefinedImports + filenames ] for idl in self._getDependencies(f) ]:
             if not idl in idl_files:
                 idl_files.append(idl)
         return idl_files
