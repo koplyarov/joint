@@ -97,6 +97,10 @@ class SemanticGraph:
         except KeyError:
            raise RuntimeError('Unknown type: {}'.format(typeStr))
 
+class SemanticGraphException:
+    def __init__(self, message):
+        self.message = message
+
 class SemanticGraphBuilder:
     def __init__(self, importDirectories):
         self._importDirectories = importDirectories
@@ -152,7 +156,7 @@ class SemanticGraphBuilder:
             idl_file = '{}{}'.format(import_dir, filename)
             if os.path.isfile(idl_file):
                 return idl_file
-        raise CmdLineException('Cannot find idl file: {}'.format(filename))
+        raise SemanticGraphException('Cannot find idl file: {}'.format(filename))
 
     def _getFiles(self, filenames):
         idl_files = []

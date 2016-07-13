@@ -32,6 +32,10 @@ try:
         out_file.write(l)
         out_file.write('\n')
 
+except joint.SemanticGraphException as e:
+    print(e.message)
+    exit(1)
+
 except CmdLineException as e:
     print(e.message)
     exit(1)
