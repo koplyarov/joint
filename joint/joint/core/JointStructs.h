@@ -12,6 +12,10 @@
 extern "C"
 {
 
+	struct Joint_Context
+	{
+	};
+
 	struct Joint_Binding
 	{
 		void*                       userData;
@@ -23,6 +27,11 @@ extern "C"
 	{
 		Joint_ModuleHandleInternal  internal;
 		Joint_Binding*        	    binding;
+		std::atomic<int>			refCount;
+
+		Joint_Module(Joint_ModuleHandleInternal internal, Joint_Binding* binding)
+			: internal(internal), binding(binding), refCount(1)
+		{ }
 	};
 
 

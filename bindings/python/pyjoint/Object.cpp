@@ -68,8 +68,7 @@ namespace pyjoint
 	{
 		PYJOINT_CPP_WRAP_BEGIN
 
-		Object* self = (Object*)type->tp_alloc(type, 0);
-		PYTHON_CHECK(self, "Could not create Object");
+		Object* self = PY_OBJ_CHECK((Object*)type->tp_alloc(type, 0));
 
 		self->handle = JOINT_NULL_HANDLE;
 
@@ -115,8 +114,7 @@ namespace pyjoint
 
 		for (int i = 2; i < tuple_size; ++i)
 		{
-			PyObject* py_param_tuple = PyTuple_GetItem(args, i);
-			PYTHON_CHECK(py_param_tuple, "Could not parse arguments"); // TODO: check if there are any leaks
+			PyObject* py_param_tuple = PY_OBJ_CHECK(PyTuple_GetItem(args, i));
 
 			Joint_Variant v = { };
 			v.type = FromPyLong<Joint_Type>(PyTuple_GetItem(py_param_tuple, 0));
@@ -156,7 +154,7 @@ namespace pyjoint
 		}));
 
 		PyObjectHolder result;
-		switch (ret_type)
+		switch (ret_variant.type)
 		{
 		case JOINT_TYPE_VOID:
 			Py_RETURN_NONE;
@@ -168,12 +166,34 @@ namespace pyjoint
 			result.Reset(PyUnicode_FromString(ret_variant.value.utf8));
 			break;
 		case JOINT_TYPE_OBJ:
-			result.Reset(PyObject_CallObject((PyObject*)&Object_type, NULL));
-			PYTHON_CHECK(result, "Could not create joint.Object");
+			result.Reset(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&Object_type, NULL)));
 			reinterpret_cast<Object*>(result.Get())->handle = ret_variant.value.obj;
 			break;
+		case JOINT_TYPE_EXCEPTION:
+			{
+				Joint_SizeT buf_size = 0;
+				std::vector<char> buf;
+
+				Joint_Error ret = Joint_GetExceptionMessageSize(ret_variant.value.ex, &buf_size);
+				if (ret != JOINT_ERROR_NONE)
+				{
+					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C++", (std::string("Joint_GetExceptionMessageSize failed: ") + Joint_ErrorToString(ret)).c_str());
+					throw std::runtime_error("Could not obtain joint exception message!");
+				}
+
+				buf.resize(buf_size);
+
+				ret = Joint_GetExceptionMessage(ret_variant.value.ex, buf.data(), buf.size());
+				if (ret != JOINT_ERROR_NONE)
+				{
+					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C++", (std::string("Joint_GetExceptionMessage failed: ") + Joint_ErrorToString(ret)).c_str());
+					throw std::runtime_error("Could not obtain joint exception message!");
+				}
+				throw std::runtime_error(buf.data());
+			}
+			break;
 		default:
-			NATIVE_THROW("Unknown return type: " + std::to_string(ret_type));
+			NATIVE_THROW("Unknown return type: " + std::to_string(ret_variant.type));
 		}
 
 		PYJOINT_CPP_WRAP_END(result.Release(), NULL)

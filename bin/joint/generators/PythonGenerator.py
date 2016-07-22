@@ -1,3 +1,5 @@
+from ..SemanticGraph import Interface
+
 class Common:
     def __init__(self):
         self.__builtInTypes = { 'void': 1, 'bool': 2, 'i8': 3, 'u8': 4, 'i16': 5, 'u16': 6, 'i32': 7, 'u32': 8, 'i64': 9, 'u64': 10, 'f32': 11, 'f64': 12, 'string': 13 }
@@ -53,12 +55,13 @@ class PythonGenerator:
                 continue
             yield ''
             yield '\tdef {}(self{}):'.format(m.name, ''.join(', {}'.format(p.name) for p in m.params))
-            yield '\t\t{}self.InvokeMethod({}, {}, {})'.format(
-                        '' if m.retType.name == 'void' else 'return ',
-                        m.index,
-                        m.retType.index,
-                        ', '.join([ '({}, {})'.format(p.type.index, p.name) for p in m.params])
-                    )
+            method_invokation = 'self.InvokeMethod({}, {}{})'.format( m.index, m.retType.index, ''.join([ ', ({}, {})'.format(p.type.index, p.name) for p in m.params]))
+            if m.retType.name == 'void':
+                yield '\t\t{}'.format(method_invokation)
+            elif m.retType.variantName == 'obj':
+                yield '\t\treturn {}_proxy({})'.format(self._mangleType(m.retType), method_invokation)
+            else:
+                yield '\t\treturn {}'.format(method_invokation)
 
     def _generateInterface(self, ifc):
         mangled_name = self._mangleType(ifc)
@@ -72,7 +75,7 @@ class PythonGenerator:
         yield '\tproxy = {}_proxy'.format(mangled_name)
 
     def _methodNeedsProxy(self, m):
-        return m.params
+        return m.params or isinstance(m.retType, Interface)
 
     def _mangleType(self, ifc):
         return '{}_{}'.format('_'.join(ifc.packageNameList), ifc.name)

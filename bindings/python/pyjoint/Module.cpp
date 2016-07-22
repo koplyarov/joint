@@ -3,6 +3,7 @@
 #include <joint/devkit/Logger.hpp>
 
 #include <utils/PythonUtils.hpp>
+#include <binding/Object.hpp>
 
 
 namespace joint_python {
@@ -15,9 +16,11 @@ namespace pyjoint
 	static int Module_init(PyObject* self, PyObject* args, PyObject* kwds);
 	static void Module_del(PyObject* self);
 	static PyObject* Module_GetRootObject(PyObject* self, PyObject* args, PyObject* kwds);
+	static PyObject* Module_CreateComponent(PyObject* self, PyObject* args, PyObject* kwds);
 
 	static PyMethodDef Module_methods[] = {
 		{"GetRootObject", (PyCFunction)Module_GetRootObject, METH_VARARGS, "GetRootObject" },
+		{"CreateComponent", (PyCFunction)Module_CreateComponent, METH_VARARGS, "CreateComponent" },
 		{NULL}  /* Sentinel */
 	};
 
@@ -67,8 +70,7 @@ namespace pyjoint
 	{
 		PYJOINT_CPP_WRAP_BEGIN
 
-		Module* self = (Module*)type->tp_alloc(type, 0);
-		PYTHON_CHECK(self, "Could not create Module");
+		Module* self = PY_OBJ_CHECK((Module*)type->tp_alloc(type, 0));
 
 		self->handle = JOINT_NULL_HANDLE;
 
@@ -98,9 +100,9 @@ namespace pyjoint
 		auto m = reinterpret_cast<Module*>(self);
 		if (m && m->handle)
 		{
-			Joint_Error ret = Joint_UnloadModule(m->handle);
+			Joint_Error ret = Joint_DecRefModule(m->handle);
 			if (ret != JOINT_ERROR_NONE)
-				GetLogger().Error() << "Joint_UnloadModule failed: " << Joint_ErrorToString(ret);
+				GetLogger().Error() << "Joint_DecRefModule failed: " << Joint_ErrorToString(ret);
 			m->handle = JOINT_NULL_HANDLE;
 		}
 
@@ -122,12 +124,58 @@ namespace pyjoint
 		Joint_Error ret = Joint_GetRootObject(m->handle, getter_name, &obj);
 		NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_GetRootObject failed: ") + Joint_ErrorToString(ret)).c_str());
 
-		PyObjectHolder py_obj(PyObject_CallObject((PyObject*)&Object_type, NULL));
-		PYTHON_CHECK(py_obj, "Could not create joint.Object");
+		PyObjectHolder py_obj(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&Object_type, NULL)));
 
 		reinterpret_cast<Object*>(py_obj.Get())->handle = obj;
 
 		PYJOINT_CPP_WRAP_END(py_obj.Release(), Py_None, Py_INCREF(Py_None);)
+	}
+
+
+	static PyObject* Module_CreateComponent(PyObject* self, PyObject* args, PyObject* kwds)
+	{
+		PYJOINT_CPP_WRAP_BEGIN
+
+		auto m = reinterpret_cast<Module*>(self);
+		NATIVE_CHECK(m && m->handle, "Uninitialized module object");
+
+		auto tuple_size = PyTuple_Size(args);
+		NATIVE_CHECK(tuple_size >= 2, "Could not parse arguments");
+
+		PyObject* interface = PY_OBJ_CHECK(PyTuple_GetItem(args, 0));
+		PyObject* type = PY_OBJ_CHECK(PyTuple_GetItem(args, 1));
+
+		auto args_count = tuple_size - 2;
+		PyObjectHolder py_args(PY_OBJ_CHECK(PyTuple_New(args_count)));
+		for (auto i = 0; i < args_count; ++i)
+		{
+			PyObjectHolder arg(PY_OBJ_CHECK(PyTuple_GetItem(args, i + 2)));
+			Py_INCREF(arg);
+
+			if (PyTuple_SetItem(py_args, i, arg))
+				PYTHON_THROW("Could not set tuple item");
+			arg.Release();
+		}
+
+		PyObjectHolder component_impl(PyObject_CallObject(type, py_args));
+
+		PyObjectHolder accessor_type(PY_OBJ_CHECK(PyObject_GetAttrString(interface, "accessor")));
+		PyObjectHolder accessor_ctor_args(PY_OBJ_CHECK(Py_BuildValue("(O)", (PyObject*)component_impl)));
+		PyObjectHolder accessor(PY_OBJ_CHECK(PyObject_CallObject(accessor_type, accessor_ctor_args)));
+
+		Joint_ObjectHandleInternal obj_internal = new binding::Object(accessor);
+		Joint_ObjectHandle obj = JOINT_NULL_HANDLE;
+		Joint_Error ret = Joint_CreateObject(m->handle, obj_internal, &obj);
+		NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_CreateObject failed: ") + Joint_ErrorToString(ret)).c_str());
+
+		PyObjectHolder py_obj(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&Object_type, NULL)));
+		reinterpret_cast<Object*>(py_obj.Get())->handle = obj;
+
+		PyObjectHolder proxy_type(PY_OBJ_CHECK(PyObject_GetAttrString(interface, "proxy")));
+		PyObjectHolder proxy_ctor_args(PY_OBJ_CHECK(Py_BuildValue("(O)", (PyObject*)py_obj)));
+		PyObjectHolder proxy(PY_OBJ_CHECK(PyObject_CallObject(proxy_type, proxy_ctor_args)));
+
+		PYJOINT_CPP_WRAP_END(proxy.Release(), Py_None, Py_INCREF(Py_None);)
 	}
 
 }}

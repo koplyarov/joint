@@ -10,21 +10,18 @@ namespace binding
 	Object::Object(PyObjectHolder obj)
 		: _obj(std::move(obj))
 	{
-		_methods.Reset(PyObject_GetAttrString(_obj, "methods"));
-		PYTHON_CHECK(_methods, "Could not find methods tuple");
+		_methods.Reset(PY_OBJ_CHECK(PyObject_GetAttrString(_obj, "methods")));
 	}
 
 
 	PyObjectHolder Object::InvokeMethod(size_t index, joint::ArrayView<const Joint_Variant> params)
 	{
-		PyObject* py_function = PyTuple_GetItem(_methods, index);
-		PYTHON_CHECK(py_function, "Could not find method with id " + std::to_string(index));
+		PyObject* py_function = PY_OBJ_CHECK_MSG((PyTuple_GetItem(_methods, index)), "Could not find method with id " + std::to_string(index));
 
 		PyObjectHolder py_args;
 		if (!params.empty())
 		{
-			py_args.Reset(PyTuple_New(params.size()));
-			PYTHON_CHECK(py_args, "Could not create args tuple");
+			py_args.Reset(PY_OBJ_CHECK(PyTuple_New(params.size())));
 
 			for (size_t i = 0; i < params.size(); ++i)
 			{
@@ -40,8 +37,7 @@ namespace binding
 					py_p.Reset(PyUnicode_FromString(p.value.utf8));
 					break;
 				case JOINT_TYPE_OBJ:
-					py_p.Reset(PyObject_CallObject((PyObject*)&pyjoint::Object_type, NULL));
-					PYTHON_CHECK(py_p, "Could not create joint.Object");
+					py_p.Reset(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&pyjoint::Object_type, NULL)));
 					PYTHON_CHECK(Joint_IncRefObject(p.value.obj) == JOINT_ERROR_NONE, "Joint_IncRefObject failed!");
 					reinterpret_cast<pyjoint::Object*>(py_p.Get())->handle = p.value.obj;
 					break;
@@ -54,8 +50,7 @@ namespace binding
 			}
 		}
 
-		PyObjectHolder py_result(PyObject_CallObject(py_function, py_args));
-		PYTHON_CHECK(py_result, "Could not invoke method");
+		PyObjectHolder py_result(PY_OBJ_CHECK(PyObject_CallObject(py_function, py_args)));
 		return py_result;
 	}
 

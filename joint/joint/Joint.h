@@ -100,34 +100,6 @@ extern "C"
 	};
 
 
-	struct Joint_VariantInternal
-	{
-		union
-		{
-			bool                         b;
-
-			int8_t                       i8;
-			uint8_t                      u8;
-			int16_t                      i16;
-			uint16_t                     u16;
-			int32_t                      i32;
-			uint32_t                     u32;
-			int64_t                      i64;
-			uint64_t                     u64;
-
-			float                        f32;
-			double                       f64;
-
-			const char*                  utf8;
-
-			Joint_ObjectHandleInternal   obj;
-			Joint_ExceptionHandle        ex;
-		} value;
-
-		Joint_Type type;
-	};
-
-
 	struct Joint_Variant
 	{
 		union
@@ -156,24 +128,20 @@ extern "C"
 	};
 
 
-	typedef Joint_Error Joint_ReleaseRetValue_Func(Joint_VariantInternal value);
-
-	struct Joint_RetValueInternal
-	{
-		Joint_VariantInternal           variant;
-		Joint_ReleaseRetValue_Func*     releaseValue;
-	};
+	typedef Joint_Error Joint_ReleaseRetValue_Func(Joint_Variant value);
 
 	struct Joint_RetValue
 	{
 		Joint_Variant                   variant;
-		Joint_RetValueInternal			internal;
+		Joint_ReleaseRetValue_Func*     releaseValue;
 	};
 
+	struct Joint_Context;
+	typedef Joint_Context* Joint_ContextHandle;
 
-	typedef Joint_Error Joint_GetRootObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, const char* getterName, Joint_ObjectHandleInternal* outObject);
+	typedef Joint_Error Joint_GetRootObject_Func(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, const char* getterName, Joint_ObjectHandle* outObject);
 	typedef Joint_Error Joint_ReleaseObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal object);
-	typedef Joint_Error Joint_InvokeMethod_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValueInternal* outRetValue);
+	typedef Joint_Error Joint_InvokeMethod_Func(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
 	typedef Joint_Error Joint_CastObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_InterfaceId interfaceId, Joint_ObjectHandleInternal* outRetValue);
 	typedef Joint_Error Joint_LoadModule_Func(void* bindingUserData, const char* moduleName, Joint_ModuleHandleInternal* outModule);
 	typedef Joint_Error Joint_UnloadModule_Func(void* bindingUserData, Joint_ModuleHandleInternal module);
@@ -192,12 +160,17 @@ extern "C"
 		const char*                 name;
 	};
 
+	JOINT_CORE_API Joint_Error Joint_MakeContext(Joint_ContextHandle *outJointCtx);
+	JOINT_CORE_API Joint_Error Joint_ReleaseContext(Joint_ContextHandle jointCtx);
 
 	JOINT_CORE_API Joint_Error Joint_MakeBinding(Joint_BindingDesc desc, void* userData, Joint_BindingHandle* outBinding);
 	JOINT_CORE_API Joint_Error Joint_ReleaseBinding(Joint_BindingHandle binding);
 
 	JOINT_CORE_API Joint_Error Joint_LoadModule(Joint_BindingHandle binding, const char* moduleName, Joint_ModuleHandle* outModule);
-	JOINT_CORE_API Joint_Error Joint_UnloadModule(Joint_ModuleHandle handle);
+	JOINT_CORE_API Joint_Error Joint_IncRefModule(Joint_ModuleHandle handle);
+	JOINT_CORE_API Joint_Error Joint_DecRefModule(Joint_ModuleHandle handle);
+
+	JOINT_CORE_API Joint_Error Joint_CreateObject(Joint_ModuleHandle module, Joint_ObjectHandleInternal internal, Joint_ObjectHandle* outObject);
 
 	JOINT_CORE_API Joint_Error Joint_GetRootObject(Joint_ModuleHandle module, const char* getterName, Joint_ObjectHandle* outObject);
 	JOINT_CORE_API Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);

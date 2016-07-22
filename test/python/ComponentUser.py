@@ -13,8 +13,12 @@ import pyjoint_loader
 m = pyjoint_loader.LoadModule('python', 'Tests')
 obj = joint_IObject_proxy(m.GetRootObject('GetBasicTests'))
 
-t = pyjoint.Cast(obj, test_IBasicTests)
-print(t.ReturnI32())
+#t = pyjoint.Cast(obj, test_IBasicTests)
+#print(t.ReturnI32())
+
+t = pyjoint.Cast(obj, test_IObjectTests)
+o2 = t.ReturnObject()
+o2.Method()
 
 del t
 del m

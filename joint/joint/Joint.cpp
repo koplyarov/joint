@@ -136,6 +136,28 @@ extern "C"
 	}
 
 
+	Joint_Error Joint_MakeContext(Joint_ContextHandle *outJointCtx)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		*outJointCtx = new Joint_Context;
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_ReleaseContext(Joint_ContextHandle jointCtx)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(jointCtx != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+
+		delete jointCtx;
+
+		JOINT_CPP_WRAP_END
+	}
+
+
 	Joint_Error Joint_MakeBinding(Joint_BindingDesc desc, void* userData, Joint_BindingHandle* outBinding)
 	{
 		JOINT_CPP_WRAP_BEGIN
@@ -185,7 +207,7 @@ extern "C"
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, JOINT_ERROR_NO_SUCH_MODULE);
 		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
 
-		*outModule = new Joint_Module{ internal, binding };
+		*outModule = new Joint_Module(internal, binding);
 
 		GetLogger().Debug() << "  LoadModule.outModule: " << *outModule;
 
@@ -193,17 +215,41 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_UnloadModule(Joint_ModuleHandle handle)
+	Joint_Error Joint_IncRefModule(Joint_ModuleHandle handle)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		GetLogger().Info() << "UnloadModule(module: " << handle << ")";
+		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		++handle->refCount;
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_DecRefModule(Joint_ModuleHandle handle)
+	{
+		JOINT_CPP_WRAP_BEGIN
 
 		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		auto refs = --handle->refCount;
+		if (refs == 0)
+		{
+			GetLogger().Info() << "UnloadModule(module: " << handle << ")";
+			Joint_Error ret = handle->binding->desc.unloadModule(handle->binding->userData, handle->internal);
+			delete handle;
+			JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+		}
+		JOINT_CHECK(refs >= 0, JOINT_ERROR_INVALID_PARAMETER);
 
-		Joint_Error ret = handle->binding->desc.unloadModule(handle->binding->userData, handle->internal);
-		delete handle;
-		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_CreateObject(Joint_ModuleHandle module, Joint_ObjectHandleInternal internal, Joint_ObjectHandle* outObject)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		*outObject = new Joint_Object(internal, module);
 
 		JOINT_CPP_WRAP_END
 	}
@@ -219,13 +265,10 @@ extern "C"
 		JOINT_CHECK(getterName, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(outObject, JOINT_ERROR_INVALID_PARAMETER);
 
-		Joint_ObjectHandleInternal internal = NULL;
-		Joint_Error ret = module->binding->desc.getRootObject(module->binding->userData, module->internal, getterName, &internal);
+		Joint_Error ret = module->binding->desc.getRootObject(module, module->binding->userData, module->internal, getterName, outObject);
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
-		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
-		*outObject = new Joint_Object(internal, module);
 
-		GetLogger().Debug() << "  GetRootObject.outObject: " << *outObject << " (internal: " << internal << ")";
+		GetLogger().Debug() << "  GetRootObject.outObject: " << *outObject << " (internal: " << (*outObject)->internal << ")";
 
 		JOINT_CPP_WRAP_END
 	}
@@ -241,17 +284,11 @@ extern "C"
 		JOINT_CHECK(params || paramsCount == 0, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(outRetValue, JOINT_ERROR_INVALID_PARAMETER);
 
-		Joint_RetValueInternal ret_value_internal = { };
-		Joint_Error ret = obj->module->binding->desc.invokeMethod(obj->module->binding->userData, obj->module->internal, obj->internal, methodId, params, paramsCount, retType, &ret_value_internal);
+		Joint_Error ret = obj->module->binding->desc.invokeMethod(obj->module, obj->module->binding->userData, obj->module->internal, obj->internal, methodId, params, paramsCount, retType, outRetValue);
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+		JOINT_CHECK(outRetValue->releaseValue, JOINT_ERROR_IMPLEMENTATION_ERROR);
 
-		JOINT_CHECK(ret_value_internal.releaseValue, JOINT_ERROR_IMPLEMENTATION_ERROR);
-
-		static_assert(sizeof(Joint_Variant) == sizeof(Joint_VariantInternal) && alignof(Joint_Variant) == alignof(Joint_VariantInternal), "Sizes or alignments do not match for Joint_Variant and Joint_VariantInternal");
-		memcpy(&outRetValue->internal, &ret_value_internal, sizeof(outRetValue->internal));
-		memcpy(&outRetValue->variant, &outRetValue->internal.variant, sizeof(outRetValue->variant));
-		if (outRetValue->internal.variant.type == JOINT_TYPE_OBJ)
-			outRetValue->variant.value.obj = new Joint_Object(outRetValue->internal.variant.value.obj, obj->module);
+		GetLogger().Debug() << "  InvokeMethod.outRetValue.type: " << outRetValue->variant.type;
 
 		JOINT_CPP_WRAP_END
 	}
@@ -273,9 +310,11 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		JOINT_CHECK(value.internal.releaseValue, JOINT_ERROR_INVALID_PARAMETER);
+		GetLogger().Debug() << "ReleaseRetValue(type: " << value.variant.type << ")";
 
-		return value.internal.releaseValue(value.internal.variant);
+		JOINT_CHECK(value.releaseValue, JOINT_ERROR_INVALID_PARAMETER);
+
+		return value.releaseValue(value.variant);
 
 		JOINT_CPP_WRAP_END
 	}

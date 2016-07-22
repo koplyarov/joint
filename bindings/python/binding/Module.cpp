@@ -26,10 +26,8 @@ namespace binding
 		PySys_SetArgv(0, argv);
 #endif
 
-		PyObjectHolder py_module_name(PyUnicode_FromString(moduleName.c_str()));
-		_pyModule.Reset(PyImport_Import(py_module_name));
-
-		PYTHON_CHECK(_pyModule, "Could not import python module " + moduleName);
+		PyObjectHolder py_module_name(PY_OBJ_CHECK(PyUnicode_FromString(moduleName.c_str())));
+		_pyModule.Reset(PY_OBJ_CHECK_MSG(PyImport_Import(py_module_name), "Could not import python module " + moduleName));
 
 		GetLogger().Debug() << "Loaded python module " << _moduleName;
 	}
@@ -42,14 +40,11 @@ namespace binding
 	}
 
 
-	PyObjectHolder Module::InvokeFunction(const std::string& functionName)
+	PyObjectHolder Module::InvokeFunction(const std::string& functionName, const PyObjectHolder& jointModule)
 	{
-		PyObjectHolder py_function(PyObject_GetAttrString(_pyModule, functionName.c_str()));
-		PYTHON_CHECK(py_function, "Could not find function " + functionName + " in python module " + _moduleName);
-		PYTHON_CHECK(PyCallable_Check(py_function), functionName + " in python module " + _moduleName + " is not a function");
-
-		PyObjectHolder py_result(PyObject_CallObject(py_function, nullptr));
-		PYTHON_CHECK(py_result, functionName + " in python module " + _moduleName + " invokation failed");
+		PyObjectHolder py_function(PY_OBJ_CHECK_MSG(PyObject_GetAttrString(_pyModule, functionName.c_str()), "Could not find function " + functionName + " in python module " + _moduleName));
+		PyObjectHolder py_params(PY_OBJ_CHECK(Py_BuildValue("(O)", jointModule.Get())));
+		PyObjectHolder py_result(PY_OBJ_CHECK_MSG(PyObject_CallObject(py_function, py_params), functionName + " in python module " + _moduleName + " invokation failed"));
 
 		return std::move(py_result);
 	}

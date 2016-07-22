@@ -35,7 +35,7 @@ namespace joint
 		{
 			if (_module != JOINT_NULL_HANDLE)
 			{
-				Joint_Error ret = Joint_UnloadModule(_module);
+				Joint_Error ret = Joint_DecRefModule(_module);
 				if (ret != JOINT_ERROR_NONE)
 					Joint_Log(JOINT_LOGLEVEL_WARNING, "Joint.C++", "Could not unload module");
 			}

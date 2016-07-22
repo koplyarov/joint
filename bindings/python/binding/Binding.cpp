@@ -1,6 +1,7 @@
 #include <binding/Binding.hpp>
 
 #include <joint/Joint.h>
+#include <joint/devkit/Holder.hpp>
 #include <joint/utils/CppWrappers.hpp>
 
 #include <memory>
@@ -11,6 +12,7 @@
 #include <binding/Module.hpp>
 #include <binding/Object.hpp>
 #include <pyjoint/Common.hpp>
+#include <pyjoint/Object.hpp>
 #include <utils/PythonUtils.hpp>
 
 
@@ -50,17 +52,36 @@ namespace binding
 	}
 
 
-	Joint_Error Binding::GetRootObject(void* bindingUserData, Joint_ModuleHandleInternal module, const char* getterName, Joint_ObjectHandleInternal* outObject)
+	Joint_Error Binding::GetRootObject(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, const char* getterName, Joint_ObjectHandle* outObject)
 	{
 		JOINT_CPP_WRAP_BEGIN
-		auto m = reinterpret_cast<Module*>(module);
-		PyObjectHolder py_obj = m->InvokeFunction(getterName);
-		*outObject = new Object(py_obj);
+
+		PyObjectHolder pyjoint_pymodule_name(PY_OBJ_CHECK(PyUnicode_FromString("pyjoint")));
+		PyObjectHolder pyjoint_pymodule(PY_OBJ_CHECK_MSG(PyImport_Import(pyjoint_pymodule_name), "Could not import python module pyjoint"));
+		PyObjectHolder pyjoint_module_type(PY_OBJ_CHECK(PyObject_GetAttrString(pyjoint_pymodule, "Module")));
+
+		PyObjectHolder py_module_handle(PY_OBJ_CHECK(PyCapsule_New(module, "Joint.Module", NULL)));
+
+		Joint_Error ret = Joint_IncRefModule(module);
+		JOINT_CHECK(ret == JOINT_ERROR_NONE, std::string("Joint_IncRefModule failed: ") + Joint_ErrorToString(ret));
+		joint::devkit::Holder<Joint_ModuleHandle> module_holder(module,
+			[&](Joint_ModuleHandle h) { auto ret = Joint_DecRefModule(h); if(ret != JOINT_ERROR_NONE) GetLogger().Error() << "Joint_DecRefModule failed: " << Joint_ErrorToString(ret); });
+
+		PyObjectHolder py_params(PY_OBJ_CHECK(Py_BuildValue("(O)", py_module_handle.Get())));
+		PyObjectHolder pyjoint_module(PY_OBJ_CHECK(PyObject_CallObject(pyjoint_module_type, py_params)));
+		module_holder.Release();
+
+		auto m = reinterpret_cast<Module*>(moduleInt);
+		PyObjectHolder py_proxy = PY_OBJ_CHECK_MSG(m->InvokeFunction(getterName, pyjoint_module), joint::devkit::StringBuilder() % "Root object getter '" % getterName % "' failed");
+		PyObjectHolder py_joint_obj(PY_OBJ_CHECK(PyObject_GetAttrString(py_proxy, "obj")));
+		*outObject = CastPyObject<pyjoint::Object>(py_joint_obj, &pyjoint::Object_type)->handle;
+		ret = Joint_IncRefObject(*outObject);
+		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 		JOINT_CPP_WRAP_END
 	}
 
 
-	Joint_Error Binding::InvokeMethod(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValueInternal* outRetValue)
+	Joint_Error Binding::InvokeMethod(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
 	{
 		JOINT_CPP_WRAP_BEGIN
 		auto o = reinterpret_cast<Object*>(obj);
@@ -104,7 +125,12 @@ namespace binding
 			}
 			break;
 		case JOINT_TYPE_OBJ:
-			outRetValue->variant.value.obj = new Object(py_res);
+			{
+				PyObjectHolder py_joint_obj(PY_OBJ_CHECK(PyObject_GetAttrString(py_res, "obj")));
+				outRetValue->variant.value.obj = CastPyObject<pyjoint::Object>(py_joint_obj, &pyjoint::Object_type)->handle;
+				Joint_Error ret = Joint_IncRefObject(outRetValue->variant.value.obj);
+				JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+			}
 			break;
 		default:
 			JOINT_THROW(std::runtime_error("Unknown type"));
@@ -134,19 +160,17 @@ namespace binding
 		int len = PySequence_Size(seq);
 		for (int i = 0; i < len; ++i)
 		{
-			PyObject* base = PySequence_Fast_GET_ITEM(seq.Get(), i);
-			JOINT_CHECK(base, "None base class???");
+			PyObject* base = PY_OBJ_CHECK(PySequence_Fast_GET_ITEM(seq.Get(), i));
 
 			if (!PyObject_HasAttrString(base, "interfaceId"))
 				continue;
 
 #if PY_VERSION_HEX >= 0x03000000
-			PyObjectHolder py_base_interface_id(PyObject_GetAttrString(base, "interfaceId"));
+			PyObjectHolder py_base_interface_id(PY_OBJ_CHECK(PyObject_GetAttrString(base, "interfaceId")));
 #else
-			PyObjectHolder py_base_interface_id_attr(PyObject_GetAttrString(base, "interfaceId"));
-			PyObjectHolder py_base_interface_id(PyObject_Unicode(py_base_interface_id_attr));
+			PyObjectHolder py_base_interface_id_attr(PY_OBJ_CHECK(PyObject_GetAttrString(base, "interfaceId")));
+			PyObjectHolder py_base_interface_id(PY_OBJ_CHECK(PyObject_Unicode(py_base_interface_id_attr)));
 #endif
-			JOINT_CHECK(py_base_interface_id, "No interfaceId attribute");
 
 			auto base_interface_id = Utf8FromPyUnicode(py_base_interface_id);
 			if (strcmp(interfaceId, base_interface_id.GetContent()) == 0)
@@ -168,25 +192,21 @@ namespace binding
 		JOINT_CPP_WRAP_BEGIN
 
 		PyObjectHolder py_accessor = reinterpret_cast<Object*>(obj)->GetObject();
-		PyObjectHolder py_obj(PyObject_GetAttrString(py_accessor, "obj"));
-		JOINT_CHECK(py_obj, "No obj attribute!");
+		PyObjectHolder py_obj(PY_OBJ_CHECK(PyObject_GetAttrString(py_accessor, "obj")));
 		PyObjectHolder py_obj_type(PyObject_Type(py_obj));
-		PyObjectHolder base_type = FindBaseById(py_obj_type, interfaceId);
-		JOINT_CHECK(base_type, std::string("Could not cast object to ") + interfaceId);
+		PyObjectHolder base_type = PY_OBJ_CHECK_MSG(FindBaseById(py_obj_type, interfaceId), std::string("Could not cast object to ") + interfaceId);
 
-		PyObjectHolder base_accessor_type(PyObject_GetAttrString(base_type, "accessor"));
-		JOINT_CHECK(base_accessor_type, "No accessor attribute");
+		PyObjectHolder base_accessor_type(PY_OBJ_CHECK(PyObject_GetAttrString(base_type, "accessor")));
 
 		PyObjectHolder py_params(Py_BuildValue("(O)", (PyObject*)py_obj));
-		PyObjectHolder new_accessor(PyObject_CallObject(base_accessor_type, py_params));
-		JOINT_CHECK(new_accessor, "Could not wrap object");
+		PyObjectHolder new_accessor(PY_OBJ_CHECK(PyObject_CallObject(base_accessor_type, py_params)));
 		*outRetValue = new Object(new_accessor);
 
 		JOINT_CPP_WRAP_END
 	}
 
 
-	Joint_Error Binding::ReleaseRetValue(Joint_VariantInternal value)
+	Joint_Error Binding::ReleaseRetValue(Joint_Variant value)
 	{
 		JOINT_CPP_WRAP_BEGIN
 		switch(value.type)

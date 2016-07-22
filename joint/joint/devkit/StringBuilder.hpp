@@ -10,6 +10,8 @@ namespace joint {
 namespace devkit
 {
 
+	class StringBuilder;
+
 	namespace detail
 	{
 		template < typename T_, typename Enabler_ = void >
@@ -27,6 +29,14 @@ namespace devkit
 			static void Print(std::ostream& s, U_&& obj)
 			{ s << obj.what(); }
 		};
+
+		template < typename T_ >
+		struct ObjectPrinter<T_, typename std::enable_if<std::is_same<StringBuilder, T_>::value>::type>
+		{
+			template < typename U_ >
+			static void Print(std::ostream& s, U_&& obj)
+			{ s << obj.ToString(); }
+		};
 	}
 
 	class StringBuilder
@@ -43,6 +53,9 @@ namespace devkit
 		}
 
 		std::string ToString() const
+		{ return _stream.str(); }
+
+		operator std::string() const
 		{ return _stream.str(); }
 	};
 

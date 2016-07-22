@@ -48,6 +48,14 @@ namespace devkit
 		T_ operator* () const
 		{ return _obj; }
 
+		T_ Release()
+		{
+			T_ result(std::move(_obj));
+			_obj = T_();
+			_initialized = false;
+			return std::move(result);
+		}
+
 	private:
 		DeleterFunc_& GetDeleterFunc() { return *this; }
 	};
