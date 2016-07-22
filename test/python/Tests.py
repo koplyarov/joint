@@ -7,14 +7,18 @@ class SomeObject(test_ISomeObject):
         super(SomeObject, self).__init__()
         self.jointModule = jointModule
     def Method(self):
-        print('METHOD')
+        pass
 
 class Tests(test_IObjectTests, test_IBasicTests):
     def __init__(self, jointModule):
         super(Tests, self).__init__()
         self.jointModule = jointModule
+
     def ReturnObject(self):
         return self.jointModule.CreateComponent(test_ISomeObject, SomeObject, self.jointModule)
+    def InvokeObjectMethod(self, o):
+        o.Method()
+
     def ReturnI32(self):
         return 42
     def Throw(self):

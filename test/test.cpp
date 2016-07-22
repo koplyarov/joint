@@ -39,6 +39,7 @@ public:
 		auto some_obj = obj->ReturnObject();
 
 		TEST_THROWS_NOTHING(some_obj->Method());
+		TEST_THROWS_NOTHING(obj->InvokeObjectMethod(some_obj));
 	}
 };
 

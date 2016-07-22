@@ -38,21 +38,21 @@ namespace joint
 		}
 
 
-		void swap(Ptr& other)
+		void Swap(Ptr& other)
 		{ std::swap(_raw, other._raw); }
 
 
 		Ptr& operator = (const Ptr& other)
 		{
 			Ptr tmp(other);
-			swap(tmp);
+			Swap(tmp);
 			return *this;
 		}
 
 		explicit operator bool() const
 		{ return _raw != nullptr; }
 
-		T_* get() const
+		T_* Get() const
 		{ return _raw; }
 
 		T_* operator -> () const
@@ -69,7 +69,7 @@ namespace joint
 		if (!src)
 			return Ptr<Dst_>();
 
-		detail::ProxyBase *proxy_base = src.get();
+		detail::ProxyBase *proxy_base = src.Get();
 		Joint_ObjectHandle result_handle;
 		JOINT_CALL(Joint_CastObject(proxy_base->_GetObjectHandle(), Dst_::_GetInterfaceId(), &result_handle));
 		return Ptr<Dst_>(new Dst_(result_handle));

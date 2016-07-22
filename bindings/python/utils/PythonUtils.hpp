@@ -45,7 +45,7 @@ namespace joint_python
 	{
 		if (pyObj)
 			return std::move(pyObj);
-		throw std::runtime_error(joint::devkit::StringBuilder() % msg % " at" % location % "\n" % GetPythonErrorMessage());
+		throw std::runtime_error(joint::devkit::StringBuilder() % msg % " at " % location % "\n" % GetPythonErrorMessage());
 	}
 
 	template < typename T_ >

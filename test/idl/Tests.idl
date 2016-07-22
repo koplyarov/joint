@@ -18,7 +18,7 @@ package test
 	interface IObjectTests
 	{
 		ISomeObject ReturnObject();
-		//void InvokeObjectMethod(ISomeObject o);
+		void InvokeObjectMethod(ISomeObject o);
 	}
 
 	////////////////////////////////////////////////////////////////////////////////

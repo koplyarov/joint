@@ -39,7 +39,18 @@ class PythonGenerator:
         yield 'class {}_accessor:'.format(self._mangleType(ifc))
         yield '\tdef __init__(self, obj):'
         yield '\t\tself.obj = obj'
-        yield '\t\tself.methods = {}'.format(self._tuple([ 'obj.{}'.format(m.name) for m in ifc.methods ]))
+        yield '\t\tself.methods = {}'.format(self._tuple([ ('self._{}_wrapper' if self._methodNeedsWrapper(m) else 'obj.{}').format(m.name) for m in ifc.methods ]))
+        for m in ifc.methods:
+            if not self._methodNeedsWrapper(m):
+                continue
+            yield '\tdef _{}_wrapper(self{}):'.format(m.name, ''.join(', {}'.format(p.name) for p in m.params))
+            yield '\t\treturn self.obj.{}({})'.format(m.name, ', '.join('{}'.format(self._wrapParameter(p)) for p in m.params))
+
+    def _wrapParameter(self, p):
+        if isinstance(p.type, Interface):
+            return '{}_proxy({})'.format(self._mangleType(p.type), p.name)
+        else:
+            return p.name
 
     def _generateInterfaceProxy(self, ifc):
         yield 'class {}_proxy:'.format(self._mangleType(ifc))
@@ -76,6 +87,12 @@ class PythonGenerator:
 
     def _methodNeedsProxy(self, m):
         return m.params or isinstance(m.retType, Interface)
+
+    def _methodNeedsWrapper(self, m):
+        for p in m.params:
+            if isinstance(p.type, Interface):
+                return True
+        return False
 
     def _mangleType(self, ifc):
         return '{}_{}'.format('_'.join(ifc.packageNameList), ifc.name)

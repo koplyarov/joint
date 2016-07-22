@@ -91,6 +91,8 @@ class CppGenerator:
                 return '{}.c_str()'.format(p.name)
             else:
                 return p.name
+        elif isinstance(p.type, Interface):
+            return '{}.Get()->_GetObjectHandle()'.format(p.name)
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 
