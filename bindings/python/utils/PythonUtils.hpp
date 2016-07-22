@@ -48,6 +48,14 @@ namespace joint_python
 		throw std::runtime_error(joint::devkit::StringBuilder() % msg % " at " % location % "\n" % GetPythonErrorMessage());
 	}
 
+	inline bool AsBool(PyObject* obj)
+	{
+		int result = PyObject_IsTrue(obj);
+		PYTHON_CHECK(result != -1, "PyObject_IsTrue failed");
+		return result != 0;
+	}
+
+
 	template < typename T_ >
 	T_ FromPyLong(PyObject* pyLong)
 	{
@@ -57,6 +65,15 @@ namespace joint_python
 		T_ result = static_cast<T_>(long_result);
 		NATIVE_CHECK(static_cast<long>(result) == long_result, "T_ value overflow");
 		return result;
+	}
+
+
+	template < typename T_ >
+	T_ FromPyFloat(PyObject* pyLong)
+	{
+		double double_result = PyFloat_AsDouble(pyLong);
+		NATIVE_CHECK(!PyErr_Occurred(), "PyFloat_AsDouble failed");
+		return static_cast<T_>(double_result);
 	}
 
 

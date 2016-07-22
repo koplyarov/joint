@@ -30,12 +30,22 @@ namespace binding
 				PyObjectHolder py_p;
 				switch (p.type)
 				{
-				case JOINT_TYPE_I32:
-					py_p.Reset(PyLong_FromLong(p.value.i32));
-					break;
-				case JOINT_TYPE_UTF8:
-					py_p.Reset(PyUnicode_FromString(p.value.utf8));
-					break;
+				case JOINT_TYPE_BOOL: py_p.Reset(PyBool_FromLong(p.value.b)); break;
+
+				case JOINT_TYPE_U8: py_p.Reset(PyLong_FromLong(p.value.u8)); break;
+				case JOINT_TYPE_I8: py_p.Reset(PyLong_FromLong(p.value.i8)); break;
+				case JOINT_TYPE_U16: py_p.Reset(PyLong_FromLong(p.value.u16)); break;
+				case JOINT_TYPE_I16: py_p.Reset(PyLong_FromLong(p.value.i16)); break;
+				case JOINT_TYPE_U32: py_p.Reset(PyLong_FromLong(p.value.u32)); break;
+				case JOINT_TYPE_I32: py_p.Reset(PyLong_FromLong(p.value.i32)); break;
+				case JOINT_TYPE_U64: py_p.Reset(PyLong_FromLong(p.value.u64)); break;
+				case JOINT_TYPE_I64: py_p.Reset(PyLong_FromLong(p.value.i64)); break;
+
+				case JOINT_TYPE_F32: py_p.Reset(PyFloat_FromDouble(p.value.f32)); break;
+				case JOINT_TYPE_F64: py_p.Reset(PyFloat_FromDouble(p.value.f64)); break;
+
+				case JOINT_TYPE_UTF8: py_p.Reset(PyUnicode_FromString(p.value.utf8)); break;
+
 				case JOINT_TYPE_OBJ:
 					py_p.Reset(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&pyjoint::Object_type, NULL)));
 					PYTHON_CHECK(Joint_IncRefObject(p.value.obj) == JOINT_ERROR_NONE, "Joint_IncRefObject failed!");

@@ -106,9 +106,21 @@ namespace binding
 		{
 		case JOINT_TYPE_VOID:
 			break;
-		case JOINT_TYPE_I32:
-			outRetValue->variant.value.i32 = FromPyLong<int32_t>(py_res);
-			break;
+
+		case JOINT_TYPE_BOOL: outRetValue->variant.value.b = AsBool(py_res); break;
+
+		case JOINT_TYPE_U8: outRetValue->variant.value.u8 = FromPyLong<uint8_t>(py_res); break;
+		case JOINT_TYPE_I8: outRetValue->variant.value.i8 = FromPyLong<int8_t>(py_res); break;
+		case JOINT_TYPE_U16: outRetValue->variant.value.u16 = FromPyLong<uint16_t>(py_res); break;
+		case JOINT_TYPE_I16: outRetValue->variant.value.i16 = FromPyLong<int16_t>(py_res); break;
+		case JOINT_TYPE_U32: outRetValue->variant.value.u32 = FromPyLong<uint32_t>(py_res); break;
+		case JOINT_TYPE_I32: outRetValue->variant.value.i32 = FromPyLong<int32_t>(py_res); break;
+		case JOINT_TYPE_U64: outRetValue->variant.value.u64 = FromPyLong<uint64_t>(py_res); break;
+		case JOINT_TYPE_I64: outRetValue->variant.value.i64 = FromPyLong<int64_t>(py_res); break;
+
+		case JOINT_TYPE_F32: outRetValue->variant.value.f32 = FromPyFloat<float>(py_res); break;
+		case JOINT_TYPE_F64: outRetValue->variant.value.f64 = FromPyFloat<double>(py_res); break;
+
 		case JOINT_TYPE_UTF8:
 			{
 				auto str_data = Utf8FromPyUnicode(py_res);

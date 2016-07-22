@@ -64,7 +64,7 @@ namespace joint
 
 
 	template < typename Dst_, typename Src_ >
-	Ptr<Dst_> Cast(Ptr<Src_> src)
+	Ptr<Dst_> Cast(const Ptr<Src_>& src)
 	{
 		if (!src)
 			return Ptr<Dst_>();

@@ -75,7 +75,7 @@ class SemanticGraph:
         self.packages = []
         self.builtInTypes = {
             'void': BuiltinType('void', 'void', 1, BuiltinTypeCategory.void),
-            'bool': BuiltinType('bool', 'bool', 2, BuiltinTypeCategory.bool),
+            'bool': BuiltinType('bool', 'b', 2, BuiltinTypeCategory.bool),
             'i8': BuiltinType('i8', 'i8', 3, BuiltinTypeCategory.int, 8, True),
             'u8': BuiltinType('u8', 'u8', 4, BuiltinTypeCategory.int, 8, False),
             'i16': BuiltinType('i16', 'i16', 5, BuiltinTypeCategory.int, 16, True),

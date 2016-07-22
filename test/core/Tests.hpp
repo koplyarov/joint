@@ -5,6 +5,8 @@
 #include <stdexcept>
 
 #include <test/core/ScopedTest.hpp>
+#include <test/core/utils/Comparers.hpp>
+#include <test/core/utils/ToString.hpp>
 #include <test/core/utils/TypeInfo.hpp>
 
 
@@ -47,10 +49,13 @@
 			TEST_DOES_NOT_THROW_INTERNAL(#__VA_ARGS__, __VA_ARGS__; TEST_REPORT_SUCCESS(#__VA_ARGS__)); \
 		} while (false)
 
+
 #define TEST_EQUALS(Val_, ...) \
 		TEST_DOES_NOT_THROW_INTERNAL("TEST_EQUALS(" #Val_ ", " #__VA_ARGS__ ")", { \
-				if (!(Val_ == __VA_ARGS__)) \
-					TEST_REPORT_ERROR(#Val_ " != " #__VA_ARGS__); \
+				auto&& l = (Val_); \
+				auto&& r = (__VA_ARGS__); \
+				if (!::test::Equals(l, r)) \
+					TEST_REPORT_ERROR("'" #Val_ " == " #__VA_ARGS__ "': " + ::test::ToString(l) + " != " + ::test::ToString(r)); \
 				else \
 					TEST_REPORT_SUCCESS(#Val_ " == " #__VA_ARGS__); \
 			} )
