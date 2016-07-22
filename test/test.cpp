@@ -24,11 +24,21 @@ public:
 	{
 		ScopedTest t(g_engine, "Basic tests");
 
-		joint::Ptr<IBasicTests> basic = _module.GetRootObject<IBasicTests>("GetBasicTests");
+		auto basic = _module.GetRootObject<IBasicTests>("GetBasicTests");
 
 		TEST_THROWS_ANYTHING(basic->Throw());
 		TEST_THROWS_NOTHING(basic->ReturnI32());
 		TEST_EQUALS(14, basic->AddI32(2, 12));
+	}
+
+	void RunObjectTests()
+	{
+		ScopedTest t(g_engine, "Object tests");
+
+		auto obj = _module.GetRootObject<IObjectTests>("GetBasicTests");
+		auto some_obj = obj->ReturnObject();
+
+		TEST_THROWS_NOTHING(some_obj->Method());
 	}
 };
 
@@ -39,6 +49,7 @@ int main()
 	{
 		Tests t(joint::Module("python", "Tests"));
 		t.RunBasicTests();
+		t.RunObjectTests();
 	}
 	catch (const std::exception& ex)
 	{

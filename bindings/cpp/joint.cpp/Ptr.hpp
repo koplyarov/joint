@@ -3,6 +3,7 @@
 
 
 #include <joint.cpp/detail/JointCall.hpp>
+#include <joint.cpp/detail/ProxyBase.hpp>
 
 
 namespace joint

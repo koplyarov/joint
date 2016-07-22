@@ -23,13 +23,13 @@ package test
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	interface ILifetimeTestsListener
-	{
-		void OnObjectDestroyed();
-	}
+	//interface ILifetimeTestsListener
+	//{
+		//void OnObjectDestroyed();
+	//}
 
-	interface ILifetimeTests
-	{
-		//void SetListener(ILifetimeTestsListener l);
-	}
+	//interface ILifetimeTests
+	//{
+		////void SetListener(ILifetimeTestsListener l);
+	//}
 }

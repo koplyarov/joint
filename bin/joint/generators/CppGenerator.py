@@ -1,4 +1,4 @@
-from ..SemanticGraph import BuiltinType, BuiltinTypeCategory
+from ..SemanticGraph import BuiltinType, BuiltinTypeCategory, Interface
 
 class CppGenerator:
     def __init__(self, semanticGraph):
@@ -15,24 +15,34 @@ class CppGenerator:
         yield ''
 
         for p in self.semanticGraph.packages:
-            for l in self._generatePackage(p):
+            for l in self._generatePackageContent(p, self._generateInterfaceProxyPredeclaration):
+                yield l
+
+        for p in self.semanticGraph.packages:
+            for l in self._generatePackageContent(p, self._generateInterfaceProxy):
+                yield l
+
+        for p in self.semanticGraph.packages:
+            for l in self._generatePackageContent(p, self._generateInterfaceProxyMethods):
                 yield l
 
         yield ''
         yield '#include <joint.cpp/detail/GeneratedCodeEpilogue.hpp>'
         yield ''
 
-    def _generatePackage(self, p):
+    def _generatePackageContent(self, p, ifcGenerator):
         namespaces_count = 0
         for n in p.nameList:
             namespaces_count += 1
             yield 'namespace {} {{'.format(n)
             for ifc in p.interfaces:
-                for l in self._generateInterfaceProxy(ifc):
+                for l in ifcGenerator(ifc):
                     yield '\t{}'.format(l)
-                yield ''
         yield '}' * namespaces_count
         yield ''
+
+    def _generateInterfaceProxyPredeclaration(self, ifc):
+        yield 'class {name}; typedef ::joint::Ptr<{name}> {name}_Ptr;'.format(name=ifc.name)
 
     def _generateInterfaceProxy(self, ifc):
         yield 'class {} : public virtual ::joint::detail::ProxyBase{}'.format(ifc.name, ''.join(', public {}'.format(self._mangleType(b)) for b in ifc.bases))
@@ -43,14 +53,23 @@ class CppGenerator:
         yield '\t{ }'
         yield ''
         yield '\tstatic const char* _GetInterfaceId() {{ return "{}"; }}'.format(ifc.fullname)
+        yield ''
         for m in ifc.methods:
-            yield ''
-            for l in self._generateMethod(m):
+            for l in self._generateMethodDeclaration(m):
                 yield '\t{}'.format(l)
         yield '};'
+        yield ''
 
-    def _generateMethod(self, m):
-        yield '{} {}({})'.format(self._toCppType(m.retType), m.name, ', '.join('{} {}'.format(self._toCppType(p.type), p.name) for p in m.params))
+    def _generateInterfaceProxyMethods(self, ifc):
+        for m in ifc.methods:
+            for l in self._generateMethodDefinition(ifc, m):
+                yield '\t{}'.format(l)
+
+    def _generateMethodDeclaration(self, m):
+        yield '{} {}({});'.format(self._toCppType(m.retType), m.name, ', '.join('{} {}'.format(self._toCppType(p.type), p.name) for p in m.params))
+
+    def _generateMethodDefinition(self, ifc, m):
+        yield '{} {}::{}({})'.format(self._toCppType(m.retType), ifc.name, m.name, ', '.join('{} {}'.format(self._toCppType(p.type), p.name) for p in m.params))
         yield '{'
         yield '\tJoint_RetValue _joint_internal_ret_val;'
         if m.params:
@@ -62,8 +81,9 @@ class CppGenerator:
         yield '\t::joint::detail::RetValueGuard _joint_internal_rvg(_joint_internal_ret_val);'
         yield '\tJOINT_CHECK_RETURN_VALUE({}, _joint_internal_ret_val);'.format(m.retType.index)
         if m.retType.name != 'void':
-            yield '\treturn _joint_internal_ret_val.variant.value.{};'.format(m.retType.variantName)
+            yield self._wrapRetValue(m.retType)
         yield '}'
+        yield ''
 
     def _toCppParamGetter(self, p):
         if isinstance(p.type, BuiltinType):
@@ -73,6 +93,12 @@ class CppGenerator:
                 return p.name
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
+
+    def _wrapRetValue(self, type):
+        if not isinstance(type, Interface):
+            return '\treturn {}(_joint_internal_ret_val.variant.value.{});'.format(self._toCppType(type), type.variantName)
+        else:
+            return '\treturn {}(new {}(_joint_internal_ret_val.variant.value.{}));'.format(self._toCppType(type), self._mangleType(type), type.variantName)
 
     def _toCppType(self, type):
         if isinstance(type, BuiltinType):
@@ -91,6 +117,8 @@ class CppGenerator:
             if type.category == BuiltinTypeCategory.string:
                 return 'std::string'
             raise RuntimeError('Unknown type: {}'.format(type))
+        elif isinstance(type, Interface):
+            return '{}_Ptr'.format(self._mangleType(type));
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 
