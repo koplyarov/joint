@@ -14,6 +14,17 @@
 #include <utils/ScopeExit.hpp>
 
 
+#ifdef _MSC_VER
+#	ifdef joint_python_core_EXPORTS
+#		define JOINT_PYTHON_CORE_API __declspec(dllexport)
+#	else
+#		define JOINT_PYTHON_CORE_API __declspec(dllimport)
+#	endif
+#else
+#	define JOINT_PYTHON_CORE_API
+#endif
+
+
 #define PYTHON_THROW(Message_) do { throw std::runtime_error(Message_ + std::string("\n") + ::joint_python::GetPythonErrorMessage()); } while (false)
 #define PYTHON_CHECK(Expr_, Message_) do { if (!(Expr_)) PYTHON_THROW(Message_); } while (false)
 
@@ -26,7 +37,7 @@
 namespace joint_python
 {
 
-	std::string GetPythonErrorMessage();
+	std::string JOINT_PYTHON_CORE_API GetPythonErrorMessage();
 
 
 	template < typename PyObjType_, typename MsgType_ >

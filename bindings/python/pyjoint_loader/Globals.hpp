@@ -2,7 +2,7 @@
 #define PYJOINT_LOADER_GLOBALS_HPP
 
 
-#include <Python.h>
+#include <utils/PythonHeaders.h>
 
 
 namespace joint_python {

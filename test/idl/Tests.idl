@@ -1,12 +1,12 @@
 package test
 {
-	//interface IBasicTests
-	//{
-		//void Throw();
+	interface IBasicTests
+	{
+		void Throw();
 
-		//i32 ReturnI32();
-		//i32 AddI32(i32 l, i32 r);
-	//}
+		i32 ReturnI32();
+		i32 AddI32(i32 l, i32 r);
+	}
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -23,13 +23,13 @@ package test
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	//interface ILifetimeTestsListener
-	//{
-		//void OnObjectDestroyed();
-	//}
+	interface ILifetimeTestsListener
+	{
+		void OnObjectDestroyed();
+	}
 
-	//interface ILifetimeTests
-	//{
-		////void SetListener(ILifetimeTestsListener l);
-	//}
+	interface ILifetimeTests
+	{
+		//void SetListener(ILifetimeTestsListener l);
+	}
 }

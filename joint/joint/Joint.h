@@ -6,13 +6,13 @@
 
 
 #ifdef _MSC_VER
-#	ifdef joint_core_EXPORTS
-#		define JOINT_CORE_API __declspec(dllexport)
+#	ifdef joint_EXPORTS
+#		define JOINT_API __declspec(dllexport)
 #	else
-#		define JOINT_CORE_API __declspec(dllimport)
+#		define JOINT_API __declspec(dllimport)
 #	endif
 #else
-#	define JOINT_CORE_API
+#	define JOINT_API
 #endif
 
 extern "C"
@@ -53,7 +53,7 @@ extern "C"
 		JOINT_ERROR_UNEXPECTED_TYPE = 8
 	};
 
-	JOINT_CORE_API const char* Joint_ErrorToString(Joint_Error err);
+	JOINT_API const char* Joint_ErrorToString(Joint_Error err);
 
 
 	enum Joint_LogLevel
@@ -64,14 +64,14 @@ extern "C"
 		JOINT_LOGLEVEL_ERROR    = 3
 	};
 
-	JOINT_CORE_API const char* Joint_LogLevelToString(Joint_LogLevel logLevel);
+	JOINT_API const char* Joint_LogLevelToString(Joint_LogLevel logLevel);
 
 	typedef void Joint_LogCallback_Func(Joint_LogLevel logLevel, const char* category, const char* message);
-	JOINT_CORE_API Joint_Error Joint_SetLogCallback(Joint_LogCallback_Func* logCallback);
-	JOINT_CORE_API Joint_Error Joint_SetLogLevel(Joint_LogLevel logLevel);
+	JOINT_API Joint_Error Joint_SetLogCallback(Joint_LogCallback_Func* logCallback);
+	JOINT_API Joint_Error Joint_SetLogLevel(Joint_LogLevel logLevel);
 
-	JOINT_CORE_API Joint_LogLevel Joint_GetLogLevel();
-	JOINT_CORE_API void Joint_Log(Joint_LogLevel logLevel, const char* subsystem, const char* format, ...);
+	JOINT_API Joint_LogLevel Joint_GetLogLevel();
+	JOINT_API void Joint_Log(Joint_LogLevel logLevel, const char* subsystem, const char* format, ...);
 
 
 	enum Joint_Type
@@ -160,33 +160,33 @@ extern "C"
 		const char*                 name;
 	};
 
-	JOINT_CORE_API Joint_Error Joint_MakeContext(Joint_ContextHandle *outJointCtx);
-	JOINT_CORE_API Joint_Error Joint_ReleaseContext(Joint_ContextHandle jointCtx);
+	JOINT_API Joint_Error Joint_MakeContext(Joint_ContextHandle *outJointCtx);
+	JOINT_API Joint_Error Joint_ReleaseContext(Joint_ContextHandle jointCtx);
 
-	JOINT_CORE_API Joint_Error Joint_MakeBinding(Joint_BindingDesc desc, void* userData, Joint_BindingHandle* outBinding);
-	JOINT_CORE_API Joint_Error Joint_ReleaseBinding(Joint_BindingHandle binding);
+	JOINT_API Joint_Error Joint_MakeBinding(Joint_BindingDesc desc, void* userData, Joint_BindingHandle* outBinding);
+	JOINT_API Joint_Error Joint_ReleaseBinding(Joint_BindingHandle binding);
 
-	JOINT_CORE_API Joint_Error Joint_LoadModule(Joint_BindingHandle binding, const char* moduleName, Joint_ModuleHandle* outModule);
-	JOINT_CORE_API Joint_Error Joint_IncRefModule(Joint_ModuleHandle handle);
-	JOINT_CORE_API Joint_Error Joint_DecRefModule(Joint_ModuleHandle handle);
+	JOINT_API Joint_Error Joint_LoadModule(Joint_BindingHandle binding, const char* moduleName, Joint_ModuleHandle* outModule);
+	JOINT_API Joint_Error Joint_IncRefModule(Joint_ModuleHandle handle);
+	JOINT_API Joint_Error Joint_DecRefModule(Joint_ModuleHandle handle);
 
-	JOINT_CORE_API Joint_Error Joint_CreateObject(Joint_ModuleHandle module, Joint_ObjectHandleInternal internal, Joint_ObjectHandle* outObject);
+	JOINT_API Joint_Error Joint_CreateObject(Joint_ModuleHandle module, Joint_ObjectHandleInternal internal, Joint_ObjectHandle* outObject);
 
-	JOINT_CORE_API Joint_Error Joint_GetRootObject(Joint_ModuleHandle module, const char* getterName, Joint_ObjectHandle* outObject);
-	JOINT_CORE_API Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
-	JOINT_CORE_API Joint_Error Joint_ObtainRetValue(Joint_RetValue value, Joint_Variant* outValue);
-	JOINT_CORE_API Joint_Error Joint_ReleaseRetValue(Joint_RetValue value);
-	JOINT_CORE_API Joint_Error Joint_IncRefObject(Joint_ObjectHandle handle);
-	JOINT_CORE_API Joint_Error Joint_DecRefObject(Joint_ObjectHandle handle);
-	JOINT_CORE_API Joint_Error Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_ObjectHandle* outHandle);
+	JOINT_API Joint_Error Joint_GetRootObject(Joint_ModuleHandle module, const char* getterName, Joint_ObjectHandle* outObject);
+	JOINT_API Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
+	JOINT_API Joint_Error Joint_ObtainRetValue(Joint_RetValue value, Joint_Variant* outValue);
+	JOINT_API Joint_Error Joint_ReleaseRetValue(Joint_RetValue value);
+	JOINT_API Joint_Error Joint_IncRefObject(Joint_ObjectHandle handle);
+	JOINT_API Joint_Error Joint_DecRefObject(Joint_ObjectHandle handle);
+	JOINT_API Joint_Error Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_ObjectHandle* outHandle);
 
-	JOINT_CORE_API Joint_Error Joint_MakeException(const char* message, Joint_ExceptionHandle* outHandle);
-	JOINT_CORE_API Joint_Error Joint_ReleaseException(Joint_ExceptionHandle handle);
-	JOINT_CORE_API Joint_Error Joint_GetExceptionMessageSize(Joint_ExceptionHandle handle, Joint_SizeT* outSize);
-	JOINT_CORE_API Joint_Error Joint_GetExceptionMessage(Joint_ExceptionHandle handle, char* buf, Joint_SizeT bufSize);
-	JOINT_CORE_API Joint_Error Joint_GetExceptionBacktraceSize(Joint_ExceptionHandle handle, Joint_SizeT* outSize);
-	JOINT_CORE_API Joint_Error Joint_GetExceptionBacktraceEntrySize(Joint_ExceptionHandle handle, Joint_SizeT index, Joint_SizeT* outSize);
-	JOINT_CORE_API Joint_Error Joint_GetExceptionBacktraceEntry(Joint_ExceptionHandle handle, Joint_SizeT index, char* buf, Joint_SizeT bufSize);
+	JOINT_API Joint_Error Joint_MakeException(const char* message, Joint_ExceptionHandle* outHandle);
+	JOINT_API Joint_Error Joint_ReleaseException(Joint_ExceptionHandle handle);
+	JOINT_API Joint_Error Joint_GetExceptionMessageSize(Joint_ExceptionHandle handle, Joint_SizeT* outSize);
+	JOINT_API Joint_Error Joint_GetExceptionMessage(Joint_ExceptionHandle handle, char* buf, Joint_SizeT bufSize);
+	JOINT_API Joint_Error Joint_GetExceptionBacktraceSize(Joint_ExceptionHandle handle, Joint_SizeT* outSize);
+	JOINT_API Joint_Error Joint_GetExceptionBacktraceEntrySize(Joint_ExceptionHandle handle, Joint_SizeT index, Joint_SizeT* outSize);
+	JOINT_API Joint_Error Joint_GetExceptionBacktraceEntry(Joint_ExceptionHandle handle, Joint_SizeT index, char* buf, Joint_SizeT bufSize);
 }
 
 #endif

@@ -62,7 +62,8 @@ static void DefaultLogCallback(Joint_LogLevel logLevel, const char* subsystem, c
 
 static std::mutex                     g_mutex;
 static Joint_LogCallback_Func*        g_logCallback = &DefaultLogCallback;
-static std::atomic<Joint_LogLevel>    g_logLevel(JOINT_LOGLEVEL_DEBUG);
+//static std::atomic<Joint_LogLevel>    g_logLevel(JOINT_LOGLEVEL_DEBUG);
+static std::atomic<Joint_LogLevel>    g_logLevel(JOINT_LOGLEVEL_WARNING);
 
 extern "C"
 {

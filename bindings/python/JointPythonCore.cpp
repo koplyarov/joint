@@ -9,11 +9,10 @@
 #include <utils/PyObjectHolder.hpp>
 
 
+JOINT_DEVKIT_LOGGER("Joint.Python.Core")
+
 extern "C"
 {
-
-	JOINT_DEVKIT_LOGGER("Joint.Python.Core")
-
 
 	Joint_Error JointPythonCore_MakeBinding(Joint_BindingHandle* outBinding)
 	{

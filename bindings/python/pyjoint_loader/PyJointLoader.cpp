@@ -1,9 +1,9 @@
 #include <joint/JointLoader.h>
 #include <joint/devkit/Logger.hpp>
 
-#include <Python.h>
 #include <pyjoint_loader/Globals.hpp>
 #include <utils/PyObjectHolder.hpp>
+#include <utils/PythonHeaders.h>
 
 
 JOINT_DEVKIT_LOGGER("Joint.Python.PyJointLoader")
