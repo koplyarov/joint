@@ -27,6 +27,7 @@ public:
 		auto basic = _module.GetRootObject<IBasicTests>("GetBasicTests");
 
 		TEST_THROWS_ANYTHING(basic->Throw());
+
 		TEST_EQUALS((int8_t)14, basic->AddI8(2, 12));
 		TEST_EQUALS((uint8_t)14, basic->AddU8(2, 12));
 		TEST_EQUALS((int16_t)14, basic->AddI16(2, 12));

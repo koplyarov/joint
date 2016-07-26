@@ -63,7 +63,7 @@ class CppGenerator:
     def _generateInterfaceProxyMethods(self, ifc):
         for m in ifc.methods:
             for l in self._generateMethodDefinition(ifc, m):
-                yield '\t{}'.format(l)
+                yield '{}'.format(l)
 
     def _generateMethodDeclaration(self, m):
         yield '{} {}({});'.format(self._toCppType(m.retType), m.name, ', '.join('{} {}'.format(self._toCppType(p.type), p.name) for p in m.params))
