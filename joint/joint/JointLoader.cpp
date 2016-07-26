@@ -9,6 +9,7 @@
 #include <mutex>
 
 #include <../bindings/python/JointPython.h>
+#include <../bindings/cpp/JointCppCore.h>
 
 
 JOINT_DEVKIT_LOGGER("Joint")
@@ -51,18 +52,22 @@ extern "C"
 			[&]() {
 				GetLogger().Info() << "Init";
 
-				static Joint_BindingHandle python_binding;
-				Joint_Error ret = JointPython_MakeBinding(&python_binding);
-				JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
-
-				g_bindings.AddBinding("python", Holder<Joint_BindingHandle>(python_binding,
-						[](Joint_BindingHandle b) {
+				auto release_binding = [](Joint_BindingHandle b) {
 							Joint_Error ret = Joint_ReleaseBinding(b);
 							if (ret != JOINT_ERROR_NONE)
 								GetLogger().Info() << "Joint_ReleaseBinding failed: " << Joint_ErrorToString(ret);
-						}
-					));
-				});
+						};
+
+				static Joint_BindingHandle python_binding;
+				Joint_Error ret = JointPython_MakeBinding(&python_binding);
+				JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+				g_bindings.AddBinding("python", Holder<Joint_BindingHandle>(python_binding, release_binding));
+
+				static Joint_BindingHandle cpp_binding;
+				ret = JointCppCore_MakeBinding(&cpp_binding);
+				JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+				g_bindings.AddBinding("cpp", Holder<Joint_BindingHandle>(cpp_binding, release_binding));
+			});
 
 		JOINT_CPP_WRAP_END
 	}

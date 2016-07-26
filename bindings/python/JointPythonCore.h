@@ -21,9 +21,6 @@
 extern "C"
 {
 	JOINT_PYTHON_CORE_API Joint_Error JointPythonCore_MakeBinding(Joint_BindingHandle* outBinding);
-
-	JOINT_PYTHON_CORE_API Joint_Error JointPythonCore_RegisterBinding();
-	JOINT_PYTHON_CORE_API Joint_Error JointPythonCore_UnregisterBinding();
 }
 
 PyMODINIT_FUNC JointPythonCore_InitModule_py3(void);

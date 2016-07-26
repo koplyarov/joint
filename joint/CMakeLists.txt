@@ -27,4 +27,4 @@ set(JOINT_SRC
 )
 
 add_library(joint-loader SHARED ${JOINT_SRC})
-target_link_libraries(joint-loader joint joint-python ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(joint-loader joint joint-python joint-cpp ${CMAKE_THREAD_LIBS_INIT})

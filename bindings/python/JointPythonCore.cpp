@@ -41,14 +41,6 @@ extern "C"
 		return ret;
 	}
 
-
-	Joint_Error JointPythonCore_RegisterBinding()
-	{ return JOINT_ERROR_NOT_IMPLEMENTED; }
-
-
-	Joint_Error JointPythonCore_UnregisterBinding()
-	{ return JOINT_ERROR_NOT_IMPLEMENTED; }
-
 }
 
 

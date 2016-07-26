@@ -66,7 +66,8 @@ int main()
 {
 	try
 	{
-		Tests t(joint::Module("python", "Tests"));
+		//Tests t(joint::Module("python", "Tests"));
+		Tests t(joint::Module("cpp", "tests"));
 		t.RunBasicTests();
 		t.RunObjectTests();
 	}

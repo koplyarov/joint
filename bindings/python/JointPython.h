@@ -21,9 +21,6 @@ extern "C"
 
 	JOINT_PYTHON_API Joint_Error JointPython_MakeBinding(Joint_BindingHandle* outBinding);
 
-	JOINT_PYTHON_API Joint_Error JointPython_Register();
-	JOINT_PYTHON_API Joint_Error JointPython_Unregister();
-
 }
 
 #endif

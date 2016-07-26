@@ -28,6 +28,7 @@ target_link_libraries(test-core ${CMAKE_THREAD_LIBS_INIT})
 
 ################################################################################
 
+add_subdirectory(cpp)
 
 include(${CMAKE_SOURCE_DIR}/joint.cmake)
 joint_import_directories(${CMAKE_SOURCE_DIR}/joint/idl)
