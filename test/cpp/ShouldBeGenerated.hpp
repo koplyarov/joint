@@ -136,6 +136,40 @@ namespace test
 	};
 
 
+	class ISomeObject_impl : public joint::IObject_impl
+	{
+	public:
+		static bool _Inherits(const char* interfaceId)
+		{
+			return strcmp(interfaceId, "test.ISomeObject") == 0 ||
+				strcmp(interfaceId, "joint.IObject") == 0;
+		}
+
+		virtual Joint_Error _InvokeMethod(Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
+		{
+			switch (methodId)
+			{
+			case 0:
+				{
+					if (paramsCount != 0 ||
+						retType != JOINT_TYPE_VOID)
+					{ return JOINT_ERROR_GENERIC; }
+
+					Method();
+					outRetValue->variant.type = JOINT_TYPE_VOID;
+				}
+				break;
+			default:
+				return JOINT_ERROR_GENERIC;
+			}
+			outRetValue->releaseValue = &_ReleaseRetValue;
+			return JOINT_ERROR_NONE;
+		}
+
+		virtual void Method() = 0;
+	};
+
+
 	class IObjectTests_impl : public joint::IObject_impl
 	{
 	public:

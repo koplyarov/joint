@@ -19,6 +19,7 @@ extern "C"
 {
 
 	TESTS_API joint::IJointObject* GetBasicTests();
+	TESTS_API joint::IJointObject* GetSomeObject();
 
 }
 

@@ -54,7 +54,7 @@ namespace joint
 		};
 	}
 
-	template < typename ComponentType_,
+	template <
 			typename Interface1_ = void,
 			typename Interface2_ = void,
 			typename Interface3_ = void,

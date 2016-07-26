@@ -9,13 +9,28 @@
 #include <joint.cpp/Component.hpp>
 
 
-class Tests : public joint::Component<Tests, test::IBasicTests_impl, test::IStringTests_impl, test::IObjectTests_impl>
+class SomeObject : public joint::Component<test::ISomeObject_impl>
 {
 public:
+	SomeObject()
+	{ printf("CPP: SomeObject ctor\n"); }
+
+	~SomeObject()
+	{ printf("CPP: SomeObject dtor\n"); }
+
+	virtual void Method()
+	{ printf("CPP: Method\n"); }
+};
+
+
+class Tests : public joint::Component<test::IBasicTests_impl, test::IStringTests_impl, test::IObjectTests_impl>
+{
+public:
+	Tests()
+	{ printf("CPP: Tests ctor\n"); }
+
 	~Tests()
-	{
-		printf("CPP: dtor\n");
-	}
+	{ printf("CPP: Tests dtor\n"); }
 
 	virtual uint32_t AddU32(uint32_t l, uint32_t r)
 	{
@@ -46,5 +61,8 @@ extern "C"
 
 	joint::IJointObject* GetBasicTests()
 	{ return joint::MakeComponent<Tests>(); }
+
+	joint::IJointObject* GetSomeObject()
+	{ return joint::MakeComponent<SomeObject>(); }
 
 }
