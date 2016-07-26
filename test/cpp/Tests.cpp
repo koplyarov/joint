@@ -9,7 +9,7 @@
 #include <joint.cpp/Component.hpp>
 
 
-class Tests : public joint::Component<Tests, test::IBasicTests_impl, test::IStringTests_impl>
+class Tests : public joint::Component<Tests, test::IBasicTests_impl, test::IStringTests_impl, test::IObjectTests_impl>
 {
 public:
 	~Tests()
@@ -33,6 +33,11 @@ public:
 	{
 		printf("CPP: Concat\n");
 		return l + r;
+	}
+
+	virtual test::IObjectTests_Ptr ReturnNewObject()
+	{
+		return test::IObjectTests_Ptr();
 	}
 };
 

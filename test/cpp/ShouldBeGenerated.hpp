@@ -3,6 +3,7 @@
 
 
 #include <joint.cpp/IJointObject.hpp>
+#include <test/Tests_adapters.hpp>
 
 
 class JointObjectBase : public joint::IJointObject
@@ -132,6 +133,41 @@ namespace test
 		}
 
 		virtual std::string Concat(const std::string& l, const std::string& r) = 0;
+	};
+
+
+	class IObjectTests_impl : public joint::IObject_impl
+	{
+	public:
+		static bool _Inherits(const char* interfaceId)
+		{
+			return strcmp(interfaceId, "test.IObjectTests") == 0 ||
+				strcmp(interfaceId, "joint.IObject") == 0;
+		}
+
+		virtual Joint_Error _InvokeMethod(Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
+		{
+			switch (methodId)
+			{
+			case 0:
+				{
+					if (paramsCount != 0 ||
+						retType != JOINT_TYPE_OBJ)
+					{ return JOINT_ERROR_GENERIC; }
+
+					IObjectTests_Ptr result = ReturnNewObject();
+					//outRetValue->variant.value.utf8 = c_result;
+					outRetValue->variant.type = JOINT_TYPE_VOID;
+				}
+				break;
+			default:
+				return JOINT_ERROR_GENERIC;
+			}
+			outRetValue->releaseValue = &_ReleaseRetValue;
+			return JOINT_ERROR_NONE;
+		}
+
+		virtual IObjectTests_Ptr ReturnNewObject() = 0;
 	};
 
 }
