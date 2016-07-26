@@ -205,7 +205,7 @@ extern "C"
 
 		Joint_ModuleHandleInternal internal = JOINT_NULL_HANDLE;
 		Joint_Error ret = binding->desc.loadModule(binding->userData, moduleName, &internal);
-		JOINT_CHECK(ret == JOINT_ERROR_NONE, JOINT_ERROR_NO_SUCH_MODULE);
+		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
 
 		*outModule = new Joint_Module(internal, binding);
@@ -340,7 +340,10 @@ extern "C"
 		auto refs = --handle->refCount;
 		if (refs == 0)
 		{
-			handle->module->binding->desc.releaseObject(handle->module->binding->userData, handle->module->internal, handle->internal);
+			GetLogger().Debug() << "ReleaseObject(obj: " << handle << " (internal: " << (handle ? handle->internal : NULL) << "))";
+			Joint_Error ret = handle->module->binding->desc.releaseObject(handle->module->binding->userData, handle->module->internal, handle->internal);
+			if (ret != JOINT_ERROR_NONE)
+				GetLogger().Error() << "releaseObject failed: " << ret;
 			delete handle;
 		}
 		JOINT_CHECK(refs >= 0, JOINT_ERROR_INVALID_PARAMETER);

@@ -29,7 +29,7 @@ namespace detail
 				Joint_Error ret = Joint_GetExceptionMessageSize((RetValue_).variant.value.ex, &buf_size); \
 				if (ret != JOINT_ERROR_NONE) \
 				{ \
-					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C++", (std::string("Joint_GetExceptionMessageSize failed: ") + Joint_ErrorToString(ret)).c_str()); \
+					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C++", "Joint_GetExceptionMessageSize failed: %s", Joint_ErrorToString(ret)); \
 					throw std::runtime_error("Could not obtain joint exception message!"); \
 				} \
 				\
@@ -38,7 +38,7 @@ namespace detail
 				ret = Joint_GetExceptionMessage((RetValue_).variant.value.ex, buf.data(), buf.size()); \
 				if (ret != JOINT_ERROR_NONE) \
 				{ \
-					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C++", (std::string("Joint_GetExceptionMessage failed: ") + Joint_ErrorToString(ret)).c_str()); \
+					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C++", "Joint_GetExceptionMessage failed: ", Joint_ErrorToString(ret)); \
 					throw std::runtime_error("Could not obtain joint exception message!"); \
 				} \
 				throw std::runtime_error(buf.data()); \

@@ -12,7 +12,7 @@
 				return JOINT_ERROR_NONE; \
 			} \
 			catch (const joint::JointException& ex) { \
-				GetLogger().Error() << __func__ << " failed: " << Joint_ErrorToString(ex.GetError()); \
+				GetLogger().Error() << __func__ << " failed: " << ex.GetError(); \
 				return ex.GetError(); \
 			} \
 			catch (const std::exception& ex) { \

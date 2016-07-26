@@ -23,7 +23,7 @@ namespace joint_cpp
 	public:
 		Impl(const std::string& name)
 		{
-			_handle = dlopen(("lib" + name + ".so").c_str(), RTLD_NOW);
+			_handle = dlopen(("lib" + name + ".so").c_str(), RTLD_NOW | RTLD_DEEPBIND);
 			JOINT_CHECK(_handle != nullptr, joint::devkit::StringBuilder() % "dlopen failed: " % dlerror());
 		}
 

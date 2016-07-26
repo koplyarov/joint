@@ -65,7 +65,7 @@ namespace binding
 		Joint_Error ret = Joint_IncRefModule(module);
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, std::string("Joint_IncRefModule failed: ") + Joint_ErrorToString(ret));
 		joint::devkit::Holder<Joint_ModuleHandle> module_holder(module,
-			[&](Joint_ModuleHandle h) { auto ret = Joint_DecRefModule(h); if(ret != JOINT_ERROR_NONE) GetLogger().Error() << "Joint_DecRefModule failed: " << Joint_ErrorToString(ret); });
+			[&](Joint_ModuleHandle h) { auto ret = Joint_DecRefModule(h); if(ret != JOINT_ERROR_NONE) GetLogger().Error() << "Joint_DecRefModule failed: " << ret; });
 
 		PyObjectHolder py_params(PY_OBJ_CHECK(Py_BuildValue("(O)", py_module_handle.Get())));
 		PyObjectHolder pyjoint_module(PY_OBJ_CHECK(PyObject_CallObject(pyjoint_module_type, py_params)));
@@ -245,7 +245,7 @@ namespace binding
 			{
 				Joint_Error ret = Joint_ReleaseException(value.value.ex);
 				if (ret != JOINT_ERROR_NONE)
-					GetLogger().Error() << "Joint_ReleaseException failed: " << Joint_ErrorToString(ret);
+					GetLogger().Error() << "Joint_ReleaseException failed: " << ret;
 			}
 			break;
 		default:

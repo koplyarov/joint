@@ -31,7 +31,7 @@ extern "C"
 
 		Joint_Error ret = Joint_MakeBinding(binding_desc, binding.get(), outBinding);
 		if (ret != JOINT_ERROR_NONE)
-			GetLogger().Error() << "Joint_MakeBinding failed: " << Joint_ErrorToString(ret);
+			GetLogger().Error() << "Joint_MakeBinding failed: " << ret;
 		else
 			binding.release();
 

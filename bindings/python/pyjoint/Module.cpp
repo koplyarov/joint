@@ -102,7 +102,7 @@ namespace pyjoint
 		{
 			Joint_Error ret = Joint_DecRefModule(m->handle);
 			if (ret != JOINT_ERROR_NONE)
-				GetLogger().Error() << "Joint_DecRefModule failed: " << Joint_ErrorToString(ret);
+				GetLogger().Error() << "Joint_DecRefModule failed: " << ret;
 			m->handle = JOINT_NULL_HANDLE;
 		}
 

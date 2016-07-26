@@ -49,7 +49,7 @@ static struct PyModuleDef g_module = {
 		Joint_Error ret = Joint_Init();
 		if (ret != JOINT_ERROR_NONE)
 		{
-			GetLogger().Error() << "Joint_Init failed: " << Joint_ErrorToString(ret);
+			GetLogger().Error() << "Joint_Init failed: " << ret;
 			RETURN_ERROR;
 		}
 

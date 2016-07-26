@@ -2,6 +2,8 @@
 #define BINDINGS_DEVKIT_STRINGBUILDER_HPP
 
 
+#include <joint/Joint.h>
+
 #include <sstream>
 #include <type_traits>
 
@@ -36,6 +38,13 @@ namespace devkit
 			template < typename U_ >
 			static void Print(std::ostream& s, U_&& obj)
 			{ s << obj.ToString(); }
+		};
+
+		template < >
+		struct ObjectPrinter<Joint_Error, void>
+		{
+			static void Print(std::ostream& s, Joint_Error obj)
+			{ s << Joint_ErrorToString(obj); }
 		};
 	}
 

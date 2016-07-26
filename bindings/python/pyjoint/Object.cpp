@@ -85,7 +85,7 @@ namespace pyjoint
 		{
 			Joint_Error ret = Joint_DecRefObject(m->handle);
 			if (ret != JOINT_ERROR_NONE)
-				GetLogger().Error() << "Joint_DecRefObject failed: " << Joint_ErrorToString(ret);
+				GetLogger().Error() << "Joint_DecRefObject failed: " << ret;
 			m->handle = JOINT_NULL_HANDLE;
 		}
 
@@ -150,7 +150,7 @@ namespace pyjoint
 		auto sg(ScopeExit([&]{
 			Joint_Error ret = Joint_ReleaseRetValue(ret_value);
 			if (ret != JOINT_ERROR_NONE)
-				GetLogger().Error() << "Joint_ReleaseRetValue failed: " << Joint_ErrorToString(ret);
+				GetLogger().Error() << "Joint_ReleaseRetValue failed: " << ret;
 		}));
 
 		PyObjectHolder result;
@@ -177,7 +177,7 @@ namespace pyjoint
 				Joint_Error ret = Joint_GetExceptionMessageSize(ret_variant.value.ex, &buf_size);
 				if (ret != JOINT_ERROR_NONE)
 				{
-					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C++", (std::string("Joint_GetExceptionMessageSize failed: ") + Joint_ErrorToString(ret)).c_str());
+					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C++", "Joint_GetExceptionMessageSize failed: ", Joint_ErrorToString(ret));
 					throw std::runtime_error("Could not obtain joint exception message!");
 				}
 
@@ -186,7 +186,7 @@ namespace pyjoint
 				ret = Joint_GetExceptionMessage(ret_variant.value.ex, buf.data(), buf.size());
 				if (ret != JOINT_ERROR_NONE)
 				{
-					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C++", (std::string("Joint_GetExceptionMessage failed: ") + Joint_ErrorToString(ret)).c_str());
+					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C++", "Joint_GetExceptionMessage failed: %s", Joint_ErrorToString(ret));
 					throw std::runtime_error("Could not obtain joint exception message!");
 				}
 				throw std::runtime_error(buf.data());

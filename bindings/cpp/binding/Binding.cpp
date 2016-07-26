@@ -4,12 +4,13 @@
 #include <joint/devkit/Holder.hpp>
 #include <joint/utils/CppWrappers.hpp>
 
-#include <utils/DynamicLibrary.hpp>
-
 #include <memory>
 #include <string.h>
 
 #include <stdio.h>
+
+#include <joint.cpp/IJointObject.hpp>
+#include <utils/DynamicLibrary.hpp>
 
 
 namespace joint_cpp {
@@ -35,12 +36,7 @@ namespace binding
 	Joint_Error Binding::LoadModule(void* bindingUserData, const char* moduleName, Joint_ModuleHandleInternal* outModule)
 	{
 		JOINT_CPP_WRAP_BEGIN
-		//*outModule = new Module(moduleName);
-		GetLogger().Warning() << "LoadModule: " << moduleName;
-		DynamicLibrary l(moduleName);
-		auto f = l.GetFunction<int()>("TestFunc");
-		GetLogger().Warning() << "f result: " << f();
-		return JOINT_ERROR_NOT_IMPLEMENTED;
+		*outModule = new DynamicLibrary(moduleName);
 		JOINT_CPP_WRAP_END
 	}
 
@@ -48,8 +44,7 @@ namespace binding
 	Joint_Error Binding::UnloadModule(void* bindingUserData, Joint_ModuleHandleInternal module)
 	{
 		JOINT_CPP_WRAP_BEGIN
-		//delete reinterpret_cast<Module*>(module);
-		return JOINT_ERROR_NOT_IMPLEMENTED;
+		delete reinterpret_cast<DynamicLibrary*>(module);
 		JOINT_CPP_WRAP_END
 	}
 
@@ -58,7 +53,9 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		return JOINT_ERROR_NOT_IMPLEMENTED;
+		auto dl = reinterpret_cast<DynamicLibrary*>(moduleInt);
+		auto getter = dl->GetFunction<joint::IJointObject*()>(getterName);
+		return Joint_CreateObject(module, getter(), outObject);
 
 		JOINT_CPP_WRAP_END
 	}
@@ -67,7 +64,10 @@ namespace binding
 	Joint_Error Binding::InvokeMethod(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
 	{
 		JOINT_CPP_WRAP_BEGIN
-		return JOINT_ERROR_NOT_IMPLEMENTED;
+
+		auto o = reinterpret_cast<joint::IJointObject*>(obj);
+		return o->_InvokeMethod(methodId, params, paramsCount, retType, outRetValue);
+
 		JOINT_CPP_WRAP_END
 	}
 
@@ -76,8 +76,8 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		//delete reinterpret_cast<Object*>(obj);
-		return JOINT_ERROR_NOT_IMPLEMENTED;
+		auto o = reinterpret_cast<joint::IJointObject*>(obj);
+		o->_Release();
 
 		JOINT_CPP_WRAP_END
 	}
@@ -87,7 +87,11 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		return JOINT_ERROR_NOT_IMPLEMENTED;
+		auto o = reinterpret_cast<joint::IJointObject*>(obj);
+		joint::IJointObject* result = nullptr;
+		Joint_Error ret = o->_CastObject(interfaceId, &result);
+		*outRetValue = result;
+		return ret;
 
 		JOINT_CPP_WRAP_END
 	}
@@ -120,7 +124,7 @@ namespace binding
 			{
 				Joint_Error ret = Joint_ReleaseException(value.value.ex);
 				if (ret != JOINT_ERROR_NONE)
-					GetLogger().Error() << "Joint_ReleaseException failed: " << Joint_ErrorToString(ret);
+					GetLogger().Error() << "Joint_ReleaseException failed: " << ret;
 			}
 			break;
 		default:
