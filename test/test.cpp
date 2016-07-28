@@ -58,7 +58,7 @@ public:
 		auto some_obj = obj->ReturnNewObject();
 
 		TEST_THROWS_NOTHING(some_obj->Method());
-		//TEST_THROWS_NOTHING(obj->InvokeObjectMethod(some_obj));
+		TEST_THROWS_NOTHING(obj->InvokeObjectMethod(some_obj));
 
 		//auto some_obj_2 = obj->ReturnSameObject(some_obj);
 		//TEST_THROWS_NOTHING(some_obj_2->Method());

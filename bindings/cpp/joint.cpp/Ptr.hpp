@@ -52,6 +52,13 @@ namespace joint
 		explicit operator bool() const
 		{ return _raw != nullptr; }
 
+		T_* NewRef() const
+		{
+			if (_raw)
+				_raw->_AddRef();
+			return _raw;
+		}
+
 		T_* Get() const
 		{ return _raw; }
 

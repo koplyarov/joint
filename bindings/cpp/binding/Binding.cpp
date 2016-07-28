@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 #include <joint.cpp/IJointObject.hpp>
+#include <joint.cpp/Ptr.hpp>
 #include <utils/DynamicLibrary.hpp>
 
 
@@ -48,14 +49,23 @@ namespace binding
 		JOINT_CPP_WRAP_END
 	}
 
+	namespace {
+		class IObject : public virtual ::joint::detail::ProxyBase
+		{ };
+	}
 
 	Joint_Error Binding::GetRootObject(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, const char* getterName, Joint_ObjectHandle* outObject)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
 		auto dl = reinterpret_cast<DynamicLibrary*>(moduleInt);
-		auto getter = dl->GetFunction<joint::IJointObject*()>(getterName);
-		return Joint_CreateObject(module, getter(), outObject);
+		auto getter = dl->GetFunction<IObject*(Joint_ModuleHandle)>(getterName);
+		JOINT_CHECK(getter, JOINT_ERROR_NO_SUCH_MODULE);
+		IObject* obj = getter(module);
+		printf("??? %p\n", obj);
+		printf("+++ %p\n", obj->_GetObjectHandle());
+		obj->_AddRef();
+		*outObject = obj->_GetObjectHandle();
 
 		JOINT_CPP_WRAP_END
 	}

@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 
+#include <test/Tests_adapters.hpp>
 #include <ShouldBeGenerated.hpp>
 #include <joint.cpp/Component.hpp>
 
@@ -12,7 +13,7 @@
 class SomeObject : public joint::Component<test::ISomeObject_impl>
 {
 public:
-	SomeObject()
+	SomeObject(Joint_ModuleHandle module)
 	{ printf("CPP: SomeObject ctor\n"); }
 
 	~SomeObject()
@@ -25,8 +26,12 @@ public:
 
 class Tests : public joint::Component<test::IBasicTests_impl, test::IStringTests_impl, test::IObjectTests_impl>
 {
+private:
+	Joint_ModuleHandle   _module;
+
 public:
-	Tests()
+	Tests(Joint_ModuleHandle module)
+		: _module(module)
 	{ printf("CPP: Tests ctor\n"); }
 
 	~Tests()
@@ -50,19 +55,23 @@ public:
 		return l + r;
 	}
 
-	virtual test::IObjectTests_Ptr ReturnNewObject()
+	virtual void InvokeObjectMethod(const test::ISomeObject_Ptr& o)
 	{
-		return test::IObjectTests_Ptr();
+		printf("CPP: InvokeObjectMethod\n");
+		o->Method();
 	}
+
+	virtual test::ISomeObject_Ptr ReturnNewObject()
+	{ return joint::MakeComponent<test::ISomeObject, SomeObject>(_module, _module); }
 };
 
 extern "C"
 {
 
-	joint::IJointObject* GetBasicTests()
-	{ return joint::MakeComponent<Tests>(); }
+	joint::IObject* GetBasicTests(Joint_ModuleHandle module)
+	{ return joint::MakeComponent<joint::IObject, Tests>(module, module).NewRef(); }
 
-	joint::IJointObject* GetSomeObject()
-	{ return joint::MakeComponent<SomeObject>(); }
+	joint::IObject* GetSomeObject(Joint_ModuleHandle module)
+	{ return joint::MakeComponent<joint::IObject, SomeObject>(module, module).NewRef(); }
 
 }

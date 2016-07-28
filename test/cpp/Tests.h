@@ -3,6 +3,8 @@
 
 
 #include <joint.cpp/IJointObject.hpp>
+#include <joint.cpp/Ptr.hpp>
+#include <test/Tests_adapters.hpp>
 
 
 #ifdef _MSC_VER
@@ -18,8 +20,8 @@
 extern "C"
 {
 
-	TESTS_API joint::IJointObject* GetBasicTests();
-	TESTS_API joint::IJointObject* GetSomeObject();
+	TESTS_API joint::IObject* GetBasicTests(Joint_ModuleHandle module);
+	TESTS_API joint::IObject* GetSomeObject(Joint_ModuleHandle module);
 
 }
 

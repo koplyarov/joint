@@ -2,8 +2,22 @@
 #define TEST_CPP_SHOULDBEGENERATED_HPP
 
 
+#include <string.h>
+
 #include <joint.cpp/IJointObject.hpp>
 #include <test/Tests_adapters.hpp>
+
+
+namespace joint {
+	class IObject; typedef ::joint::Ptr<IObject> IObject_Ptr;
+}
+
+namespace test {
+	class IBasicTests; typedef ::joint::Ptr<IBasicTests> IBasicTests_Ptr;
+	class IStringTests; typedef ::joint::Ptr<IStringTests> IStringTests_Ptr;
+	class ISomeObject; typedef ::joint::Ptr<ISomeObject> ISomeObject_Ptr;
+	class IObjectTests; typedef ::joint::Ptr<IObjectTests> IObjectTests_Ptr;
+}
 
 
 class JointObjectBase : public joint::IJointObject
@@ -189,8 +203,21 @@ namespace test
 						retType != JOINT_TYPE_OBJ)
 					{ return JOINT_ERROR_GENERIC; }
 
-					IObjectTests_Ptr result = ReturnNewObject();
-					//outRetValue->variant.value.utf8 = c_result;
+					ISomeObject* result = ReturnNewObject().NewRef();
+					outRetValue->variant.value.obj = result->_GetObjectHandle();
+					outRetValue->variant.type = JOINT_TYPE_OBJ;
+				}
+				break;
+			case 2:
+				{
+					if (paramsCount != 1 ||
+						retType != JOINT_TYPE_VOID ||
+						params[0].type != JOINT_TYPE_OBJ)
+					{ return JOINT_ERROR_GENERIC; }
+
+					test::ISomeObject_Ptr obj_ptr(new test::ISomeObject(params[0].value.obj));
+					obj_ptr.NewRef();
+					InvokeObjectMethod(obj_ptr);
 					outRetValue->variant.type = JOINT_TYPE_VOID;
 				}
 				break;
@@ -201,7 +228,8 @@ namespace test
 			return JOINT_ERROR_NONE;
 		}
 
-		virtual IObjectTests_Ptr ReturnNewObject() = 0;
+		virtual void InvokeObjectMethod(const test::ISomeObject_Ptr& o) = 0;
+		virtual ISomeObject_Ptr ReturnNewObject() = 0;
 	};
 
 }

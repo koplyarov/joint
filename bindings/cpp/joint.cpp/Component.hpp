@@ -5,6 +5,8 @@
 #include <atomic>
 
 #include <joint.cpp/IJointObject.hpp>
+#include <joint.cpp/MetaProgramming.hpp>
+#include <joint.cpp/Ptr.hpp>
 
 
 namespace joint
@@ -52,6 +54,52 @@ namespace joint
 					delete this;
 			}
 		};
+
+		template < typename RequestedInterface_, typename Interface_, bool Valid_ = IsBaseOf<RequestedInterface_, Interface_>::Value >
+		class InterfaceGetterHelper
+		{
+		public:
+			static RequestedInterface_* Get(Interface_* interface)
+			{ return NULL; }
+		};
+
+		template < typename RequestedInterface_, typename Interface_ >
+		class InterfaceGetterHelper<RequestedInterface_, Interface_, true>
+		{
+		public:
+			static RequestedInterface_* Get(Interface_* interface)
+			{ return interface; }
+		};
+
+
+		template < typename RequestedInterface_, typename Component_ >
+		class InterfaceGetter
+		{
+		public:
+			static RequestedInterface_* Get(Component_* component)
+			{
+				StaticAssert<
+					//IsBaseOf<RequestedInterface_, Component_>::Value
+					IsBaseOf<RequestedInterface_, typename Component_::Interface1>::Value ||
+					IsBaseOf<RequestedInterface_, typename Component_::Interface2>::Value ||
+					IsBaseOf<RequestedInterface_, typename Component_::Interface3>::Value ||
+					IsBaseOf<RequestedInterface_, typename Component_::Interface4>::Value ||
+					IsBaseOf<RequestedInterface_, typename Component_::Interface5>::Value
+				> ERROR_Invalid_RequestedInterface;
+				(void)ERROR_Invalid_RequestedInterface;
+
+				RequestedInterface_* result;
+	#define DETAIL_JOINT_TRY_GET_IFC(I_) result = InterfaceGetterHelper<RequestedInterface_, typename Component_::Interface ## I_>::Get(component); if (result) return result
+			DETAIL_JOINT_TRY_GET_IFC(1);
+			DETAIL_JOINT_TRY_GET_IFC(2);
+			DETAIL_JOINT_TRY_GET_IFC(3);
+			DETAIL_JOINT_TRY_GET_IFC(4);
+			DETAIL_JOINT_TRY_GET_IFC(5);
+	#undef DETAIL_JOINT_TRY_CAST
+				return result;
+			}
+		};
+
 	}
 
 	template <
@@ -71,6 +119,10 @@ namespace joint
 	{
 	public:
 		typedef Interface1_		Interface1;
+		typedef Interface2_		Interface2;
+		typedef Interface3_		Interface3;
+		typedef Interface4_		Interface4;
+		typedef Interface5_		Interface5;
 
 		virtual void _AddRef()
 		{ detail::RefCounter::_AddRef(); }
@@ -95,10 +147,32 @@ namespace joint
 
 
 	template < typename ComponentType_ >
-	IJointObject* MakeComponent()
+	ComponentType_* MakeComponentImpl()
+	{ return new ComponentType_; }
+
+	template < typename ComponentType_, typename Arg1_ >
+	ComponentType_* MakeComponentImpl(const Arg1_& arg1)
+	{ return new ComponentType_(arg1); }
+
+
+	template < typename Interface_, typename ComponentType_ >
+	Ptr<Interface_> MakeComponentProxy(Joint_ModuleHandle module, ComponentType_* component)
 	{
-		return static_cast<typename ComponentType_::Interface1*>(new ComponentType_);
+		IJointObject* internal = detail::InterfaceGetter<typename Interface_::ImplInterface, ComponentType_>::Get(component);
+		Joint_ObjectHandle obj = JOINT_NULL_HANDLE;
+		JOINT_CALL( Joint_CreateObject(module, internal, &obj) );
+		printf("!!! %p\n", obj);
+		return Ptr<Interface_>(new Interface_(obj));
 	}
+
+
+	template < typename Interface_, typename ComponentType_ >
+	Ptr<Interface_>  MakeComponent(Joint_ModuleHandle module)
+	{ return MakeComponentProxy<Interface_>(module, MakeComponentImpl<ComponentType_>()); }
+
+	template < typename Interface_, typename ComponentType_, typename Arg1_ >
+	Ptr<Interface_> MakeComponent(Joint_ModuleHandle module, const Arg1_& arg1)
+	{ return MakeComponentProxy<Interface_>(module, MakeComponentImpl<ComponentType_>(arg1)); }
 
 }
 
