@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 
-#include <joint.cpp/IJointObject.hpp>
+#include <joint.cpp/Accessor.hpp>
 #include <joint.cpp/Ptr.hpp>
 #include <utils/DynamicLibrary.hpp>
 
@@ -49,23 +49,15 @@ namespace binding
 		JOINT_CPP_WRAP_END
 	}
 
-	namespace {
-		class IObject : public virtual ::joint::detail::ProxyBase
-		{ };
-	}
 
 	Joint_Error Binding::GetRootObject(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, const char* getterName, Joint_ObjectHandle* outObject)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
 		auto dl = reinterpret_cast<DynamicLibrary*>(moduleInt);
-		auto getter = dl->GetFunction<IObject*(Joint_ModuleHandle)>(getterName);
+		auto getter = dl->GetFunction<Joint_ObjectHandle(Joint_ModuleHandle)>(getterName);
 		JOINT_CHECK(getter, JOINT_ERROR_NO_SUCH_MODULE);
-		IObject* obj = getter(module);
-		printf("??? %p\n", obj);
-		printf("+++ %p\n", obj->_GetObjectHandle());
-		obj->_AddRef();
-		*outObject = obj->_GetObjectHandle();
+		*outObject = getter(module);
 
 		JOINT_CPP_WRAP_END
 	}
@@ -75,8 +67,8 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		auto o = reinterpret_cast<joint::IJointObject*>(obj);
-		return o->_InvokeMethod(methodId, params, paramsCount, retType, outRetValue);
+		auto accessor = reinterpret_cast<joint::Accessor*>(obj);
+		return accessor->VTable->InvokeMethod(accessor->Component, methodId, params, paramsCount, retType, outRetValue);
 
 		JOINT_CPP_WRAP_END
 	}
@@ -86,8 +78,8 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		auto o = reinterpret_cast<joint::IJointObject*>(obj);
-		o->_Release();
+		auto accessor = reinterpret_cast<joint::Accessor*>(obj);
+		return accessor->VTable->Release(accessor->Component);
 
 		JOINT_CPP_WRAP_END
 	}
@@ -97,10 +89,11 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		auto o = reinterpret_cast<joint::IJointObject*>(obj);
-		joint::IJointObject* result = nullptr;
-		Joint_Error ret = o->_CastObject(interfaceId, &result);
-		*outRetValue = result;
+		auto accessor = reinterpret_cast<joint::Accessor*>(obj);
+		const joint::Accessor* result = nullptr;
+		Joint_Error ret = accessor->VTable->CastObject(accessor->Component, interfaceId, &result);
+		accessor->VTable->AddRef(accessor->Component);
+		*outRetValue = const_cast<joint::Accessor*>(result);
 		return ret;
 
 		JOINT_CPP_WRAP_END

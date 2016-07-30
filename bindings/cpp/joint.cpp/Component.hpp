@@ -3,10 +3,13 @@
 
 
 #include <atomic>
+#include <typeinfo>
 
+#include <joint.cpp/Accessor.hpp>
 #include <joint.cpp/IJointObject.hpp>
 #include <joint.cpp/MetaProgramming.hpp>
 #include <joint.cpp/Ptr.hpp>
+#include <joint.cpp/TypeList.hpp>
 
 
 namespace joint
@@ -14,165 +17,168 @@ namespace joint
 
 	namespace detail
 	{
-		template < typename Interface_, int N_ >
-		class BaseClass : public Interface_
+		template < typename ComponentImpl_, typename InterfacesList_ >
+		class AccessorsHolder
 		{
+			typedef typename InterfacesList_::Type::template Accessor<ComponentImpl_>    AccessorType;
+			typedef AccessorsHolder<ComponentImpl_, typename InterfacesList_::NextNode>  TailAccessors;
+
+		private:
+			static AccessorVTable   s_accessorVTable;
+			Accessor                _accessor;
+			TailAccessors           _tail;
+
 		public:
-			joint::IJointObject* TryCast(const char* interfaceId)
+			void Init(void* component)
 			{
-				if (Interface_::_Inherits(interfaceId))
-					return static_cast<joint::IJointObject*>(this);
-				return NULL;
+				_accessor.Component = component;
+				_accessor.VTable = &s_accessorVTable;
+				_tail.Init(component);
+			}
+
+			template < typename Interface_ >
+			const Accessor* GetAccessor() const
+			{ return &_accessor; }
+
+			bool GetAccessorById(Joint_InterfaceId interfaceId, const Accessor** outAccessor)
+			{
+				if (AccessorType::InheritsInterface(interfaceId))
+				{
+					*outAccessor = &_accessor;
+					return true;
+				}
+				else
+					return _tail.GetAccessorById(interfaceId, outAccessor);
 			}
 		};
 
-		template < int N_ >
-		class BaseClass<void, N_>
+
+		template < typename ComponentImpl_ >
+		class AccessorsHolder<ComponentImpl_, joint::detail::TypeListEndNode>
 		{
 		public:
-			joint::IJointObject* TryCast(const char* interfaceId)
-			{ return NULL; }
-		};
-
-
-		class RefCounter : public virtual IJointObjectLifetime
-		{
-		private:
-			std::atomic<int>	_refCount;
-
-		public:
-			RefCounter()
-				: _refCount(1)
+			void Init(void* component)
 			{ }
 
-			virtual void _AddRef()
-			{ ++_refCount; }
-
-			virtual void _Release()
-			{
-				if (--_refCount == 0)
-					delete this;
-			}
+			bool GetAccessorById(Joint_InterfaceId interfaceId, const Accessor** outAccessor)
+			{ return false; }
 		};
-
-		template < typename RequestedInterface_, typename Interface_, bool Valid_ = IsBaseOf<RequestedInterface_, Interface_>::Value >
-		class InterfaceGetterHelper
-		{
-		public:
-			static RequestedInterface_* Get(Interface_* interface)
-			{ return NULL; }
-		};
-
-		template < typename RequestedInterface_, typename Interface_ >
-		class InterfaceGetterHelper<RequestedInterface_, Interface_, true>
-		{
-		public:
-			static RequestedInterface_* Get(Interface_* interface)
-			{ return interface; }
-		};
-
-
-		template < typename RequestedInterface_, typename Component_ >
-		class InterfaceGetter
-		{
-		public:
-			static RequestedInterface_* Get(Component_* component)
-			{
-				StaticAssert<
-					//IsBaseOf<RequestedInterface_, Component_>::Value
-					IsBaseOf<RequestedInterface_, typename Component_::Interface1>::Value ||
-					IsBaseOf<RequestedInterface_, typename Component_::Interface2>::Value ||
-					IsBaseOf<RequestedInterface_, typename Component_::Interface3>::Value ||
-					IsBaseOf<RequestedInterface_, typename Component_::Interface4>::Value ||
-					IsBaseOf<RequestedInterface_, typename Component_::Interface5>::Value
-				> ERROR_Invalid_RequestedInterface;
-				(void)ERROR_Invalid_RequestedInterface;
-
-				RequestedInterface_* result;
-	#define DETAIL_JOINT_TRY_GET_IFC(I_) result = InterfaceGetterHelper<RequestedInterface_, typename Component_::Interface ## I_>::Get(component); if (result) return result
-			DETAIL_JOINT_TRY_GET_IFC(1);
-			DETAIL_JOINT_TRY_GET_IFC(2);
-			DETAIL_JOINT_TRY_GET_IFC(3);
-			DETAIL_JOINT_TRY_GET_IFC(4);
-			DETAIL_JOINT_TRY_GET_IFC(5);
-	#undef DETAIL_JOINT_TRY_CAST
-				return result;
-			}
-		};
-
 	}
 
-	template <
-			typename Interface1_ = void,
-			typename Interface2_ = void,
-			typename Interface3_ = void,
-			typename Interface4_ = void,
-			typename Interface5_ = void
-		>
-	class Component :
-		public virtual detail::RefCounter,
-		public detail::BaseClass<Interface1_, 1>,
-		public detail::BaseClass<Interface2_, 2>,
-		public detail::BaseClass<Interface3_, 3>,
-		public detail::BaseClass<Interface4_, 4>,
-		public detail::BaseClass<Interface5_, 5>
+
+	template < typename ComponentImpl_ >
+	class ComponentWrapper
 	{
+		typedef typename ComponentImpl_::JointInterfaces              Interfaces;
+		typedef detail::AccessorsHolder<ComponentImpl_, Interfaces>   Accessors;
+
+	private:
+		std::atomic<int>  _refCount;
+		Accessors         _accessors;
+		ComponentImpl_    _componentImpl;
+
 	public:
-		typedef Interface1_		Interface1;
-		typedef Interface2_		Interface2;
-		typedef Interface3_		Interface3;
-		typedef Interface4_		Interface4;
-		typedef Interface5_		Interface5;
+		ComponentWrapper()
+			: _refCount(1), _componentImpl()
+		{ Init(); }
 
-		virtual void _AddRef()
-		{ detail::RefCounter::_AddRef(); }
+		template < typename Arg1_ >
+		ComponentWrapper(const Arg1_& arg1)
+			: _refCount(1), _componentImpl(arg1)
+		{ Init(); }
 
-		virtual void _Release()
-		{ detail::RefCounter::_Release(); }
+		template < typename Interface_ >
+		const Accessor* GetIntefaceAccessor() const
+		{ return _accessors.template GetAccessor<Interface_>(); }
 
-		virtual joint::IJointObject* _DoCastObject(Joint_InterfaceId interfaceId)
+		template < typename Interface_ >
+		static AccessorVTable GetAccessorVTable()
 		{
-			printf("DoCastObject, interfaceId: %s\n", interfaceId);
-			joint::IJointObject* result = NULL;
-	#define DETAIL_JOINT_TRY_CAST(I_) result = detail::BaseClass<Interface ## I_ ## _, I_>::TryCast(interfaceId); if (result) return result
-			DETAIL_JOINT_TRY_CAST(1);
-			DETAIL_JOINT_TRY_CAST(2);
-			DETAIL_JOINT_TRY_CAST(3);
-			DETAIL_JOINT_TRY_CAST(4);
-			DETAIL_JOINT_TRY_CAST(5);
-	#undef DETAIL_JOINT_TRY_CAST
+			AccessorVTable result;
+			result.AddRef = &ComponentWrapper::AddRef;
+			result.Release = &ComponentWrapper::Release;
+			result.CastObject = &ComponentWrapper::CastObject;
+			result.InvokeMethod = &ComponentWrapper::InvokeMethod<typename Interface_::template Accessor<ComponentImpl_> >;
 			return result;
+		}
+
+	private:
+		void Init()
+		{ _accessors.Init(this); }
+
+		static Joint_Error AddRef(void* component)
+		{
+			ComponentWrapper* inst = reinterpret_cast<ComponentWrapper*>(component);
+			++inst->_refCount;
+			return JOINT_ERROR_NONE;
+		}
+
+		static Joint_Error Release(void* component)
+		{
+			ComponentWrapper* inst = reinterpret_cast<ComponentWrapper*>(component);
+			if (--inst->_refCount == 0)
+				delete inst;
+			return JOINT_ERROR_NONE;
+		}
+
+		static Joint_Error CastObject(void* component, Joint_InterfaceId interfaceId, const Accessor** outAccessor)
+		{
+			ComponentWrapper* inst = reinterpret_cast<ComponentWrapper*>(component);
+			return inst->_accessors.GetAccessorById(interfaceId, outAccessor) ? JOINT_ERROR_NONE : JOINT_ERROR_GENERIC;
+		}
+
+		template < typename Accessor_ >
+		static Joint_Error InvokeMethod(void* component, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
+		{
+			ComponentWrapper* inst = reinterpret_cast<ComponentWrapper*>(component);
+			return Accessor_::InvokeMethodImpl(&inst->_componentImpl, methodId, params, paramsCount, retType, outRetValue);
 		}
 	};
 
 
+	namespace detail
+	{
+		template < typename ComponentImpl_, typename InterfacesList_ >
+		AccessorVTable AccessorsHolder<ComponentImpl_, InterfacesList_>::s_accessorVTable(ComponentWrapper<ComponentImpl_>::template GetAccessorVTable<typename InterfacesList_::Type>());
+	}
+
+
 	template < typename ComponentType_ >
-	ComponentType_* MakeComponentImpl()
-	{ return new ComponentType_; }
+	ComponentWrapper<ComponentType_>* MakeComponentWrapper()
+	{ return new ComponentWrapper<ComponentType_>; }
 
 	template < typename ComponentType_, typename Arg1_ >
-	ComponentType_* MakeComponentImpl(const Arg1_& arg1)
-	{ return new ComponentType_(arg1); }
+	ComponentWrapper<ComponentType_>* MakeComponentWrapper(const Arg1_& arg1)
+	{ return new ComponentWrapper<ComponentType_>(arg1); }
 
 
 	template < typename Interface_, typename ComponentType_ >
-	Ptr<Interface_> MakeComponentProxy(Joint_ModuleHandle module, ComponentType_* component)
+	Ptr<Interface_> MakeComponentProxy(Joint_ModuleHandle module, ComponentWrapper<ComponentType_>* component)
 	{
-		IJointObject* internal = detail::InterfaceGetter<typename Interface_::ImplInterface, ComponentType_>::Get(component);
+		Accessor* accessor = const_cast<Accessor*>(component->template GetIntefaceAccessor<Interface_>());
 		Joint_ObjectHandle obj = JOINT_NULL_HANDLE;
-		JOINT_CALL( Joint_CreateObject(module, internal, &obj) );
-		printf("!!! %p\n", obj);
+		JOINT_CALL( Joint_CreateObject(module, accessor, &obj) );
 		return Ptr<Interface_>(new Interface_(obj));
 	}
 
 
 	template < typename Interface_, typename ComponentType_ >
 	Ptr<Interface_>  MakeComponent(Joint_ModuleHandle module)
-	{ return MakeComponentProxy<Interface_>(module, MakeComponentImpl<ComponentType_>()); }
+	{ return MakeComponentProxy<Interface_>(module, MakeComponentWrapper<ComponentType_>()); }
 
 	template < typename Interface_, typename ComponentType_, typename Arg1_ >
 	Ptr<Interface_> MakeComponent(Joint_ModuleHandle module, const Arg1_& arg1)
-	{ return MakeComponentProxy<Interface_>(module, MakeComponentImpl<ComponentType_>(arg1)); }
+	{ return MakeComponentProxy<Interface_>(module, MakeComponentWrapper<ComponentType_>(arg1)); }
+
+
+	template < typename Interface_ >
+	Joint_ObjectHandle Export(const Ptr<Interface_>& p)
+	{
+		Joint_ObjectHandle handle = p.Get()->_GetObjectHandle();
+		Joint_IncRefObject(handle);
+		return handle;
+	}
+
 
 }
 

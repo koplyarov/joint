@@ -20,8 +20,7 @@
 extern "C"
 {
 
-	TESTS_API joint::IObject* GetBasicTests(Joint_ModuleHandle module);
-	TESTS_API joint::IObject* GetSomeObject(Joint_ModuleHandle module);
+	TESTS_API Joint_ObjectHandle GetBasicTests(Joint_ModuleHandle module);
 
 }
 

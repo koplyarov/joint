@@ -17,6 +17,10 @@ namespace detail
 		Joint_ObjectHandle		_obj;
 		std::atomic<int>		_refCount;
 
+	private:
+		ProxyBase(const ProxyBase&);
+		ProxyBase& operator = (const ProxyBase&);
+
 	public:
 		ProxyBase(Joint_ObjectHandle obj)
 			: _obj(obj), _refCount(1)
