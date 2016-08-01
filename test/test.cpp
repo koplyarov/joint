@@ -12,12 +12,22 @@ test::TestEngine		g_engine;
 
 class Tests
 {
+	class SomeObject
+	{
+	public:
+		typedef joint::TypeList<test::ISomeObject>	JointInterfaces;
+
+		void Method()
+		{ printf("HAHAHAHA\n"); }
+	};
+
 private:
+	joint::Context			_ctx;
 	joint::Module			_module;
 
 public:
-	Tests(joint::Module module)
-		: _module(std::move(module))
+	Tests(joint::Context ctx, joint::Module module)
+		: _ctx(ctx), _module(std::move(module))
 	{ }
 
 	void RunBasicTests()
@@ -59,6 +69,9 @@ public:
 
 		auto some_obj_2 = obj->ReturnSameObject(some_obj);
 		TEST_THROWS_NOTHING(some_obj_2->Method());
+
+		auto main_module_some_obj = _ctx.GetMainModule().MakeComponent<test::ISomeObject, SomeObject>();
+		TEST_THROWS_NOTHING(obj->InvokeObjectMethod(main_module_some_obj));
 	}
 };
 
@@ -67,8 +80,9 @@ int main()
 {
 	try
 	{
-		//Tests t(joint::Module("python", "Tests"));
-		Tests t(joint::Module("cpp", "tests"));
+		joint::Context ctx;
+		//Tests t(ctx, ctx.LoadModule("python", "Tests"));
+		Tests t(ctx, ctx.LoadModule("cpp", "tests"));
 		t.RunBasicTests();
 		t.RunObjectTests();
 	}

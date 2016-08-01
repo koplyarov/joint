@@ -53,7 +53,7 @@ extern "C"
 				GetLogger().Info() << "Init";
 
 				auto release_binding = [](Joint_BindingHandle b) {
-							Joint_Error ret = Joint_ReleaseBinding(b);
+							Joint_Error ret = Joint_DecRefBinding(b);
 							if (ret != JOINT_ERROR_NONE)
 								GetLogger().Info() << "Joint_ReleaseBinding failed: " << ret;
 						};

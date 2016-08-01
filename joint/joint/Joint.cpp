@@ -175,7 +175,36 @@ extern "C"
 		JOINT_CHECK(desc.unloadModule != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(desc.deinitBinding != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 
-		*outBinding = new Joint_Binding{userData, desc};
+		*outBinding = new Joint_Binding(userData, desc);
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_IncRefBinding(Joint_BindingHandle handle)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		++handle->refCount;
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_DecRefBinding(Joint_BindingHandle handle)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+
+		auto refs = --handle->refCount;
+		if (refs == 0)
+		{
+			GetLogger().Info() << "ReleaseBinding(binding: " << handle << " (userData: " << (handle ? handle->userData : NULL) << ")" << ")";
+			Joint_Error ret = handle->desc.deinitBinding(handle->userData);
+			JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+		}
 
 		JOINT_CPP_WRAP_END
 	}
@@ -211,6 +240,17 @@ extern "C"
 		*outModule = new Joint_Module(internal, binding);
 
 		GetLogger().Debug() << "  LoadModule.outModule: " << *outModule;
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_MakeModule(Joint_BindingHandle binding, Joint_ModuleHandleInternal internal, Joint_ModuleHandle* outModule)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(outModule, JOINT_ERROR_INVALID_PARAMETER);
+		*outModule = new Joint_Module(internal, binding);
 
 		JOINT_CPP_WRAP_END
 	}

@@ -164,9 +164,11 @@ extern "C"
 	JOINT_API Joint_Error Joint_ReleaseContext(Joint_ContextHandle jointCtx);
 
 	JOINT_API Joint_Error Joint_MakeBinding(Joint_BindingDesc desc, void* userData, Joint_BindingHandle* outBinding);
-	JOINT_API Joint_Error Joint_ReleaseBinding(Joint_BindingHandle binding);
+	JOINT_API Joint_Error Joint_IncRefBinding(Joint_BindingHandle handle);
+	JOINT_API Joint_Error Joint_DecRefBinding(Joint_BindingHandle handle);
 
 	JOINT_API Joint_Error Joint_LoadModule(Joint_BindingHandle binding, const char* moduleName, Joint_ModuleHandle* outModule);
+	JOINT_API Joint_Error Joint_MakeModule(Joint_BindingHandle binding, Joint_ModuleHandleInternal internal, Joint_ModuleHandle* outModule);
 	JOINT_API Joint_Error Joint_IncRefModule(Joint_ModuleHandle handle);
 	JOINT_API Joint_Error Joint_DecRefModule(Joint_ModuleHandle handle);
 

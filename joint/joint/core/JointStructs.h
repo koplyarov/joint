@@ -20,6 +20,11 @@ extern "C"
 	{
 		void*                       userData;
 		Joint_BindingDesc           desc;
+		std::atomic<int>			refCount;
+
+		Joint_Binding(void* userData, const Joint_BindingDesc& desc)
+			: userData(userData), desc(desc), refCount(1)
+		{ }
 	};
 
 
