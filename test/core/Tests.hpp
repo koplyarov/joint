@@ -2,6 +2,7 @@
 #define TEST_CORE_TESTS_HPP
 
 
+#include <map>
 #include <stdexcept>
 
 #include <test/core/ScopedTest.hpp>
@@ -60,5 +61,58 @@
 					TEST_REPORT_SUCCESS(#Val_ " == " #__VA_ARGS__); \
 			} )
 
+
+#define TEST_DEFINE_TEST(UserContext_, Name_) \
+	class Name_##Test : private UserContext_ \
+	{ \
+	public: \
+		void RunTest() \
+		{ \
+			::test::ScopedTest t(::test::detail::TestsContext::GetInstance().GetEngine(), #Name_); \
+			try { TestImpl(); } \
+			catch (const std::exception& ex) \
+			{ \
+				std::cerr << "TODO: implement exception handling" << std::endl; \
+			} \
+		} \
+	private: \
+		void TestImpl(); \
+	}; \
+	::test::detail::TestRegisterer g_##Name_##_testRegisterer(#Name_, []() { Name_##Test().RunTest(); } ); \
+	void Name_##Test::TestImpl()
+
+
+namespace test
+{
+	namespace detail
+	{
+		class TestsContext
+		{
+		private:
+			TestEngine _engine;
+			std::map<std::string, std::function<void()>> _tests;
+
+		public:
+			void RegisterTest(std::string name, std::function<void()> f);
+			void RunAllTests();
+
+			TestEngine& GetEngine()
+			{ return _engine; }
+
+			static TestsContext& GetInstance();
+		};
+
+		class TestRegisterer
+		{
+		public:
+			TestRegisterer(std::string name, std::function<void()> f)
+			{ detail::TestsContext::GetInstance().RegisterTest(name, f); }
+		};
+	}
+
+	inline void RunAllTests()
+	{ detail::TestsContext::GetInstance().RunAllTests(); }
+
+}
 
 #endif

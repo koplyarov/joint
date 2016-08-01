@@ -13,11 +13,13 @@ else()
 	add_definitions(-std=c++11)
 endif()
 
+add_definitions(-D_GLIBCXX_DEBUG)
 
 set(TEST_CORE_SRC
+	core/ScopedTest.cpp
 	core/TestContext.cpp
 	core/TestEngine.cpp
-	core/ScopedTest.cpp
+	core/Tests.cpp
 	core/utils/Logger.cpp
 	core/utils/TypeInfo.cpp
 )
