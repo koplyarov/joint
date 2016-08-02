@@ -129,8 +129,11 @@ class SemanticGraphBuilder:
             parsed_files.append(self._idlParser.parseFile(f))
 
         for ast in parsed_files:
-            pkg = Package(ast['package'])
-            semanticsGraph.packages.append(pkg)
+            try:
+                pkg = semanticsGraph.findPackage(ast['package'])
+            except LookupError:
+                pkg = Package(ast['package'])
+                semanticsGraph.packages.append(pkg)
             for ifc_ast in ast['interfaces']:
                 ifc = Interface(ifc_ast['name'], pkg.nameList)
                 pkg.interfaces.append(ifc)
