@@ -5,19 +5,19 @@ package test
 		void Throw();
 
 		u8 AddU8(u8 l, u8 r);
-		i8 AddI8(i8 l, i8 r);
-		u16 AddU16(u16 l, u16 r);
-		i16 AddI16(i16 l, i16 r);
-		u32 AddU32(u32 l, u32 r);
-		i32 AddI32(i32 l, i32 r);
-		u64 AddU64(u64 l, u64 r);
-		i64 AddI64(i64 l, i64 r);
+		//i8 AddI8(i8 l, i8 r);
+		//u16 AddU16(u16 l, u16 r);
+		//i16 AddI16(i16 l, i16 r);
+		//u32 AddU32(u32 l, u32 r);
+		//i32 AddI32(i32 l, i32 r);
+		//u64 AddU64(u64 l, u64 r);
+		//i64 AddI64(i64 l, i64 r);
 
-		f32 AddF32(f32 l, f32 r);
-		f64 AddF64(f64 l, f64 r);
+		//f32 AddF32(f32 l, f32 r);
+		//f64 AddF64(f64 l, f64 r);
 
-		string Concat(string l, string r);
+		//string Concat(string l, string r);
 
-		bool And(bool l, bool r);
+		//bool And(bool l, bool r);
 	}
 }

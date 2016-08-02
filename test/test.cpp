@@ -24,28 +24,28 @@ TEST_DEFINE_TEST(TestCtx, BasicTests)
 {
 	auto t = Module.GetRootObject<test::IBasicTests>("GetTests");
 
-	//TEST_THROWS_ANYTHING(t->Throw());
+	TEST_THROWS_ANYTHING(t->Throw());
 
-	TEST_EQUALS(t->AddI8(2, 12), (int8_t)14);
+	//TEST_EQUALS(t->AddI8(2, 12), (int8_t)14);
 	TEST_EQUALS(t->AddU8(2, 12), (uint8_t)14);
-	TEST_EQUALS(t->AddI16(2, 12), (int16_t)14);
-	TEST_EQUALS(t->AddU16(2, 12), (uint16_t)14);
-	TEST_EQUALS(t->AddI32(2, 12), (int32_t)14);
-	TEST_EQUALS(t->AddU32(2, 12), (uint32_t)14);
+	//TEST_EQUALS(t->AddI16(2, 12), (int16_t)14);
+	//TEST_EQUALS(t->AddU16(2, 12), (uint16_t)14);
+	//TEST_EQUALS(t->AddI32(2, 12), (int32_t)14);
+	//TEST_EQUALS(t->AddU32(2, 12), (uint32_t)14);
 
-	TEST_EQUALS(t->AddI64(2, 12), (int64_t)14);
-	TEST_EQUALS(t->AddU64(2, 12), (uint64_t)14);
+	//TEST_EQUALS(t->AddI64(2, 12), (int64_t)14);
+	//TEST_EQUALS(t->AddU64(2, 12), (uint64_t)14);
 
-	TEST_EQUALS(t->AddF32(2.1f, 12.2f), 14.3f);
-	TEST_EQUALS(t->AddF64(2.1, 12.2), 14.3);
+	//TEST_EQUALS(t->AddF32(2.1f, 12.2f), 14.3f);
+	//TEST_EQUALS(t->AddF64(2.1, 12.2), 14.3);
 
-	TEST_EQUALS(t->Concat("abc", "xyz"), std::string("abcxyz"));
+	//TEST_EQUALS(t->Concat("abc", "xyz"), std::string("abcxyz"));
 
-	TEST_EQUALS(t->And(true, true), true);
-	TEST_EQUALS(t->And(true, false), false);
+	//TEST_EQUALS(t->And(true, true), true);
+	//TEST_EQUALS(t->And(true, false), false);
 }
 
-
+#if 0
 class SomeObject
 {
 private:
@@ -95,6 +95,7 @@ TEST_DEFINE_TEST(TestCtx, LifetimeTests)
 	t->CollectGarbage();
 	TEST_EQUALS(listener->GetObjectDestroyed(), true);
 }
+#endif
 
 
 int main()

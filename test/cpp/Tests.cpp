@@ -1,5 +1,3 @@
-#include <test/cpp/Tests.h>
-
 #include <test/Tests_adapters.hpp>
 
 
@@ -87,6 +85,9 @@ public:
 extern "C"
 {
 
+#ifdef _MSC_VER
+	__declspec(dllexport)
+#endif
 	Joint_ObjectHandle GetTests(Joint_ModuleHandle module)
 	{ return joint::Export(joint::MakeComponent<joint::IObject, Tests>(module, module)); }
 

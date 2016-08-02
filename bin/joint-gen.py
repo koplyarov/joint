@@ -10,7 +10,11 @@ class CmdLineException(Exception):
 
 idl_parser = joint.IdlParser()
 
-generators = { 'python': joint.generators.PythonGenerator, 'c++': joint.generators.CppGenerator }
+generators = {
+    'python': joint.generators.PythonGenerator,
+    'c++': joint.generators.CppGenerator,
+    'c': joint.generators.CGenerator
+}
 
 parser = argparse.ArgumentParser(description='Joint adapters generator')
 parser.add_argument('--language', '-l', dest='languageId', help='Output language', required=True)

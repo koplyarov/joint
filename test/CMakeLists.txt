@@ -37,10 +37,13 @@ include(${CMAKE_SOURCE_DIR}/joint.cmake)
 joint_import_directories(${CMAKE_SOURCE_DIR}/joint/idl)
 
 joint_generate_adapters(python ${CMAKE_CURRENT_SOURCE_DIR}/python/Tests_adapters.py idl/IBasicTests.idl idl/IObjectTests.idl idl/ILifetimeTests.idl)
-add_custom_target(test-adapters ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/python/Tests_adapters.py)
+add_custom_target(test-adapters-py ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/python/Tests_adapters.py)
 
 joint_generate_adapters(c++ Tests_adapters.hpp idl/IBasicTests.idl idl/IObjectTests.idl idl/ILifetimeTests.idl)
-add_custom_target(test-adapters2 ALL DEPENDS Tests_adapters.hpp)
+add_custom_target(test-adapters-cpp ALL DEPENDS Tests_adapters.hpp)
+
+joint_generate_adapters(c Tests_adapters.h idl/IBasicTests.idl)
+add_custom_target(test-adapters-c ALL DEPENDS Tests_adapters.h)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_executable(joint-test test.cpp)
