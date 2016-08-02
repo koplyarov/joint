@@ -34,7 +34,7 @@ TEST_DEFINE_TEST(TestCtx, BasicTests)
 {
 	auto basic = Module.GetRootObject<test::IBasicTests>("GetBasicTests");
 
-	//TEST_THROWS_ANYTHING(basic->Throw());
+	TEST_THROWS_ANYTHING(basic->Throw());
 
 	TEST_EQUALS((int8_t)14, basic->AddI8(2, 12));
 	TEST_EQUALS((uint8_t)14, basic->AddU8(2, 12));

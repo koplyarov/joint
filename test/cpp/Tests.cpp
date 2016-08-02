@@ -41,6 +41,8 @@ public:
 	~Tests()
 	{ }
 
+	void Throw() { }
+
 	uint8_t   AddU8(uint8_t l, uint8_t r)     { return l + r; }
 	int8_t    AddI8(int8_t l, int8_t r)       { return l + r; }
 	uint16_t  AddU16(uint16_t l, uint16_t r)  { return l + r; }

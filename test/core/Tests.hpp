@@ -12,10 +12,10 @@
 
 
 #define TEST_REPORT_SUCCESS(Message_) \
-		::test::ScopedTest::GetCurrentContext().TestSucceeded(TEST_LOCATION, Message_)
+		{ }
 
 #define TEST_REPORT_ERROR(Message_) \
-		::test::ScopedTest::GetCurrentContext().TestFailed(TEST_LOCATION, Message_)
+		::test::ScopedTest::GetCurrentContext().AssertionFailed(TEST_LOCATION, Message_)
 
 
 #define TEST_THROWS_ANYTHING(...) \
@@ -68,11 +68,12 @@
 	public: \
 		void RunTest() \
 		{ \
-			::test::ScopedTest t(::test::detail::TestsContext::GetInstance().GetEngine(), #Name_); \
+			::test::TestContext ctx(&::test::detail::TestsRegistry::GetInstance().GetEngine(), #Name_, TEST_LOCATION); \
+			::test::ScopedTest t(ctx, #Name_); \
 			try { TestImpl(); } \
 			catch (const std::exception& ex) \
 			{ \
-				std::cerr << "TODO: implement exception handling" << std::endl; \
+				TEST_REPORT_ERROR(std::string("Exception from test code: ") + ex.what()); \
 			} \
 		} \
 	private: \
@@ -86,7 +87,7 @@ namespace test
 {
 	namespace detail
 	{
-		class TestsContext
+		class TestsRegistry
 		{
 		private:
 			TestEngine _engine;
@@ -99,19 +100,19 @@ namespace test
 			TestEngine& GetEngine()
 			{ return _engine; }
 
-			static TestsContext& GetInstance();
+			static TestsRegistry& GetInstance();
 		};
 
 		class TestRegisterer
 		{
 		public:
 			TestRegisterer(std::string name, std::function<void()> f)
-			{ detail::TestsContext::GetInstance().RegisterTest(name, f); }
+			{ detail::TestsRegistry::GetInstance().RegisterTest(name, f); }
 		};
 	}
 
 	inline void RunAllTests()
-	{ detail::TestsContext::GetInstance().RunAllTests(); }
+	{ detail::TestsRegistry::GetInstance().RunAllTests(); }
 
 }
 

@@ -15,11 +15,12 @@ namespace test
 	private:
 		thread_local static TestContext*	s_currentContext;
 
-		TestContext							_context;
+		TestContext&						_context;
 		TestContext*						_prevContext;
+		bool								_testFailed;
 
 	public:
-		ScopedTest(TestEngine& engine, std::string name);
+		ScopedTest(TestContext& ctx, std::string name);
 		~ScopedTest();
 
 		static TestContext& GetCurrentContext();

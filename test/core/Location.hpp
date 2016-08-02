@@ -5,23 +5,23 @@
 namespace test
 {
 
-#define TEST_LOCATION ::test::Location(__FILE__, __LINE__, __func__)
+#define TEST_LOCATION ::test::Location(__FILE__, __LINE__)
 
 	class Location
 	{
 	private:
 		const char*		_fileName;
 		int				_line;
-		const char*		_function;
 
 	public:
-		Location(const char* fileName, int line, const char* function)
-			: _fileName(fileName), _line(line), _function(function)
+		Location(const char* fileName, int line)
+			: _fileName(fileName), _line(line)
 		{ }
 
 		const char* GetFileName() const { return _fileName; }
 		int GetLine() const { return _line; }
-		const char* GetFunction() const { return _function; }
+
+		std::string ToString() const { return std::string(_fileName) + ":" + std::to_string(_line); }
 	};
 
 }

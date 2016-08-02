@@ -7,21 +7,18 @@ namespace test
 {
 	namespace detail
 	{
-		void TestsContext::RegisterTest(std::string name, std::function<void()> f)
+		void TestsRegistry::RegisterTest(std::string name, std::function<void()> f)
 		{ _tests.insert({name, f}); }
 
-		void TestsContext::RunAllTests()
+		void TestsRegistry::RunAllTests()
 		{
 			for (auto& test : _tests)
-			{
-				std::cout << test.first << std::endl;
 				test.second();
-			}
 		}
 
-		TestsContext& TestsContext::GetInstance()
+		TestsRegistry& TestsRegistry::GetInstance()
 		{
-			static TestsContext inst;
+			static TestsRegistry inst;
 			return inst;
 		}
 	}

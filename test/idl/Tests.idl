@@ -2,7 +2,7 @@ package test
 {
 	interface IBasicTests
 	{
-		//void Throw();
+		void Throw();
 
 		u8 AddU8(u8 l, u8 r);
 		i8 AddI8(i8 l, i8 r);

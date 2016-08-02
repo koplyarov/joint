@@ -2,8 +2,10 @@
 #define TEST_CORE_TESTCONTEXT_HPP
 
 
+#include <mutex>
 #include <string>
 
+#include <test/core/Location.hpp>
 #include <test/core/TestEngine.hpp>
 
 
@@ -15,14 +17,14 @@ namespace test
 	private:
 		TestEngine*		_engine;
 		std::string		_testName;
+		Location		_location;
+		bool			_failed;
 
 	public:
-		TestContext(TestEngine* engine, std::string testName)
-			: _engine(engine), _testName(std::move(testName))
-		{ }
+		TestContext(TestEngine* engine, std::string testName, const Location& location);
+		~TestContext();
 
-		void TestSucceeded(const Location& location, const std::string& message);
-		void TestFailed(const Location& location, const std::string& message);
+		void AssertionFailed(const Location& location, const std::string& message);
 	};
 
 }
