@@ -1,12 +1,6 @@
 #include <test/cpp/Tests.h>
 
-#include <string.h>
-#include <string>
-
-#include <stdio.h>
-
 #include <test/Tests_adapters.hpp>
-#include <joint.cpp/Component.hpp>
 
 
 class SomeObject
@@ -15,7 +9,7 @@ public:
 	typedef joint::TypeList<test::ISomeObject>	JointInterfaces;
 
 	void Method()
-	{ printf("CPP: Method\n"); }
+	{ }
 };
 
 
