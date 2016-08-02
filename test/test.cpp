@@ -7,7 +7,7 @@
 
 
 std::string g_bindingName = "cpp";
-std::string g_moduleName = "tests";
+std::string g_moduleName = "tests-c";
 
 struct TestCtx
 {

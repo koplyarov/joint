@@ -18,5 +18,5 @@ set(TEST_CPP_SRC
 	Tests.cpp
 )
 
-add_library(tests SHARED ${TEST_CPP_SRC})
-target_link_libraries(tests ${CMAKE_THREAD_LIBS_INIT})
+add_library(tests-cpp SHARED ${TEST_CPP_SRC})
+target_link_libraries(tests-cpp ${CMAKE_THREAD_LIBS_INIT})

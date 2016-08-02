@@ -5,7 +5,7 @@
 #include <atomic>
 #include <typeinfo>
 
-#include <joint.cpp/Accessor.hpp>
+#include <joint.c/Accessor.h>
 #include <joint.cpp/MetaProgramming.hpp>
 #include <joint.cpp/Ptr.hpp>
 #include <joint.cpp/TypeList.hpp>
@@ -23,9 +23,9 @@ namespace joint
 			typedef AccessorsHolder<ComponentImpl_, typename InterfacesList_::NextNode>  TailAccessors;
 
 		private:
-			static AccessorVTable   s_accessorVTable;
-			Accessor                _accessor;
-			TailAccessors           _tail;
+			static JointC_AccessorVTable   s_accessorVTable;
+			JointC_Accessor                _accessor;
+			TailAccessors                  _tail;
 
 		public:
 			void Init(void* component)
@@ -36,10 +36,10 @@ namespace joint
 			}
 
 			template < typename Interface_ >
-			const Accessor* GetAccessor() const
+			const JointC_Accessor* GetAccessor() const
 			{ return &_accessor; }
 
-			bool GetAccessorById(Joint_InterfaceId interfaceId, const Accessor** outAccessor)
+			bool GetAccessorById(Joint_InterfaceId interfaceId, const JointC_Accessor** outAccessor)
 			{
 				if (AccessorType::InheritsInterface(interfaceId))
 				{
@@ -59,7 +59,7 @@ namespace joint
 			void Init(void* component)
 			{ }
 
-			bool GetAccessorById(Joint_InterfaceId interfaceId, const Accessor** outAccessor)
+			bool GetAccessorById(Joint_InterfaceId interfaceId, const JointC_Accessor** outAccessor)
 			{ return false; }
 		};
 	}
@@ -90,13 +90,13 @@ namespace joint
 		const ComponentImpl_& GetComponentImpl() const { return _componentImpl; }
 
 		template < typename Interface_ >
-		const Accessor* GetIntefaceAccessor() const
+		const JointC_Accessor* GetIntefaceAccessor() const
 		{ return _accessors.template GetAccessor<Interface_>(); }
 
 		template < typename Interface_ >
-		static AccessorVTable GetAccessorVTable()
+		static JointC_AccessorVTable GetAccessorVTable()
 		{
-			AccessorVTable result;
+			JointC_AccessorVTable result;
 			result.AddRef = &ComponentWrapper::AddRef;
 			result.Release = &ComponentWrapper::Release;
 			result.CastObject = &ComponentWrapper::CastObject;
@@ -123,7 +123,7 @@ namespace joint
 			return JOINT_ERROR_NONE;
 		}
 
-		static Joint_Error CastObject(void* component, Joint_InterfaceId interfaceId, const Accessor** outAccessor)
+		static Joint_Error CastObject(void* component, Joint_InterfaceId interfaceId, const JointC_Accessor** outAccessor)
 		{
 			ComponentWrapper* inst = reinterpret_cast<ComponentWrapper*>(component);
 			return inst->_accessors.GetAccessorById(interfaceId, outAccessor) ? JOINT_ERROR_NONE : JOINT_ERROR_GENERIC;
@@ -188,7 +188,7 @@ namespace joint
 	namespace detail
 	{
 		template < typename ComponentImpl_, typename InterfacesList_ >
-		AccessorVTable AccessorsHolder<ComponentImpl_, InterfacesList_>::s_accessorVTable(ComponentWrapper<ComponentImpl_>::template GetAccessorVTable<typename InterfacesList_::Type>());
+		JointC_AccessorVTable AccessorsHolder<ComponentImpl_, InterfacesList_>::s_accessorVTable(ComponentWrapper<ComponentImpl_>::template GetAccessorVTable<typename InterfacesList_::Type>());
 	}
 
 
@@ -205,7 +205,7 @@ namespace joint
 	Ptr<Interface_> MakeComponentProxy(Joint_ModuleHandle module, const ComponentImplPtr<ComponentType_>& component)
 	{
 		ComponentWrapper<ComponentType_>::AddRef(component.GetWrapperPtr());
-		Accessor* accessor = const_cast<Accessor*>(component.GetWrapperPtr()->template GetIntefaceAccessor<Interface_>());
+		JointC_Accessor* accessor = const_cast<JointC_Accessor*>(component.GetWrapperPtr()->template GetIntefaceAccessor<Interface_>());
 		Joint_ObjectHandle obj = JOINT_NULL_HANDLE;
 		JOINT_CALL( Joint_CreateObject(module, accessor, &obj) );
 		return Ptr<Interface_>(new Interface_(obj));

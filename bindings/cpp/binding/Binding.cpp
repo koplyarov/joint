@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 
-#include <joint.cpp/Accessor.hpp>
+#include <joint.c/Accessor.h>
 #include <joint.cpp/Ptr.hpp>
 #include <utils/DynamicLibrary.hpp>
 
@@ -67,7 +67,7 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		auto accessor = reinterpret_cast<joint::Accessor*>(obj);
+		auto accessor = reinterpret_cast<JointC_Accessor*>(obj);
 		return accessor->VTable->InvokeMethod(accessor->Component, methodId, params, paramsCount, retType, outRetValue);
 
 		JOINT_CPP_WRAP_END
@@ -78,7 +78,7 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		auto accessor = reinterpret_cast<joint::Accessor*>(obj);
+		auto accessor = reinterpret_cast<JointC_Accessor*>(obj);
 		return accessor->VTable->Release(accessor->Component);
 
 		JOINT_CPP_WRAP_END
@@ -89,11 +89,11 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		auto accessor = reinterpret_cast<joint::Accessor*>(obj);
-		const joint::Accessor* result = nullptr;
+		auto accessor = reinterpret_cast<JointC_Accessor*>(obj);
+		const JointC_Accessor* result = nullptr;
 		Joint_Error ret = accessor->VTable->CastObject(accessor->Component, interfaceId, &result);
 		accessor->VTable->AddRef(accessor->Component);
-		*outRetValue = const_cast<joint::Accessor*>(result);
+		*outRetValue = const_cast<JointC_Accessor*>(result);
 		return ret;
 
 		JOINT_CPP_WRAP_END

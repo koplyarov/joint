@@ -6,7 +6,7 @@
 
 
 #ifdef _MSC_VER
-#	ifdef tests_cpp_EXPORTS
+#	ifdef tests_c_EXPORTS
 #		define TESTS_API __declspec(dllexport)
 #	else
 #		define TESTS_API __declspec(dllimport)
@@ -15,12 +15,15 @@
 #	define TESTS_API
 #endif
 
-extern "C"
-{
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 	TESTS_API Joint_ObjectHandle GetTests(Joint_ModuleHandle module);
 
+#ifdef __cplusplus
 }
+#endif
 
 
 #endif

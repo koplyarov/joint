@@ -15,23 +15,25 @@
 #	define JOINT_API
 #endif
 
-extern "C"
-{
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define JOINT_NULL_HANDLE NULL
 
 	typedef const char* Joint_InterfaceId;
 
 	struct Joint_Binding;
-	typedef Joint_Binding* Joint_BindingHandle;
+	typedef struct Joint_Binding* Joint_BindingHandle;
 
 	struct Joint_Module;
-	typedef Joint_Module* Joint_ModuleHandle;
+	typedef struct Joint_Module* Joint_ModuleHandle;
 
 	struct Joint_Object;
-	typedef Joint_Object* Joint_ObjectHandle;
+	typedef struct Joint_Object* Joint_ObjectHandle;
 
 	struct Joint_Exception;
-	typedef Joint_Exception* Joint_ExceptionHandle;
+	typedef struct Joint_Exception* Joint_ExceptionHandle;
 
 
 	typedef uint32_t Joint_SizeT;
@@ -40,7 +42,7 @@ extern "C"
 	typedef void* Joint_ModuleHandleInternal;
 
 
-	enum Joint_Error
+	typedef enum
 	{
 		JOINT_ERROR_NONE = 0,
 		JOINT_ERROR_GENERIC = 1,
@@ -51,18 +53,18 @@ extern "C"
 		JOINT_ERROR_OUT_OF_MEMORY = 6,
 		JOINT_ERROR_IMPLEMENTATION_ERROR = 7,
 		JOINT_ERROR_UNEXPECTED_TYPE = 8
-	};
+	} Joint_Error;
 
 	JOINT_API const char* Joint_ErrorToString(Joint_Error err);
 
 
-	enum Joint_LogLevel
+	typedef enum
 	{
 		JOINT_LOGLEVEL_DEBUG    = 0,
 		JOINT_LOGLEVEL_INFO     = 1,
 		JOINT_LOGLEVEL_WARNING  = 2,
 		JOINT_LOGLEVEL_ERROR    = 3
-	};
+	} Joint_LogLevel;
 
 	JOINT_API const char* Joint_LogLevelToString(Joint_LogLevel logLevel);
 
@@ -74,7 +76,7 @@ extern "C"
 	JOINT_API void Joint_Log(Joint_LogLevel logLevel, const char* subsystem, const char* format, ...);
 
 
-	enum Joint_Type
+	typedef enum
 	{
 		JOINT_TYPE_VOID       = 1,
 
@@ -97,14 +99,14 @@ extern "C"
 		JOINT_TYPE_OBJ        = 14,
 
 		JOINT_TYPE_EXCEPTION  = 15
-	};
+	} Joint_Type;
 
 
-	struct Joint_Variant
+	typedef struct
 	{
 		union
 		{
-			bool                    b;
+			int                     b;
 
 			int8_t                  i8;
 			uint8_t                 u8;
@@ -125,19 +127,19 @@ extern "C"
 		} value;
 
 		Joint_Type type;
-	};
+	} Joint_Variant;
 
 
 	typedef Joint_Error Joint_ReleaseRetValue_Func(Joint_Variant value);
 
-	struct Joint_RetValue
+	typedef struct
 	{
 		Joint_Variant                   variant;
 		Joint_ReleaseRetValue_Func*     releaseValue;
-	};
+	} Joint_RetValue;
 
 	struct Joint_Context;
-	typedef Joint_Context* Joint_ContextHandle;
+	typedef struct Joint_Context* Joint_ContextHandle;
 
 	typedef Joint_Error Joint_GetRootObject_Func(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, const char* getterName, Joint_ObjectHandle* outObject);
 	typedef Joint_Error Joint_ReleaseObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal object);
@@ -147,7 +149,7 @@ extern "C"
 	typedef Joint_Error Joint_UnloadModule_Func(void* bindingUserData, Joint_ModuleHandleInternal module);
 	typedef Joint_Error Joint_DeinitBinding_Func(void* bindingUserData);
 
-	struct Joint_BindingDesc
+	typedef struct
 	{
 		Joint_InvokeMethod_Func*    invokeMethod;
 		Joint_ReleaseObject_Func*   releaseObject;
@@ -158,7 +160,7 @@ extern "C"
 		Joint_DeinitBinding_Func*   deinitBinding;
 
 		const char*                 name;
-	};
+	} Joint_BindingDesc;
 
 	JOINT_API Joint_Error Joint_MakeContext(Joint_ContextHandle *outJointCtx);
 	JOINT_API Joint_Error Joint_ReleaseContext(Joint_ContextHandle jointCtx);
@@ -189,6 +191,9 @@ extern "C"
 	JOINT_API Joint_Error Joint_GetExceptionBacktraceSize(Joint_ExceptionHandle handle, Joint_SizeT* outSize);
 	JOINT_API Joint_Error Joint_GetExceptionBacktraceEntrySize(Joint_ExceptionHandle handle, Joint_SizeT index, Joint_SizeT* outSize);
 	JOINT_API Joint_Error Joint_GetExceptionBacktraceEntry(Joint_ExceptionHandle handle, Joint_SizeT index, char* buf, Joint_SizeT bufSize);
+
+#ifdef __cplusplus
 }
+#endif
 
 #endif
