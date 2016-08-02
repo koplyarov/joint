@@ -52,5 +52,5 @@ class Tests(test_IObjectTests, test_IBasicTests):
         return l and r
 
 
-def GetBasicTests(jointModule):
+def GetTests(jointModule):
     return jointModule.CreateComponent(joint_IObject, Tests, jointModule)

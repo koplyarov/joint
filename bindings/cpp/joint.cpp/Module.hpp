@@ -46,6 +46,10 @@ namespace joint
 		{ std::swap(_module, other._module); }
 
 		template < typename Interface_, typename ComponentType_ >
+		Ptr<Interface_> MakeComponentProxy(const ComponentImplPtr<ComponentType_>& component)
+		{ return joint::MakeComponentProxy<Interface_, ComponentType_>(_module, component); }
+
+		template < typename Interface_, typename ComponentType_ >
 		Ptr<Interface_> MakeComponent()
 		{ return joint::MakeComponent<Interface_, ComponentType_>(_module); }
 
@@ -168,6 +172,18 @@ namespace joint
 
 		Module LoadModule(std::string bindingName, std::string moduleName)
 		{ return Module(bindingName, moduleName); }
+
+		template < typename Interface_, typename ComponentType_ >
+		Ptr<Interface_> MakeComponentProxy(const ComponentImplPtr<ComponentType_>& component)
+		{ return _mainModule.MakeComponentProxy<Interface_, ComponentType_>(component); }
+
+		template < typename Interface_, typename ComponentType_ >
+		Ptr<Interface_> MakeComponent()
+		{ return _mainModule.MakeComponent<Interface_, ComponentType_>(); }
+
+		template < typename Interface_, typename ComponentType_, typename Arg1_ >
+		Ptr<Interface_> MakeComponent(Joint_ModuleHandle module, const Arg1_& arg1)
+		{ return _mainModule.MakeComponent<Interface_, ComponentType_, Arg1_>(arg1); }
 	};
 
 }

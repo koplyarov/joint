@@ -41,6 +41,12 @@ namespace joint
 		void Swap(Ptr& other)
 		{ std::swap(_raw, other._raw); }
 
+		void Reset(T_* raw = nullptr)
+		{
+			Ptr tmp(raw);
+			Swap(tmp);
+		}
+
 
 		Ptr& operator = (const Ptr& other)
 		{

@@ -87,6 +87,9 @@ namespace joint
 			: _refCount(1), _componentImpl(arg1)
 		{ Init(); }
 
+		ComponentImpl_& GetComponentImpl() { return _componentImpl; }
+		const ComponentImpl_& GetComponentImpl() const { return _componentImpl; }
+
 		template < typename Interface_ >
 		const Accessor* GetIntefaceAccessor() const
 		{ return _accessors.template GetAccessor<Interface_>(); }
@@ -102,7 +105,7 @@ namespace joint
 			return result;
 		}
 
-	private:
+	//private:
 		void Init()
 		{ _accessors.Init(this); }
 
@@ -136,6 +139,53 @@ namespace joint
 	};
 
 
+	template < typename ComponentImpl_ >
+	class ComponentImplPtr
+	{
+		typedef ComponentWrapper<ComponentImpl_>	WrapperType;
+
+	private:
+		WrapperType*	_wrapper;
+
+	public:
+		ComponentImplPtr(WrapperType* wrapper)
+			: _wrapper(wrapper)
+		{ }
+
+		~ComponentImplPtr()
+		{
+			if (_wrapper)
+				WrapperType::Release(_wrapper);
+		}
+
+		ComponentImplPtr(const ComponentImplPtr& other)
+			: _wrapper(other._wrapper)
+		{
+			if (_wrapper)
+				WrapperType::AddRef(_wrapper);
+		}
+
+		ComponentImplPtr operator= (const ComponentImplPtr& other)
+		{
+			ComponentImplPtr tmp(other);
+			Swap(tmp);
+			return *this;
+		}
+
+		void Swap(const ComponentImplPtr& other)
+		{ std::swap(_wrapper, other._wrapper); }
+
+		ComponentImpl_& operator* () const
+		{ return _wrapper->GetComponentImpl(); }
+
+		ComponentImpl_* operator-> () const
+		{ return &_wrapper->GetComponentImpl(); }
+
+		WrapperType* GetWrapperPtr() const
+		{ return _wrapper; }
+	};
+
+
 	namespace detail
 	{
 		template < typename ComponentImpl_, typename InterfacesList_ >
@@ -144,18 +194,19 @@ namespace joint
 
 
 	template < typename ComponentType_ >
-	ComponentWrapper<ComponentType_>* MakeComponentWrapper()
-	{ return new ComponentWrapper<ComponentType_>; }
+	ComponentImplPtr<ComponentType_> MakeComponentWrapper()
+	{ return ComponentImplPtr<ComponentType_>(new ComponentWrapper<ComponentType_>); }
 
 	template < typename ComponentType_, typename Arg1_ >
-	ComponentWrapper<ComponentType_>* MakeComponentWrapper(const Arg1_& arg1)
-	{ return new ComponentWrapper<ComponentType_>(arg1); }
+	ComponentImplPtr<ComponentType_> MakeComponentWrapper(const Arg1_& arg1)
+	{ return ComponentImplPtr<ComponentType_>(new ComponentWrapper<ComponentType_>(arg1)); }
 
 
 	template < typename Interface_, typename ComponentType_ >
-	Ptr<Interface_> MakeComponentProxy(Joint_ModuleHandle module, ComponentWrapper<ComponentType_>* component)
+	Ptr<Interface_> MakeComponentProxy(Joint_ModuleHandle module, const ComponentImplPtr<ComponentType_>& component)
 	{
-		Accessor* accessor = const_cast<Accessor*>(component->template GetIntefaceAccessor<Interface_>());
+		ComponentWrapper<ComponentType_>::AddRef(component.GetWrapperPtr());
+		Accessor* accessor = const_cast<Accessor*>(component.GetWrapperPtr()->template GetIntefaceAccessor<Interface_>());
 		Joint_ObjectHandle obj = JOINT_NULL_HANDLE;
 		JOINT_CALL( Joint_CreateObject(module, accessor, &obj) );
 		return Ptr<Interface_>(new Interface_(obj));

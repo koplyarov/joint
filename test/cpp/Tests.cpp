@@ -14,21 +14,34 @@ class SomeObject
 public:
 	typedef joint::TypeList<test::ISomeObject>	JointInterfaces;
 
-	SomeObject(Joint_ModuleHandle module)
-	{ }
-
-	~SomeObject()
-	{ }
-
 	void Method()
 	{ printf("CPP: Method\n"); }
+};
+
+
+class LifetimeListenable
+{
+private:
+	test::ILifetimeListener_Ptr	_listener;
+
+public:
+	typedef joint::TypeList<test::ILifetimeListenable>	JointInterfaces;
+
+	~LifetimeListenable()
+	{
+		if (_listener)
+			_listener->OnDestroyed();
+	}
+
+	void SetListener(const test::ILifetimeListener_Ptr& l)
+	{ _listener = l; }
 };
 
 
 class Tests
 {
 public:
-	typedef joint::TypeList<test::IBasicTests, test::IObjectTests>	JointInterfaces;
+	typedef joint::TypeList<test::IBasicTests, test::IObjectTests, test::ILifetimeTests>	JointInterfaces;
 
 private:
 	Joint_ModuleHandle   _module;
@@ -67,13 +80,20 @@ public:
 	{ return o; }
 
 	test::ISomeObject_Ptr ReturnNewObject()
-	{ return joint::MakeComponent<test::ISomeObject, SomeObject>(_module, _module); }
+	{ return joint::MakeComponent<test::ISomeObject, SomeObject>(_module); }
+
+
+	test::ILifetimeListenable_Ptr CreateListenable()
+	{ return joint::MakeComponent<test::ILifetimeListenable, LifetimeListenable>(_module); }
+
+	void CollectGarbage()
+	{ }
 };
 
 extern "C"
 {
 
-	Joint_ObjectHandle GetBasicTests(Joint_ModuleHandle module)
+	Joint_ObjectHandle GetTests(Joint_ModuleHandle module)
 	{ return joint::Export(joint::MakeComponent<joint::IObject, Tests>(module, module)); }
 
 }

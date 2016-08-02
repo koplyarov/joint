@@ -20,7 +20,7 @@
 extern "C"
 {
 
-	TESTS_API Joint_ObjectHandle GetBasicTests(Joint_ModuleHandle module);
+	TESTS_API Joint_ObjectHandle GetTests(Joint_ModuleHandle module);
 
 }
 

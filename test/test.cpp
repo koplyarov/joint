@@ -20,55 +20,80 @@ struct TestCtx
 };
 
 
-class SomeObject
-{
-public:
-	typedef joint::TypeList<test::ISomeObject>	JointInterfaces;
-
-	void Method()
-	{ printf("HAHAHAHA\n"); }
-};
-
-
 TEST_DEFINE_TEST(TestCtx, BasicTests)
 {
-	auto basic = Module.GetRootObject<test::IBasicTests>("GetBasicTests");
+	auto t = Module.GetRootObject<test::IBasicTests>("GetTests");
 
-	TEST_THROWS_ANYTHING(basic->Throw());
+	//TEST_THROWS_ANYTHING(t->Throw());
 
-	TEST_EQUALS((int8_t)14, basic->AddI8(2, 12));
-	TEST_EQUALS((uint8_t)14, basic->AddU8(2, 12));
-	TEST_EQUALS((int16_t)14, basic->AddI16(2, 12));
-	TEST_EQUALS((uint16_t)14, basic->AddU16(2, 12));
-	TEST_EQUALS((int32_t)14, basic->AddI32(2, 12));
-	TEST_EQUALS((uint32_t)14, basic->AddU32(2, 12));
+	TEST_EQUALS(t->AddI8(2, 12), (int8_t)14);
+	TEST_EQUALS(t->AddU8(2, 12), (uint8_t)14);
+	TEST_EQUALS(t->AddI16(2, 12), (int16_t)14);
+	TEST_EQUALS(t->AddU16(2, 12), (uint16_t)14);
+	TEST_EQUALS(t->AddI32(2, 12), (int32_t)14);
+	TEST_EQUALS(t->AddU32(2, 12), (uint32_t)14);
 
-	TEST_EQUALS((int64_t)14, basic->AddI64(2, 12));
-	TEST_EQUALS((uint64_t)14, basic->AddU64(2, 12));
+	TEST_EQUALS(t->AddI64(2, 12), (int64_t)14);
+	TEST_EQUALS(t->AddU64(2, 12), (uint64_t)14);
 
-	TEST_EQUALS(14.3f, basic->AddF32(2.1f, 12.2f));
-	TEST_EQUALS(14.3, basic->AddF64(2.1, 12.2));
+	TEST_EQUALS(t->AddF32(2.1f, 12.2f), 14.3f);
+	TEST_EQUALS(t->AddF64(2.1, 12.2), 14.3);
 
-	TEST_EQUALS(std::string("abcxyz"), basic->Concat("abc", "xyz"));
+	TEST_EQUALS(t->Concat("abc", "xyz"), std::string("abcxyz"));
 
-	TEST_EQUALS(true, basic->And(true, true));
-	TEST_EQUALS(false, basic->And(true, false));
+	TEST_EQUALS(t->And(true, true), true);
+	TEST_EQUALS(t->And(true, false), false);
 }
 
 
+class SomeObject
+{
+private:
+	mutable std::mutex	_mutex;
+	int					_methodInvokationCounter{0};
+
+public:
+	typedef joint::TypeList<test::ISomeObject>	JointInterfaces;
+
+	void Method() { std::lock_guard<std::mutex> l(_mutex); ++_methodInvokationCounter; }
+	int GetMethodInvokationCounter() const { std::lock_guard<std::mutex> l(_mutex); return _methodInvokationCounter; }
+};
+
 TEST_DEFINE_TEST(TestCtx, ObjectTests)
 {
-	auto obj = Module.GetRootObject<test::IObjectTests>("GetBasicTests");
-	auto some_obj = obj->ReturnNewObject();
+	auto t = Module.GetRootObject<test::IObjectTests>("GetTests");
 
-	TEST_THROWS_NOTHING(some_obj->Method());
-	TEST_THROWS_NOTHING(obj->InvokeObjectMethod(some_obj));
+	auto so = joint::MakeComponentWrapper<SomeObject>();
+	TEST_THROWS_NOTHING(t->InvokeObjectMethod(Ctx.MakeComponentProxy<test::ISomeObject>(so)));
+	TEST_EQUALS(so->GetMethodInvokationCounter(), 1);
+}
 
-	auto some_obj_2 = obj->ReturnSameObject(some_obj);
-	TEST_THROWS_NOTHING(some_obj_2->Method());
 
-	auto main_module_some_obj = Ctx.GetMainModule().MakeComponent<test::ISomeObject, SomeObject>();
-	TEST_THROWS_NOTHING(obj->InvokeObjectMethod(main_module_some_obj));
+class LifetimeListener
+{
+private:
+	mutable std::mutex	_mutex;
+	bool				_objectDestroyed{0};
+
+public:
+	typedef joint::TypeList<test::ILifetimeListener>	JointInterfaces;
+
+	void OnDestroyed() { std::lock_guard<std::mutex> l(_mutex); _objectDestroyed = true; }
+	bool GetObjectDestroyed() const { std::lock_guard<std::mutex> l(_mutex); return _objectDestroyed; }
+};
+
+
+TEST_DEFINE_TEST(TestCtx, LifetimeTests)
+{
+	auto t = Module.GetRootObject<test::ILifetimeTests>("GetTests");
+
+	auto listenable = t->CreateListenable();
+	auto listener = joint::MakeComponentWrapper<LifetimeListener>();
+	TEST_THROWS_NOTHING(listenable->SetListener(Ctx.MakeComponentProxy<test::ILifetimeListener>(listener)));
+	TEST_EQUALS(listener->GetObjectDestroyed(), false);
+	listenable.Reset();
+	t->CollectGarbage();
+	TEST_EQUALS(listener->GetObjectDestroyed(), true);
 }
 
 
