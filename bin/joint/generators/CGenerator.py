@@ -156,7 +156,7 @@ class CGenerator:
             if type.category == BuiltinTypeCategory.int:
                 return '{}int{}_t'.format('' if type.signed else 'u', type.bits)
             if type.category == BuiltinTypeCategory.bool:
-                return 'bool'
+                return 'JOINT_BOOL'
             if type.category == BuiltinTypeCategory.float:
                 if type.bits == 32:
                     return 'float'
