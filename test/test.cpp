@@ -39,7 +39,7 @@ TEST_DEFINE_TEST(TestCtx, BasicTests)
 	TEST_EQUALS(t->AddF32(2.1f, 12.2f), 14.3f);
 	TEST_EQUALS(t->AddF64(2.1, 12.2), 14.3);
 
-	//TEST_EQUALS(t->Concat("abc", "xyz"), std::string("abcxyz"));
+	TEST_EQUALS(t->Concat("abc", "xyz"), std::string("abcxyz"));
 
 	TEST_EQUALS(t->And(true, true), true);
 	TEST_EQUALS(t->And(true, false), false);

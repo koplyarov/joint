@@ -46,6 +46,14 @@ Joint_Error Tests_AddF32(Tests* self, float l, float r, float* result)
 Joint_Error Tests_AddF64(Tests* self, double l, double r, double* result)
 { *result = l + r; return JOINT_ERROR_NONE; }
 
+Joint_Error Tests_Concat(Tests* self, const char* l, const char* r, const char** result)
+{
+	char* buf = (char*)malloc(strlen(l) + strlen(r) + 1);
+	strcat(strcpy(buf, l), r);
+	*result = buf;
+	return JOINT_ERROR_NONE;
+}
+
 Joint_Error Tests_And(Tests* self, JOINT_BOOL l, JOINT_BOOL r, JOINT_BOOL* result)
 { *result = l && r; return JOINT_ERROR_NONE; }
 

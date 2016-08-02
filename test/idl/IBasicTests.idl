@@ -16,7 +16,7 @@ package test
 		f32 AddF32(f32 l, f32 r);
 		f64 AddF64(f64 l, f64 r);
 
-		//string Concat(string l, string r);
+		string Concat(string l, string r);
 
 		bool And(bool l, bool r);
 	}
