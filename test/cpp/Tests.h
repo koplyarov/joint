@@ -2,7 +2,6 @@
 #define TEST_CPP_TESTS_H
 
 
-#include <joint.cpp/IJointObject.hpp>
 #include <joint.cpp/Ptr.hpp>
 #include <test/Tests_adapters.hpp>
 

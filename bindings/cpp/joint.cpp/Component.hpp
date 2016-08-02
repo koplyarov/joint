@@ -6,7 +6,6 @@
 #include <typeinfo>
 
 #include <joint.cpp/Accessor.hpp>
-#include <joint.cpp/IJointObject.hpp>
 #include <joint.cpp/MetaProgramming.hpp>
 #include <joint.cpp/Ptr.hpp>
 #include <joint.cpp/TypeList.hpp>
