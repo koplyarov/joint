@@ -57,7 +57,11 @@ Joint_Error Tests_Concat(Tests* self, const char* l, const char* r, const char**
 Joint_Error Tests_And(Tests* self, JOINT_BOOL l, JOINT_BOOL r, JOINT_BOOL* result)
 { *result = l && r; return JOINT_ERROR_NONE; }
 
-JOINT_C_COMPONENT(Tests, test_IBasicTests);
+
+Joint_Error Tests_InvokeObjectMethod(Tests* self, test_ISomeObject o)
+{ return test_ISomeObject_Method(o); }
+
+JOINT_C_COMPONENT(Tests, test_IBasicTests, test_IObjectTests);
 
 
 #ifdef _MSC_VER
@@ -65,8 +69,6 @@ JOINT_C_COMPONENT(Tests, test_IBasicTests);
 #endif
 Joint_ObjectHandle GetTests(Joint_ModuleHandle module)
 {
-	printf("GET TESTS\n");
-
 	Tests__wrapper* t = JointC_Wrap__Tests();
 	Tests_Init(&t->impl, 42);
 	return JointC__Tests__As__test_IBasicTests(module, t);

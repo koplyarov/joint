@@ -42,7 +42,7 @@ add_custom_target(test-adapters-py ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/pytho
 joint_generate_adapters(c++ Tests_adapters.hpp idl/IBasicTests.idl idl/IObjectTests.idl idl/ILifetimeTests.idl)
 add_custom_target(test-adapters-cpp ALL DEPENDS Tests_adapters.hpp)
 
-joint_generate_adapters(c Tests_adapters.h idl/IBasicTests.idl)
+joint_generate_adapters(c Tests_adapters.h idl/IBasicTests.idl idl/IObjectTests.idl)
 add_custom_target(test-adapters-c ALL DEPENDS Tests_adapters.h)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

@@ -5,16 +5,57 @@
 #include <joint/Joint.h>
 
 #include <joint.c/Accessor.h>
+#include <joint.c/detail/Preprocessor.h>
 
 #include <stdlib.h>
 
 
-#define JOINT_C_COMPONENT(C, I1) \
+#define DETAIL_JOINT_C_ACCESSOR_AND_VTABLE(Ifc, ...) \
+		JointC_Accessor    Ifc##__accessor; \
+		Ifc##__VTableType  Ifc##__vtable;
+
+#define DETAIL_JOINT_C_CAST(Ifc, ...) \
+		else if (strcmp(interfaceId, Ifc##__id) == 0) \
+			*outAccessor = &w->Ifc##__accessor; \
+
+#define DETAIL_JOINT_C_GLOBAL_STUFF(Ifc, ComponentImpl) \
+	static Joint_Error Detail__##ComponentImpl##__##Ifc##__InvokeMethod(void* componentWrapper, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue) \
+	{ \
+		ComponentImpl##__wrapper* w = (ComponentImpl##__wrapper*)componentWrapper; \
+		return Detail__##Ifc##__InvokeMethod(&w->Ifc##__vtable, &w->impl, methodId, params, paramsCount, retType, outRetValue); \
+	} \
+	\
+	JointC_AccessorVTable Detail__##ComponentImpl##__accessor_vtable__##Ifc =\
+	{ \
+		&Detail__##ComponentImpl##__AddRef, \
+		&Detail__##ComponentImpl##__Release, \
+		&Detail__##ComponentImpl##__Cast, \
+		&Detail__##ComponentImpl##__##Ifc##__InvokeMethod, \
+	}; \
+	Joint_ObjectHandle JointC__##ComponentImpl##__As__##Ifc(Joint_ModuleHandle module, ComponentImpl##__wrapper* w) \
+	{ \
+		Joint_ObjectHandle result = JOINT_NULL_HANDLE; \
+		JointC_Accessor* internal = &w->Ifc##__accessor; \
+		Joint_Error ret = Joint_CreateObject(module, internal, &result); \
+		if (ret != JOINT_ERROR_NONE) \
+			fprintf(stderr, "Joint_CreateObject failed: %s\n", Joint_ErrorToString(ret)); \
+		return result; \
+	}
+
+#define DETAIL_JOINT_C_INIT_ACCESSOR_AND_VTABLE(Ifc, ComponentImpl) \
+		JOINT_C_INIT_VTABLE__##Ifc(w->Ifc##__vtable, ComponentImpl); \
+		w->Ifc##__accessor.Component = w; \
+		w->Ifc##__accessor.VTable = &Detail__##ComponentImpl##__accessor_vtable__##Ifc; \
+
+#define DETAIL_JOINT_C_VALIDATE_IFC(Ifc, ...) \
+	extern int QWEQWEWQE_##Ifc[sizeof(Ifc)]; \
+
+#define JOINT_C_COMPONENT(C, ...) \
+	JOINT_C_PP_FOREACH(DETAIL_JOINT_C_VALIDATE_IFC, ~, __VA_ARGS__) \
 	typedef struct  \
 	{ \
 		int                refCount; \
-		JointC_Accessor    I1##__accessor; \
-		I1##__VTableType   I1##__vtable; \
+		JOINT_C_PP_FOREACH(DETAIL_JOINT_C_ACCESSOR_AND_VTABLE, ~, __VA_ARGS__) \
 		C                  impl; \
 	} C##__wrapper; \
 	\
@@ -34,43 +75,21 @@
 	static Joint_Error Detail__##C##__Cast(void* componentWrapper, Joint_InterfaceId interfaceId, const JointC_Accessor** outAccessor) \
 	{ \
 		C##__wrapper* w = (C##__wrapper*)componentWrapper; \
-		if (strcmp(interfaceId, I1##__id) == 0) \
-			*outAccessor = &w->I1##__accessor; \
+		if (0) ;\
+		JOINT_C_PP_FOREACH(DETAIL_JOINT_C_CAST, ~, __VA_ARGS__) \
 		else \
 			return JOINT_ERROR_NOT_IMPLEMENTED; \
 		return JOINT_ERROR_NONE; \
 	} \
-	static Joint_Error Detail__##C##__##I1##__InvokeMethod(void* componentWrapper, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue) \
-	{ \
-		C##__wrapper* w = (C##__wrapper*)componentWrapper; \
-		return Detail__##I1##__InvokeMethod(&w->I1##__vtable, &w->impl, methodId, params, paramsCount, retType, outRetValue); \
-	} \
 	\
-	JointC_AccessorVTable Detail__##C##__accessor_vtable__##I1 =\
-	{ \
-		&Detail__##C##__AddRef, \
-		&Detail__##C##__Release, \
-		&Detail__##C##__Cast, \
-		&Detail__##C##__##I1##__InvokeMethod, \
-	}; \
+	JOINT_C_PP_FOREACH(DETAIL_JOINT_C_GLOBAL_STUFF, C, __VA_ARGS__) \
 	\
 	C##__wrapper* JointC_Wrap__##C() \
 	{ \
 		C##__wrapper* w = (C##__wrapper*)malloc(sizeof(C##__wrapper)); \
-		JOINT_C_INIT_VTABLE__##I1(w->I1##__vtable, C); \
 		w->refCount = 1; \
-		w->I1##__accessor.Component = w; \
-		w->I1##__accessor.VTable = &Detail__##C##__accessor_vtable__##I1; \
+		JOINT_C_PP_FOREACH(DETAIL_JOINT_C_INIT_ACCESSOR_AND_VTABLE, C, __VA_ARGS__) \
 		return w; \
-	} \
-	Joint_ObjectHandle JointC__##C##__As__##I1(Joint_ModuleHandle module, C##__wrapper* w) \
-	{ \
-		Joint_ObjectHandle result = JOINT_NULL_HANDLE; \
-		JointC_Accessor* internal = &w->I1##__accessor; \
-		Joint_Error ret = Joint_CreateObject(module, internal, &result); \
-		if (ret != JOINT_ERROR_NONE) \
-			fprintf(stderr, "Joint_CreateObject failed: %s\n", Joint_ErrorToString(ret)); \
-		return result; \
 	}
 
 
