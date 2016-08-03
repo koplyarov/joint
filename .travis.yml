@@ -1,0 +1,27 @@
+sudo: required
+dist: trusty
+language: cpp
+cache: apt
+
+matrix:
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-4.8', 'valgrind']
+      env: COMPILER=gcc-4.8 COMPILERXX=g++-4.8
+    - compiler: clang
+      addons:
+        apt:
+          packages: ['clang-3.5', 'valgrind']
+      env: COMPILER=clang-3.5 COMPILERXX=clang++-3.5
+
+before_install:
+  - sudo apt-get install -yq python-dev
+
+script: 
+  - ( mkdir build && cd build && CC="$COMPILER" CXX="$COMPILERXX" cmake -DJOINT_VALGRIND=TRUE .. && make )
+  - ./build/bin/joint-test c tests
+  - ./build/bin/joint-test cpp tests
+  - PYTHONPATH="`pwd`/test/python:`pwd`/build/bin" ./build/bin/joint-test python Tests
