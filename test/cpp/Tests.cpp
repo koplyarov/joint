@@ -3,11 +3,16 @@
 
 class SomeObject
 {
+private:
+	int	_counter;
+
 public:
 	typedef joint::TypeList<test::ISomeObject>	JointInterfaces;
 
-	void Method()
-	{ }
+	SomeObject() : _counter(0) { }
+
+	void Method() { ++_counter; }
+	int32_t GetInvokationsCount() { return _counter; }
 };
 
 

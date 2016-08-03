@@ -43,27 +43,34 @@ TEST_DEFINE_TEST(TestCtx, BasicTests)
 	TEST_EQUALS(t->And(true, false), false);
 }
 
-#if 0
+
 class SomeObject
 {
 private:
-	mutable std::mutex	_mutex;
-	int					_methodInvokationCounter{0};
+	int					_counter{0};
 
 public:
 	typedef joint::TypeList<test::ISomeObject>	JointInterfaces;
 
-	void Method() { std::lock_guard<std::mutex> l(_mutex); ++_methodInvokationCounter; }
-	int GetMethodInvokationCounter() const { std::lock_guard<std::mutex> l(_mutex); return _methodInvokationCounter; }
+	void Method() { ++_counter; }
+	int32_t GetInvokationsCount() { return _counter; }
 };
 
 TEST_DEFINE_TEST(TestCtx, ObjectTests)
 {
 	auto t = Module.GetRootObject<test::IObjectTests>("GetTests");
 
-	auto so = joint::MakeComponentWrapper<SomeObject>();
-	TEST_THROWS_NOTHING(t->InvokeObjectMethod(Ctx.MakeComponentProxy<test::ISomeObject>(so)));
-	TEST_EQUALS(so->GetMethodInvokationCounter(), 1);
+	t->ReturnNewObject()->Method();
+
+	auto o_impl = joint::MakeComponentWrapper<SomeObject>();
+	auto o = Ctx.MakeComponentProxy<test::ISomeObject>(o_impl);
+
+	TEST_THROWS_NOTHING(t->InvokeObjectMethod(o));
+	TEST_EQUALS(o_impl->GetInvokationsCount(), 1);
+
+	auto o2 = t->ReturnSameObject(o);
+	o2->Method();
+	TEST_EQUALS(o_impl->GetInvokationsCount(), 2);
 }
 
 
@@ -93,7 +100,6 @@ TEST_DEFINE_TEST(TestCtx, LifetimeTests)
 	t->CollectGarbage();
 	TEST_EQUALS(listener->GetObjectDestroyed(), true);
 }
-#endif
 
 
 int main()

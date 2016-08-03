@@ -108,7 +108,7 @@ class CGenerator:
             yield '\t\t\t{'
             yield '\t\t\t\toutRetValue->variant.type = (Joint_Type){};'.format(m.retType.index)
             if m.retType.name != 'void':
-                yield '\t\t\t\toutRetValue->variant.value.{} = result;'.format(m.retType.variantName)
+                yield '\t\t\t\toutRetValue->variant.value.{} = {}result;'.format(m.retType.variantName, '' if isinstance(m.retType, BuiltinType) else '(Joint_ObjectHandle)')
             yield '\t\t\t}'
             yield '\t\t}'
             yield '\t\tbreak;'

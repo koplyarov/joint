@@ -322,6 +322,7 @@ extern "C"
 		GetLogger().Debug() << "InvokeMethod(obj: " << obj << " (internal: " << (obj ? obj->internal : NULL) << "), methodId: " << methodId << ")";
 
 		JOINT_CHECK(obj != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(obj->refCount.load(std::memory_order_relaxed) > 0, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(params || paramsCount == 0, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(outRetValue, JOINT_ERROR_INVALID_PARAMETER);
 
@@ -366,6 +367,7 @@ extern "C"
 		JOINT_CPP_WRAP_BEGIN
 
 		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(handle->refCount.load(std::memory_order_relaxed) > 0, JOINT_ERROR_INVALID_PARAMETER);
 		++handle->refCount;
 
 		JOINT_CPP_WRAP_END
@@ -377,6 +379,7 @@ extern "C"
 		JOINT_CPP_WRAP_BEGIN
 
 		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(handle->refCount.load(std::memory_order_relaxed) > 0, JOINT_ERROR_INVALID_PARAMETER);
 		auto refs = --handle->refCount;
 		if (refs == 0)
 		{
@@ -399,6 +402,7 @@ extern "C"
 		GetLogger().Debug() << "CastObject(obj: " << handle << " (internal: " << (handle ? handle->internal : NULL) << "), interfaceId: " << interfaceId << ")";
 
 		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(handle->refCount.load(std::memory_order_relaxed) > 0, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(interfaceId, JOINT_ERROR_INVALID_PARAMETER);
 
 		Joint_ObjectHandleInternal internal = NULL;
