@@ -21,6 +21,10 @@ extern "C" {
 
 #define JOINT_NULL_HANDLE NULL
 
+#define JOINT_BOOL int32_t
+#define JOINT_TRUE 1
+#define JOINT_FALSE 0
+
 	typedef const char* Joint_InterfaceId;
 
 	struct Joint_Binding;
@@ -106,7 +110,7 @@ extern "C" {
 	{
 		union
 		{
-			int                     b;
+			JOINT_BOOL              b;
 
 			int8_t                  i8;
 			uint8_t                 u8;
