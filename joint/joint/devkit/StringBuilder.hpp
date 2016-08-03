@@ -54,6 +54,20 @@ namespace devkit
 		std::stringstream		_stream;
 
 	public:
+#if __GNUC__ < 5
+		StringBuilder()
+		{ }
+
+		StringBuilder(StringBuilder&& other)
+		{ _stream << other._stream.str(); }
+
+		StringBuilder& operator = (StringBuilder&& other)
+		{
+			_stream << other._stream.str();
+			return *this;
+		}
+#endif
+
 		template < typename T_ >
 		StringBuilder& operator % (T_&& val)
 		{
