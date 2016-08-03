@@ -23,12 +23,22 @@ namespace test
 		std::mutex		_mutex;
 		int				_succeeded = 0;
 		int				_failed = 0;
+		bool			_hasTests = false;
 
 	public:
 		~DefaultTestResultsListener()
 		{
+			if (!_hasTests)
+				return;
+
 			std::string color = EscapeColor(Bright, (_failed == 0) ? Green : Red);
 			printf("%s%d tests succeeded, %d failed%s\n", color.c_str(), _succeeded, _failed, ResetColor().c_str());
+		}
+
+		virtual void RunningTest(const std::string& testName, const Location& location)
+		{
+			std::lock_guard<std::mutex> l(_mutex);
+			_hasTests = true;
 		}
 
 		virtual void TestSucceeded(const std::string& testName, const Location& location)

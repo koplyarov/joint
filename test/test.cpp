@@ -102,8 +102,16 @@ TEST_DEFINE_TEST(TestCtx, LifetimeTests)
 }
 
 
-int main()
+int main(int argc, const char* argv[])
 {
+	if (argc != 3)
+	{
+		std::cerr << "Usage: " << argv[0] << " <binding> <module>" << std::endl;
+		return 1;
+	}
+	g_bindingName = argv[1];
+	g_moduleName = argv[2];
+
 	try
 	{ test::RunAllTests(); }
 	catch (const std::exception& ex)

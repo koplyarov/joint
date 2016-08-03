@@ -8,7 +8,7 @@ namespace test
 
 	TestContext::TestContext(TestEngine* engine, std::string testName, const Location& location)
 		: _engine(engine), _testName(std::move(testName)), _location(std::move(location)), _failed(false)
-	{ }
+	{ _engine->GetListener()->RunningTest(_testName, _location); }
 
 	TestContext::~TestContext()
 	{
