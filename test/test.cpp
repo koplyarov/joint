@@ -111,6 +111,7 @@ int main(int argc, const char* argv[])
 	}
 	g_bindingName = argv[1];
 	g_moduleName = argv[2];
+	std::cerr << "Binding: " << argv[1] << ", module: " << argv[2] << std::endl;
 
 	try
 	{ test::RunAllTests(); }
