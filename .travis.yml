@@ -19,6 +19,8 @@ matrix:
 
 before_install:
   - sudo apt-get install -yq python-dev
+  - sudo apt-get install -yq python-pip
+  - sudo pip install pyparsing
 
 script: 
   - ( mkdir build && cd build && CC="$COMPILER" CXX="$COMPILERXX" cmake -DJOINT_VALGRIND=TRUE .. && make )
