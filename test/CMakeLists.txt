@@ -1,5 +1,9 @@
 project(joint-test)
 
+add_subdirectory(c)
+add_subdirectory(cpp)
+add_subdirectory(python)
+
 find_package(Threads)
 
 include_directories(${CMAKE_SOURCE_DIR})
@@ -30,21 +34,11 @@ target_link_libraries(test-core ${CMAKE_THREAD_LIBS_INIT})
 
 ################################################################################
 
-add_subdirectory(c)
-add_subdirectory(cpp)
-
 include(${CMAKE_SOURCE_DIR}/joint.cmake)
 joint_import_directories(${CMAKE_SOURCE_DIR}/joint/idl)
 
-joint_generate_adapters(python ${CMAKE_CURRENT_SOURCE_DIR}/python/Tests_adapters.py idl/IBasicTests.idl idl/IObjectTests.idl idl/ILifetimeTests.idl)
-add_custom_target(test-adapters-py ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/python/Tests_adapters.py)
-
 joint_generate_adapters(c++ Tests_adapters.hpp idl/IBasicTests.idl idl/IObjectTests.idl idl/ILifetimeTests.idl)
-add_custom_target(test-adapters-cpp ALL DEPENDS Tests_adapters.hpp)
-
-joint_generate_adapters(c Tests_adapters.h idl/IBasicTests.idl idl/IObjectTests.idl idl/ILifetimeTests.idl)
-add_custom_target(test-adapters-c ALL DEPENDS Tests_adapters.h)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-add_executable(joint-test test.cpp)
+add_executable(joint-test Tests_adapters.hpp test.cpp)
 target_link_libraries(joint-test test-core joint-loader)

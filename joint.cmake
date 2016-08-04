@@ -34,5 +34,5 @@ macro(JOINT_GENERATE_ADAPTERS LANGUAGE OUTPUT)
 		DEPENDS ${ARGN}
 	)
 
-	set_source_files_properties(${OUTPUT} PROPERTIES GENERATED true)
+	set_source_files_properties(${OUTPUT} PROPERTIES GENERATED 1)
 endmacro(JOINT_GENERATE_ADAPTERS)

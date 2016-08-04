@@ -1,4 +1,4 @@
-#include <test/Tests_adapters.hpp>
+#include <Tests_adapters.hpp>
 
 
 class SomeObject

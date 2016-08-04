@@ -8,9 +8,13 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 if (MSVC)
 	add_definitions(-DMS_NO_COREDLL)
 	add_definitions(-DPy_ENABLE_SHARED)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
+else()
+	add_definitions(-Wall)
+	add_definitions(-std=c++11)
 endif()
 
-set(JOINT_PYTHON_CORE_SRC
+add_library(joint-python-core SHARED 
 	JointPythonCore.cpp
 	binding/Binding.cpp
 	binding/Module.cpp
@@ -21,26 +25,16 @@ set(JOINT_PYTHON_CORE_SRC
 	pyjoint/Object.cpp
 	utils/PythonUtils.cpp
 )
-
-add_library(joint-python-core SHARED ${JOINT_PYTHON_CORE_SRC})
 target_link_libraries(joint-python-core joint ${PYTHON_LIBRARIES})
 
 ################################################################################
 
-set(JOINT_PYTHON_BINDING_SRC
-	JointPython.cpp
-)
-
-add_library(joint-python SHARED ${JOINT_PYTHON_BINDING_SRC})
+add_library(joint-python SHARED JointPython.cpp)
 target_link_libraries(joint-python joint-python-core)
 
 ################################################################################
 
-set(PY_JOINT_SRC
-	PyJoint.cpp
-)
-
-add_library(pyjoint SHARED ${PY_JOINT_SRC})
+add_library(pyjoint SHARED PyJoint.cpp)
 set_target_properties(pyjoint PROPERTIES PREFIX "")
 if (WIN32)
 	set_target_properties(pyjoint PROPERTIES SUFFIX ".pyd")
@@ -49,12 +43,10 @@ target_link_libraries(pyjoint joint joint-python-core)
 
 ################################################################################
 
-set(PY_JOINT_LOADER_SRC
+add_library(pyjoint_loader SHARED
 	pyjoint_loader/Globals.cpp
 	pyjoint_loader/PyJointLoader.cpp
 )
-
-add_library(pyjoint_loader SHARED ${PY_JOINT_LOADER_SRC})
 set_target_properties(pyjoint_loader PROPERTIES PREFIX "")
 if (WIN32)
 	set_target_properties(pyjoint_loader PROPERTIES SUFFIX ".pyd")
