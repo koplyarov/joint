@@ -24,6 +24,6 @@ before_install:
 
 script: 
   - ( mkdir build && cd build && CC="$COMPILER" CXX="$COMPILERXX" cmake -DJOINT_VALGRIND=TRUE .. && make )
-  - ./build/bin/joint-test c tests
-  - ./build/bin/joint-test cpp tests
+  - ./build/bin/joint-test cpp tests-c
+  - ./build/bin/joint-test cpp tests-cpp
   - PYTHONPATH="`pwd`/test/python:`pwd`/build/bin" ./build/bin/joint-test python Tests
