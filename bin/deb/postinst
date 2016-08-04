@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DIR='/usr/share/joint-gen'
+LIST_FILE='installed-joint-files.txt'
+
+( cd "$DIR" && python ./setup.py install -f --record $LIST_FILE; )

@@ -28,3 +28,20 @@ set(JOINT_SRC
 
 add_library(joint-loader SHARED ${JOINT_SRC})
 target_link_libraries(joint-loader joint joint-python joint-cpp ${CMAKE_THREAD_LIBS_INIT})
+
+################################################################################
+
+install(FILES
+	joint/Joint.h
+	joint/JointConfig.h
+	joint/JointLoader.h
+	DESTINATION include
+	COMPONENT dev)
+
+install(TARGETS
+	joint
+	joint-loader
+	COMPONENT runtime
+	RUNTIME DESTINATION bin
+	LIBRARY DESTINATION lib
+	ARCHIVE DESTINATION lib)

@@ -52,3 +52,10 @@ if (WIN32)
 	set_target_properties(pyjoint_loader PROPERTIES SUFFIX ".pyd")
 endif()
 target_link_libraries(pyjoint_loader joint-python-core joint-loader)
+
+
+install(TARGETS
+	joint-python-core
+	joint-python
+	COMPONENT python
+	LIBRARY DESTINATION lib)

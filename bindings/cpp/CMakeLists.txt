@@ -17,3 +17,8 @@ add_library(joint-cpp SHARED
 	utils/DynamicLibrary.cpp
 )
 target_link_libraries(joint-cpp joint ${CMAKE_THREAD_LIBS_INIT})
+
+install(TARGETS
+	joint-cpp
+	COMPONENT cpp
+	LIBRARY DESTINATION lib)

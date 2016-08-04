@@ -6,7 +6,15 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 include_directories(${CMAKE_SOURCE_DIR}/joint)
 
+add_subdirectory(bin)
 add_subdirectory(joint)
 add_subdirectory(bindings/python)
 add_subdirectory(bindings/cpp)
 add_subdirectory(test)
+
+################################################################################
+
+set(CPACK_GENERATOR "DEB")
+set(CPACK_DEB_COMPONENT_INSTALL "ON")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dmitry Koplyarov")
+include(CPack)

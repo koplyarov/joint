@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DIR='/usr/share/joint-gen'
+LIST_FILE='installed-joint-files.txt'
+
+( cd "$DIR" && tr '\n' '\0' < "$LIST_FILE" | xargs -0 sudo rm -f -- && rm "$LIST_FILE" && rm -rf "build" )
