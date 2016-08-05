@@ -1,5 +1,7 @@
 project(joint-test)
 
+find_package(JointGen)
+
 add_subdirectory(c)
 add_subdirectory(cpp)
 add_subdirectory(python)
@@ -33,8 +35,6 @@ target_link_libraries(test-core ${CMAKE_THREAD_LIBS_INIT})
 
 
 ################################################################################
-
-include(${CMAKE_SOURCE_DIR}/joint-gen/joint.cmake)
 
 joint_generate_adapters(c++ Tests_adapters.hpp idl/IBasicTests.idl idl/IObjectTests.idl idl/ILifetimeTests.idl)
 

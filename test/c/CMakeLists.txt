@@ -11,8 +11,6 @@ endif()
 
 ################################################################################
 
-include(${CMAKE_SOURCE_DIR}/joint-gen/joint.cmake)
-
 joint_generate_adapters(c Tests_adapters.h
 	../idl/IBasicTests.idl
 	../idl/IObjectTests.idl
