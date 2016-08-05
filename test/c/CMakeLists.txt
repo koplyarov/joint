@@ -11,8 +11,7 @@ endif()
 
 ################################################################################
 
-include(${CMAKE_SOURCE_DIR}/joint.cmake)
-joint_import_directories(${CMAKE_SOURCE_DIR}/joint/idl)
+include(${CMAKE_SOURCE_DIR}/joint-gen/joint.cmake)
 
 joint_generate_adapters(c Tests_adapters.h
 	../idl/IBasicTests.idl
