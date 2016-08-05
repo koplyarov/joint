@@ -14,7 +14,8 @@ add_subdirectory(test)
 
 ################################################################################
 
-set(CPACK_GENERATOR "DEB")
+set(CPACK_GENERATOR "RPM;DEB")
+set(CPACK_RPM_COMPONENT_INSTALL "ON")
 set(CPACK_DEB_COMPONENT_INSTALL "ON")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dmitry Koplyarov")
 include(CPack)
