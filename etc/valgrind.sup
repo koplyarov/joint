@@ -38,7 +38,7 @@
    <insert_a_suppression_name_here>
    Memcheck:Cond
    fun:Py*
-   obj:/usr/bin/python3.5
+   obj:/usr/bin/python*
    ...
 }
 
@@ -107,32 +107,32 @@
 {
    <insert_a_suppression_name_here>
    Memcheck:Addr4
-   obj:/usr/bin/python3.5
-   obj:/usr/bin/python3.5
-   obj:/usr/bin/python3.5
+   obj:/usr/bin/python*
+   obj:/usr/bin/python*
+   obj:/usr/bin/python*
    fun:PyEval_EvalFrameEx
    fun:PyEval_EvalFrameEx
    fun:PyEval_EvalFrameEx
    fun:PyEval_EvalCodeEx
-   obj:/usr/bin/python3.5
+   obj:/usr/bin/python*
    fun:PyObject_Call
    fun:_PyObject_CallMethodIdObjArgs
    fun:PyImport_ImportModuleLevelObject
-   obj:/usr/bin/python3.5
+   obj:/usr/bin/python*
 }
 
 {
    <insert_a_suppression_name_here>
    Memcheck:Addr4
-   obj:/usr/bin/python3.5
-   obj:/usr/bin/python3.5
-   obj:/usr/bin/python3.5
-   obj:/usr/bin/python3.5
+   obj:/usr/bin/python*
+   obj:/usr/bin/python*
+   obj:/usr/bin/python*
+   obj:/usr/bin/python*
    fun:PyEval_EvalFrameEx
    fun:PyEval_EvalFrameEx
    fun:PyEval_EvalFrameEx
    fun:PyEval_EvalCodeEx
-   obj:/usr/bin/python3.5
+   obj:/usr/bin/python*
    fun:PyObject_Call
    fun:_PyObject_CallMethodIdObjArgs
    fun:PyImport_ImportModuleLevelObject
@@ -141,21 +141,21 @@
 {
    <insert_a_suppression_name_here>
    Memcheck:Addr4
-   obj:/usr/bin/python3.5
+   obj:/usr/bin/python*
    ...
 }
 
 {
    <insert_a_suppression_name_here>
    Memcheck:Cond
-   obj:/usr/bin/python3.5
+   obj:/usr/bin/python*
    ...
 }
 
 {
    <insert_a_suppression_name_here>
    Memcheck:Value8
-   obj:/usr/bin/python3.5
+   obj:/usr/bin/python*
    ...
 }
 
@@ -164,7 +164,7 @@
    Memcheck:Leak
    match-leak-kinds: possible
    fun:malloc
-   obj:/usr/bin/python3.5
+   obj:/usr/bin/python*
    fun:PyObject_Realloc
    ...
 }
@@ -193,27 +193,27 @@
    Memcheck:Leak
    match-leak-kinds: possible
    fun:malloc
-   obj:/usr/lib/x86_64-linux-gnu/libpython3.5m.so.1.0
+   obj:/usr/lib/*/libpython*
    ...
 }
 
 {
    <insert_a_suppression_name_here>
    Memcheck:Addr4
-   obj:/usr/lib/x86_64-linux-gnu/libpython3.5m.so.1.0
+   obj:/usr/lib/*/libpython*
    ...
 }
 
 {
    <insert_a_suppression_name_here>
    Memcheck:Value8
-   obj:/usr/lib/x86_64-linux-gnu/libpython3.5m.so.1.0
+   obj:/usr/lib/*/libpython*
    ...
 }
 
 {
    <insert_a_suppression_name_here>
    Memcheck:Cond
-   obj:/usr/lib/x86_64-linux-gnu/libpython3.5m.so.1.0
+   obj:/usr/lib/*/libpython*
    ...
 }
