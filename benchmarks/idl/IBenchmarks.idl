@@ -1,0 +1,8 @@
+package benchmarks
+{
+	interface IBenchmarks
+	{
+		void NoParamsMethod();
+		void InvokeNativeNoParams(i64 n);
+	}
+}

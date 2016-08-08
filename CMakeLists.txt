@@ -13,6 +13,7 @@ add_subdirectory(joint)
 add_subdirectory(bindings/python)
 add_subdirectory(bindings/cpp)
 add_subdirectory(test)
+add_subdirectory(benchmarks)
 
 ################################################################################
 

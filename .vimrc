@@ -8,7 +8,8 @@ set path+=joint
 set path+=bindings/python
 set path+=bindings/cpp
 set path+=build/test
-let g:include_directories = [ 'joint', 'bindings/python', 'bindings/cpp', 'build' ]
+set path+=build/benchmarks
+let g:include_directories = [ 'joint', 'bindings/python', 'bindings/cpp', 'build', 'benchmarks/core', 'benchmarks' ]
 
 function! GetCppNamespaceFromPath(path)
 	let res = []

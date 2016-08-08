@@ -1,0 +1,6 @@
+#ifndef CPP_OTHERTRANSLATIONUNIT_HPP
+#define CPP_OTHERTRANSLATIONUNIT_HPP
+
+void NoParamsFunc();
+
+#endif
