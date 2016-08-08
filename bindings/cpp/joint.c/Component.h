@@ -69,7 +69,11 @@
 	{ \
 		C##__wrapper* w = (C##__wrapper*)componentWrapper; \
 		if (--w->refCount == 0) \
-			return C##_Deinit(&w->impl); \
+		{ \
+			Joint_Error ret = C##_Deinit(&w->impl); \
+			free(w); \
+			return ret; \
+		} \
 		return JOINT_ERROR_NONE; \
 	} \
 	static Joint_Error Detail__##C##__Cast(void* componentWrapper, Joint_InterfaceId interfaceId, const JointC_Accessor** outAccessor) \

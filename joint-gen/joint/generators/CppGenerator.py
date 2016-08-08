@@ -138,7 +138,12 @@ class CppGenerator:
                 yield '\t\t\t{} result({});'.format(self._toCppType(m.retType), method_call)
                 if isinstance(m.retType, Interface):
                     yield '\t\t\tJoint_IncRefObject(result->_GetObjectHandle());'
-                yield '\t\t\toutRetValue->variant.value.{} = {};'.format(m.retType.variantName, self._toCppValue('result', m.retType))
+                if m.retType.name != 'string':
+                    yield '\t\t\toutRetValue->variant.value.{} = {};'.format(m.retType.variantName, self._toCppValue('result', m.retType))
+                else:
+                    yield '\t\t\tchar* result_c_str = new char[result.size() + 1];'
+                    yield '\t\t\tstrcpy(result_c_str, result.c_str());'
+                    yield '\t\t\toutRetValue->variant.value.{} = result_c_str;'.format(m.retType.variantName)
             else:
                 yield '\t\t\t{};'.format(method_call)
             yield '\t\t\toutRetValue->variant.type = (Joint_Type){};'.format(m.retType.index)

@@ -18,7 +18,7 @@ extern "C"
 		GetLogger().Info() << "MakeBinding";
 
 		Joint_BindingDesc binding_desc = { };
-		binding_desc.name            = "python";
+		binding_desc.name            = "cpp";
 		binding_desc.deinitBinding   = &Binding::Deinit;
 		binding_desc.loadModule      = &Binding::LoadModule;
 		binding_desc.unloadModule    = &Binding::UnloadModule;

@@ -177,6 +177,8 @@ extern "C"
 
 		*outBinding = new Joint_Binding(userData, desc);
 
+		GetLogger().Debug() << "MakeBinding.outBinding: " << (void*)*outBinding;
+
 		JOINT_CPP_WRAP_END
 	}
 
@@ -187,6 +189,7 @@ extern "C"
 
 		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 		++handle->refCount;
+		GetLogger().Debug() << "IncRefBinding(binding: " << handle << " (userData: " << (handle ? handle->userData : NULL) << ")" << "): " << handle->refCount;
 
 		JOINT_CPP_WRAP_END
 	}
@@ -199,10 +202,12 @@ extern "C"
 		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 
 		auto refs = --handle->refCount;
+		GetLogger().Debug() << "DecRefBinding(binding: " << handle << " (userData: " << (handle ? handle->userData : NULL) << ")" << "): " << handle->refCount;
 		if (refs == 0)
 		{
 			GetLogger().Info() << "ReleaseBinding(binding: " << handle << " (userData: " << (handle ? handle->userData : NULL) << ")" << ")";
 			Joint_Error ret = handle->desc.deinitBinding(handle->userData);
+			delete handle;
 			JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 		}
 

@@ -18,6 +18,8 @@ namespace detail
 
 	inline Joint_Error _ReleaseRetValue(Joint_Variant value)
 	{
+		if (value.type == JOINT_TYPE_UTF8)
+			delete[] value.value.utf8;
 		return JOINT_ERROR_NONE;
 	}
 
