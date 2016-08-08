@@ -167,7 +167,10 @@ class CppGenerator:
 
     def _wrapRetValue(self, type):
         if not isinstance(type, Interface):
-            return '\treturn {}(_joint_internal_ret_val.variant.value.{});'.format(self._toCppType(type), type.variantName)
+            if type.name != 'bool':
+                return '\treturn {}(_joint_internal_ret_val.variant.value.{});'.format(self._toCppType(type), type.variantName)
+            else:
+                return '\treturn _joint_internal_ret_val.variant.value.{} != 0;'.format(type.variantName)
         else:
             return '\treturn {}(new {}(_joint_internal_ret_val.variant.value.{}));'.format(self._toCppType(type), self._mangleType(type), type.variantName)
 

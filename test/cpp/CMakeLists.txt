@@ -22,4 +22,4 @@ joint_generate_adapters(c++ Tests_adapters.hpp
 	../idl/ILifetimeTests.idl)
 
 add_library(tests-cpp SHARED Tests.cpp Tests_adapters.hpp)
-target_link_libraries(tests-cpp ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(tests-cpp joint ${CMAKE_THREAD_LIBS_INIT})

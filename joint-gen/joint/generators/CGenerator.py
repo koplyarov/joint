@@ -47,6 +47,7 @@ class CGenerator:
         yield 'typedef struct {'
         for m in ifc.methods:
             yield '\tJoint_Error (*{})(void* self{}{});'.format(m.name, self._paramsDecl(m.params), self._retDecl(m.retType))
+        yield '\tint dummy;'
         yield '}} {}__VTableType;'.format(mangled_ifc)
         yield ''
 

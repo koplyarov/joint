@@ -21,4 +21,5 @@ target_link_libraries(joint-cpp joint ${CMAKE_THREAD_LIBS_INIT})
 install(TARGETS
 	joint-cpp
 	COMPONENT cpp
+	ARCHIVE DESTINATION lib
 	LIBRARY DESTINATION lib)

@@ -58,4 +58,5 @@ install(TARGETS
 	joint-python-core
 	joint-python
 	COMPONENT python
+	ARCHIVE DESTINATION lib
 	LIBRARY DESTINATION lib)

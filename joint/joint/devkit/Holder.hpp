@@ -21,10 +21,6 @@ namespace devkit
 			: _initialized(false)
 		{ }
 
-		explicit Holder(T_ obj)
-			: _obj(std::move(obj)), _initialized(true)
-		{ }
-
 		Holder(T_ obj, DeleterFunc_ deleter)
 			: DeleterFunc_(std::move(deleter)), _obj(std::move(obj)), _initialized(true)
 		{ }

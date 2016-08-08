@@ -15,8 +15,11 @@ namespace joint_python
 
 	public:
 		PythonContext()
-			: _needFinalize(Py_IsInitialized() != 0)
-		{ Py_Initialize(); }
+			: _needFinalize(Py_IsInitialized() == 0)
+		{
+			if (_needFinalize)
+				Py_Initialize();
+		}
 
 		~PythonContext()
 		{

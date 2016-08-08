@@ -38,8 +38,8 @@ namespace binding
 				case JOINT_TYPE_I16: py_p.Reset(PyLong_FromLong(p.value.i16)); break;
 				case JOINT_TYPE_U32: py_p.Reset(PyLong_FromLong(p.value.u32)); break;
 				case JOINT_TYPE_I32: py_p.Reset(PyLong_FromLong(p.value.i32)); break;
-				case JOINT_TYPE_U64: py_p.Reset(PyLong_FromLong(p.value.u64)); break;
-				case JOINT_TYPE_I64: py_p.Reset(PyLong_FromLong(p.value.i64)); break;
+				case JOINT_TYPE_U64: py_p.Reset(PyLong_FromLongLong(p.value.u64)); break;
+				case JOINT_TYPE_I64: py_p.Reset(PyLong_FromLongLong(p.value.i64)); break;
 
 				case JOINT_TYPE_F32: py_p.Reset(PyFloat_FromDouble(p.value.f32)); break;
 				case JOINT_TYPE_F64: py_p.Reset(PyFloat_FromDouble(p.value.f64)); break;
