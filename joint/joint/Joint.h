@@ -182,7 +182,6 @@ extern "C" {
 
 	JOINT_API Joint_Error Joint_GetRootObject(Joint_ModuleHandle module, const char* getterName, Joint_ObjectHandle* outObject);
 	JOINT_API Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
-	JOINT_API Joint_Error Joint_ObtainRetValue(Joint_RetValue value, Joint_Variant* outValue);
 	JOINT_API Joint_Error Joint_ReleaseRetValue(Joint_RetValue value);
 	JOINT_API Joint_Error Joint_IncRefObject(Joint_ObjectHandle handle);
 	JOINT_API Joint_Error Joint_DecRefObject(Joint_ObjectHandle handle);

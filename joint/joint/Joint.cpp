@@ -324,7 +324,8 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		GetLogger().Debug() << "InvokeMethod(obj: " << obj << " (internal: " << (obj ? obj->internal : NULL) << "), methodId: " << methodId << ")";
+		//if (DETAIL_JOINT_UNLIKELY(Joint_GetLogLevel() <= JOINT_LOGLEVEL_DEBUG))
+			//GetLogger().Debug() << "InvokeMethod(obj: " << obj << " (internal: " << (obj ? obj->internal : NULL) << "), methodId: " << methodId << ")";
 
 		JOINT_CHECK(obj != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(obj->refCount.load(std::memory_order_relaxed) > 0, JOINT_ERROR_INVALID_PARAMETER);
@@ -335,19 +336,8 @@ extern "C"
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 		JOINT_CHECK(outRetValue->releaseValue, JOINT_ERROR_IMPLEMENTATION_ERROR);
 
-		GetLogger().Debug() << "  InvokeMethod.outRetValue.type: " << outRetValue->variant.type;
-
-		JOINT_CPP_WRAP_END
-	}
-
-
-	Joint_Error Joint_ObtainRetValue(Joint_RetValue value, Joint_Variant* outValue)
-	{
-		JOINT_CPP_WRAP_BEGIN
-
-		JOINT_CHECK(outValue, JOINT_ERROR_INVALID_PARAMETER);
-
-		*outValue = value.variant;
+		//if (DETAIL_JOINT_UNLIKELY(Joint_GetLogLevel() <= JOINT_LOGLEVEL_DEBUG))
+			//GetLogger().Debug() << "  InvokeMethod.outRetValue.type: " << outRetValue->variant.type;
 
 		JOINT_CPP_WRAP_END
 	}
@@ -357,7 +347,8 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		GetLogger().Debug() << "ReleaseRetValue(type: " << value.variant.type << ")";
+		//if (DETAIL_JOINT_UNLIKELY(Joint_GetLogLevel() <= JOINT_LOGLEVEL_DEBUG))
+			//GetLogger().Debug() << "ReleaseRetValue(type: " << value.variant.type << ")";
 
 		JOINT_CHECK(value.releaseValue, JOINT_ERROR_INVALID_PARAMETER);
 

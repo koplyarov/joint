@@ -143,10 +143,6 @@ namespace pyjoint
 		Joint_Error ret = Joint_InvokeMethod(o->handle, method_id, params.data(), params.size(), ret_type, &ret_value);
 		NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_InvokeMethod failed: ") + Joint_ErrorToString(ret)).c_str());
 
-		Joint_Variant ret_variant;
-		ret = Joint_ObtainRetValue(ret_value, &ret_variant);
-		NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_ObtainRetValue failed: ") + Joint_ErrorToString(ret)).c_str());
-
 		auto sg(ScopeExit([&]{
 			Joint_Error ret = Joint_ReleaseRetValue(ret_value);
 			if (ret != JOINT_ERROR_NONE)
@@ -154,27 +150,27 @@ namespace pyjoint
 		}));
 
 		PyObjectHolder result;
-		switch (ret_variant.type)
+		switch (ret_value.variant.type)
 		{
 		case JOINT_TYPE_VOID:
 			Py_RETURN_NONE;
 			break;
 		case JOINT_TYPE_I32:
-			result.Reset(PyLong_FromLong(ret_variant.value.i32));
+			result.Reset(PyLong_FromLong(ret_value.variant.value.i32));
 			break;
 		case JOINT_TYPE_UTF8:
-			result.Reset(PyUnicode_FromString(ret_variant.value.utf8));
+			result.Reset(PyUnicode_FromString(ret_value.variant.value.utf8));
 			break;
 		case JOINT_TYPE_OBJ:
 			result.Reset(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&Object_type, NULL)));
-			reinterpret_cast<Object*>(result.Get())->handle = ret_variant.value.obj;
+			reinterpret_cast<Object*>(result.Get())->handle = ret_value.variant.value.obj;
 			break;
 		case JOINT_TYPE_EXCEPTION:
 			{
 				Joint_SizeT buf_size = 0;
 				std::vector<char> buf;
 
-				Joint_Error ret = Joint_GetExceptionMessageSize(ret_variant.value.ex, &buf_size);
+				Joint_Error ret = Joint_GetExceptionMessageSize(ret_value.variant.value.ex, &buf_size);
 				if (ret != JOINT_ERROR_NONE)
 				{
 					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C++", "Joint_GetExceptionMessageSize failed: ", Joint_ErrorToString(ret));
@@ -183,7 +179,7 @@ namespace pyjoint
 
 				buf.resize(buf_size);
 
-				ret = Joint_GetExceptionMessage(ret_variant.value.ex, buf.data(), buf.size());
+				ret = Joint_GetExceptionMessage(ret_value.variant.value.ex, buf.data(), buf.size());
 				if (ret != JOINT_ERROR_NONE)
 				{
 					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C++", "Joint_GetExceptionMessage failed: %s", Joint_ErrorToString(ret));
@@ -193,7 +189,7 @@ namespace pyjoint
 			}
 			break;
 		default:
-			NATIVE_THROW("Unknown return type: " + std::to_string(ret_variant.type));
+			NATIVE_THROW("Unknown return type: " + std::to_string(ret_value.variant.type));
 		}
 
 		PYJOINT_CPP_WRAP_END(result.Release(), NULL)

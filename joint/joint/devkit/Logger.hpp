@@ -3,10 +3,14 @@
 
 
 #include <joint/Joint.h>
+#include <joint/devkit/StorageFor.hpp>
 #include <joint/devkit/StringBuilder.hpp>
 
 #include <string>
 #include <utility>
+
+#define DETAIL_JOINT_LIKELY(Expr_)        __builtin_expect(!!(Expr_), 1)
+#define DETAIL_JOINT_UNLIKELY(Expr_)      __builtin_expect((Expr_), 0)
 
 
 namespace joint {
@@ -18,32 +22,73 @@ namespace devkit
 	public:
 		class Stream
 		{
+			struct Impl
+			{
+				const char*					_name;
+				Joint_LogLevel				_logLevel;
+				bool						_constructed;
+				StorageFor<StringBuilder>	_stringBuilder;
+
+				Impl(const char* name, Joint_LogLevel logLevel)
+					: _name(name), _logLevel(logLevel), _constructed(false)
+				{ }
+
+				Impl(Impl&& other)
+					: _name(other._name), _logLevel(other._logLevel), _constructed(false)
+				{ }
+
+				~Impl()
+				{
+					if (_constructed)
+					{
+						Joint_Log(_logLevel, _name, "%s", _stringBuilder->ToString().c_str());
+						_stringBuilder.Destruct();
+					}
+				}
+
+				template < typename T_ >
+				void Write(T_&& val)
+				{
+					if (!_constructed)
+					{
+						_stringBuilder.Construct();
+						_constructed = true;
+					}
+					*_stringBuilder % val;
+				}
+			};
+			using ImplStorage = StorageFor<Impl>;
+
 		private:
-			const char*			_name;
-			Joint_LogLevel		_logLevel;
-			bool				_nop;
-			StringBuilder		_stringBuilder;
+			bool			_nop;
+			ImplStorage		_impl;
 
 		public:
 			Stream(const char* name, Joint_LogLevel logLevel)
-				: _name(name), _logLevel(logLevel), _nop(logLevel < Joint_GetLogLevel())
-			{ }
+				: _nop(logLevel < Joint_GetLogLevel())
+			{
+				if (DETAIL_JOINT_UNLIKELY(!_nop))
+					_impl.Construct(name, logLevel);
+			}
 
 			Stream(Stream&& other)
-				: _name(other._name), _logLevel(other._logLevel), _nop(other._nop), _stringBuilder(std::move(other._stringBuilder))
-			{ other._nop = true; }
+				: _nop(other._nop)
+			{
+				if (DETAIL_JOINT_UNLIKELY(!_nop))
+					_impl.Construct(std::move(*other._impl));
+			}
 
 			~Stream()
 			{
-				if (!_nop)
-					Joint_Log(_logLevel, _name, "%s", _stringBuilder.ToString().c_str());
+				if (DETAIL_JOINT_UNLIKELY(!_nop))
+					_impl.Destruct();
 			}
 
 			template < typename T_ >
 			Stream& operator << (T_&& val)
 			{
-				if (!_nop)
-					_stringBuilder % val;
+				if (DETAIL_JOINT_UNLIKELY(!_nop))
+					_impl->Write(std::forward<T_>(val));
 				return *this;
 			}
 		};
