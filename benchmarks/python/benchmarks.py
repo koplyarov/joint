@@ -10,9 +10,13 @@ class Benchmarks(benchmarks_IBenchmarks):
     def NoParamsMethod(self):
         pass
 
-    def InvokeNativeNoParams(self, n):
+    def MeasureNativeNoParams(self, n):
         for i in range(n):
             self.NoParamsMethod()
+
+    def MeasureOutcomingNoParams(self, invokable, n):
+        for i in range(n):
+            invokable.NoParamsMethod()
 
 def GetBenchmarks(jointModule):
     return jointModule.CreateComponent(joint_IObject, Benchmarks, jointModule)

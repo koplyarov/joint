@@ -20,10 +20,17 @@ public:
 	{ }
 
 	void NoParamsMethod() { }
-	void InvokeNativeNoParams(int64_t n)
+
+	void MeasureNativeNoParams(int64_t n)
 	{
 		for (auto i = 0; i < n; ++i)
 			NoParamsFunc();
+	}
+
+	void MeasureOutcomingNoParams(benchmarks::IInvokable_Ptr invokable, int64_t n)
+	{
+		for (auto i = 0; i < n; ++i)
+			invokable->NoParamsMethod();
 	}
 };
 

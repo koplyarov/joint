@@ -21,7 +21,7 @@ namespace benchmarks
 	template < typename Desc_ >
 	class Benchmarks : public BenchmarksClass
 	{
-		using ModuleType = typename Desc_::Module;
+		using BenchmarkCtx = typename Desc_::BenchmarkCtx;
 
 	public:
 		Benchmarks()
@@ -34,11 +34,14 @@ namespace benchmarks
 		static void InvokeNoParams(BenchmarkContext& context, const std::string& binding, const std::string& module)
 		{
 			const auto n = context.GetIterationsCount();
-			ModuleType m(binding, module);
-			auto b = m.CreateBenchmarks();
+			BenchmarkCtx ctx(binding, module);
+			auto b = ctx.CreateBenchmarks();
 
 			context.Profile("invokeNoParams", n, [&]{ for (auto i = 0; i < n; ++i) b->NoParamsMethod(); });
-			context.Profile("invokeNoParams_native", n, [&]{ b->InvokeNativeNoParams(n); });
+			context.Profile("invokeNoParams_native", n, [&]{ b->MeasureNativeNoParams(n); });
+
+			auto invokable = ctx.CreateLocalInvokable();
+			context.Profile("invokeNoParams_outcoming", n, [&]{ b->MeasureOutcomingNoParams(invokable, n); });
 		}
 	};
 

@@ -2,6 +2,7 @@
 *.swo
 *.swp
 /.buildSettings
+/benchmarks/python/Benchmarks_adapters.py
 /build
 /test/python/Tests_adapters.py
 tags

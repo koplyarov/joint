@@ -1,5 +1,3 @@
-project(test-cpp)
-
 find_package(Threads)
 
 include_directories(${CMAKE_SOURCE_DIR})
