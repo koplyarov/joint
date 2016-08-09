@@ -27,22 +27,17 @@ namespace benchmarks
 		Benchmarks()
 			: BenchmarksClass("basic")
 		{
-			AddBenchmark<>("invokeNoParams", &Benchmarks::InvokeNoParams);
+			AddBenchmark<std::string, std::string>("invokeNoParams", &Benchmarks::InvokeNoParams, {"binding", "module"});
 		}
 
 	private:
-		static void InvokeNoParams(BenchmarkContext& context)
+		static void InvokeNoParams(BenchmarkContext& context, const std::string& binding, const std::string& module)
 		{
 			const auto n = context.GetIterationsCount();
-
-			ModuleType m("cpp", "benchmarks-cpp");
+			ModuleType m(binding, module);
 			auto b = m.CreateBenchmarks();
 
-			context.Profile("invokeNoParams", n, [&]{
-					for (auto i = 0; i < n; ++i)
-						b->NoParamsMethod();
-				});
-
+			context.Profile("invokeNoParams", n, [&]{ for (auto i = 0; i < n; ++i) b->NoParamsMethod(); });
 			context.Profile("invokeNoParams_native", n, [&]{ b->InvokeNativeNoParams(n); });
 		}
 	};
