@@ -7,6 +7,7 @@ if (BENCHMARKS_DEPENDENCIES_RESOLVED)
 
 	add_subdirectory(python)
 	add_subdirectory(cpp)
+	add_subdirectory(c)
 
 	include_directories(${CMAKE_CURRENT_BINARY_DIR})
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR})
