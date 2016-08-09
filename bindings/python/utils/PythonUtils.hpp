@@ -31,8 +31,8 @@
 #define NATIVE_THROW(Message_) do { throw std::runtime_error(Message_); } while (false)
 #define NATIVE_CHECK(Expr_, Message_) do { if (!(Expr_)) NATIVE_THROW(Message_); } while (false)
 
-#define PY_OBJ_CHECK(...) ::joint_python::CheckPyObject(__VA_ARGS__, #__VA_ARGS__ " failed", JOINT_SOURCE_LOCATION)
-#define PY_OBJ_CHECK_MSG(Expr_, Msg_) ::joint_python::CheckPyObject(Expr_, Msg_ , JOINT_SOURCE_LOCATION)
+#define PY_OBJ_CHECK(...) ::joint_python::CheckPyObject(__VA_ARGS__, []{ return #__VA_ARGS__ " failed"; }, JOINT_SOURCE_LOCATION)
+#define PY_OBJ_CHECK_MSG(Expr_, Msg_) ::joint_python::CheckPyObject(Expr_, [&]() -> std::string { return ::joint::devkit::StringBuilder() % (Msg_); }, JOINT_SOURCE_LOCATION)
 
 namespace joint_python
 {
@@ -40,12 +40,12 @@ namespace joint_python
 	std::string JOINT_PYTHON_CORE_API GetPythonErrorMessage();
 
 
-	template < typename PyObjType_, typename MsgType_ >
-	PyObjType_ CheckPyObject(PyObjType_ pyObj, MsgType_&& msg, const char* location)
+	template < typename PyObjType_, typename MsgGetter_ >
+	PyObjType_ CheckPyObject(PyObjType_ pyObj, MsgGetter_&& msgGetter, const char* location)
 	{
 		if (pyObj)
 			return std::move(pyObj);
-		throw std::runtime_error(joint::devkit::StringBuilder() % msg % " at " % location % "\n" % GetPythonErrorMessage());
+		throw std::runtime_error(joint::devkit::StringBuilder() % msgGetter() % " at " % location % "\n" % GetPythonErrorMessage());
 	}
 
 	inline bool AsBool(PyObject* obj)
