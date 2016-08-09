@@ -3,10 +3,13 @@
 #include "OtherTranslationUnit.hpp"
 
 
+using namespace joint;
+
+
 class Benchmarks
 {
 public:
-	typedef joint::TypeList<benchmarks::IBenchmarks>	JointInterfaces;
+	typedef TypeList<benchmarks::IBenchmarks>	JointInterfaces;
 
 private:
 	Joint_ModuleHandle   _module;
@@ -41,6 +44,6 @@ extern "C"
 	__declspec(dllexport)
 #endif
 	Joint_ObjectHandle GetBenchmarks(Joint_ModuleHandle module)
-	{ return joint::Export(joint::MakeComponent<joint::IObject, Benchmarks>(module, module)); }
+	{ return Export(MakeComponent<IObject, Benchmarks>(module, module)); }
 
 }
