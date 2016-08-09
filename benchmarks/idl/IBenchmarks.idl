@@ -9,6 +9,6 @@ package benchmarks
 	{
 		void NoParamsMethod();
 		void MeasureNativeNoParams(i64 n);
-		void MeasureOutcomingNoParams(IInvokable callback, i64 n);
+		void MeasureOutgoingNoParams(IInvokable callback, i64 n);
 	}
 }

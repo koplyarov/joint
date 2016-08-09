@@ -14,7 +14,7 @@ class Benchmarks(benchmarks_IBenchmarks):
         for i in range(n):
             self.NoParamsMethod()
 
-    def MeasureOutcomingNoParams(self, invokable, n):
+    def MeasureOutgoingNoParams(self, invokable, n):
         for i in range(n):
             invokable.NoParamsMethod()
 

@@ -41,7 +41,7 @@ namespace benchmarks
 			context.Profile("invokeNoParams_native", n, [&]{ b->MeasureNativeNoParams(n); });
 
 			auto invokable = ctx.CreateLocalInvokable();
-			context.Profile("invokeNoParams_outcoming", n, [&]{ b->MeasureOutcomingNoParams(invokable, n); });
+			context.Profile("invokeNoParams_outgoing", n, [&]{ b->MeasureOutgoingNoParams(invokable, n); });
 		}
 	};
 

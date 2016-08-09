@@ -24,7 +24,7 @@ Joint_Error Benchmarks_MeasureNativeNoParams(Benchmarks* self, int64_t n)
 	return JOINT_ERROR_NONE;
 }
 
-Joint_Error Benchmarks_MeasureOutcomingNoParams(Benchmarks* self, benchmarks_IInvokable invokable, int64_t n)
+Joint_Error Benchmarks_MeasureOutgoingNoParams(Benchmarks* self, benchmarks_IInvokable invokable, int64_t n)
 {
 	for (int64_t i = 0; i < n; ++i)
 		benchmarks_IInvokable_NoParamsMethod(invokable);
