@@ -42,5 +42,5 @@ Joint_ObjectHandle GetBenchmarks(Joint_ModuleHandle module)
 {
 	Benchmarks__wrapper* t = JointC_Wrap__Benchmarks();
 	Benchmarks_Init(&t->impl);
-	return JointC__Benchmarks__As__benchmarks_IBenchmarks(module, t);
+	return Benchmarks__as__benchmarks_IBenchmarks(module, t);
 }

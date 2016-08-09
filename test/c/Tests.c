@@ -122,7 +122,7 @@ Joint_Error Tests_ReturnNewObject(Tests* self, test_ISomeObject* result)
 {
 	SomeObject__wrapper* t = JointC_Wrap__SomeObject();
 	SomeObject_Init(&t->impl);
-	*result = (test_ISomeObject)JointC__SomeObject__As__test_ISomeObject(self->module, t);
+	*result = (test_ISomeObject)SomeObject__as__test_ISomeObject(self->module, t);
 	return JOINT_ERROR_NONE;
 }
 
@@ -138,7 +138,7 @@ Joint_Error Tests_CreateListenable(Tests* self, test_ILifetimeListenable* result
 {
 	LifetimeListenable__wrapper* t = JointC_Wrap__LifetimeListenable();
 	LifetimeListenable_Init(&t->impl);
-	*result = (test_ILifetimeListenable)JointC__LifetimeListenable__As__test_ILifetimeListenable(self->module, t);
+	*result = (test_ILifetimeListenable)LifetimeListenable__as__test_ILifetimeListenable(self->module, t);
 	return JOINT_ERROR_NONE;
 }
 
@@ -156,5 +156,5 @@ Joint_ObjectHandle GetTests(Joint_ModuleHandle module)
 {
 	Tests__wrapper* t = JointC_Wrap__Tests();
 	Tests_Init(&t->impl, module);
-	return JointC__Tests__As__test_IBasicTests(module, t);
+	return Tests__as__test_IBasicTests(module, t);
 }

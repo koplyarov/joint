@@ -32,7 +32,7 @@
 		&Detail__##ComponentImpl##__Cast, \
 		&Detail__##ComponentImpl##__##Ifc##__InvokeMethod, \
 	}; \
-	Joint_ObjectHandle JointC__##ComponentImpl##__As__##Ifc(Joint_ModuleHandle module, ComponentImpl##__wrapper* w) \
+	Joint_ObjectHandle ComponentImpl##__as__##Ifc(Joint_ModuleHandle module, ComponentImpl##__wrapper* w) \
 	{ \
 		Joint_ObjectHandle result = JOINT_NULL_HANDLE; \
 		JointC_Accessor* internal = &w->Ifc##__accessor; \
