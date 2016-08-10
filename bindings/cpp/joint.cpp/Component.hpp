@@ -208,7 +208,7 @@ namespace joint
 		JointC_Accessor* accessor = const_cast<JointC_Accessor*>(component.GetWrapperPtr()->template GetIntefaceAccessor<Interface_>());
 		Joint_ObjectHandle obj = JOINT_NULL_HANDLE;
 		JOINT_CALL( Joint_CreateObject(module, accessor, &obj) );
-		return Ptr<Interface_>(new Interface_(obj));
+		return Ptr<Interface_>(Interface_(obj));
 	}
 
 

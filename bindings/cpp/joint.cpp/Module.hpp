@@ -98,7 +98,7 @@ namespace joint
 		{
 			Joint_ObjectHandle obj;
 			JOINT_CALL( Joint_GetRootObject(_module, getterName.c_str(), &obj) );
-			return joint::Ptr<joint::IObject>(new joint::IObject(obj));
+			return joint::Ptr<joint::IObject>(joint::IObject(obj));
 		}
 
 		template < typename Interface_ >

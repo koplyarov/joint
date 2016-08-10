@@ -13,35 +13,35 @@ namespace joint
 	class Ptr
 	{
 	private:
-		T_*		_raw;
+		mutable T_		_raw;
 
 	public:
-		explicit Ptr(T_* raw = nullptr)
+		explicit Ptr(T_ raw = T_())
 			: _raw(raw)
 		{ }
 
 		Ptr(Ptr&& other)
 			: _raw(other._raw)
-		{ other._raw = nullptr; }
+		{ other._raw = T_(); }
 
 		Ptr(const Ptr& other)
 			: _raw(other._raw)
 		{
-			if (_raw)
-				_raw->_AddRef();
+			if (*this)
+				Joint_IncRefObject(_raw._GetObjectHandle());
 		}
 
 		~Ptr()
 		{
-			if (_raw)
-				_raw->_Release();
+			if (*this)
+				Joint_DecRefObject(_raw._GetObjectHandle());
 		}
 
 
 		void Swap(Ptr& other)
 		{ std::swap(_raw, other._raw); }
 
-		void Reset(T_* raw = nullptr)
+		void Reset(T_ raw = T_())
 		{
 			Ptr tmp(raw);
 			Swap(tmp);
@@ -56,23 +56,16 @@ namespace joint
 		}
 
 		explicit operator bool() const
-		{ return _raw != nullptr; }
+		{ return _raw._GetObjectHandle() != JOINT_NULL_HANDLE; }
 
-		T_* NewRef() const
-		{
-			if (_raw)
-				_raw->_AddRef();
-			return _raw;
-		}
+		//T_* Get() { return &_raw; }
+		T_* Get() const { return &_raw; }
 
-		T_* Get() const
-		{ return _raw; }
+		//T_* operator -> () { return &_raw; }
+		T_* operator -> () const { return &_raw; }
 
-		T_* operator -> () const
-		{ return _raw; }
-
-		T_& operator * () const
-		{ return &_raw; }
+		//T_& operator * () { return _raw; }
+		T_& operator * () const { return _raw; }
 	};
 
 
@@ -82,10 +75,9 @@ namespace joint
 		if (!src)
 			return Ptr<Dst_>();
 
-		detail::ProxyBase *proxy_base = src.Get();
 		Joint_ObjectHandle result_handle;
-		JOINT_CALL(Joint_CastObject(proxy_base->_GetObjectHandle(), Dst_::_GetInterfaceId(), &result_handle));
-		return Ptr<Dst_>(new Dst_(result_handle));
+		JOINT_CALL(Joint_CastObject(src->_GetObjectHandle(), Dst_::_GetInterfaceId(), &result_handle));
+		return Ptr<Dst_>(Dst_(result_handle));
 	}
 
 }

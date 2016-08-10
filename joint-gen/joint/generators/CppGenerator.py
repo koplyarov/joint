@@ -45,15 +45,19 @@ class CppGenerator:
         yield ''
 
     def _generateClasses(self, ifc):
-        yield 'class {} : public virtual ::joint::detail::ProxyBase{}'.format(ifc.name, ''.join(', public {}'.format(self._mangleType(b)) for b in ifc.bases))
+        yield 'class {}'.format(ifc.name)
         yield '{'
+        yield 'private:'
+        yield '\tJoint_ObjectHandle _obj;'
+        yield ''
         yield 'public:'
+        yield '\ttypedef ::joint::TypeList<{}> BaseInterfaces;'.format(', '.join(self._mangleType(b) for b in ifc.bases))
         yield '\ttemplate <typename ComponentImpl_> using Accessor = {}_accessor<ComponentImpl_>;'.format(ifc.name)
         yield ''
-        yield '\t{}(Joint_ObjectHandle obj)'.format(ifc.name);
-        yield '\t\t: ::joint::detail::ProxyBase(obj){}'.format(''.join(', {}(obj)'.format(self._mangleType(b)) for b in ifc.bases))
-        yield '\t{ }'
+        yield '\t{}() : _obj(JOINT_NULL_HANDLE) {{ }}'.format(ifc.name);
+        yield '\t{}(Joint_ObjectHandle obj) : _obj(obj) {{ }}'.format(ifc.name);
         yield ''
+        yield '\tJoint_ObjectHandle _GetObjectHandle() const { return _obj; }'
         yield '\tstatic const char* _GetInterfaceId() {{ return "{}"; }}'.format(ifc.fullname)
         yield ''
         for m in ifc.methods:
@@ -130,7 +134,7 @@ class CppGenerator:
             for p in m.params:
                 if isinstance(p.type, Interface):
                     yield '\t\t\tJoint_IncRefObject(params[{i}].value.{v});'.format(i=p.index, v=p.type.variantName)
-                    yield '\t\t\t{t} p{i}(new {w}(params[{i}].value.{v}));'.format(t=self._toCppType(p.type), w=self._mangleType(p.type), i=p.index, v=p.type.variantName)
+                    yield '\t\t\t{t} p{i}({w}(params[{i}].value.{v}));'.format(t=self._toCppType(p.type), w=self._mangleType(p.type), i=p.index, v=p.type.variantName)
                 else:
                     yield '\t\t\t{t} p{i}(params[{i}].value.{v});'.format(t=self._toCppType(p.type), i=p.index, v=p.type.variantName)
             method_call = 'componentImpl->{}({})'.format(m.name, ', '.join('p{}'.format(p.index) for p in m.params))
@@ -177,7 +181,7 @@ class CppGenerator:
             else:
                 return '\treturn _joint_internal_ret_val.variant.value.{} != 0;'.format(type.variantName)
         else:
-            return '\treturn {}(new {}(_joint_internal_ret_val.variant.value.{}));'.format(self._toCppType(type), self._mangleType(type), type.variantName)
+            return '\treturn {}({}(_joint_internal_ret_val.variant.value.{}));'.format(self._toCppType(type), self._mangleType(type), type.variantName)
 
     def _toCppType(self, type):
         if isinstance(type, BuiltinType):
