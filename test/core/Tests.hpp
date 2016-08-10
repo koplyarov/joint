@@ -12,10 +12,13 @@
 
 
 #define TEST_REPORT_SUCCESS(Message_) \
-		{ }
+		do { } while (false)
 
 #define TEST_REPORT_ERROR(Message_) \
 		::test::ScopedTest::GetCurrentContext().AssertionFailed(TEST_LOCATION, Message_)
+
+#define TEST_REPORT_WARNING(Message_) \
+		::test::ScopedTest::GetCurrentContext().ReportWarning(TEST_LOCATION, Message_)
 
 
 #define TEST_THROWS_ANYTHING(...) \

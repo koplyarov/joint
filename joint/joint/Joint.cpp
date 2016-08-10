@@ -124,6 +124,7 @@ extern "C"
 		switch (err)
 		{
 		DETAIL_JOINT_ERR_TO_STRING(JOINT_ERROR_NONE);
+		DETAIL_JOINT_ERR_TO_STRING(JOINT_ERROR_CAST_FAILED);
 		DETAIL_JOINT_ERR_TO_STRING(JOINT_ERROR_EXCEPTION);
 		DETAIL_JOINT_ERR_TO_STRING(JOINT_ERROR_GENERIC);
 		DETAIL_JOINT_ERR_TO_STRING(JOINT_ERROR_NO_SUCH_BINDING);
@@ -406,7 +407,17 @@ extern "C"
 
 		Joint_ObjectHandleInternal internal = NULL;
 		Joint_Error ret = handle->module->binding->desc.castObject(handle->module->binding->userData, handle->module->internal, handle->internal, interfaceId, &internal);
-		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+		if (ret != JOINT_ERROR_NONE)
+		{
+			if (ret == JOINT_ERROR_CAST_FAILED)
+			{
+				*outHandle = JOINT_NULL_HANDLE;
+				return ret;
+			}
+
+			JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+		}
+
 		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
 		*outHandle = new Joint_Object(internal, handle->module);
 

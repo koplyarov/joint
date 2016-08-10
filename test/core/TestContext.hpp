@@ -25,6 +25,7 @@ namespace test
 		~TestContext();
 
 		void AssertionFailed(const Location& location, const std::string& message);
+		void ReportWarning(const Location& location, const std::string& message);
 	};
 
 }

@@ -206,7 +206,9 @@ namespace binding
 		PyObjectHolder py_accessor = reinterpret_cast<Object*>(obj)->GetObject();
 		PyObjectHolder py_obj(PY_OBJ_CHECK(PyObject_GetAttrString(py_accessor, "obj")));
 		PyObjectHolder py_obj_type(PyObject_Type(py_obj));
-		PyObjectHolder base_type = PY_OBJ_CHECK_MSG(FindBaseById(py_obj_type, interfaceId), std::string("Could not cast object to ") + interfaceId);
+		PyObjectHolder base_type = FindBaseById(py_obj_type, interfaceId);
+		if (!base_type)
+			return JOINT_ERROR_CAST_FAILED;
 
 		PyObjectHolder base_accessor_type(PY_OBJ_CHECK(PyObject_GetAttrString(base_type, "accessor")));
 

@@ -23,6 +23,11 @@ struct TestCtx
 TEST_DEFINE_TEST(TestCtx, BasicTests)
 {
 	auto t = Module.GetRootObject<test::IBasicTests>("GetTests");
+	if (!t)
+	{
+		TEST_REPORT_ERROR("BasicTests not implemented!");
+		return;
+	}
 
 	TEST_EQUALS(t->AddI8(2, 12), (int8_t)14);
 	TEST_EQUALS(t->AddU8(2, 12), (uint8_t)14);
@@ -59,6 +64,11 @@ public:
 TEST_DEFINE_TEST(TestCtx, ObjectTests)
 {
 	auto t = Module.GetRootObject<test::IObjectTests>("GetTests");
+	if (!t)
+	{
+		TEST_REPORT_ERROR("ObjectTests not implemented!");
+		return;
+	}
 
 	t->ReturnNewObject()->Method();
 
@@ -91,6 +101,11 @@ public:
 TEST_DEFINE_TEST(TestCtx, LifetimeTests)
 {
 	auto t = Module.GetRootObject<test::ILifetimeTests>("GetTests");
+	if (!t)
+	{
+		TEST_REPORT_ERROR("LifetimeTests not implemented!");
+		return;
+	}
 
 	auto listenable = t->CreateListenable();
 	auto listener = joint::MakeComponentWrapper<LifetimeListener>();

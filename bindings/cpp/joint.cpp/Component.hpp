@@ -126,7 +126,10 @@ namespace joint
 		static Joint_Error CastObject(void* component, Joint_InterfaceId interfaceId, const JointC_Accessor** outAccessor)
 		{
 			ComponentWrapper* inst = reinterpret_cast<ComponentWrapper*>(component);
-			return inst->_accessors.GetAccessorById(interfaceId, outAccessor) ? JOINT_ERROR_NONE : JOINT_ERROR_GENERIC;
+			Joint_Error ret = inst->_accessors.GetAccessorById(interfaceId, outAccessor) ? JOINT_ERROR_NONE : JOINT_ERROR_CAST_FAILED;
+			if (ret == JOINT_ERROR_NONE)
+				++inst->_refCount;
+			return ret;
 		}
 
 		template < typename Accessor_ >

@@ -92,7 +92,6 @@ namespace binding
 		auto accessor = reinterpret_cast<JointC_Accessor*>(obj);
 		const JointC_Accessor* result = nullptr;
 		Joint_Error ret = accessor->VTable->CastObject(accessor->Component, interfaceId, &result);
-		accessor->VTable->AddRef(accessor->Component);
 		*outRetValue = const_cast<JointC_Accessor*>(result);
 		return ret;
 

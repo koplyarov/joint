@@ -82,7 +82,8 @@
 		if (0) ;\
 		JOINT_C_PP_FOREACH(DETAIL_JOINT_C_CAST, ~, __VA_ARGS__) \
 		else \
-			return JOINT_ERROR_NOT_IMPLEMENTED; \
+			return JOINT_ERROR_CAST_FAILED; \
+		++w->refCount; \
 		return JOINT_ERROR_NONE; \
 	} \
 	\

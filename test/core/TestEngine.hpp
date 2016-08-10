@@ -18,6 +18,7 @@ namespace test
 		virtual void RunningTest(const std::string& testName, const Location& location) = 0;
 		virtual void TestSucceeded(const std::string& testName, const Location& location) = 0;
 		virtual void TestFailed(const std::string& testName, const Location& location) = 0;
+		virtual void ReportWarning(const std::string& testName, const Location& location, const std::string& message) = 0;
 		virtual void AssertionFailed(const std::string& testName, const Location& location, const std::string& message) = 0;
 	};
 	using ITestResultsListenerPtr = std::unique_ptr<ITestResultsListener>;

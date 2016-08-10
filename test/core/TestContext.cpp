@@ -18,6 +18,11 @@ namespace test
 			_engine->GetListener()->TestSucceeded(_testName, _location);
 	}
 
+	void TestContext::ReportWarning(const Location& location, const std::string& message)
+	{
+		_engine->GetListener()->ReportWarning(_testName, location, message);
+	}
+
 	void TestContext::AssertionFailed(const Location& location, const std::string& message)
 	{
 		_engine->GetListener()->AssertionFailed(_testName, location, message);

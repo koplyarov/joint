@@ -23,6 +23,7 @@ namespace test
 		std::mutex		_mutex;
 		int				_succeeded = 0;
 		int				_failed = 0;
+		int				_warnings = 0;
 		bool			_hasTests = false;
 
 	public:
@@ -31,8 +32,14 @@ namespace test
 			if (!_hasTests)
 				return;
 
-			std::string color = EscapeColor(Bright, (_failed == 0) ? Green : Red);
-			printf("%s%d tests succeeded, %d failed%s\n", color.c_str(), _succeeded, _failed, ResetColor().c_str());
+			std::string color = EscapeColor(Bright, (_failed == 0) ? (_warnings == 0 ? Green : Yellow) : Red);
+			printf("%s", color.c_str());
+			printf("%d tests succeeded", _succeeded);
+			if (_failed > 0)
+				printf(", %d failed", _failed);
+			if (_warnings > 0)
+				printf(", %d warnings", _warnings);
+			printf("%s\n", ResetColor().c_str());
 		}
 
 		virtual void RunningTest(const std::string& testName, const Location& location)
@@ -57,6 +64,18 @@ namespace test
 				testName.c_str(),
 				ResetColor().c_str());
 			++_failed;
+		}
+
+		virtual void ReportWarning(const std::string& testName, const Location& location, const std::string& message)
+		{
+			std::lock_guard<std::mutex> l(_mutex);
+			printf("%s%s: Warning in test %s: \n%s%s\n",
+				EscapeColor(Bright, Yellow).c_str(),
+				location.ToString().c_str(),
+				testName.c_str(),
+				message.c_str(),
+				ResetColor().c_str());
+			++_warnings;
 		}
 
 		virtual void AssertionFailed(const std::string& testName, const Location& location, const std::string& message)
