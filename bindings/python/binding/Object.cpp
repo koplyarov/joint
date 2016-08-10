@@ -47,9 +47,17 @@ namespace binding
 				case JOINT_TYPE_UTF8: py_p.Reset(PyUnicode_FromString(p.value.utf8)); break;
 
 				case JOINT_TYPE_OBJ:
-					py_p.Reset(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&pyjoint::Object_type, NULL)));
-					PYTHON_CHECK(Joint_IncRefObject(p.value.obj) == JOINT_ERROR_NONE, "Joint_IncRefObject failed!");
-					reinterpret_cast<pyjoint::Object*>(py_p.Get())->handle = p.value.obj;
+					if (p.value.obj != JOINT_NULL_HANDLE)
+					{
+						py_p.Reset(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&pyjoint::Object_type, NULL)));
+						PYTHON_CHECK(Joint_IncRefObject(p.value.obj) == JOINT_ERROR_NONE, "Joint_IncRefObject failed!");
+						reinterpret_cast<pyjoint::Object*>(py_p.Get())->handle = p.value.obj;
+					}
+					else
+					{
+						Py_INCREF(Py_None);
+						py_p.Reset(Py_None);
+					}
 					break;
 				default:
 					throw std::runtime_error("Unknown parameter type");

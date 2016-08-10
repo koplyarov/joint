@@ -122,6 +122,9 @@ namespace pyjoint
 			PyObject* py_param = PyTuple_GetItem(py_param_tuple, 1);
 			switch (v.type)
 			{
+			case JOINT_TYPE_BOOL:
+				v.value.b = PyObject_IsTrue(py_param);
+				break;
 			case JOINT_TYPE_I32:
 				v.value.i32 = FromPyLong<int32_t>(py_param);
 				break;
@@ -130,10 +133,10 @@ namespace pyjoint
 				v.value.utf8 = str_params.back().GetContent();
 				break;
 			case JOINT_TYPE_OBJ:
-				v.value.obj = CastPyObject<Object>(py_param, &Object_type)->handle;
+				v.value.obj = (py_param != Py_None) ? CastPyObject<Object>(py_param, &Object_type)->handle : JOINT_NULL_HANDLE;
 				break;
 			default:
-				NATIVE_THROW("Unknown parameter type");
+				NATIVE_THROW("Unknown parameter type: " + std::to_string(v.type));
 			}
 
 			params.push_back(v);
@@ -155,6 +158,9 @@ namespace pyjoint
 		case JOINT_TYPE_VOID:
 			Py_RETURN_NONE;
 			break;
+		case JOINT_TYPE_BOOL:
+			result.Reset(PyBool_FromLong(ret_value.variant.value.b));
+			break;
 		case JOINT_TYPE_I32:
 			result.Reset(PyLong_FromLong(ret_value.variant.value.i32));
 			break;
@@ -162,8 +168,16 @@ namespace pyjoint
 			result.Reset(PyUnicode_FromString(ret_value.variant.value.utf8));
 			break;
 		case JOINT_TYPE_OBJ:
-			result.Reset(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&Object_type, NULL)));
-			reinterpret_cast<Object*>(result.Get())->handle = ret_value.variant.value.obj;
+			if (ret_value.variant.value.obj != JOINT_NULL_HANDLE)
+			{
+				result.Reset(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&Object_type, NULL)));
+				reinterpret_cast<Object*>(result.Get())->handle = ret_value.variant.value.obj;
+			}
+			else
+			{
+				Py_INCREF(Py_None);
+				result.Reset(Py_None);
+			}
 			break;
 		case JOINT_TYPE_EXCEPTION:
 			{

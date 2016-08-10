@@ -41,14 +41,16 @@ Joint_Error LifetimeListenable_Deinit(LifetimeListenable* self)
 	if (self->listener)
 	{
 		test_ILifetimeListener_OnDestroyed(self->listener);
-		Joint_DecRefObject((Joint_ObjectHandle)self->listener);
+		return Joint_DecRefObject((Joint_ObjectHandle)self->listener);
 	}
 	return JOINT_ERROR_NONE;
 }
 
 Joint_Error LifetimeListenable_SetListener(LifetimeListenable* self, test_ILifetimeListener l)
 {
-	Joint_IncRefObject((Joint_ObjectHandle)l);
+	Joint_Error ret = Joint_IncRefObject((Joint_ObjectHandle)l);
+	if (ret != JOINT_ERROR_NONE)
+		return ret;
 	self->listener = l;
 	return JOINT_ERROR_NONE;
 }
@@ -115,6 +117,41 @@ Joint_Error Tests_And(Tests* self, JOINT_BOOL l, JOINT_BOOL r, JOINT_BOOL* resul
 { *result = l && r; return JOINT_ERROR_NONE; }
 
 
+Joint_Error Tests_ReturnNull(Tests* self, test_ISomeObject* result)
+{ *result = NULL; return JOINT_ERROR_NONE; }
+
+Joint_Error Tests_CheckNotNull(Tests* self, test_ISomeObject o, JOINT_BOOL* result)
+{
+	*result = o != NULL;
+	return JOINT_ERROR_NONE;
+}
+
+Joint_Error Tests_ReverseNullChecks(Tests* self, test_INullChecksCallback cb, JOINT_BOOL* result)
+{
+	Joint_Error ret = JOINT_ERROR_NONE;
+	test_ISomeObject o = NULL;
+	JOINT_BOOL tmp_bool = JOINT_FALSE;
+
+	*result = JOINT_TRUE;
+
+	ret = test_INullChecksCallback_ReturnNull(cb, &o); if (ret != JOINT_ERROR_NONE) return ret;
+	*result = *result && (o == NULL);
+	ret = Joint_DecRefObject((Joint_ObjectHandle)o); if (ret != JOINT_ERROR_NONE) return ret;
+
+	ret = test_INullChecksCallback_ReturnNotNull(cb, &o); if (ret != JOINT_ERROR_NONE) return ret;
+	*result = *result && (o != NULL);
+
+	ret = test_INullChecksCallback_ValidateNotNull(cb, NULL, JOINT_FALSE, &tmp_bool); if (ret != JOINT_ERROR_NONE) return ret;
+	*result = *result && tmp_bool;
+
+	ret = test_INullChecksCallback_ValidateNotNull(cb, o, JOINT_TRUE, &tmp_bool); if (ret != JOINT_ERROR_NONE) return ret;
+	*result = *result && tmp_bool;
+
+	ret = Joint_DecRefObject((Joint_ObjectHandle)o); if (ret != JOINT_ERROR_NONE) return ret;
+
+	return ret;
+}
+
 Joint_Error Tests_InvokeObjectMethod(Tests* self, test_ISomeObject o)
 { return test_ISomeObject_Method(o); }
 
@@ -128,7 +165,9 @@ Joint_Error Tests_ReturnNewObject(Tests* self, test_ISomeObject* result)
 
 Joint_Error Tests_ReturnSameObject(Tests* self, test_ISomeObject o, test_ISomeObject* result)
 {
-	Joint_IncRefObject((Joint_ObjectHandle)o);
+	Joint_Error ret = Joint_IncRefObject((Joint_ObjectHandle)o);
+	if (ret != JOINT_ERROR_NONE)
+		return ret;
 	*result = o;
 	return JOINT_ERROR_NONE;
 }

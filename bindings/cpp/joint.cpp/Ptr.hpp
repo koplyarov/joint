@@ -28,13 +28,17 @@ namespace joint
 			: _raw(other._raw)
 		{
 			if (*this)
-				Joint_IncRefObject(_raw._GetObjectHandle());
+				JOINT_CALL(Joint_IncRefObject(_raw._GetObjectHandle()));
 		}
 
 		~Ptr()
 		{
 			if (*this)
-				Joint_DecRefObject(_raw._GetObjectHandle());
+			{
+				Joint_Error ret = Joint_DecRefObject(_raw._GetObjectHandle());
+				if (ret != JOINT_ERROR_NONE)
+					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C++", "Joint_DecRefObject failed: %s", Joint_ErrorToString(ret));
+			}
 		}
 
 

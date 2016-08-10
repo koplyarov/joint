@@ -133,7 +133,7 @@ class CppGenerator:
             yield ''
             for p in m.params:
                 if isinstance(p.type, Interface):
-                    yield '\t\t\tJoint_IncRefObject(params[{i}].value.{v});'.format(i=p.index, v=p.type.variantName)
+                    yield '\t\t\tJOINT_CALL(Joint_IncRefObject(params[{i}].value.{v}));'.format(i=p.index, v=p.type.variantName)
                     yield '\t\t\t{t} p{i}({w}(params[{i}].value.{v}));'.format(t=self._toCppType(p.type), w=self._mangleType(p.type), i=p.index, v=p.type.variantName)
                 else:
                     yield '\t\t\t{t} p{i}(params[{i}].value.{v});'.format(t=self._toCppType(p.type), i=p.index, v=p.type.variantName)
@@ -141,7 +141,9 @@ class CppGenerator:
             if m.retType.name != 'void':
                 yield '\t\t\t{} result({});'.format(self._toCppType(m.retType), method_call)
                 if isinstance(m.retType, Interface):
-                    yield '\t\t\tJoint_IncRefObject(result->_GetObjectHandle());'
+                    yield '\t\t\tJoint_Error ret = Joint_IncRefObject(result->_GetObjectHandle());'
+                    yield '\t\t\tif (ret != JOINT_ERROR_NONE)'
+                    yield '\t\t\t\treturn ret;'
                 if m.retType.name != 'string':
                     yield '\t\t\toutRetValue->variant.value.{} = {};'.format(m.retType.variantName, self._toCppValue('result', m.retType))
                 else:
@@ -167,7 +169,7 @@ class CppGenerator:
             else:
                 return varName
         elif isinstance(type, Interface):
-            return '{}.Get()->_GetObjectHandle()'.format(varName)
+            return '{}->_GetObjectHandle()'.format(varName)
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 

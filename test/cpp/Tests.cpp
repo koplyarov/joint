@@ -70,6 +70,23 @@ public:
 	std::string Concat(const std::string& l, const std::string& r)
 	{ return l + r; }
 
+
+	test::ISomeObject_Ptr ReturnNull()
+	{ return test::ISomeObject_Ptr(); }
+
+	bool CheckNotNull(const test::ISomeObject_Ptr& o)
+	{ return (bool)o; }
+
+	bool ReverseNullChecks(const test::INullChecksCallback_Ptr& cb)
+	{
+		test::ISomeObject_Ptr o = cb->ReturnNotNull();
+		return
+			(bool)cb->ReturnNull() == false &&
+			(bool)o == true &&
+			cb->ValidateNotNull(test::ISomeObject_Ptr(), false) &&
+			cb->ValidateNotNull(o, true);
+	}
+
 	void InvokeObjectMethod(const test::ISomeObject_Ptr& o)
 	{ o->Method(); }
 

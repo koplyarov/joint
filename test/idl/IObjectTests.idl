@@ -6,8 +6,19 @@ package test
 		i32 GetInvokationsCount();
 	}
 
+	interface INullChecksCallback
+	{
+		ISomeObject ReturnNull();
+		ISomeObject ReturnNotNull();
+		bool ValidateNotNull(ISomeObject o, bool notNull);
+	}
+
 	interface IObjectTests
 	{
+		ISomeObject ReturnNull();
+		bool CheckNotNull(ISomeObject o);
+		bool ReverseNullChecks(INullChecksCallback cb);
+
 		ISomeObject ReturnNewObject();
 		ISomeObject ReturnSameObject(ISomeObject o);
 		void InvokeObjectMethod(ISomeObject o);

@@ -366,7 +366,9 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		if (handle == JOINT_NULL_HANDLE)
+			return JOINT_ERROR_NONE;
+
 		JOINT_CHECK(handle->refCount.load(std::memory_order_relaxed) > 0, JOINT_ERROR_INVALID_PARAMETER);
 		++handle->refCount;
 
@@ -378,7 +380,9 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		if (handle == JOINT_NULL_HANDLE)
+			return JOINT_ERROR_NONE;
+
 		JOINT_CHECK(handle->refCount.load(std::memory_order_relaxed) > 0, JOINT_ERROR_INVALID_PARAMETER);
 		auto refs = --handle->refCount;
 		if (refs == 0)

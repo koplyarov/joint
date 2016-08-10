@@ -48,7 +48,13 @@ class PythonGenerator:
 
     def _wrapParameter(self, p):
         if isinstance(p.type, Interface):
-            return '{}_proxy({})'.format(self._mangleType(p.type), p.name)
+            return 'None if {n} is None else {t}_proxy({n})'.format(t=self._mangleType(p.type), n=p.name)
+        else:
+            return p.name
+
+    def _unwrapParameter(self, p):
+        if isinstance(p.type, Interface):
+            return 'None if {n} is None else {n}.obj'.format(t=self._mangleType(p.type), n=p.name)
         else:
             return p.name
 
@@ -66,11 +72,12 @@ class PythonGenerator:
                 continue
             yield ''
             yield '\tdef {}(self{}):'.format(m.name, ''.join(', {}'.format(p.name) for p in m.params))
-            method_invokation = 'self.InvokeMethod({}, {}{})'.format( m.index, m.retType.index, ''.join([ ', ({}, {})'.format(p.type.index, p.name) for p in m.params]))
+            method_invokation = 'self.InvokeMethod({}, {}{})'.format( m.index, m.retType.index, ''.join([ ', ({}, {})'.format(p.type.index, self._unwrapParameter(p)) for p in m.params]))
             if m.retType.name == 'void':
                 yield '\t\t{}'.format(method_invokation)
             elif m.retType.variantName == 'obj':
-                yield '\t\treturn {}_proxy({})'.format(self._mangleType(m.retType), method_invokation)
+                yield '\t\t_raw_res = {}'.format(method_invokation)
+                yield '\t\treturn None if _raw_res is None else {}_proxy(_raw_res)'.format(self._mangleType(m.retType))
             else:
                 yield '\t\treturn {}'.format(method_invokation)
 

@@ -138,10 +138,15 @@ namespace binding
 			break;
 		case JOINT_TYPE_OBJ:
 			{
-				PyObjectHolder py_joint_obj(PY_OBJ_CHECK(PyObject_GetAttrString(py_res, "obj")));
-				outRetValue->variant.value.obj = CastPyObject<pyjoint::Object>(py_joint_obj, &pyjoint::Object_type)->handle;
-				Joint_Error ret = Joint_IncRefObject(outRetValue->variant.value.obj);
-				JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+				if (py_res.Get() != Py_None)
+				{
+					PyObjectHolder py_joint_obj(PY_OBJ_CHECK(PyObject_GetAttrString(py_res, "obj")));
+					outRetValue->variant.value.obj = CastPyObject<pyjoint::Object>(py_joint_obj, &pyjoint::Object_type)->handle;
+					Joint_Error ret = Joint_IncRefObject(outRetValue->variant.value.obj);
+					JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+				}
+				else
+					outRetValue->variant.value.obj = JOINT_NULL_HANDLE;
 			}
 			break;
 		default:
