@@ -13,8 +13,16 @@
 | Outgoing call | ${basic.invokeNoParams.joint(binding:cpp,module:benchmarks-c)[invokeNoParams_outgoing]} |
 
 # Python
+## joint
 |               | time, ns |
 | ------------- | -------: |
 | Native call   | ${basic.invokeNoParams.joint(binding:python,module:benchmarks)[invokeNoParams_native]} |
 | Incoming call | ${basic.invokeNoParams.joint(binding:python,module:benchmarks)[invokeNoParams]} |
 | Outgoing call | ${basic.invokeNoParams.joint(binding:python,module:benchmarks)[invokeNoParams_outgoing]} |
+
+## swig
+|               | time, ns |
+| ------------- | -------: |
+| Native call   | ${basic.invokeNoParams.swig(binding:python,module:swig_benchmarks)[invokeNoParams_native]} |
+| Incoming call | ${basic.invokeNoParams.swig(binding:python,module:swig_benchmarks)[invokeNoParams]} |
+| Outgoing call | ${basic.invokeNoParams.swig(binding:python,module:swig_benchmarks)[invokeNoParams_outgoing]} |

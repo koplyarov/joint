@@ -15,6 +15,7 @@
 
 #include <Benchmarks.hpp>
 #include <descriptors/joint.hpp>
+#include <descriptors/swig.hpp>
 
 
 int main(int argc, char* argv[])
@@ -25,6 +26,7 @@ int main(int argc, char* argv[])
 
 		BenchmarkSuite s;
 		s.RegisterBenchmarks<Benchmarks, descriptors::joint::Desc>();
+		s.RegisterBenchmarks<Benchmarks, descriptors::swig::Desc>();
 
 		return BenchmarkApp(s).Run(argc, argv);
 	}

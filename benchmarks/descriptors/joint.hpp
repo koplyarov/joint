@@ -1,5 +1,5 @@
-#ifndef SRC_BENCHMARKS_DESCRIPTORS_SIGNALS_WIGWAG_HPP
-#define SRC_BENCHMARKS_DESCRIPTORS_SIGNALS_WIGWAG_HPP
+#ifndef BENCHMARKS_DESCRIPTORS_JOINT_HPP
+#define BENCHMARKS_DESCRIPTORS_JOINT_HPP
 
 
 #include <Benchmarks_adapters.hpp>
@@ -29,8 +29,6 @@ namespace joint
 			BenchmarkCtx(const std::string& bindingName, const std::string& moduleName)
 				: _module(_ctx.LoadModule(bindingName, moduleName))
 			{ }
-
-			::joint::Context& GetContext() { return _ctx; }
 
 			benchmarks::IBenchmarks_Ptr CreateBenchmarks() const
 			{ return _module.GetRootObject<benchmarks::IBenchmarks>("GetBenchmarks"); }
