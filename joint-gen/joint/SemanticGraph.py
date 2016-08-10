@@ -31,6 +31,7 @@ class Interface:
         self.fullname = '{}.{}'.format('.'.join(packageNameList), name)
         self.methods = []
         self.bases = []
+        self.needRelease = True
 
 
 class Package:
@@ -50,11 +51,15 @@ class Package:
 
 
 class BuiltinTypeCategory:
-    void = 1
-    int = 2
-    bool = 3
-    float = 4
-    string = 5
+    class BuiltinTypeCategoryValue:
+        def __init__(self, needRelease):
+            self.needRelease = needRelease
+
+    void = BuiltinTypeCategoryValue(False)
+    int = BuiltinTypeCategoryValue(False)
+    bool = BuiltinTypeCategoryValue(False)
+    float = BuiltinTypeCategoryValue(False)
+    string = BuiltinTypeCategoryValue(True)
 
 
 class BuiltinType:
@@ -63,6 +68,7 @@ class BuiltinType:
         self.variantName = variantName
         self.index = index
         self.category = category
+        self.needRelease = category.needRelease
         self.signed = signed
         self.bits = bits
 

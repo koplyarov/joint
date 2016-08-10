@@ -19,6 +19,20 @@ namespace detail
 				throw std::runtime_error(std::string(#__VA_ARGS__ " failed: ") + Joint_ErrorToString(ret)); \
 		} while (false)
 
+#define JOINT_METHOD_CALL(...) \
+		do { \
+			Joint_Error ret = (__VA_ARGS__); \
+			if (ret != JOINT_ERROR_NONE) \
+			{ \
+				if (ret == JOINT_ERROR_EXCEPTION) \
+				{ \
+					::joint::detail::RetValueGuard _joint_internal_rvg(_joint_internal_ret_val); \
+					JOINT_CHECK_RETURN_VALUE(1, _joint_internal_ret_val); \
+				} \
+				throw std::runtime_error(std::string(#__VA_ARGS__ " failed: ") + Joint_ErrorToString(ret)); \
+			} \
+		} while (false)
+
 #define JOINT_CHECK_RETURN_VALUE(RetType_, RetValue_) \
 		do { \
 			if ((RetValue_).variant.type == JOINT_TYPE_EXCEPTION) \

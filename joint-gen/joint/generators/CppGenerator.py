@@ -108,9 +108,9 @@ class CppGenerator:
             for p in m.params:
                 yield '\tparams[{}].value.{} = {};'.format(p.index, p.type.variantName, self._toCppParamGetter(p))
                 yield '\tparams[{}].type = (Joint_Type){};'.format(p.index, p.type.index)
-        yield '\tJOINT_CALL( Joint_InvokeMethod(_obj, {}, {}, {}, (Joint_Type){}, &_joint_internal_ret_val) );'.format(m.index, 'params' if m.params else 'nullptr', len(m.params), m.retType.index)
-        yield '\t::joint::detail::RetValueGuard _joint_internal_rvg(_joint_internal_ret_val);'
-        yield '\tJOINT_CHECK_RETURN_VALUE({}, _joint_internal_ret_val);'.format(m.retType.index)
+        yield '\tJOINT_METHOD_CALL( Joint_InvokeMethod(_obj, {}, {}, {}, (Joint_Type){}, &_joint_internal_ret_val) );'.format(m.index, 'params' if m.params else 'nullptr', len(m.params), m.retType.index)
+        if m.retType.needRelease:
+            yield '\t::joint::detail::RetValueGuard _joint_internal_rvg(_joint_internal_ret_val);'
         if m.retType.name != 'void':
             yield self._wrapRetValue(m.retType)
         yield '}'
