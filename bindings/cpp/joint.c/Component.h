@@ -48,7 +48,7 @@
 		w->Ifc##__accessor.VTable = &Detail__##ComponentImpl##__accessor_vtable__##Ifc; \
 
 #define DETAIL_JOINT_C_VALIDATE_IFC(Ifc, ...) \
-	extern int QWEQWEWQE_##Ifc[sizeof(Ifc)]; \
+	extern int _Detail_Joint_C_interface_validity_checker__##Ifc[sizeof(Ifc)]; \
 
 #define JOINT_C_COMPONENT(C, ...) \
 	JOINT_C_PP_FOREACH(DETAIL_JOINT_C_VALIDATE_IFC, ~, __VA_ARGS__) \

@@ -73,9 +73,15 @@ class CGenerator:
                 yield '\tparams[{}].value.{} = {};'.format(p.index, p.type.variantName, self._toCParamGetter(p))
                 yield '\tparams[{}].type = (Joint_Type){};'.format(p.index, p.type.index)
         yield '\tJoint_Error _ret = Joint_InvokeMethod((Joint_ObjectHandle)_obj, {}, {}, {}, (Joint_Type){}, &_joint_internal_ret_val);'.format(m.index, 'params' if m.params else 'NULL', len(m.params), m.retType.index)
-        #yield '\t::joint::detail::RetValueGuard _joint_internal_rvg(_joint_internal_ret_val);'
-        #yield '\tJOINT_CHECK_RETURN_VALUE({}, _joint_internal_ret_val);'.format(m.retType.index)
-        if m.retType.name != 'void':
+        yield '\tif (_ret != JOINT_ERROR_NONE)'
+        yield '\t\treturn _ret;'
+        if m.retType.name == 'string':
+            result_var = '_joint_internal_ret_val.variant.value.utf8'
+            yield '\tchar* _tmpResult = (char*)malloc(strlen({}) + 1);'.format(result_var)
+            yield '\tstrcpy(_tmpResult, {});'.format(result_var)
+            yield '\t_ret = Joint_ReleaseRetValue(_joint_internal_ret_val);'
+            yield '\t*_outResult = _tmpResult;'
+        elif m.retType.name != 'void':
             yield self._wrapRetValue(m.retType)
         yield '\treturn _ret;'
         yield '}'

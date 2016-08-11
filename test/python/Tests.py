@@ -43,33 +43,31 @@ class Tests(test_IObjectTests, test_IBasicTests, test_ILifetimeTests):
 
     def Throw(self):
         raise RuntimeError('Requested exception')
-    def AddU8(self, l, r):
-        return l + r
-    def AddI8(self, l, r):
-        return l + r
-    def AddU16(self, l, r):
-        return l + r
-    def AddI16(self, l, r):
-        return l + r
-    def AddU32(self, l, r):
-        return l + r
-    def AddI32(self, l, r):
-        return l + r
-    def AddU64(self, l, r):
-        return l + r
-    def AddI64(self, l, r):
-        return l + r
+    def AddU8(self, l, r):  return l + r
+    def AddI8(self, l, r):  return l + r
+    def AddU16(self, l, r): return l + r
+    def AddI16(self, l, r): return l + r
+    def AddU32(self, l, r): return l + r
+    def AddI32(self, l, r): return l + r
+    def AddU64(self, l, r): return l + r
+    def AddI64(self, l, r): return l + r
+    def AddF32(self, l, r): return l + r
+    def AddF64(self, l, r): return l + r
+    def And(self, l, r):    return l and r
+    def Concat(self, l, r): return l + r
 
-    def AddF32(self, l, r):
-        return l + r
-    def AddF64(self, l, r):
-        return l + r
-
-    def Concat(self, l, r):
-        return l + r
-
-    def And(self, l, r):
-        return l and r
+    def CallbackU8(self, cb, l, r): return cb.AddU8(l, r)
+    def CallbackI8(self, cb, l, r): return cb.AddI8(l, r)
+    def CallbackU16(self, cb, l, r): return cb.AddU16(l, r)
+    def CallbackI16(self, cb, l, r): return cb.AddI16(l, r)
+    def CallbackU32(self, cb, l, r): return cb.AddU32(l, r)
+    def CallbackI32(self, cb, l, r): return cb.AddI32(l, r)
+    def CallbackU64(self, cb, l, r): return cb.AddU64(l, r)
+    def CallbackI64(self, cb, l, r): return cb.AddI64(l, r)
+    def CallbackF32(self, cb, l, r): return cb.AddF32(l, r)
+    def CallbackF64(self, cb, l, r): return cb.AddF64(l, r)
+    def CallbackBool(self, cb, l, r): return cb.And(l, r)
+    def CallbackString(self, cb, l, r): return cb.Concat(l, r)
 
     def CreateListenable(self):
         return self.jointModule.CreateComponent(test_ILifetimeListenable, LifetimeListenable)

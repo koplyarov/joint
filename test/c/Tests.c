@@ -117,6 +117,43 @@ Joint_Error Tests_And(Tests* self, JOINT_BOOL l, JOINT_BOOL r, JOINT_BOOL* resul
 { *result = l && r; return JOINT_ERROR_NONE; }
 
 
+Joint_Error Tests_CallbackU8(Tests* self, test_IBasicTestsCallbackU8 cb, uint8_t l, uint8_t r, uint8_t* result)
+{ return test_IBasicTestsCallbackU8_AddU8(cb, l, r, result); }
+
+Joint_Error Tests_CallbackI8(Tests* self, test_IBasicTestsCallbackI8 cb, int8_t l, int8_t r, int8_t* result)
+{ return test_IBasicTestsCallbackI8_AddI8(cb, l, r, result); }
+
+Joint_Error Tests_CallbackU16(Tests* self, test_IBasicTestsCallbackU16 cb, uint16_t l, uint16_t r, uint16_t* result)
+{ return test_IBasicTestsCallbackU16_AddU16(cb, l, r, result); }
+
+Joint_Error Tests_CallbackI16(Tests* self, test_IBasicTestsCallbackI16 cb, int16_t l, int16_t r, int16_t* result)
+{ return test_IBasicTestsCallbackI16_AddI16(cb, l, r, result); }
+
+Joint_Error Tests_CallbackU32(Tests* self, test_IBasicTestsCallbackU32 cb, uint32_t l, uint32_t r, uint32_t* result)
+{ return test_IBasicTestsCallbackU32_AddU32(cb, l, r, result); }
+
+Joint_Error Tests_CallbackI32(Tests* self, test_IBasicTestsCallbackI32 cb, int32_t l, int32_t r, int32_t* result)
+{ return test_IBasicTestsCallbackI32_AddI32(cb, l, r, result); }
+
+Joint_Error Tests_CallbackU64(Tests* self, test_IBasicTestsCallbackU64 cb, uint64_t l, uint64_t r, uint64_t* result)
+{ return test_IBasicTestsCallbackU64_AddU64(cb, l, r, result); }
+
+Joint_Error Tests_CallbackI64(Tests* self, test_IBasicTestsCallbackI64 cb, int64_t l, int64_t r, int64_t* result)
+{ return test_IBasicTestsCallbackI64_AddI64(cb, l, r, result); }
+
+Joint_Error Tests_CallbackF32(Tests* self, test_IBasicTestsCallbackF32 cb, float l, float r, float* result)
+{ return test_IBasicTestsCallbackF32_AddF32(cb, l, r, result); }
+
+Joint_Error Tests_CallbackF64(Tests* self, test_IBasicTestsCallbackF64 cb, double l, double r, double* result)
+{ return test_IBasicTestsCallbackF64_AddF64(cb, l, r, result); }
+
+Joint_Error Tests_CallbackBool(Tests* self, test_IBasicTestsCallbackBool cb, JOINT_BOOL l, JOINT_BOOL r, JOINT_BOOL* result)
+{ return test_IBasicTestsCallbackBool_And(cb, l, r, result); }
+
+Joint_Error Tests_CallbackString(Tests* self, test_IBasicTestsCallbackString cb, const char* l, const char* r, const char** result)
+{ return test_IBasicTestsCallbackString_Concat(cb, l, r, result); }
+
+
 Joint_Error Tests_ReturnNull(Tests* self, test_ISomeObject* result)
 { *result = NULL; return JOINT_ERROR_NONE; }
 

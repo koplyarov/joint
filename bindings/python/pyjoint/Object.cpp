@@ -122,12 +122,17 @@ namespace pyjoint
 			PyObject* py_param = PyTuple_GetItem(py_param_tuple, 1);
 			switch (v.type)
 			{
-			case JOINT_TYPE_BOOL:
-				v.value.b = PyObject_IsTrue(py_param);
-				break;
-			case JOINT_TYPE_I32:
-				v.value.i32 = FromPyLong<int32_t>(py_param);
-				break;
+			case JOINT_TYPE_BOOL: v.value.b = PyObject_IsTrue(py_param); break;
+			case JOINT_TYPE_I8: v.value.i8 = FromPyLong<int8_t>(py_param); break;
+			case JOINT_TYPE_U8: v.value.u8 = FromPyLong<uint8_t>(py_param); break;
+			case JOINT_TYPE_I16: v.value.i16 = FromPyLong<int16_t>(py_param); break;
+			case JOINT_TYPE_U16: v.value.u16 = FromPyLong<uint16_t>(py_param); break;
+			case JOINT_TYPE_I32: v.value.i32 = FromPyLong<int32_t>(py_param); break;
+			case JOINT_TYPE_U32: v.value.u32 = FromPyLong<uint32_t>(py_param); break;
+			case JOINT_TYPE_I64: v.value.i64 = FromPyLong<int64_t>(py_param); break;
+			case JOINT_TYPE_U64: v.value.u64 = FromPyLong<uint64_t>(py_param); break;
+			case JOINT_TYPE_F32: v.value.f32 = FromPyFloat<float>(py_param); break;
+			case JOINT_TYPE_F64: v.value.f64 = FromPyFloat<double>(py_param); break;
 			case JOINT_TYPE_UTF8:
 				str_params.push_back(Utf8FromPyUnicode(py_param));
 				v.value.utf8 = str_params.back().GetContent();
@@ -155,18 +160,19 @@ namespace pyjoint
 		PyObjectHolder result;
 		switch (ret_value.variant.type)
 		{
-		case JOINT_TYPE_VOID:
-			Py_RETURN_NONE;
-			break;
-		case JOINT_TYPE_BOOL:
-			result.Reset(PyBool_FromLong(ret_value.variant.value.b));
-			break;
-		case JOINT_TYPE_I32:
-			result.Reset(PyLong_FromLong(ret_value.variant.value.i32));
-			break;
-		case JOINT_TYPE_UTF8:
-			result.Reset(PyUnicode_FromString(ret_value.variant.value.utf8));
-			break;
+		case JOINT_TYPE_VOID: Py_RETURN_NONE; break;
+		case JOINT_TYPE_BOOL: result.Reset(PyBool_FromLong(ret_value.variant.value.b)); break;
+		case JOINT_TYPE_I8: result.Reset(PyLong_FromLong(ret_value.variant.value.i8)); break;
+		case JOINT_TYPE_U8: result.Reset(PyLong_FromLong(ret_value.variant.value.u8)); break;
+		case JOINT_TYPE_I16: result.Reset(PyLong_FromLong(ret_value.variant.value.i16)); break;
+		case JOINT_TYPE_U16: result.Reset(PyLong_FromLong(ret_value.variant.value.u16)); break;
+		case JOINT_TYPE_I32: result.Reset(PyLong_FromLong(ret_value.variant.value.i32)); break;
+		case JOINT_TYPE_U32: result.Reset(PyLong_FromLong(ret_value.variant.value.u32)); break;
+		case JOINT_TYPE_I64: result.Reset(PyLong_FromLong(ret_value.variant.value.i64)); break;
+		case JOINT_TYPE_U64: result.Reset(PyLong_FromLong(ret_value.variant.value.u64)); break;
+		case JOINT_TYPE_F32: result.Reset(PyFloat_FromDouble(ret_value.variant.value.f32)); break;
+		case JOINT_TYPE_F64: result.Reset(PyFloat_FromDouble(ret_value.variant.value.f64)); break;
+		case JOINT_TYPE_UTF8: result.Reset(PyUnicode_FromString(ret_value.variant.value.utf8)); break;
 		case JOINT_TYPE_OBJ:
 			if (ret_value.variant.value.obj != JOINT_NULL_HANDLE)
 			{
