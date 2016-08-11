@@ -1,0 +1,12 @@
+package test
+{
+	interface IInterface1 { }
+	interface IInterface2 { bool Method2(bool b); }
+	interface IInterface3 { i32 Method3(i32 i); }
+
+	interface ICastTests
+	{
+		IInterface2 CastTo2(IInterface1 obj);
+		IInterface3 CastTo3(IInterface1 obj);
+	}
+}

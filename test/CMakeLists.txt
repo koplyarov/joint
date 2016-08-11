@@ -36,7 +36,12 @@ target_link_libraries(test-core ${CMAKE_THREAD_LIBS_INIT})
 
 ################################################################################
 
-joint_generate_adapters(c++ Tests_adapters.hpp idl/IBasicTests.idl idl/IObjectTests.idl idl/ILifetimeTests.idl)
+joint_generate_adapters(c++ Tests_adapters.hpp
+	idl/IBasicTests.idl
+	idl/IObjectTests.idl
+	idl/ILifetimeTests.idl
+	idl/ICastTests.idl
+)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_executable(joint-test Tests_adapters.hpp test.cpp)

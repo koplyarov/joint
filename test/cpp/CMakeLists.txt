@@ -19,7 +19,9 @@ endif()
 joint_generate_adapters(c++ Tests_adapters.hpp
 	../idl/IBasicTests.idl
 	../idl/IObjectTests.idl
-	../idl/ILifetimeTests.idl)
+	../idl/ILifetimeTests.idl
+	../idl/ICastTests.idl
+)
 
 add_library(tests-cpp SHARED Tests.cpp Tests_adapters.hpp)
 target_link_libraries(tests-cpp joint ${CMAKE_THREAD_LIBS_INIT})

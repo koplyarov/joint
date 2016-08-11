@@ -19,6 +19,7 @@ struct TestCtx
 	{ }
 };
 
+
 class BasicTestsCallback
 {
 public:
@@ -197,6 +198,37 @@ TEST_DEFINE_TEST(TestCtx, LifetimeTests)
 	listenable.Reset();
 	t->CollectGarbage();
 	TEST_EQUALS(listener->GetObjectDestroyed(), true);
+}
+
+
+class CastObject
+{
+public:
+	typedef joint::TypeList<
+			test::IInterface1,
+			test::IInterface2
+		> JointInterfaces;
+
+	bool Method2(bool b)
+	{ return b; }
+};
+
+TEST_DEFINE_TEST(TestCtx, CastTests)
+{
+	auto t = Module.GetRootObject<test::ICastTests>("GetTests");
+	if (!t)
+	{
+		TEST_REPORT_ERROR("CastTests not implemented!");
+		return;
+	}
+
+	auto o1 = Ctx.MakeComponent<test::IInterface1, CastObject>();
+	auto o2 = t->CastTo2(o1);
+	auto o3 = t->CastTo3(o1);
+	TEST_EQUALS((bool)o2, true);
+	TEST_EQUALS(o2->Method2(true), true);
+	TEST_EQUALS((bool)o3, false);
+	TEST_EQUALS((bool)t->CastTo2(nullptr), false);
 }
 
 

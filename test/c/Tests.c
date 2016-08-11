@@ -202,7 +202,28 @@ Joint_Error Tests_CreateListenable(Tests* self, test_ILifetimeListenable* result
 Joint_Error Tests_CollectGarbage(Tests* self)
 { return JOINT_ERROR_NONE; }
 
-JOINT_C_COMPONENT(Tests, test_IBasicTests, test_IObjectTests, test_ILifetimeTests);
+
+Joint_Error Tests_CastTo2(Tests* self, test_IInterface1 obj, test_IInterface2* result)
+{
+	Joint_Error ret = JOINT_ERROR_NONE;
+	if (!obj)
+		*result = JOINT_NULL_HANDLE;
+	else
+		ret = Joint_CastObject((Joint_ObjectHandle)obj, test_IInterface2__id, (Joint_ObjectHandle*)result);
+	return ret == JOINT_ERROR_CAST_FAILED ? JOINT_ERROR_NONE : ret;
+}
+
+Joint_Error Tests_CastTo3(Tests* self, test_IInterface1 obj, test_IInterface3* result)
+{
+	Joint_Error ret = JOINT_ERROR_NONE;
+	if (!obj)
+		*result = JOINT_NULL_HANDLE;
+	else
+		ret = Joint_CastObject((Joint_ObjectHandle)obj, test_IInterface3__id, (Joint_ObjectHandle*)result);
+	return ret == JOINT_ERROR_CAST_FAILED ? JOINT_ERROR_NONE : ret;
+}
+
+JOINT_C_COMPONENT(Tests, test_IBasicTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests);
 
 ////////////////////////////////////////////////////////////////////////////////
 

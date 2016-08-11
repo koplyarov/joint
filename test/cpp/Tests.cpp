@@ -41,7 +41,12 @@ public:
 class Tests
 {
 public:
-	typedef TypeList<IBasicTests, IObjectTests, ILifetimeTests>	JointInterfaces;
+	typedef TypeList<
+			IBasicTests,
+			IObjectTests,
+			ILifetimeTests,
+			ICastTests
+		> JointInterfaces;
 
 private:
 	Joint_ModuleHandle   _module;
@@ -114,6 +119,13 @@ public:
 
 	void CollectGarbage()
 	{ }
+
+
+	IInterface2_Ptr CastTo2(const IInterface1_Ptr& obj)
+	{ return joint::Cast<IInterface2>(obj); }
+
+	IInterface3_Ptr CastTo3(const IInterface1_Ptr& obj)
+	{ return joint::Cast<IInterface3>(obj); }
 };
 
 extern "C"

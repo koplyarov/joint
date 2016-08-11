@@ -14,7 +14,9 @@ endif()
 joint_generate_adapters(c Tests_adapters.h
 	../idl/IBasicTests.idl
 	../idl/IObjectTests.idl
-	../idl/ILifetimeTests.idl)
+	../idl/ILifetimeTests.idl
+	../idl/ICastTests.idl
+)
 
 add_library(tests-c SHARED Tests.c Tests_adapters.h)
 target_link_libraries(tests-c joint)
