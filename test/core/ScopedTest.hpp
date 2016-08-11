@@ -17,7 +17,6 @@ namespace test
 
 		TestContext&						_context;
 		TestContext*						_prevContext;
-		bool								_testFailed;
 
 	public:
 		ScopedTest(TestContext& ctx, std::string name);

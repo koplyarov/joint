@@ -46,7 +46,7 @@ namespace binding
 		PyObjectHolder py_params(PY_OBJ_CHECK(Py_BuildValue("(O)", jointModule.Get())));
 		PyObjectHolder py_result(PY_OBJ_CHECK_MSG(PyObject_CallObject(py_function, py_params), functionName + " in python module " + _moduleName + " invokation failed"));
 
-		return std::move(py_result);
+		return py_result;
 	}
 
 }}

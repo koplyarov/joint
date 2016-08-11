@@ -53,7 +53,7 @@ namespace joint
 		const_iterator cend() const { return _ptr + _size; }
 
 		reference operator[] (size_t index) { return _ptr[index]; }
-		const reference operator[] (size_t index) const { return _ptr[index]; }
+		const_reference operator[] (size_t index) const { return _ptr[index]; }
 	};
 
 }

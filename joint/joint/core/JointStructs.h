@@ -14,6 +14,7 @@ extern "C"
 
 	struct Joint_Context
 	{
+		int dummy;
 	};
 
 	struct Joint_Binding
