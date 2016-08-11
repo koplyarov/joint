@@ -163,31 +163,12 @@ Joint_Error Tests_CheckNotNull(Tests* self, test_ISomeObject o, JOINT_BOOL* resu
 	return JOINT_ERROR_NONE;
 }
 
-Joint_Error Tests_ReverseNullChecks(Tests* self, test_INullChecksCallback cb, JOINT_BOOL* result)
-{
-	Joint_Error ret = JOINT_ERROR_NONE;
-	test_ISomeObject o = NULL;
-	JOINT_BOOL tmp_bool = JOINT_FALSE;
+Joint_Error Tests_CallbackReturn(Tests* self, test_IObjectTestsCallbackReturn cb, test_ISomeObject* result)
+{ return test_IObjectTestsCallbackReturn_Return(cb, result); }
 
-	*result = JOINT_TRUE;
+Joint_Error Tests_CallbackParam(Tests* self, test_IObjectTestsCallbackParam cb, test_ISomeObject o, JOINT_BOOL* result)
+{ return test_IObjectTestsCallbackParam_Method(cb, o, result); }
 
-	ret = test_INullChecksCallback_ReturnNull(cb, &o); if (ret != JOINT_ERROR_NONE) return ret;
-	*result = *result && (o == NULL);
-	ret = Joint_DecRefObject((Joint_ObjectHandle)o); if (ret != JOINT_ERROR_NONE) return ret;
-
-	ret = test_INullChecksCallback_ReturnNotNull(cb, &o); if (ret != JOINT_ERROR_NONE) return ret;
-	*result = *result && (o != NULL);
-
-	ret = test_INullChecksCallback_ValidateNotNull(cb, NULL, JOINT_FALSE, &tmp_bool); if (ret != JOINT_ERROR_NONE) return ret;
-	*result = *result && tmp_bool;
-
-	ret = test_INullChecksCallback_ValidateNotNull(cb, o, JOINT_TRUE, &tmp_bool); if (ret != JOINT_ERROR_NONE) return ret;
-	*result = *result && tmp_bool;
-
-	ret = Joint_DecRefObject((Joint_ObjectHandle)o); if (ret != JOINT_ERROR_NONE) return ret;
-
-	return ret;
-}
 
 Joint_Error Tests_InvokeObjectMethod(Tests* self, test_ISomeObject o)
 { return test_ISomeObject_Method(o); }

@@ -5,6 +5,8 @@
 #include <joint.cpp/detail/JointCall.hpp>
 #include <joint.cpp/detail/ProxyBase.hpp>
 
+#include <cstddef>
+
 
 namespace joint
 {
@@ -18,6 +20,10 @@ namespace joint
 	public:
 		explicit Ptr(T_ raw = T_())
 			: _raw(raw)
+		{ }
+
+		Ptr(std::nullptr_t)
+			: _raw()
 		{ }
 
 		Ptr(Ptr&& other)

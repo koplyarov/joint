@@ -35,7 +35,7 @@ public:
 			test::IBasicTestsCallbackF64,
 			test::IBasicTestsCallbackBool,
 			test::IBasicTestsCallbackString
-		>	JointInterfaces;
+		> JointInterfaces;
 
 	uint8_t   AddU8(uint8_t l, uint8_t r)     { return l + r; }
 	int8_t    AddI8(int8_t l, int8_t r)       { return l + r; }
@@ -111,37 +111,26 @@ public:
 	int32_t GetInvokationsCount() { return _counter; }
 };
 
-class NullChecksCallback
+class ObjectTestsCallback
 {
 private:
-	joint::Context		_ctx;
+	test::ISomeObject_Ptr	_obj;
 
 public:
-	typedef joint::TypeList<test::INullChecksCallback>	JointInterfaces;
+	typedef joint::TypeList<
+			test::IObjectTestsCallbackReturn,
+			test::IObjectTestsCallbackParam
+		> JointInterfaces;
 
-	bool				ReturnNullInvoked = false;
-	bool				ReturnNotNullInvoked = false;
-	bool				ValidateNullInvoked = false;
-	bool				ValidateNotNullInvoked = false;
-
-	NullChecksCallback(joint::Context ctx)
-		: _ctx(std::move(ctx))
+	ObjectTestsCallback(const test::ISomeObject_Ptr& obj)
+		: _obj(obj)
 	{ }
 
-	test::ISomeObject_Ptr ReturnNull()
-	{ ReturnNullInvoked = true; return test::ISomeObject_Ptr(); }
+	test::ISomeObject_Ptr Return()
+	{ return _obj; }
 
-	test::ISomeObject_Ptr ReturnNotNull()
-	{ ReturnNotNullInvoked = true; return _ctx.MakeComponent<test::ISomeObject, SomeObject>(); }
-
-	bool ValidateNotNull(test::ISomeObject_Ptr o, bool notNull)
-	{
-		if (notNull)
-			ValidateNullInvoked = true;
-		else
-			ValidateNotNullInvoked = true;
-		return notNull == (bool)o;
-	}
+	bool Method(test::ISomeObject_Ptr o)
+	{ return (bool)o; }
 };
 
 TEST_DEFINE_TEST(TestCtx, ObjectTests)
@@ -157,16 +146,14 @@ TEST_DEFINE_TEST(TestCtx, ObjectTests)
 	TEST_THROWS_NOTHING(some_obj->Method());
 
 	TEST_EQUALS((bool)t->ReturnNull(), false);
-	TEST_EQUALS(t->CheckNotNull(test::ISomeObject_Ptr()), false);
+	TEST_EQUALS(t->CheckNotNull(nullptr), false);
 	TEST_EQUALS(t->CheckNotNull(some_obj), true);
 
-	auto cb_impl = joint::MakeComponentWrapper<NullChecksCallback>(Ctx);
-	auto cb = Ctx.MakeComponentProxy<test::INullChecksCallback>(cb_impl);
-	TEST_EQUALS(t->ReverseNullChecks(cb), true);
-	TEST_EQUALS(cb_impl->ReturnNullInvoked, true);
-	TEST_EQUALS(cb_impl->ReturnNotNullInvoked, true);
-	TEST_EQUALS(cb_impl->ValidateNullInvoked, true);
-	TEST_EQUALS(cb_impl->ValidateNotNullInvoked, true);
+	TEST_EQUALS((bool)t->CallbackReturn(Ctx.MakeComponent<test::IObjectTestsCallbackReturn, ObjectTestsCallback>(some_obj)), true);
+	auto cb = Ctx.MakeComponent<test::IObjectTestsCallbackReturn, ObjectTestsCallback>(nullptr);
+	TEST_EQUALS((bool)t->CallbackReturn(cb), false);
+	TEST_EQUALS(t->CallbackParam(joint::Cast<test::IObjectTestsCallbackParam>(cb), nullptr), false);
+	TEST_EQUALS(t->CallbackParam(joint::Cast<test::IObjectTestsCallbackParam>(cb), some_obj), true);
 
 	auto o_impl = joint::MakeComponentWrapper<SomeObject>();
 	auto o = Ctx.MakeComponentProxy<test::ISomeObject>(o_impl);

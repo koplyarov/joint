@@ -93,15 +93,11 @@ public:
 	bool CheckNotNull(const ISomeObject_Ptr& o)
 	{ return (bool)o; }
 
-	bool ReverseNullChecks(const INullChecksCallback_Ptr& cb)
-	{
-		ISomeObject_Ptr o = cb->ReturnNotNull();
-		return
-			(bool)cb->ReturnNull() == false &&
-			(bool)o == true &&
-			cb->ValidateNotNull(ISomeObject_Ptr(), false) &&
-			cb->ValidateNotNull(o, true);
-	}
+	ISomeObject_Ptr CallbackReturn(const IObjectTestsCallbackReturn_Ptr& cb)
+	{ return cb->Return(); }
+
+	bool CallbackParam(const IObjectTestsCallbackParam_Ptr& cb, const ISomeObject_Ptr& o)
+	{ return cb->Method(o); }
 
 	void InvokeObjectMethod(const ISomeObject_Ptr& o)
 	{ o->Method(); }

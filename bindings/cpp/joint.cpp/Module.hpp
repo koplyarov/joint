@@ -54,7 +54,7 @@ namespace joint
 		{ return joint::MakeComponent<Interface_, ComponentType_>(_module); }
 
 		template < typename Interface_, typename ComponentType_, typename Arg1_ >
-		Ptr<Interface_> MakeComponent(Joint_ModuleHandle module, const Arg1_& arg1)
+		Ptr<Interface_> MakeComponent(const Arg1_& arg1)
 		{ return joint::MakeComponent<Interface_, ComponentType_, Arg1_>(_module, arg1); }
 	};
 
@@ -182,7 +182,7 @@ namespace joint
 		{ return _mainModule.MakeComponent<Interface_, ComponentType_>(); }
 
 		template < typename Interface_, typename ComponentType_, typename Arg1_ >
-		Ptr<Interface_> MakeComponent(Joint_ModuleHandle module, const Arg1_& arg1)
+		Ptr<Interface_> MakeComponent(const Arg1_& arg1)
 		{ return _mainModule.MakeComponent<Interface_, ComponentType_, Arg1_>(arg1); }
 	};
 

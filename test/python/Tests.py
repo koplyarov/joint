@@ -27,22 +27,16 @@ class Tests(test_IObjectTests, test_IBasicTests, test_ILifetimeTests):
         super(Tests, self).__init__()
         self.jointModule = jointModule
 
-    def ReturnNull(self):
-        return None
-    def CheckNotNull(self, o):
-        return o
-    def ReverseNullChecks(self, cb):
-        o = cb.ReturnNotNull()
-        return cb.ReturnNull() is None and o is not None and cb.ValidateNotNull(None, False) and cb.ValidateNotNull(o, True)
-    def ReturnNewObject(self):
-        return self.jointModule.CreateComponent(test_ISomeObject, SomeObject)
-    def ReturnSameObject(self, o):
-        return o
-    def InvokeObjectMethod(self, o):
-        o.Method()
+    def ReturnNull(self): return None
+    def CheckNotNull(self, o): return o
+    def CallbackReturn(self, cb): return cb.Return()
+    def CallbackParam(self, cb, o): return cb.Method(o)
 
-    def Throw(self):
-        raise RuntimeError('Requested exception')
+    def ReturnNewObject(self): return self.jointModule.CreateComponent(test_ISomeObject, SomeObject)
+    def ReturnSameObject(self, o): return o
+    def InvokeObjectMethod(self, o): o.Method()
+
+    def Throw(self): raise RuntimeError('Requested exception')
     def AddU8(self, l, r):  return l + r
     def AddI8(self, l, r):  return l + r
     def AddU16(self, l, r): return l + r
