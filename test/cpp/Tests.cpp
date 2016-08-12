@@ -121,11 +121,11 @@ public:
 	{ }
 
 
-	IInterface2_Ptr CastTo2(const IInterface1_Ptr& obj)
-	{ return joint::Cast<IInterface2>(obj); }
-
-	IInterface3_Ptr CastTo3(const IInterface1_Ptr& obj)
-	{ return joint::Cast<IInterface3>(obj); }
+	IInterface2_Ptr CastTo2(const IInterface1_Ptr& obj) { return joint::Cast<IInterface2>(obj); }
+	IInterface3_Ptr CastTo3(const IInterface1_Ptr& obj) { return joint::Cast<IInterface3>(obj); }
+	IInterface4_Ptr CastTo4(const IInterface1_Ptr& obj) { return joint::Cast<IInterface4>(obj); }
+	IInterface5_Ptr CastTo5(const IInterface1_Ptr& obj) { return joint::Cast<IInterface5>(obj); }
+	IInterface6_Ptr CastTo6(const IInterface1_Ptr& obj) { return joint::Cast<IInterface6>(obj); }
 };
 
 extern "C"

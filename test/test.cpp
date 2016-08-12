@@ -206,11 +206,14 @@ class CastObject
 public:
 	typedef joint::TypeList<
 			test::IInterface1,
-			test::IInterface2
+			test::IInterface2,
+			test::IInterface6
 		> JointInterfaces;
 
-	bool Method2(bool b)
-	{ return b; }
+	bool Method2(bool b) { return b; }
+	std::string Method4(const std::string& s) { return s; }
+	float Method5(float f) { return f; }
+	double Method6(double f) { return f; }
 };
 
 TEST_DEFINE_TEST(TestCtx, CastTests)
@@ -225,10 +228,21 @@ TEST_DEFINE_TEST(TestCtx, CastTests)
 	auto o1 = Ctx.MakeComponent<test::IInterface1, CastObject>();
 	auto o2 = t->CastTo2(o1);
 	auto o3 = t->CastTo3(o1);
+	auto o4 = t->CastTo4(o1);
+	auto o5 = t->CastTo5(o1);
+	auto o6 = t->CastTo6(o1);
 	TEST_EQUALS((bool)o2, true);
 	TEST_EQUALS(o2->Method2(true), true);
 	TEST_EQUALS((bool)o3, false);
 	TEST_EQUALS((bool)t->CastTo2(nullptr), false);
+	TEST_EQUALS((bool)o4, true);
+	TEST_EQUALS(o4->Method4("abc"), std::string("abc"));
+	//TEST_EQUALS((bool)o5, true);
+	//TEST_EQUALS(o5->Method5(3.14f), 3.14f);
+	TEST_EQUALS((bool)o6, true);
+	TEST_EQUALS(o6->Method4("abc"), std::string("abc"));
+	TEST_EQUALS(o6->Method5(3.14f), 3.14f);
+	TEST_EQUALS(o6->Method6(3.14), 3.14);
 }
 
 

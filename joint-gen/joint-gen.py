@@ -37,8 +37,9 @@ try:
     semantic_graph_builder = joint.SemanticGraphBuilder(importDirs)
 
     gen = generators[args.languageId](semantic_graph_builder.build(args.input))
+    code = list(gen.generate())
     out_file = open(args.output, 'w')
-    for l in gen.generate():
+    for l in code:
         out_file.write(l)
         out_file.write('\n')
 

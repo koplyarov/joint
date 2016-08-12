@@ -1,3 +1,4 @@
+import copy
 import os
 from .IdlParser import IdlParser
 
@@ -20,6 +21,12 @@ class Method:
         self.name = name
         self.retType = retType
         self.params = []
+        self.inherited = False
+    def copyFromBase(self, newIndex):
+        result = copy.copy(self)
+        result.index = newIndex
+        result.inherited = True
+        return result
 
 
 class Interface:
@@ -32,6 +39,9 @@ class Interface:
         self.methods = []
         self.bases = []
         self.needRelease = True
+
+    def __repr__(self):
+        return self.fullname
 
 
 class Package:
@@ -145,7 +155,7 @@ class SemanticGraphBuilder:
                 pkg.interfaces.append(ifc)
                 if 'bases' in ifc_ast:
                     for b_ast in ifc_ast['bases']:
-                        ifc.bases.append(semanticsGraph.findInterface(b_ast['package'], b_ast['type']))
+                        ifc.bases.append(semanticsGraph.makeType(pkg, b_ast))
                 elif ifc.fullname != 'joint.IObject':
                     ifc.bases.append(semanticsGraph.findInterface(['joint'], 'IObject'))
 
@@ -153,10 +163,9 @@ class SemanticGraphBuilder:
             pkg = semanticsGraph.findPackage(ast['package'])
             for ifc_ast in ast['interfaces']:
                 ifc = pkg.findInterface(ifc_ast['name'])
-                m_index = 0
+                self._addBaseMethods(ifc, ifc.bases, set())
                 for m_ast in ifc_ast['methods']:
-                    m = Method(m_index, m_ast['name'], semanticsGraph.makeType(pkg, m_ast['retType']))
-                    m_index += 1
+                    m = Method(len(ifc.methods), m_ast['name'], semanticsGraph.makeType(pkg, m_ast['retType']))
                     p_index = 0
                     for p_ast in m_ast['params']:
                         p = Parameter(p_index, p_ast['name'], semanticsGraph.makeType(pkg, p_ast['type']))
@@ -165,6 +174,16 @@ class SemanticGraphBuilder:
                     ifc.methods.append(m)
 
         return semanticsGraph
+
+    def _addBaseMethods(self, ifc, bases, visitedInterfaces):
+        for b in bases:
+            if b.fullname in visitedInterfaces:
+                continue
+            visitedInterfaces.add(b.fullname)
+            self._addBaseMethods(ifc, b.bases, visitedInterfaces)
+            for m in b.methods:
+                if not m.inherited:
+                    ifc.methods.append(m.copyFromBase(len(ifc.methods)))
 
     def _getDependencies(self, idlFile):
         idl_file_path = self._findIdlFile(idlFile)

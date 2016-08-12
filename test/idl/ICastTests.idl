@@ -4,9 +4,16 @@ package test
 	interface IInterface2 { bool Method2(bool b); }
 	interface IInterface3 { i32 Method3(i32 i); }
 
+	interface IInterface4 { string Method4(string i); }
+	interface IInterface5 { f32 Method5(f32 f); }
+	interface IInterface6 : IInterface4, IInterface5 { f64 Method6(f64 f); }
+
 	interface ICastTests
 	{
 		IInterface2 CastTo2(IInterface1 obj);
 		IInterface3 CastTo3(IInterface1 obj);
+		IInterface4 CastTo4(IInterface1 obj);
+		IInterface5 CastTo5(IInterface1 obj);
+		IInterface6 CastTo6(IInterface1 obj);
 	}
 }

@@ -70,6 +70,9 @@ class Tests(test_IBasicTests, test_IObjectTests, test_ILifetimeTests, test_ICast
 
     def CastTo2(self, obj): return pyjoint.Cast(obj, test_IInterface2)
     def CastTo3(self, obj): return pyjoint.Cast(obj, test_IInterface3)
+    def CastTo4(self, obj): return pyjoint.Cast(obj, test_IInterface4)
+    def CastTo5(self, obj): return pyjoint.Cast(obj, test_IInterface5)
+    def CastTo6(self, obj): return pyjoint.Cast(obj, test_IInterface6)
 
 
 def GetTests(jointModule):

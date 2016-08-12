@@ -223,6 +223,36 @@ Joint_Error Tests_CastTo3(Tests* self, test_IInterface1 obj, test_IInterface3* r
 	return ret == JOINT_ERROR_CAST_FAILED ? JOINT_ERROR_NONE : ret;
 }
 
+Joint_Error Tests_CastTo4(Tests* self, test_IInterface1 obj, test_IInterface4* result)
+{
+	Joint_Error ret = JOINT_ERROR_NONE;
+	if (!obj)
+		*result = JOINT_NULL_HANDLE;
+	else
+		ret = Joint_CastObject((Joint_ObjectHandle)obj, test_IInterface4__id, (Joint_ObjectHandle*)result);
+	return ret == JOINT_ERROR_CAST_FAILED ? JOINT_ERROR_NONE : ret;
+}
+
+Joint_Error Tests_CastTo5(Tests* self, test_IInterface1 obj, test_IInterface5* result)
+{
+	Joint_Error ret = JOINT_ERROR_NONE;
+	if (!obj)
+		*result = JOINT_NULL_HANDLE;
+	else
+		ret = Joint_CastObject((Joint_ObjectHandle)obj, test_IInterface5__id, (Joint_ObjectHandle*)result);
+	return ret == JOINT_ERROR_CAST_FAILED ? JOINT_ERROR_NONE : ret;
+}
+
+Joint_Error Tests_CastTo6(Tests* self, test_IInterface1 obj, test_IInterface6* result)
+{
+	Joint_Error ret = JOINT_ERROR_NONE;
+	if (!obj)
+		*result = JOINT_NULL_HANDLE;
+	else
+		ret = Joint_CastObject((Joint_ObjectHandle)obj, test_IInterface6__id, (Joint_ObjectHandle*)result);
+	return ret == JOINT_ERROR_CAST_FAILED ? JOINT_ERROR_NONE : ret;
+}
+
 JOINT_C_COMPONENT(Tests, test_IBasicTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests);
 
 ////////////////////////////////////////////////////////////////////////////////
