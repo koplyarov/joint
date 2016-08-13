@@ -22,6 +22,12 @@ class LifetimeListenable(test_ILifetimeListenable):
     def SetListener(self, l):
         self.listener = l
 
+class CastComponent126(test_IInterface1, test_IInterface2, test_IInterface6):
+    def Method2(self, b): return b
+    def Method4(self, s): return s
+    def Method5(self, f): return f
+    def Method6(self, f): return f
+
 class Tests(test_IBasicTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests):
     def __init__(self, jointModule):
         super(Tests, self).__init__()
@@ -73,6 +79,9 @@ class Tests(test_IBasicTests, test_IObjectTests, test_ILifetimeTests, test_ICast
     def CastTo4(self, obj): return pyjoint.Cast(obj, test_IInterface4)
     def CastTo5(self, obj): return pyjoint.Cast(obj, test_IInterface5)
     def CastTo6(self, obj): return pyjoint.Cast(obj, test_IInterface6)
+
+    def Create126(self):
+        return self.jointModule.CreateComponent(test_IInterface1, CastComponent126)
 
 
 def GetTests(jointModule):

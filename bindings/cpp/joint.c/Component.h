@@ -10,42 +10,28 @@
 #include <stdlib.h>
 
 
-#define DETAIL_JOINT_C_ACCESSOR_AND_VTABLE(Ifc, ...) \
-		JointC_Accessor    Ifc##__accessor; \
-		Ifc##__VTableType  Ifc##__vtable;
+#define DETAIL_JOINT_C_ACCESSOR(Ifc, ...) \
+		Ifc##__Accessors    Ifc##__accessor; \
 
 #define DETAIL_JOINT_C_CAST(Ifc, ...) \
-		else if (strcmp(interfaceId, Ifc##__id) == 0) \
-			*outAccessor = &w->Ifc##__accessor; \
+		DETAIL_TRY_CAST__##Ifc(w->Ifc##__accessor)
 
 #define DETAIL_JOINT_C_GLOBAL_STUFF(Ifc, ComponentImpl) \
-	static Joint_Error Detail__##ComponentImpl##__##Ifc##__InvokeMethod(void* componentWrapper, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue) \
-	{ \
-		ComponentImpl##__wrapper* w = (ComponentImpl##__wrapper*)componentWrapper; \
-		return Detail__##Ifc##__InvokeMethod(&w->Ifc##__vtable, &w->impl, methodId, params, paramsCount, retType, outRetValue); \
-	} \
+	DETAIL_DEFINE_INVOKE_METHOD__##Ifc(ComponentImpl) \
 	\
-	JointC_AccessorVTable Detail__##ComponentImpl##__accessor_vtable__##Ifc =\
-	{ \
-		&Detail__##ComponentImpl##__AddRef, \
-		&Detail__##ComponentImpl##__Release, \
-		&Detail__##ComponentImpl##__Cast, \
-		&Detail__##ComponentImpl##__##Ifc##__InvokeMethod, \
-	}; \
+	DETAIL_DEFINE_ACCESSOR_VTABLE__##Ifc(ComponentImpl); \
 	Joint_ObjectHandle ComponentImpl##__as__##Ifc(Joint_ModuleHandle module, ComponentImpl##__wrapper* w) \
 	{ \
 		Joint_ObjectHandle result = JOINT_NULL_HANDLE; \
-		JointC_Accessor* internal = &w->Ifc##__accessor; \
+		JointC_Accessor* internal = &w->Ifc##__accessor.accessor; \
 		Joint_Error ret = Joint_CreateObject(module, internal, &result); \
 		if (ret != JOINT_ERROR_NONE) \
 			fprintf(stderr, "Joint_CreateObject failed: %s\n", Joint_ErrorToString(ret)); \
 		return result; \
 	}
 
-#define DETAIL_JOINT_C_INIT_ACCESSOR_AND_VTABLE(Ifc, ComponentImpl) \
-		JOINT_C_INIT_VTABLE__##Ifc(w->Ifc##__vtable, ComponentImpl); \
-		w->Ifc##__accessor.Component = w; \
-		w->Ifc##__accessor.VTable = &Detail__##ComponentImpl##__accessor_vtable__##Ifc; \
+#define DETAIL_JOINT_C_INIT_ACCESSOR(Ifc, ComponentImpl) \
+		DETAIL_INIT_ACCESSOR__##Ifc(ComponentImpl, w, w->Ifc##__accessor)
 
 #define DETAIL_JOINT_C_VALIDATE_IFC(Ifc, ...) \
 	extern int _Detail_Joint_C_interface_validity_checker__##Ifc[sizeof(Ifc)]; \
@@ -55,7 +41,7 @@
 	typedef struct  \
 	{ \
 		int                refCount; \
-		JOINT_C_PP_FOREACH(DETAIL_JOINT_C_ACCESSOR_AND_VTABLE, ~, __VA_ARGS__) \
+		JOINT_C_PP_FOREACH(DETAIL_JOINT_C_ACCESSOR, ~, __VA_ARGS__) \
 		C                  impl; \
 	} C##__wrapper; \
 	\
@@ -93,7 +79,7 @@
 	{ \
 		C##__wrapper* w = (C##__wrapper*)malloc(sizeof(C##__wrapper)); \
 		w->refCount = 1; \
-		JOINT_C_PP_FOREACH(DETAIL_JOINT_C_INIT_ACCESSOR_AND_VTABLE, C, __VA_ARGS__) \
+		JOINT_C_PP_FOREACH(DETAIL_JOINT_C_INIT_ACCESSOR, C, __VA_ARGS__) \
 		return w; \
 	}
 

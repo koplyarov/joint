@@ -38,6 +38,22 @@ public:
 };
 
 
+class CastComponent126
+{
+public:
+	typedef TypeList<
+			IInterface1,
+			IInterface2,
+			IInterface6
+		> JointInterfaces;
+
+	bool Method2(bool b) { return b; }
+	std::string Method4(const std::string& s) { return s; }
+	float Method5(float f) { return f; }
+	double Method6(double f) { return f; }
+};
+
+
 class Tests
 {
 public:
@@ -126,6 +142,9 @@ public:
 	IInterface4_Ptr CastTo4(const IInterface1_Ptr& obj) { return joint::Cast<IInterface4>(obj); }
 	IInterface5_Ptr CastTo5(const IInterface1_Ptr& obj) { return joint::Cast<IInterface5>(obj); }
 	IInterface6_Ptr CastTo6(const IInterface1_Ptr& obj) { return joint::Cast<IInterface6>(obj); }
+
+	IInterface1_Ptr Create126()
+	{ return MakeComponent<IInterface1, CastComponent126>(_module); }
 };
 
 extern "C"

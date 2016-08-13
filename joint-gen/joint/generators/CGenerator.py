@@ -45,22 +45,55 @@ class CGenerator:
             yield 'Joint_Error {n}_{m}({n} _obj{p}{r});'.format(n=mangled_ifc, m=m.name, p=self._paramsDecl(m.params), r=self._retDecl(m.retType))
         yield ''
         yield 'typedef struct {'
-        for m in ifc.methods:
-            yield '\tJoint_Error (*{})(void* self{}{});'.format(m.name, self._paramsDecl(m.params), self._retDecl(m.retType))
-        yield '\tint dummy;'
-        yield '}} {}__VTableType;'.format(mangled_ifc)
+        yield '\tJointC_Accessor accessor;'
+        for b in ifc.bases[1:]:
+            yield '\t{mn}__Accessors {mn}__accessors;'.format(mn=self._mangleType(b))
+        yield '}} {}__Accessors;'.format(mangled_ifc)
+        yield '#define DETAIL_DEFINE_ACCESSOR_VTABLE__{}(ComponentImpl) \\'.format(mangled_ifc)
+        for b in ifc.bases[1:]:
+            yield 'DETAIL_DEFINE_ACCESSOR_VTABLE__{mn}(ComponentImpl) \\'.format(mn=self._mangleType(b))
+        yield 'JointC_AccessorVTable Detail__##ComponentImpl##__accessor_vtable__{} = \\'.format(mangled_ifc)
+        yield '\t{ \\'
+        yield '\t\t&Detail__##ComponentImpl##__AddRef, \\'
+        yield '\t\t&Detail__##ComponentImpl##__Release, \\'
+        yield '\t\t&Detail__##ComponentImpl##__Cast, \\'
+        yield '\t\t&Detail__##ComponentImpl##__##{}__InvokeMethod \\'.format(mangled_ifc)
+        yield '\t};'
+        yield '#define DETAIL_INIT_ACCESSOR__{}(ComponentImpl, ComponentWrapper, Accessor) \\'.format(mangled_ifc)
+        yield '\t(Accessor).accessor.Component = (ComponentWrapper); \\'
+        yield '\t(Accessor).accessor.VTable = &Detail__##ComponentImpl##__accessor_vtable__{}; \\'.format(mangled_ifc)
+        for b in ifc.bases[1:]:
+            yield '\tDETAIL_INIT_ACCESSOR__{mn}(ComponentImpl, (ComponentWrapper), (Accessor).{mn}__accessors) \\'.format(mn=self._mangleType(b))
+        yield ''
+        yield '#define DETAIL_TRY_CAST__{}(Accessor) \\'.format(mangled_ifc)
+        yield '\telse if (JOINT_FALSE \\'
+        cast_to = ifc
+        while cast_to:
+            yield '\t\t|| strcmp(interfaceId, {}__id) == 0 \\'.format(self._mangleType(cast_to))
+            cast_to = cast_to.bases[0] if cast_to.bases else None
+        yield '\t) \\'
+        yield '\t{{ *outAccessor = &(Accessor).accessor; }} \\'.format(mangled_ifc)
+        for b in ifc.bases[1:]:
+            yield 'DETAIL_TRY_CAST__{mn}((Accessor).{mn}__accessors) \\'.format(mn=self._mangleType(b))
+        yield ''
         yield ''
 
     def _generateMethods(self, ifc):
+        yield 'Joint_Error JointC_CastTo__{mn}(void* obj, {mn}* result)'.format(mn=self._mangleType(ifc))
+        yield '{'
+        yield '\tJoint_Error ret = JOINT_ERROR_NONE;'
+        yield '\tif (!obj)'
+        yield '\t\t*result = JOINT_NULL_HANDLE;'
+        yield '\telse'
+        yield '\t\tret = Joint_CastObject((Joint_ObjectHandle)obj, {mn}__id, (Joint_ObjectHandle*)result);'.format(mn=self._mangleType(ifc))
+        yield '\treturn ret == JOINT_ERROR_CAST_FAILED ? JOINT_ERROR_NONE : ret;'
+        yield '}'
         for m in ifc.methods:
             for l in self._generateMethodDefinition(ifc, m):
                 yield '{}'.format(l)
 
         for l in self._generateAccessorInvokeMethod(ifc):
             yield '{}'.format(l)
-
-    def _generateMethodDeclaration(self, m):
-        yield '{} {}({});'.format(self._toCppType(m.retType), m.name, ', '.join('{} {}'.format(self._toCppType(p.type), p.name) for p in m.params))
 
     def _generateMethodDefinition(self, ifc, m):
         mangled_ifc = self._mangleType(ifc)
@@ -88,50 +121,48 @@ class CGenerator:
         yield ''
 
     def _generateAccessorInvokeMethod(self, ifc):
-        yield 'Joint_Error Detail__{mn}__InvokeMethod({mn}__VTableType* vtable, void* component, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)'.format(mn=self._mangleType(ifc))
-        yield '{'
-        yield '\tJoint_Error ret;'
-        yield '\tswitch(methodId)'
-        yield '\t{'
+        yield '#define DETAIL_DEFINE_INVOKE_METHOD__{mn}(ComponentImpl) \\'.format(mn=self._mangleType(ifc))
+        for b in ifc.bases[1:]:
+            yield 'DETAIL_DEFINE_INVOKE_METHOD__{mn}(ComponentImpl) \\'.format(mn=self._mangleType(b))
+        yield 'Joint_Error Detail__##ComponentImpl##__{mn}__InvokeMethod(void* componentWrapper, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue) \\'.format(mn=self._mangleType(ifc))
+        yield '{ \\'
+        yield '\tComponentImpl##__wrapper* w = (ComponentImpl##__wrapper*)componentWrapper; \\'
+        yield '\t(void)w; \\'
+        yield '\tJoint_Error ret; \\'
+        yield '\tswitch(methodId) \\'
+        yield '\t{ \\'
         for m in ifc.methods:
-            yield '\tcase {}:'.format(m.index)
-            yield '\t\t{'
-            yield '\t\t\tif (paramsCount != {}'.format(len(m.params))
-            yield '\t\t\t\t|| retType != (Joint_Type){}'.format(m.retType.index)
+            yield '\tcase {}: \\'.format(m.index)
+            yield '\t\t{ \\'
+            yield '\t\t\tif (paramsCount != {} \\'.format(len(m.params))
+            yield '\t\t\t\t|| retType != (Joint_Type){} \\'.format(m.retType.index)
             for p in m.params:
-                yield '\t\t\t\t|| params[{}].type != (Joint_Type){}'.format(p.index, p.type.index)
-            yield '\t\t\t) { return JOINT_ERROR_GENERIC; }'
-            yield ''
+                yield '\t\t\t\t|| params[{}].type != (Joint_Type){} \\'.format(p.index, p.type.index)
+            yield '\t\t\t) { return JOINT_ERROR_GENERIC; } \\'
+            yield '\t\t\t\\'
             if m.retType.name != 'void':
-                yield '\t\t\t{} result;'.format(self._toCType(m.retType))
+                yield '\t\t\t{} result; \\'.format(self._toCType(m.retType))
             for p in m.params:
-                yield '\t\t\t{t} p{i} = ({t})params[{i}].value.{v};'.format(t=self._toCType(p.type), i=p.index, v=p.type.variantName)
+                yield '\t\t\t{t} p{i} = ({t})params[{i}].value.{v}; \\'.format(t=self._toCType(p.type), i=p.index, v=p.type.variantName)
             if m.retType.name != 'void':
                 ret_param = ', &result'
             else:
                 ret_param = ''
-            yield '\t\t\tret = vtable->{}(component{}{});'.format(m.name, ''.join(', p{}'.format(p.index) for p in m.params), ret_param)
-            yield '\t\t\tif (ret == JOINT_ERROR_NONE)'
-            yield '\t\t\t{'
-            yield '\t\t\t\toutRetValue->variant.type = (Joint_Type){};'.format(m.retType.index)
+            yield '\t\t\tret = ComponentImpl##_{}((&w->impl){}{}); \\'.format(m.name, ''.join(', p{}'.format(p.index) for p in m.params), ret_param)
+            yield '\t\t\tif (ret == JOINT_ERROR_NONE) \\'
+            yield '\t\t\t{ \\'
+            yield '\t\t\t\toutRetValue->variant.type = (Joint_Type){}; \\'.format(m.retType.index)
             if m.retType.name != 'void':
-                yield '\t\t\t\toutRetValue->variant.value.{} = {}result;'.format(m.retType.variantName, '' if isinstance(m.retType, BuiltinType) else '(Joint_ObjectHandle)')
-            yield '\t\t\t}'
-            yield '\t\t}'
-            yield '\t\tbreak;'
-        yield '\tdefault:'
-        yield '\t\treturn JOINT_ERROR_GENERIC;'
-        yield '\t}'
-        yield '\toutRetValue->releaseValue = &JointC_ReleaseRetValue;'
-        yield '\treturn ret;'
+                yield '\t\t\t\toutRetValue->variant.value.{} = {}result; \\'.format(m.retType.variantName, '' if isinstance(m.retType, BuiltinType) else '(Joint_ObjectHandle)')
+            yield '\t\t\t} \\'
+            yield '\t\t} \\'
+            yield '\t\tbreak; \\'
+        yield '\tdefault: \\'
+        yield '\t\treturn JOINT_ERROR_GENERIC; \\'
+        yield '\t} \\'
+        yield '\toutRetValue->releaseValue = &JointC_ReleaseRetValue; \\'
+        yield '\treturn ret; \\'
         yield '}'
-        yield '#define JOINT_C_INIT_VTABLE__{}(Var_, ComponentImpl_) \\'.format(self._mangleType(ifc))
-        yield '\tdo { \\'
-        for m in ifc.methods:
-            ret_str = '' if m.retType.name == 'void' else ', {}*'.format(self._toCType(m.retType))
-            params_str = ''.join(', {}'.format(self._toCType(p.type)) for p in m.params)
-            yield '\t\t(Var_).{n} = (Joint_Error (*)(void*{p}{r}))&ComponentImpl_##_{n}; \\'.format(n=m.name, p=params_str, r=ret_str)
-        yield '\t} while(0)'
 
     def _toCValue(self, varName, type):
         if isinstance(type, BuiltinType):

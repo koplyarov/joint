@@ -225,24 +225,52 @@ TEST_DEFINE_TEST(TestCtx, CastTests)
 		return;
 	}
 
-	auto o1 = Ctx.MakeComponent<test::IInterface1, CastObject>();
-	auto o2 = t->CastTo2(o1);
-	auto o3 = t->CastTo3(o1);
-	auto o4 = t->CastTo4(o1);
-	auto o5 = t->CastTo5(o1);
-	auto o6 = t->CastTo6(o1);
-	TEST_EQUALS((bool)o2, true);
-	TEST_EQUALS(o2->Method2(true), true);
-	TEST_EQUALS((bool)o3, false);
-	TEST_EQUALS((bool)t->CastTo2(nullptr), false);
-	TEST_EQUALS((bool)o4, true);
-	TEST_EQUALS(o4->Method4("abc"), std::string("abc"));
-	TEST_EQUALS((bool)o5, true);
-	TEST_EQUALS(o5->Method5(3.14f), 3.14f);
-	TEST_EQUALS((bool)o6, true);
-	TEST_EQUALS(o6->Method4("abc"), std::string("abc"));
-	TEST_EQUALS(o6->Method5(3.14f), 3.14f);
-	TEST_EQUALS(o6->Method6(3.14), 3.14);
+	{
+		TEST_EQUALS((bool)t->CastTo2(nullptr), false);
+
+		auto o1 = Ctx.MakeComponent<test::IInterface1, CastObject>();
+		auto o2 = t->CastTo2(o1);
+		auto o3 = t->CastTo3(o1);
+		auto o4 = t->CastTo4(o1);
+		auto o5 = t->CastTo5(o1);
+		auto o6 = t->CastTo6(o1);
+
+		TEST_EQUALS((bool)o2, true);
+		TEST_EQUALS((bool)o3, false);
+		TEST_EQUALS((bool)o4, true);
+		TEST_EQUALS((bool)o5, true);
+		TEST_EQUALS((bool)o6, true);
+
+		TEST_EQUALS(o2->Method2(true), true);
+		TEST_EQUALS(o4->Method4("abc"), std::string("abc"));
+		TEST_EQUALS(o5->Method5(3.14f), 3.14f);
+		TEST_EQUALS(o6->Method4("abc"), std::string("abc"));
+		TEST_EQUALS(o6->Method5(3.14f), 3.14f);
+		TEST_EQUALS(o6->Method6(3.14), 3.14);
+	}
+
+	{
+		auto o1 = t->Create126();
+		auto o2 = joint::Cast<test::IInterface2>(o1);
+		auto o3 = joint::Cast<test::IInterface3>(o1);
+		auto o4 = joint::Cast<test::IInterface4>(o1);
+		auto o5 = joint::Cast<test::IInterface5>(o1);
+		auto o6 = joint::Cast<test::IInterface6>(o1);
+
+		TEST_EQUALS((bool)o1, true);
+		TEST_EQUALS((bool)o2, true);
+		TEST_EQUALS((bool)o3, false);
+		TEST_EQUALS((bool)o4, true);
+		TEST_EQUALS((bool)o5, true);
+		TEST_EQUALS((bool)o6, true);
+
+		TEST_THROWS_NOTHING(o2->Method2(true));
+		TEST_THROWS_NOTHING(o4->Method4("abc"));
+		TEST_THROWS_NOTHING(o5->Method5(3.14f));
+		TEST_THROWS_NOTHING(o6->Method4("abc"));
+		TEST_THROWS_NOTHING(o6->Method5(3.14f));
+		TEST_THROWS_NOTHING(o6->Method6(3.14));
+	}
 }
 
 

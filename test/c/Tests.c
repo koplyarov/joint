@@ -59,6 +59,35 @@ JOINT_C_COMPONENT(LifetimeListenable, test_ILifetimeListenable);
 
 ////////////////////////////////////////////////////////////////////////////////
 
+typedef struct { } CastComponent126;
+
+Joint_Error CastComponent126_Init(CastComponent126* self)
+{ return JOINT_ERROR_NONE; }
+
+Joint_Error CastComponent126_Deinit(CastComponent126* self)
+{ return JOINT_ERROR_NONE; }
+
+Joint_Error CastComponent126_Method2(CastComponent126* self, JOINT_BOOL b, JOINT_BOOL* result)
+{ *result = b; return JOINT_ERROR_NONE; }
+
+Joint_Error CastComponent126_Method4(CastComponent126* self, const char* b, const char** result)
+{
+	char* tmp = malloc(strlen(b) + 1);
+	strcpy(tmp, b);
+	*result = tmp;
+	return JOINT_ERROR_NONE;
+}
+
+Joint_Error CastComponent126_Method5(CastComponent126* self, float f, float* result)
+{ *result = f; return JOINT_ERROR_NONE; }
+
+Joint_Error CastComponent126_Method6(CastComponent126* self, double f, double* result)
+{ *result = f; return JOINT_ERROR_NONE; }
+
+JOINT_C_COMPONENT(CastComponent126, test_IInterface1, test_IInterface2, test_IInterface6);
+
+////////////////////////////////////////////////////////////////////////////////
+
 typedef struct {
 	Joint_ModuleHandle module;
 } Tests;
@@ -204,53 +233,26 @@ Joint_Error Tests_CollectGarbage(Tests* self)
 
 
 Joint_Error Tests_CastTo2(Tests* self, test_IInterface1 obj, test_IInterface2* result)
-{
-	Joint_Error ret = JOINT_ERROR_NONE;
-	if (!obj)
-		*result = JOINT_NULL_HANDLE;
-	else
-		ret = Joint_CastObject((Joint_ObjectHandle)obj, test_IInterface2__id, (Joint_ObjectHandle*)result);
-	return ret == JOINT_ERROR_CAST_FAILED ? JOINT_ERROR_NONE : ret;
-}
+{ return JointC_CastTo__test_IInterface2(obj, result); }
 
 Joint_Error Tests_CastTo3(Tests* self, test_IInterface1 obj, test_IInterface3* result)
-{
-	Joint_Error ret = JOINT_ERROR_NONE;
-	if (!obj)
-		*result = JOINT_NULL_HANDLE;
-	else
-		ret = Joint_CastObject((Joint_ObjectHandle)obj, test_IInterface3__id, (Joint_ObjectHandle*)result);
-	return ret == JOINT_ERROR_CAST_FAILED ? JOINT_ERROR_NONE : ret;
-}
+{ return JointC_CastTo__test_IInterface3(obj, result); }
 
 Joint_Error Tests_CastTo4(Tests* self, test_IInterface1 obj, test_IInterface4* result)
-{
-	Joint_Error ret = JOINT_ERROR_NONE;
-	if (!obj)
-		*result = JOINT_NULL_HANDLE;
-	else
-		ret = Joint_CastObject((Joint_ObjectHandle)obj, test_IInterface4__id, (Joint_ObjectHandle*)result);
-	return ret == JOINT_ERROR_CAST_FAILED ? JOINT_ERROR_NONE : ret;
-}
+{ return JointC_CastTo__test_IInterface4(obj, result); }
 
 Joint_Error Tests_CastTo5(Tests* self, test_IInterface1 obj, test_IInterface5* result)
-{
-	Joint_Error ret = JOINT_ERROR_NONE;
-	if (!obj)
-		*result = JOINT_NULL_HANDLE;
-	else
-		ret = Joint_CastObject((Joint_ObjectHandle)obj, test_IInterface5__id, (Joint_ObjectHandle*)result);
-	return ret == JOINT_ERROR_CAST_FAILED ? JOINT_ERROR_NONE : ret;
-}
+{ return JointC_CastTo__test_IInterface5(obj, result); }
 
 Joint_Error Tests_CastTo6(Tests* self, test_IInterface1 obj, test_IInterface6* result)
+{ return JointC_CastTo__test_IInterface6(obj, result); }
+
+Joint_Error Tests_Create126(Tests* self, test_IInterface1* result)
 {
-	Joint_Error ret = JOINT_ERROR_NONE;
-	if (!obj)
-		*result = JOINT_NULL_HANDLE;
-	else
-		ret = Joint_CastObject((Joint_ObjectHandle)obj, test_IInterface6__id, (Joint_ObjectHandle*)result);
-	return ret == JOINT_ERROR_CAST_FAILED ? JOINT_ERROR_NONE : ret;
+	CastComponent126__wrapper* t = JointC_Wrap__CastComponent126();
+	CastComponent126_Init(&t->impl);
+	*result = (test_IInterface1)CastComponent126__as__test_IInterface1(self->module, t);
+	return JOINT_ERROR_NONE;
 }
 
 JOINT_C_COMPONENT(Tests, test_IBasicTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests);
