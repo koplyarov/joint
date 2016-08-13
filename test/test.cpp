@@ -237,8 +237,8 @@ TEST_DEFINE_TEST(TestCtx, CastTests)
 	TEST_EQUALS((bool)t->CastTo2(nullptr), false);
 	TEST_EQUALS((bool)o4, true);
 	TEST_EQUALS(o4->Method4("abc"), std::string("abc"));
-	//TEST_EQUALS((bool)o5, true);
-	//TEST_EQUALS(o5->Method5(3.14f), 3.14f);
+	TEST_EQUALS((bool)o5, true);
+	TEST_EQUALS(o5->Method5(3.14f), 3.14f);
 	TEST_EQUALS((bool)o6, true);
 	TEST_EQUALS(o6->Method4("abc"), std::string("abc"));
 	TEST_EQUALS(o6->Method5(3.14f), 3.14f);

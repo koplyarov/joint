@@ -1,12 +1,16 @@
 #ifndef JOINT_CPP_TYPELIST_HPP
 #define JOINT_CPP_TYPELIST_HPP
 
+
+#include <joint.cpp/MetaProgramming.hpp>
+
+
 namespace joint
 {
 
 	namespace detail
 	{
-		struct TypeListEndNode;
+		struct TypeListEndNode { };
 
 		template < typename Type_, typename NextNode_ >
 		struct TypeListNode
@@ -134,6 +138,21 @@ namespace joint
 	{ };
 
 #undef DETAIL_JOINT_TLB
+
+
+	template < typename List_ >
+	struct TypeList_IsEmpty
+	{ static const bool Value = IsBaseOf<detail::TypeListEndNode, List_>::Value; };
+
+
+	template < typename List_, size_t N_, bool IsEmpty_ = TypeList_IsEmpty<List_>::Value >
+	struct TypeList_Get { typedef typename TypeList_Get<typename List_::NextNode, N_ - 1>::ValueT ValueT; };
+
+	template < typename List_, bool IsEmpty_ >
+	struct TypeList_Get<List_, 0, IsEmpty_> { typedef typename List_::Type ValueT; };
+
+	template < typename List_, size_t N_ >
+	struct TypeList_Get<List_, N_, true> { };
 
 }
 

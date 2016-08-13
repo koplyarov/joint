@@ -16,6 +16,67 @@ namespace joint
 
 	namespace detail
 	{
+		template < typename Ifc_, typename BaseIfc_, typename BaseInterfacesList_ = typename Ifc_::BaseInterfaces, bool IsEmpty_ = TypeList_IsEmpty<BaseInterfacesList_>::Value >
+		struct ContainsInterface
+		{ static const bool Value = IsSame<Ifc_, BaseIfc_>::Value || ContainsInterface<typename BaseInterfacesList_::Type, BaseIfc_>::Value; };
+
+		template < typename Ifc_, typename BaseIfc_, typename BaseInterfacesList_ >
+		struct ContainsInterface<Ifc_, BaseIfc_, BaseInterfacesList_, true>
+		{ static const bool Value = IsSame<Ifc_, BaseIfc_>::Value; };
+
+
+		template < typename List_, typename Ifc_, bool IsEmpty_ = TypeList_IsEmpty<List_>::Value >
+		struct AppendToInterfacesList
+		{
+			typedef typename IfElse<
+					ContainsInterface<typename List_::Type, Ifc_>::Value,
+					List_,
+					TypeListNode<typename List_::Type, typename AppendToInterfacesList<typename List_::NextNode, Ifc_>::ValueT>
+				>::ValueT ValueT;
+		};
+
+		template < typename List_, typename Ifc_ >
+		struct AppendToInterfacesList<List_, Ifc_, true>
+		{ typedef TypeListNode<Ifc_, TypeListEndNode> ValueT; };
+
+
+		template < typename L_, typename R_, bool IsEmpty_ = TypeList_IsEmpty<R_>::Value >
+		struct InterfacesListMerger
+		{ typedef typename InterfacesListMerger<typename AppendToInterfacesList<L_, typename R_::Type>::ValueT, typename R_::NextNode>::ValueT ValueT; };
+
+		template < typename L_, typename R_ >
+		struct InterfacesListMerger<L_, R_, true>
+		{ typedef L_ ValueT; };
+
+
+		template < typename BaseInterfaces_, bool IsEmpty_ = TypeList_IsEmpty<BaseInterfaces_>::Value >
+		struct GetNonContainedBaseInterfaces
+		{ typedef typename BaseInterfaces_::NextNode ValueT; };
+
+		template < typename BaseInterfaces_ >
+		struct GetNonContainedBaseInterfaces<BaseInterfaces_, true>
+		{ typedef TypeListEndNode ValueT; };
+
+
+		template < typename InterfacesList_, bool IsEmpty_ = TypeList_IsEmpty<InterfacesList_>::Value >
+		struct LinearizedInterfacesList
+		{
+			typedef typename InterfacesListMerger<
+					TypeListNode<
+						typename InterfacesList_::Type,
+						typename LinearizedInterfacesList<
+								typename GetNonContainedBaseInterfaces<typename InterfacesList_::Type::BaseInterfaces>::ValueT
+							>::ValueT
+					>,
+					typename LinearizedInterfacesList<typename InterfacesList_::NextNode>::ValueT
+				>::ValueT ValueT;
+		};
+
+		template < typename InterfacesList_ >
+		struct LinearizedInterfacesList<InterfacesList_, true>
+		{ typedef TypeListEndNode ValueT; };
+
+
 		template < typename ComponentImpl_, typename InterfacesList_ >
 		class AccessorsHolder
 		{
@@ -68,8 +129,10 @@ namespace joint
 	template < typename ComponentImpl_ >
 	class ComponentWrapper
 	{
-		typedef typename ComponentImpl_::JointInterfaces              Interfaces;
-		typedef detail::AccessorsHolder<ComponentImpl_, Interfaces>   Accessors;
+		typedef typename ComponentImpl_::JointInterfaces Interfaces;
+		typedef typename detail::LinearizedInterfacesList<Interfaces>::ValueT LinearizedInterfaces;
+
+		typedef detail::AccessorsHolder<ComponentImpl_, LinearizedInterfaces> Accessors;
 
 	private:
 		std::atomic<int>  _refCount;

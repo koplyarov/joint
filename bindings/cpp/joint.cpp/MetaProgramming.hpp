@@ -12,6 +12,13 @@ namespace joint
 	{ static const bool Value = true; };
 
 
+	template < bool Condition_, typename IfResult_, typename ElseResult_ >
+	struct IfElse { typedef IfResult_ ValueT; };
+
+	template < typename IfResult_, typename ElseResult_ >
+	struct IfElse<false, IfResult_, ElseResult_> { typedef ElseResult_ ValueT; };
+
+
 	template < typename Base_, typename Derived_ >
 	class IsBaseOf
 	{
