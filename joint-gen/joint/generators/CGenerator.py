@@ -45,36 +45,39 @@ class CGenerator:
             yield 'Joint_Error {n}_{m}({n} _obj{p}{r});'.format(n=mangled_ifc, m=m.name, p=self._paramsDecl(m.params), r=self._retDecl(m.retType))
         yield ''
         yield 'typedef struct {'
-        yield '\tJointC_Accessor accessor;'
-        for b in ifc.bases[1:]:
+        if not ifc.bases:
+            yield '\tJointC_Accessor accessor;'
+        for b in ifc.bases:
             yield '\t{mn}__Accessors {mn}__accessors;'.format(mn=self._mangleType(b))
         yield '}} {}__Accessors;'.format(mangled_ifc)
         yield '#define DETAIL_DEFINE_ACCESSOR_VTABLE__{}(ComponentImpl, IfcPrefix) \\'.format(mangled_ifc)
+        for b in ifc.bases:
+            yield '\tDETAIL_DEFINE_ACCESSOR_VTABLE__{}(ComponentImpl, IfcPrefix##__##{}) \\'.format(self._mangleType(b), mangled_ifc)
+        yield '\tJointC_AccessorVTable Detail__##ComponentImpl##__accessor_vtable##IfcPrefix##__{} = \\'.format(mangled_ifc)
+        yield '\t\t{ \\'
+        yield '\t\t\t&Detail__##ComponentImpl##__AddRef, \\'
+        yield '\t\t\t&Detail__##ComponentImpl##__Release, \\'
+        yield '\t\t\t&Detail__##ComponentImpl##__Cast, \\'
+        yield '\t\t\t&Detail__##ComponentImpl##IfcPrefix##__{}__InvokeMethod \\'.format(mangled_ifc)
+        yield '\t\t};'
+        yield '#define DETAIL_ACCESSOR__{}(Accessors) \\'.format(mangled_ifc)
+        if not ifc.bases:
+            yield '\t((Accessors).accessor)'
+        else:
+            yield '\tDETAIL_ACCESSOR__{b}((Accessors).{b}__accessors)'.format(b=self._mangleType(ifc.bases[0]))
+        yield '#define DETAIL_INIT_ACCESSOR__{}(ComponentImpl, ComponentWrapper, Accessors, IfcPrefix) \\'.format(mangled_ifc)
+        if ifc.bases:
+            yield '\tDETAIL_INIT_ACCESSOR__{b}(ComponentImpl, (ComponentWrapper), (Accessors).{b}__accessors, IfcPrefix##__##{i}) \\'.format(b=self._mangleType(ifc.bases[0]), i=mangled_ifc)
+        yield '\tDETAIL_ACCESSOR__{i}(Accessors).Component = (ComponentWrapper); \\'.format(i=mangled_ifc)
+        yield '\tDETAIL_ACCESSOR__{i}(Accessors).VTable = &Detail__##ComponentImpl##__accessor_vtable##IfcPrefix##__{i}; \\'.format(i=mangled_ifc)
         for b in ifc.bases[1:]:
-            yield 'DETAIL_DEFINE_ACCESSOR_VTABLE__{}(ComponentImpl, IfcPrefix##__##{}) \\'.format(self._mangleType(b), mangled_ifc)
-        yield 'JointC_AccessorVTable Detail__##ComponentImpl##__accessor_vtable##IfcPrefix##__{} = \\'.format(mangled_ifc)
-        yield '\t{ \\'
-        yield '\t\t&Detail__##ComponentImpl##__AddRef, \\'
-        yield '\t\t&Detail__##ComponentImpl##__Release, \\'
-        yield '\t\t&Detail__##ComponentImpl##__Cast, \\'
-        yield '\t\t&Detail__##ComponentImpl##IfcPrefix##__{}__InvokeMethod \\'.format(mangled_ifc)
-        yield '\t};'
-        yield '#define DETAIL_INIT_ACCESSOR__{}(ComponentImpl, ComponentWrapper, Accessor, IfcPrefix) \\'.format(mangled_ifc)
-        yield '\t(Accessor).accessor.Component = (ComponentWrapper); \\'
-        yield '\t(Accessor).accessor.VTable = &Detail__##ComponentImpl##__accessor_vtable##IfcPrefix##__{}; \\'.format(mangled_ifc)
-        for b in ifc.bases[1:]:
-            yield '\tDETAIL_INIT_ACCESSOR__{b}(ComponentImpl, (ComponentWrapper), (Accessor).{b}__accessors, IfcPrefix##__##{i}) \\'.format(b=self._mangleType(b), i=mangled_ifc)
+            yield '\tDETAIL_INIT_ACCESSOR__{b}(ComponentImpl, (ComponentWrapper), (Accessors).{b}__accessors, IfcPrefix##__##{i}) \\'.format(b=self._mangleType(b), i=mangled_ifc)
         yield ''
-        yield '#define DETAIL_TRY_CAST__{}(Accessor) \\'.format(mangled_ifc)
-        yield '\telse if (JOINT_FALSE \\'
-        cast_to = ifc
-        while cast_to:
-            yield '\t\t|| strcmp(interfaceId, {}__id) == 0 \\'.format(self._mangleType(cast_to))
-            cast_to = cast_to.bases[0] if cast_to.bases else None
-        yield '\t) \\'
-        yield '\t{{ *outAccessor = &(Accessor).accessor; }} \\'.format(mangled_ifc)
-        for b in ifc.bases[1:]:
-            yield 'DETAIL_TRY_CAST__{mn}((Accessor).{mn}__accessors) \\'.format(mn=self._mangleType(b))
+        yield '#define DETAIL_TRY_CAST__{}(Accessors) \\'.format(mangled_ifc)
+        yield '\telse if (strcmp(interfaceId, {}__id) == 0) \\'.format(mangled_ifc)
+        yield '\t\t*outAccessor = &DETAIL_ACCESSOR__{}(Accessors); \\'.format(mangled_ifc)
+        for b in ifc.bases:
+            yield '\tDETAIL_TRY_CAST__{mn}((Accessors).{mn}__accessors) \\'.format(mn=self._mangleType(b))
         yield ''
         yield ''
 
@@ -123,7 +126,7 @@ class CGenerator:
     def _generateAccessorInvokeMethod(self, ifc):
         mangled_ifc = self._mangleType(ifc)
         yield '#define DETAIL_DEFINE_INVOKE_METHOD__{}(ComponentImpl, IfcPrefix) \\'.format(mangled_ifc)
-        for b in ifc.bases[1:]:
+        for b in ifc.bases:
             yield 'DETAIL_DEFINE_INVOKE_METHOD__{}(ComponentImpl, IfcPrefix##__##{}) \\'.format(self._mangleType(b), mangled_ifc)
         yield 'Joint_Error Detail__##ComponentImpl##IfcPrefix##__{}__InvokeMethod(void* componentWrapper, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue) \\'.format(mangled_ifc)
         yield '{ \\'
@@ -139,7 +142,11 @@ class CGenerator:
             yield '\t\t\t\t|| retType != (Joint_Type){} \\'.format(m.retType.index)
             for p in m.params:
                 yield '\t\t\t\t|| params[{}].type != (Joint_Type){} \\'.format(p.index, p.type.index)
-            yield '\t\t\t) { return JOINT_ERROR_GENERIC; } \\'
+            yield '\t\t\t) \\'
+            yield '\t\t\t{ \\'
+            yield '\t\t\t\tJoint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C", "Invalid {}.{} parameters or return type"); \\'.format(ifc.fullname, m.name)
+            yield '\t\t\t\treturn JOINT_ERROR_GENERIC; \\'
+            yield '\t\t\t} \\'
             yield '\t\t\t\\'
             if m.retType.name != 'void':
                 yield '\t\t\t{} result; \\'.format(self._toCType(m.retType))
@@ -159,6 +166,7 @@ class CGenerator:
             yield '\t\t} \\'
             yield '\t\tbreak; \\'
         yield '\tdefault: \\'
+        yield '\t\tJoint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C", "Invalid {} method id: %d", methodId); \\'.format(ifc.fullname)
         yield '\t\treturn JOINT_ERROR_GENERIC; \\'
         yield '\t} \\'
         yield '\toutRetValue->releaseValue = &JointC_ReleaseRetValue; \\'

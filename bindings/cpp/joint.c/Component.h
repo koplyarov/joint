@@ -23,10 +23,20 @@
 	Joint_ObjectHandle ComponentImpl##__as__##Ifc(Joint_ModuleHandle module, ComponentImpl##__wrapper* w) \
 	{ \
 		Joint_ObjectHandle result = JOINT_NULL_HANDLE; \
-		JointC_Accessor* internal = &w->Ifc##__accessor.accessor; \
-		Joint_Error ret = Joint_CreateObject(module, internal, &result); \
+		JointC_Accessor* internal = NULL; \
+		Joint_Error ret = Detail__##ComponentImpl##__Cast(w, Ifc##__id, (const JointC_Accessor**)&internal); \
+		--w->refCount; \
 		if (ret != JOINT_ERROR_NONE) \
+		{ \
+			fprintf(stderr, JOINT_C_PP_STRINGIZE(Detail__##ComponentImpl##__Cast) " failed: %s\n", Joint_ErrorToString(ret)); \
+			return JOINT_NULL_HANDLE; \
+		} \
+		ret = Joint_CreateObject(module, internal, &result); \
+		if (ret != JOINT_ERROR_NONE) \
+		{ \
 			fprintf(stderr, "Joint_CreateObject failed: %s\n", Joint_ErrorToString(ret)); \
+			return JOINT_NULL_HANDLE; \
+		} \
 		return result; \
 	}
 

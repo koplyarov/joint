@@ -86,7 +86,7 @@ Joint_Error CastComponent017_Method7(CastComponent017* self, int64_t i, int64_t*
 { *result = i; return JOINT_ERROR_NONE; }
 
 
-JOINT_C_COMPONENT(CastComponent017, test_IInterface0, test_IInterface1, test_IInterface7, test_IInterface3);
+JOINT_C_COMPONENT(CastComponent017, test_IInterface0, test_IInterface1, test_IInterface7);
 
 ////////////////////////////////////////////////////////////////////////////////
 
