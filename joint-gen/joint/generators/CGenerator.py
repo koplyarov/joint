@@ -49,21 +49,21 @@ class CGenerator:
         for b in ifc.bases[1:]:
             yield '\t{mn}__Accessors {mn}__accessors;'.format(mn=self._mangleType(b))
         yield '}} {}__Accessors;'.format(mangled_ifc)
-        yield '#define DETAIL_DEFINE_ACCESSOR_VTABLE__{}(ComponentImpl) \\'.format(mangled_ifc)
+        yield '#define DETAIL_DEFINE_ACCESSOR_VTABLE__{}(ComponentImpl, IfcPrefix) \\'.format(mangled_ifc)
         for b in ifc.bases[1:]:
-            yield 'DETAIL_DEFINE_ACCESSOR_VTABLE__{mn}(ComponentImpl) \\'.format(mn=self._mangleType(b))
-        yield 'JointC_AccessorVTable Detail__##ComponentImpl##__accessor_vtable__{} = \\'.format(mangled_ifc)
+            yield 'DETAIL_DEFINE_ACCESSOR_VTABLE__{}(ComponentImpl, IfcPrefix##__##{}) \\'.format(self._mangleType(b), mangled_ifc)
+        yield 'JointC_AccessorVTable Detail__##ComponentImpl##__accessor_vtable##IfcPrefix##__{} = \\'.format(mangled_ifc)
         yield '\t{ \\'
         yield '\t\t&Detail__##ComponentImpl##__AddRef, \\'
         yield '\t\t&Detail__##ComponentImpl##__Release, \\'
         yield '\t\t&Detail__##ComponentImpl##__Cast, \\'
-        yield '\t\t&Detail__##ComponentImpl##__##{}__InvokeMethod \\'.format(mangled_ifc)
+        yield '\t\t&Detail__##ComponentImpl##IfcPrefix##__{}__InvokeMethod \\'.format(mangled_ifc)
         yield '\t};'
-        yield '#define DETAIL_INIT_ACCESSOR__{}(ComponentImpl, ComponentWrapper, Accessor) \\'.format(mangled_ifc)
+        yield '#define DETAIL_INIT_ACCESSOR__{}(ComponentImpl, ComponentWrapper, Accessor, IfcPrefix) \\'.format(mangled_ifc)
         yield '\t(Accessor).accessor.Component = (ComponentWrapper); \\'
-        yield '\t(Accessor).accessor.VTable = &Detail__##ComponentImpl##__accessor_vtable__{}; \\'.format(mangled_ifc)
+        yield '\t(Accessor).accessor.VTable = &Detail__##ComponentImpl##__accessor_vtable##IfcPrefix##__{}; \\'.format(mangled_ifc)
         for b in ifc.bases[1:]:
-            yield '\tDETAIL_INIT_ACCESSOR__{mn}(ComponentImpl, (ComponentWrapper), (Accessor).{mn}__accessors) \\'.format(mn=self._mangleType(b))
+            yield '\tDETAIL_INIT_ACCESSOR__{b}(ComponentImpl, (ComponentWrapper), (Accessor).{b}__accessors, IfcPrefix##__##{i}) \\'.format(b=self._mangleType(b), i=mangled_ifc)
         yield ''
         yield '#define DETAIL_TRY_CAST__{}(Accessor) \\'.format(mangled_ifc)
         yield '\telse if (JOINT_FALSE \\'
@@ -121,10 +121,11 @@ class CGenerator:
         yield ''
 
     def _generateAccessorInvokeMethod(self, ifc):
-        yield '#define DETAIL_DEFINE_INVOKE_METHOD__{mn}(ComponentImpl) \\'.format(mn=self._mangleType(ifc))
+        mangled_ifc = self._mangleType(ifc)
+        yield '#define DETAIL_DEFINE_INVOKE_METHOD__{}(ComponentImpl, IfcPrefix) \\'.format(mangled_ifc)
         for b in ifc.bases[1:]:
-            yield 'DETAIL_DEFINE_INVOKE_METHOD__{mn}(ComponentImpl) \\'.format(mn=self._mangleType(b))
-        yield 'Joint_Error Detail__##ComponentImpl##__{mn}__InvokeMethod(void* componentWrapper, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue) \\'.format(mn=self._mangleType(ifc))
+            yield 'DETAIL_DEFINE_INVOKE_METHOD__{}(ComponentImpl, IfcPrefix##__##{}) \\'.format(self._mangleType(b), mangled_ifc)
+        yield 'Joint_Error Detail__##ComponentImpl##IfcPrefix##__{}__InvokeMethod(void* componentWrapper, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue) \\'.format(mangled_ifc)
         yield '{ \\'
         yield '\tComponentImpl##__wrapper* w = (ComponentImpl##__wrapper*)componentWrapper; \\'
         yield '\t(void)w; \\'

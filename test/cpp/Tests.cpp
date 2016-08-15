@@ -38,19 +38,21 @@ public:
 };
 
 
-class CastComponent126
+class CastComponent017
 {
 public:
 	typedef TypeList<
+			IInterface0,
 			IInterface1,
-			IInterface2,
-			IInterface6
+			IInterface7
 		> JointInterfaces;
 
-	bool Method2(bool b) { return b; }
-	std::string Method4(const std::string& s) { return s; }
-	float Method5(float f) { return f; }
-	double Method6(double f) { return f; }
+	int8_t Method1(int8_t i) { return i; }
+	int16_t Method3(int16_t i) { return i; }
+	uint16_t Method4(uint16_t i) { return i; }
+	int32_t Method5(int32_t i) { return i; }
+	uint32_t Method6(uint32_t i) { return i; }
+	int64_t Method7(int64_t i) { return i; }
 };
 
 
@@ -137,14 +139,16 @@ public:
 	{ }
 
 
-	IInterface2_Ptr CastTo2(const IInterface1_Ptr& obj) { return joint::Cast<IInterface2>(obj); }
-	IInterface3_Ptr CastTo3(const IInterface1_Ptr& obj) { return joint::Cast<IInterface3>(obj); }
-	IInterface4_Ptr CastTo4(const IInterface1_Ptr& obj) { return joint::Cast<IInterface4>(obj); }
-	IInterface5_Ptr CastTo5(const IInterface1_Ptr& obj) { return joint::Cast<IInterface5>(obj); }
-	IInterface6_Ptr CastTo6(const IInterface1_Ptr& obj) { return joint::Cast<IInterface6>(obj); }
+	IInterface1_Ptr CastTo1(const IInterface0_Ptr& obj) { return joint::Cast<IInterface1>(obj); }
+	IInterface2_Ptr CastTo2(const IInterface0_Ptr& obj) { return joint::Cast<IInterface2>(obj); }
+	IInterface3_Ptr CastTo3(const IInterface0_Ptr& obj) { return joint::Cast<IInterface3>(obj); }
+	IInterface4_Ptr CastTo4(const IInterface0_Ptr& obj) { return joint::Cast<IInterface4>(obj); }
+	IInterface5_Ptr CastTo5(const IInterface0_Ptr& obj) { return joint::Cast<IInterface5>(obj); }
+	IInterface6_Ptr CastTo6(const IInterface0_Ptr& obj) { return joint::Cast<IInterface6>(obj); }
+	IInterface7_Ptr CastTo7(const IInterface0_Ptr& obj) { return joint::Cast<IInterface7>(obj); }
 
-	IInterface1_Ptr Create126()
-	{ return MakeComponent<IInterface1, CastComponent126>(_module); }
+	IInterface0_Ptr Create017()
+	{ return MakeComponent<IInterface0, CastComponent017>(_module); }
 };
 
 extern "C"

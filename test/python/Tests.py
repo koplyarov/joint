@@ -22,11 +22,13 @@ class LifetimeListenable(test_ILifetimeListenable):
     def SetListener(self, l):
         self.listener = l
 
-class CastComponent126(test_IInterface1, test_IInterface2, test_IInterface6):
-    def Method2(self, b): return b
-    def Method4(self, s): return s
-    def Method5(self, f): return f
-    def Method6(self, f): return f
+class CastComponent017(test_IInterface0, test_IInterface1, test_IInterface7):
+    def Method1(self, i): return i
+    def Method3(self, i): return i
+    def Method4(self, i): return i
+    def Method5(self, i): return i
+    def Method6(self, i): return i
+    def Method7(self, i): return i
 
 class Tests(test_IBasicTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests):
     def __init__(self, jointModule):
@@ -74,14 +76,16 @@ class Tests(test_IBasicTests, test_IObjectTests, test_ILifetimeTests, test_ICast
     def CollectGarbage(self):
         gc.collect()
 
+    def CastTo1(self, obj): return pyjoint.Cast(obj, test_IInterface1)
     def CastTo2(self, obj): return pyjoint.Cast(obj, test_IInterface2)
     def CastTo3(self, obj): return pyjoint.Cast(obj, test_IInterface3)
     def CastTo4(self, obj): return pyjoint.Cast(obj, test_IInterface4)
     def CastTo5(self, obj): return pyjoint.Cast(obj, test_IInterface5)
     def CastTo6(self, obj): return pyjoint.Cast(obj, test_IInterface6)
+    def CastTo7(self, obj): return pyjoint.Cast(obj, test_IInterface7)
 
-    def Create126(self):
-        return self.jointModule.CreateComponent(test_IInterface1, CastComponent126)
+    def Create017(self):
+        return self.jointModule.CreateComponent(test_IInterface1, CastComponent017)
 
 
 def GetTests(jointModule):

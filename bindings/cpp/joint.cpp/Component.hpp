@@ -29,10 +29,17 @@ namespace joint
 		struct AppendToInterfacesList
 		{
 			typedef typename IfElse<
-					ContainsInterface<typename List_::Type, Ifc_>::Value,
-					List_,
-					TypeListNode<typename List_::Type, typename AppendToInterfacesList<typename List_::NextNode, Ifc_>::ValueT>
-				>::ValueT ValueT;
+				ContainsInterface<typename List_::Type, Ifc_>::Value,
+				List_,
+				TypeListNode<
+					typename IfElse<
+						ContainsInterface<Ifc_, typename List_::Type>::Value,
+						Ifc_,
+						typename List_::Type
+					>::ValueT,
+					typename AppendToInterfacesList<typename List_::NextNode, Ifc_>::ValueT
+				>
+			>::ValueT ValueT;
 		};
 
 		template < typename List_, typename Ifc_ >
@@ -49,25 +56,28 @@ namespace joint
 		{ typedef L_ ValueT; };
 
 
-		template < typename BaseInterfaces_, bool IsEmpty_ = TypeList_IsEmpty<BaseInterfaces_>::Value >
-		struct GetNonContainedBaseInterfaces
-		{ typedef typename BaseInterfaces_::NextNode ValueT; };
+		template < typename Root_, typename Bases_ = typename Root_::BaseInterfaces, bool BasesEmpty_ = TypeList_IsEmpty<Bases_>::Value >
+		struct InterfacesTreeLinearizer
+		{
+			typedef typename InterfacesListMerger<
+					typename InterfacesListMerger<
+						TypeListNode<Root_, TypeListEndNode>,
+						typename InterfacesTreeLinearizer<typename Bases_::Type>::ValueT
+					>::ValueT,
+					typename InterfacesTreeLinearizer<Root_, typename Bases_::NextNode>::ValueT
+				>::ValueT ValueT;
+		};
 
-		template < typename BaseInterfaces_ >
-		struct GetNonContainedBaseInterfaces<BaseInterfaces_, true>
-		{ typedef TypeListEndNode ValueT; };
+		template < typename Root_, typename Bases_ >
+		struct InterfacesTreeLinearizer<Root_, Bases_, true>
+		{ typedef TypeListNode<Root_, TypeListEndNode> ValueT; };
 
 
 		template < typename InterfacesList_, bool IsEmpty_ = TypeList_IsEmpty<InterfacesList_>::Value >
 		struct LinearizedInterfacesList
 		{
 			typedef typename InterfacesListMerger<
-					TypeListNode<
-						typename InterfacesList_::Type,
-						typename LinearizedInterfacesList<
-								typename GetNonContainedBaseInterfaces<typename InterfacesList_::Type::BaseInterfaces>::ValueT
-							>::ValueT
-					>,
+					typename InterfacesTreeLinearizer<typename InterfacesList_::Type>::ValueT,
 					typename LinearizedInterfacesList<typename InterfacesList_::NextNode>::ValueT
 				>::ValueT ValueT;
 		};

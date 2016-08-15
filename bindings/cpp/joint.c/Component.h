@@ -17,9 +17,9 @@
 		DETAIL_TRY_CAST__##Ifc(w->Ifc##__accessor)
 
 #define DETAIL_JOINT_C_GLOBAL_STUFF(Ifc, ComponentImpl) \
-	DETAIL_DEFINE_INVOKE_METHOD__##Ifc(ComponentImpl) \
+	DETAIL_DEFINE_INVOKE_METHOD__##Ifc(ComponentImpl, _) \
 	\
-	DETAIL_DEFINE_ACCESSOR_VTABLE__##Ifc(ComponentImpl); \
+	DETAIL_DEFINE_ACCESSOR_VTABLE__##Ifc(ComponentImpl, _); \
 	Joint_ObjectHandle ComponentImpl##__as__##Ifc(Joint_ModuleHandle module, ComponentImpl##__wrapper* w) \
 	{ \
 		Joint_ObjectHandle result = JOINT_NULL_HANDLE; \
@@ -31,7 +31,7 @@
 	}
 
 #define DETAIL_JOINT_C_INIT_ACCESSOR(Ifc, ComponentImpl) \
-		DETAIL_INIT_ACCESSOR__##Ifc(ComponentImpl, w, w->Ifc##__accessor)
+		DETAIL_INIT_ACCESSOR__##Ifc(ComponentImpl, w, w->Ifc##__accessor, _)
 
 #define DETAIL_JOINT_C_VALIDATE_IFC(Ifc, ...) \
 	extern int _Detail_Joint_C_interface_validity_checker__##Ifc[sizeof(Ifc)]; \
