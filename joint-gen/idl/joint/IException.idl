@@ -1,0 +1,13 @@
+package joint
+{
+	interface IException
+	{
+		string GetMessage();
+	}
+
+	interface INativeLanguageException : IException
+	{ }
+
+	interface INullReferenceException : IException
+	{ }
+}

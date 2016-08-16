@@ -21,6 +21,7 @@ joint_generate_adapters(c++ Tests_adapters.hpp
 	../idl/IObjectTests.idl
 	../idl/ILifetimeTests.idl
 	../idl/ICastTests.idl
+	../idl/IExceptionTests.idl
 )
 
 add_library(tests-cpp SHARED Tests.cpp Tests_adapters.hpp)

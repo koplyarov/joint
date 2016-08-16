@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
 
 #include <utils/PyObjectHolder.hpp>
 #include <utils/PythonHeaders.h>
@@ -25,7 +26,7 @@
 #endif
 
 
-#define PYTHON_THROW(Message_) do { throw std::runtime_error(Message_ + std::string("\n") + ::joint_python::GetPythonErrorMessage()); } while (false)
+#define PYTHON_THROW(Message_) do { throw std::runtime_error(Message_ + std::string("\n") + ::joint_python::GetPythonErrorMessage().ToString()); } while (false)
 #define PYTHON_CHECK(Expr_, Message_) do { if (!(Expr_)) PYTHON_THROW(Message_); } while (false)
 
 #define NATIVE_THROW(Message_) do { throw std::runtime_error(Message_); } while (false)
@@ -37,7 +38,62 @@
 namespace joint_python
 {
 
-	std::string JOINT_PYTHON_CORE_API GetPythonErrorMessage();
+	inline bool PyObjectToStringNoExcept(PyObject* obj, std::string& result)
+	{
+		if (!obj)
+			return false;
+
+#if PY_VERSION_HEX >= 0x03000000
+		PyObjectHolder obj_str(PyObject_Str(obj));
+#else
+		PyObjectHolder obj_str(PyObject_Unicode(obj));
+#endif
+		if (!obj_str)
+			return false;
+
+		PyObjectHolder py_bytes(PyUnicode_AsUTF8String(obj_str));
+		if (!py_bytes)
+			return false;
+
+		const char* content = PyBytes_AsString(py_bytes);
+		if (!content)
+			return false;
+
+		result = content;
+		return true;
+	}
+
+	class PythonErrorInfo
+	{
+	private:
+		PyObjectHolder				_type;
+		std::string					_message;
+		std::vector<std::string>	_backtrace;
+
+	public:
+		PythonErrorInfo(PyObjectHolder type, std::string message, std::vector<std::string> backtrace)
+			: _type(std::move(type)), _message(std::move(message)), _backtrace(std::move(backtrace))
+		{ }
+
+		const PyObjectHolder& GetType() const { return _type; }
+		const std::string& GetMessage() const { return _message; }
+		const std::vector<std::string>& GetBacktrace() const { return _backtrace; }
+
+		std::string ToString() const
+		{
+			std::stringstream result;
+			std::string type_str;
+			if (PyObjectToStringNoExcept(_type, type_str))
+				result << type_str << "\n";
+			if (!_message.empty())
+				result << _message;
+			for (const auto& l : _backtrace)
+				result << "\n" << l;
+			return result.str();
+		}
+	};
+
+	PythonErrorInfo JOINT_PYTHON_CORE_API GetPythonErrorMessage();
 
 
 	template < typename PyObjType_, typename MsgGetter_ >
@@ -45,7 +101,7 @@ namespace joint_python
 	{
 		if (pyObj)
 			return std::move(pyObj);
-		throw std::runtime_error(joint::devkit::StringBuilder() % msgGetter() % " at " % location % "\n" % GetPythonErrorMessage());
+		throw std::runtime_error(joint::devkit::StringBuilder() % msgGetter() % " at " % location % "\n" % GetPythonErrorMessage().ToString());
 	}
 
 	inline bool AsBool(PyObject* obj)

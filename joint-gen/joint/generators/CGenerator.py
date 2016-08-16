@@ -42,7 +42,7 @@ class CGenerator:
         yield ''
         yield 'typedef struct {n}_s* {n};'.format(n=mangled_ifc)
         for m in ifc.methods:
-            yield 'Joint_Error {n}_{m}({n} _obj{p}{r});'.format(n=mangled_ifc, m=m.name, p=self._paramsDecl(m.params), r=self._retDecl(m.retType))
+            yield 'Joint_Error {n}_{m}({n} _obj{p}{r}, Joint_ExceptionHandle* _ex);'.format(n=mangled_ifc, m=m.name, p=self._paramsDecl(m.params), r=self._retDecl(m.retType))
         yield ''
         yield 'typedef struct {'
         if not ifc.bases:
@@ -100,7 +100,7 @@ class CGenerator:
 
     def _generateMethodDefinition(self, ifc, m):
         mangled_ifc = self._mangleType(ifc)
-        yield 'Joint_Error {n}_{m}({n} _obj{p}{r})'.format(n=mangled_ifc, m=m.name, p=self._paramsDecl(m.params), r=self._retDecl(m.retType))
+        yield 'Joint_Error {n}_{m}({n} _obj{p}{r}, Joint_ExceptionHandle* _ex)'.format(n=mangled_ifc, m=m.name, p=self._paramsDecl(m.params), r=self._retDecl(m.retType))
         yield '{'
         yield '\tJoint_RetValue _joint_internal_ret_val;'
         if m.params:
@@ -110,7 +110,11 @@ class CGenerator:
                 yield '\tparams[{}].type = (Joint_Type){};'.format(p.index, p.type.index)
         yield '\tJoint_Error _ret = Joint_InvokeMethod((Joint_ObjectHandle)_obj, {}, {}, {}, (Joint_Type){}, &_joint_internal_ret_val);'.format(m.index, 'params' if m.params else 'NULL', len(m.params), m.retType.index)
         yield '\tif (_ret != JOINT_ERROR_NONE)'
+        yield '\t{'
+        yield '\t\tif (_ret == JOINT_ERROR_EXCEPTION)'
+        yield '\t\t\t*_ex = _joint_internal_ret_val.variant.value.ex;'
         yield '\t\treturn _ret;'
+        yield '\t}'
         if m.retType.name == 'string':
             result_var = '_joint_internal_ret_val.variant.value.utf8'
             yield '\tchar* _tmpResult = (char*)malloc(strlen({}) + 1);'.format(result_var)
@@ -156,13 +160,9 @@ class CGenerator:
                 ret_param = ', &result'
             else:
                 ret_param = ''
-            yield '\t\t\tret = ComponentImpl##_{}((&w->impl){}{}); \\'.format(m.name, ''.join(', p{}'.format(p.index) for p in m.params), ret_param)
-            yield '\t\t\tif (ret == JOINT_ERROR_NONE) \\'
-            yield '\t\t\t{ \\'
-            yield '\t\t\t\toutRetValue->variant.type = (Joint_Type){}; \\'.format(m.retType.index)
-            if m.retType.name != 'void':
-                yield '\t\t\t\toutRetValue->variant.value.{} = {}result; \\'.format(m.retType.variantName, '' if isinstance(m.retType, BuiltinType) else '(Joint_ObjectHandle)')
-            yield '\t\t\t} \\'
+            yield '\t\t\tret = ComponentImpl##_{}(&w->impl{}{}, &outRetValue->variant.value.ex); \\'.format(m.name, ''.join(', p{}'.format(p.index) for p in m.params), ret_param)
+            ret_statement = '' if m.retType.name == 'void' else ', outRetValue->variant.value.{} = {}result;'.format(m.retType.variantName, '' if isinstance(m.retType, BuiltinType) else '(Joint_ObjectHandle)')
+            yield '\t\t\tDETAIL_JOINT_C_SET_RET_VALUE("{}.{}", ret, (Joint_Type){}{}) \\'.format(ifc.fullname, m.name, m.retType.index, ret_statement)
             yield '\t\t} \\'
             yield '\t\tbreak; \\'
         yield '\tdefault: \\'

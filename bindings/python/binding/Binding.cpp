@@ -4,6 +4,7 @@
 #include <joint/devkit/Holder.hpp>
 #include <joint/utils/CppWrappers.hpp>
 
+#include <algorithm>
 #include <memory>
 #include <string.h>
 
@@ -85,21 +86,25 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 		auto o = reinterpret_cast<Object*>(obj);
-		PyObjectHolder py_res;
-		try
+		PyObjectHolder py_res(o->InvokeMethod(methodId, joint::ArrayView<const Joint_Variant>(params, paramsCount)));
+		if (!py_res)
 		{
-			py_res = o->InvokeMethod(methodId, joint::ArrayView<const Joint_Variant>(params, paramsCount));
-		}
-		catch (const std::exception& ex) // TODO: reimplement this
-		{
+			auto err_info = GetPythonErrorMessage();
+			const auto& msg = err_info.GetMessage();
+			const auto& bt = err_info.GetBacktrace();
+
+			std::vector<const char*> c_bt;
+			c_bt.reserve(bt.size());
+			std::transform(bt.begin(), bt.end(), std::back_inserter(c_bt), [](const std::string& s) { return s.c_str(); });
+
 			Joint_ExceptionHandle joint_ex;
-			Joint_Error ret = Joint_MakeException(ex.what(), &joint_ex);
+			Joint_Error ret = Joint_MakeException(msg.c_str(), c_bt.data(), c_bt.size(), &joint_ex);
 			JOINT_CHECK(ret == JOINT_ERROR_NONE, std::string("Joint_MakeException failed: ") + Joint_ErrorToString(ret));
 			outRetValue->releaseValue = &Binding::ReleaseRetValue;
 			outRetValue->variant.type = JOINT_TYPE_EXCEPTION;
 			outRetValue->variant.value.ex = joint_ex;
 
-			return JOINT_ERROR_NONE;
+			return JOINT_ERROR_EXCEPTION;
 		}
 
 		switch (retType)

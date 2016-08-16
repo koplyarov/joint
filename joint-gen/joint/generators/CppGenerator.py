@@ -108,7 +108,7 @@ class CppGenerator:
             for p in m.params:
                 yield '\tparams[{}].value.{} = {};'.format(p.index, p.type.variantName, self._toCppParamGetter(p))
                 yield '\tparams[{}].type = (Joint_Type){};'.format(p.index, p.type.index)
-        yield '\tJOINT_METHOD_CALL( Joint_InvokeMethod(_obj, {}, {}, {}, (Joint_Type){}, &_joint_internal_ret_val) );'.format(m.index, 'params' if m.params else 'nullptr', len(m.params), m.retType.index)
+        yield '\tJOINT_METHOD_CALL("{}.{}", Joint_InvokeMethod(_obj, {}, {}, {}, (Joint_Type){}, &_joint_internal_ret_val));'.format(ifc.fullname, m.name, m.index, 'params' if m.params else 'nullptr', len(m.params), m.retType.index)
         if m.retType.needRelease:
             yield '\t::joint::detail::RetValueGuard _joint_internal_rvg(_joint_internal_ret_val);'
         if m.retType.name != 'void':
@@ -116,7 +116,7 @@ class CppGenerator:
         yield '}'
         yield ''
 
-    def _generateAccessorInvokeMethodCase(self, m):
+    def _generateAccessorInvokeMethodCase(self, ifc, m):
         yield 'case {}:'.format(m.index)
         yield '\t{'
         yield '\t\tif (paramsCount != {}'.format(len(m.params))
@@ -132,21 +132,26 @@ class CppGenerator:
             else:
                 yield '\t\t{t} p{i}(params[{i}].value.{v});'.format(t=self._toCppType(p.type), i=p.index, v=p.type.variantName)
         method_call = 'componentImpl->{}({})'.format(m.name, ', '.join('p{}'.format(p.index) for p in m.params))
+        yield '\t\ttry'
+        yield '\t\t{'
         if m.retType.name != 'void':
-            yield '\t\t{} result({});'.format(self._toCppType(m.retType), method_call)
+            yield '\t\t\t{} result({});'.format(self._toCppType(m.retType), method_call)
             if isinstance(m.retType, Interface):
-                yield '\t\tJoint_Error ret = Joint_IncRefObject(result->_GetObjectHandle());'
-                yield '\t\tif (ret != JOINT_ERROR_NONE)'
-                yield '\t\t\treturn ret;'
+                yield '\t\t\tJoint_Error ret = Joint_IncRefObject(result->_GetObjectHandle());'
+                yield '\t\t\tif (ret != JOINT_ERROR_NONE)'
+                yield '\t\t\t\treturn ret;'
             if m.retType.name != 'string':
-                yield '\t\toutRetValue->variant.value.{} = {};'.format(m.retType.variantName, self._toCppValue('result', m.retType))
+                yield '\t\t\toutRetValue->variant.value.{} = {};'.format(m.retType.variantName, self._toCppValue('result', m.retType))
             else:
-                yield '\t\tchar* result_c_str = new char[result.size() + 1];'
-                yield '\t\tstrcpy(result_c_str, result.c_str());'
-                yield '\t\toutRetValue->variant.value.{} = result_c_str;'.format(m.retType.variantName)
+                yield '\t\t\tchar* result_c_str = new char[result.size() + 1];'
+                yield '\t\t\tstrcpy(result_c_str, result.c_str());'
+                yield '\t\t\toutRetValue->variant.value.{} = result_c_str;'.format(m.retType.variantName)
         else:
-            yield '\t\t{};'.format(method_call)
-        yield '\t\toutRetValue->variant.type = (Joint_Type){};'.format(m.retType.index)
+            yield '\t\t\t{};'.format(method_call)
+        yield '\t\t\toutRetValue->variant.type = (Joint_Type){};'.format(m.retType.index)
+        yield '\t\t}'
+        yield '\t\tcatch (const std::exception& ex)'
+        yield '\t\t{{ return ::joint::detail::WrapCppException(ex, outRetValue, "{}.{}"); }}'.format(ifc.fullname, m.name)
         yield '\t\tbreak;'
         yield '\t}'
 
@@ -157,7 +162,7 @@ class CppGenerator:
         yield '\tswitch(methodId)'
         yield '\t{'
         for m in ifc.methods:
-            for l in self._generateAccessorInvokeMethodCase(m):
+            for l in self._generateAccessorInvokeMethodCase(ifc, m):
                 yield '\t{}'.format(l)
         yield '\tdefault:'
         yield '\t\treturn JOINT_ERROR_GENERIC;'

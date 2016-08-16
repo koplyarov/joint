@@ -30,7 +30,7 @@ class CastComponent017(test_IInterface0, test_IInterface1, test_IInterface7):
     def Method6(self, i): return i
     def Method7(self, i): return i
 
-class Tests(test_IBasicTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests):
+class Tests(test_IBasicTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests):
     def __init__(self, jointModule):
         super(Tests, self).__init__()
         self.jointModule = jointModule
@@ -44,7 +44,6 @@ class Tests(test_IBasicTests, test_IObjectTests, test_ILifetimeTests, test_ICast
     def ReturnSameObject(self, o): return o
     def InvokeObjectMethod(self, o): o.Method()
 
-    def Throw(self): raise RuntimeError('Requested exception')
     def AddU8(self, l, r):  return l + r
     def AddI8(self, l, r):  return l + r
     def AddU16(self, l, r): return l + r
@@ -86,6 +85,8 @@ class Tests(test_IBasicTests, test_IObjectTests, test_ILifetimeTests, test_ICast
 
     def Create017(self):
         return self.jointModule.CreateComponent(test_IInterface1, CastComponent017)
+
+    def ThrowNative(self): raise RuntimeError('Requested exception')
 
 
 def GetTests(jointModule):

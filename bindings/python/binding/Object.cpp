@@ -68,8 +68,7 @@ namespace binding
 			}
 		}
 
-		PyObjectHolder py_result(PY_OBJ_CHECK(PyObject_CallObject(py_function, py_args)));
-		return py_result;
+		return PyObjectHolder(PyObject_CallObject(py_function, py_args));
 	}
 
 }}

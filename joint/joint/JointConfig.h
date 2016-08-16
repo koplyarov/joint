@@ -23,4 +23,12 @@
 #	define JOINT_WARN_UNUSED_RESULT(Result_) Result_
 #endif
 
+#ifdef _MSC_VER
+#	define JOINT_EXPORT __declspec(dllexport)
+#	define JOINT_IMPORT __declspec(dllimport)
+#else
+#	define JOINT_EXPORT
+#	define JOINT_IMPORT
+#endif
+
 #endif

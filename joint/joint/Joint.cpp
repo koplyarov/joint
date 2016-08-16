@@ -328,20 +328,16 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		//if (DETAIL_JOINT_UNLIKELY(Joint_GetLogLevel() <= JOINT_LOGLEVEL_DEBUG))
-			//GetLogger().Debug() << "InvokeMethod(obj: " << obj << " (internal: " << (obj ? obj->internal : NULL) << "), methodId: " << methodId << ")";
-
 		JOINT_CHECK(obj != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(obj->refCount.load(std::memory_order_relaxed) > 0, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(params || paramsCount == 0, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(outRetValue, JOINT_ERROR_INVALID_PARAMETER);
 
 		Joint_Error ret = obj->module->binding->desc.invokeMethod(obj->module, obj->module->binding->userData, obj->module->internal, obj->internal, methodId, params, paramsCount, retType, outRetValue);
-		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+		JOINT_CHECK(ret == JOINT_ERROR_NONE || ret == JOINT_ERROR_EXCEPTION, ret);
 		JOINT_CHECK(outRetValue->releaseValue, JOINT_ERROR_IMPLEMENTATION_ERROR);
 
-		//if (DETAIL_JOINT_UNLIKELY(Joint_GetLogLevel() <= JOINT_LOGLEVEL_DEBUG))
-			//GetLogger().Debug() << "  InvokeMethod.outRetValue.type: " << outRetValue->variant.type;
+		return ret;
 
 		JOINT_CPP_WRAP_END
 	}
@@ -350,9 +346,6 @@ extern "C"
 	Joint_Error Joint_ReleaseRetValue(Joint_RetValue value)
 	{
 		JOINT_CPP_WRAP_BEGIN
-
-		//if (DETAIL_JOINT_UNLIKELY(Joint_GetLogLevel() <= JOINT_LOGLEVEL_DEBUG))
-			//GetLogger().Debug() << "ReleaseRetValue(type: " << value.variant.type << ")";
 
 		JOINT_CHECK(value.releaseValue, JOINT_ERROR_INVALID_PARAMETER);
 
@@ -403,8 +396,6 @@ extern "C"
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		GetLogger().Debug() << "CastObject(obj: " << handle << " (internal: " << (handle ? handle->internal : NULL) << "), interfaceId: " << interfaceId << ")";
-
 		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(handle->refCount.load(std::memory_order_relaxed) > 0, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(interfaceId, JOINT_ERROR_INVALID_PARAMETER);
@@ -425,19 +416,21 @@ extern "C"
 		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
 		*outHandle = new Joint_Object(internal, handle->module);
 
-		GetLogger().Debug() << "  CastObject.outHandle: " << *outHandle << " (internal: " << internal << ")";
-
 		JOINT_CPP_WRAP_END
 	}
 
 
-	Joint_Error Joint_MakeException(const char* message, Joint_ExceptionHandle* outHandle)
+	Joint_Error Joint_MakeException(const char* message, const char** backtrace, Joint_SizeT backtraceSize, Joint_ExceptionHandle* outHandle)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
 		JOINT_CHECK(outHandle, JOINT_ERROR_INVALID_PARAMETER);
 
-		*outHandle = new Joint_Exception{message, {}};
+		std::vector<std::string> bt;
+		bt.resize(backtraceSize);
+		for (Joint_SizeT i = 0; i < backtraceSize; ++i)
+			bt[i] = backtrace[i];
+		*outHandle = new Joint_Exception{message, bt};
 
 		JOINT_CPP_WRAP_END
 	}

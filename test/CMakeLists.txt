@@ -41,6 +41,7 @@ joint_generate_adapters(c++ Tests_adapters.hpp
 	idl/IObjectTests.idl
 	idl/ILifetimeTests.idl
 	idl/ICastTests.idl
+	idl/IExceptionTests.idl
 )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

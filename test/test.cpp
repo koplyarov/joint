@@ -284,6 +284,24 @@ TEST_DEFINE_TEST(TestCtx, CastTests)
 }
 
 
+TEST_DEFINE_TEST(TestCtx, ExceptionTests)
+{
+	auto t = Module.GetRootObject<test::IExceptionTests>("GetTests");
+	if (!t)
+	{
+		TEST_REPORT_ERROR("ExceptionTests not implemented!");
+		return;
+	}
+
+	try
+	{ t->ThrowNative(); }
+	catch (const std::exception& ex)
+	{ Joint_Log(JOINT_LOGLEVEL_WARNING, "Test", "%s", ex.what()); }
+
+	TEST_THROWS(joint::detail::JointCppException, t->ThrowNative());
+}
+
+
 int main(int argc, const char* argv[])
 {
 	if (argc != 3)

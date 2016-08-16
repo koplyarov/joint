@@ -63,7 +63,8 @@ public:
 			IBasicTests,
 			IObjectTests,
 			ILifetimeTests,
-			ICastTests
+			ICastTests,
+			IExceptionTests
 		> JointInterfaces;
 
 private:
@@ -77,7 +78,7 @@ public:
 	~Tests()
 	{ }
 
-	void Throw() { }
+	void ThrowNative() { throw std::runtime_error("Requested exception"); }
 
 	uint8_t   AddU8(uint8_t l, uint8_t r)     { return l + r; }
 	int8_t    AddI8(int8_t l, int8_t r)       { return l + r; }
