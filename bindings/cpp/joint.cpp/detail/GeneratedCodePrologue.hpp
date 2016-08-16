@@ -43,7 +43,7 @@ namespace detail
 		{ return ex.what(); }
 
 		static std::vector<std::string> GetBacktrace(const ExceptionType_& ex)
-		{ return {}; }
+		{ return std::vector<std::string>(); }
 	};
 
 	template <  >

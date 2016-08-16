@@ -117,15 +117,15 @@ namespace detail
 			msg.assign(buf.data());
 		}
 
+		std::vector<std::string> bt;
 		Joint_SizeT bt_size = 0;
 		ret = Joint_GetExceptionBacktraceSize(ex, &bt_size);
 		if (ret != JOINT_ERROR_NONE)
 		{
 			Joint_Log(JOINT_LOGLEVEL_WARNING, "Joint.C++", "Joint_GetExceptionBacktraceSize failed: %s", Joint_ErrorToString(ret));
-			return JointCppException(msg, {});
+			return JointCppException(msg, bt);
 		}
 
-		std::vector<std::string> bt;
 		bt.reserve(bt_size + 1);
 		std::string current_module(Joint_DevKit_GetCurrentModuleName());
 		bt.push_back(std::string("C++ proxy in ") + current_module + ": " + methodName);
