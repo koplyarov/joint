@@ -2,6 +2,7 @@
 #define JOINT_INTEROP_PYTHONUTILS_HPP
 
 
+#include <joint/devkit/StackFrameData.hpp>
 #include <joint/devkit/StringBuilder.hpp>
 #include <joint/utils/JointException.hpp>
 
@@ -12,7 +13,6 @@
 
 #include <utils/PyObjectHolder.hpp>
 #include <utils/PythonHeaders.h>
-#include <utils/ScopeExit.hpp>
 
 
 #ifdef _MSC_VER
@@ -26,7 +26,7 @@
 #endif
 
 
-#define PYTHON_THROW(Message_) do { throw std::runtime_error(Message_ + std::string("\n") + ::joint_python::GetPythonErrorMessage().ToString()); } while (false)
+#define PYTHON_THROW(Message_) do { throw std::runtime_error(Message_ + std::string("\n") + ::joint_python::GetPythonErrorInfo().ToString()); } while (false)
 #define PYTHON_CHECK(Expr_, Message_) do { if (!(Expr_)) PYTHON_THROW(Message_); } while (false)
 
 #define NATIVE_THROW(Message_) do { throw std::runtime_error(Message_); } while (false)
@@ -66,18 +66,18 @@ namespace joint_python
 	class PythonErrorInfo
 	{
 	private:
-		PyObjectHolder				_type;
-		std::string					_message;
-		std::vector<std::string>	_backtrace;
+		PyObjectHolder								_type;
+		std::string									_message;
+		std::vector<joint::devkit::StackFrameData>	_backtrace;
 
 	public:
-		PythonErrorInfo(PyObjectHolder type, std::string message, std::vector<std::string> backtrace)
+		PythonErrorInfo(PyObjectHolder type, std::string message, std::vector<joint::devkit::StackFrameData> backtrace)
 			: _type(std::move(type)), _message(std::move(message)), _backtrace(std::move(backtrace))
 		{ }
 
 		const PyObjectHolder& GetType() const { return _type; }
 		const std::string& GetMessage() const { return _message; }
-		const std::vector<std::string>& GetBacktrace() const { return _backtrace; }
+		const std::vector<joint::devkit::StackFrameData>& GetBacktrace() const { return _backtrace; }
 
 		std::string ToString() const
 		{
@@ -88,12 +88,14 @@ namespace joint_python
 			if (!_message.empty())
 				result << _message;
 			for (const auto& l : _backtrace)
-				result << "\n" << l;
+				result << "\n" << l.ToString();
 			return result.str();
 		}
 	};
 
-	PythonErrorInfo JOINT_PYTHON_CORE_API GetPythonErrorMessage();
+	JOINT_PYTHON_CORE_API bool GetPythonErrorMessage(PyObject* value, std::string& msg);
+	JOINT_PYTHON_CORE_API bool GetPythonErrorBacktrace(PyObject* traceback, std::vector<joint::devkit::StackFrameData>& backtrace);
+	JOINT_PYTHON_CORE_API PythonErrorInfo GetPythonErrorInfo();
 
 
 	template < typename PyObjType_, typename MsgGetter_ >
@@ -101,7 +103,7 @@ namespace joint_python
 	{
 		if (pyObj)
 			return std::move(pyObj);
-		throw std::runtime_error(joint::devkit::StringBuilder() % msgGetter() % " at " % location % "\n" % GetPythonErrorMessage().ToString());
+		throw std::runtime_error(joint::devkit::StringBuilder() % msgGetter() % " at " % location % "\n" % GetPythonErrorInfo().ToString());
 	}
 
 	inline bool AsBool(PyObject* obj)

@@ -1,7 +1,9 @@
 #include <pyjoint/Object.hpp>
 
 #include <joint/devkit/Logger.hpp>
+#include <joint/devkit/ScopeExit.hpp>
 
+#include <algorithm>
 #include <vector>
 
 #include <utils/PythonUtils.hpp>
@@ -89,6 +91,8 @@ namespace pyjoint
 			m->handle = JOINT_NULL_HANDLE;
 		}
 
+		Py_TYPE(self)->tp_free(self);
+
 		PYJOINT_CPP_WRAP_END_VOID()
 	}
 
@@ -149,9 +153,9 @@ namespace pyjoint
 
 		Joint_RetValue ret_value;
 		Joint_Error ret = Joint_InvokeMethod(o->handle, method_id, params.data(), params.size(), ret_type, &ret_value);
-		NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_InvokeMethod failed: ") + Joint_ErrorToString(ret)).c_str());
+		NATIVE_CHECK(ret == JOINT_ERROR_NONE || ret == JOINT_ERROR_EXCEPTION, (std::string("Joint_InvokeMethod failed: ") + Joint_ErrorToString(ret)).c_str());
 
-		auto sg(ScopeExit([&]{
+		auto sg(joint::devkit::ScopeExit([&]{
 			Joint_Error ret = Joint_ReleaseRetValue(ret_value);
 			if (ret != JOINT_ERROR_NONE)
 				GetLogger().Error() << "Joint_ReleaseRetValue failed: " << ret;
@@ -190,22 +194,57 @@ namespace pyjoint
 				Joint_SizeT buf_size = 0;
 				std::vector<char> buf;
 
-				Joint_Error ret = Joint_GetExceptionMessageSize(ret_value.variant.value.ex, &buf_size);
+				auto ex = ret_value.variant.value.ex;
+
+				Joint_Error ret = Joint_GetExceptionMessageSize(ex, &buf_size);
 				if (ret != JOINT_ERROR_NONE)
 				{
-					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C++", "Joint_GetExceptionMessageSize failed: ", Joint_ErrorToString(ret));
+					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.Python", "Joint_GetExceptionMessageSize failed: ", Joint_ErrorToString(ret));
 					throw std::runtime_error("Could not obtain joint exception message!");
 				}
 
 				buf.resize(buf_size);
 
-				ret = Joint_GetExceptionMessage(ret_value.variant.value.ex, buf.data(), buf.size());
+				ret = Joint_GetExceptionMessage(ex, buf.data(), buf.size());
 				if (ret != JOINT_ERROR_NONE)
 				{
-					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C++", "Joint_GetExceptionMessage failed: %s", Joint_ErrorToString(ret));
+					Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.Python", "Joint_GetExceptionMessage failed: %s", Joint_ErrorToString(ret));
 					throw std::runtime_error("Could not obtain joint exception message!");
 				}
-				throw std::runtime_error(buf.data());
+
+				PyObjectHolder py_ex(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&JointException_type, NULL)));
+				reinterpret_cast<JointException*>(py_ex.Get())->message = new std::string(buf.data());
+
+				Joint_SizeT bt_size = 0;
+				ret = Joint_GetExceptionBacktraceSize(ex, &bt_size);
+				if (ret != JOINT_ERROR_NONE)
+				{
+					Joint_Log(JOINT_LOGLEVEL_WARNING, "Joint.Python", "Joint_GetExceptionBacktraceSize failed: %s", Joint_ErrorToString(ret));
+					PyErr_SetObject((PyObject*)&JointException_type, py_ex);
+					return NULL;
+				}
+
+				std::vector<joint::devkit::StackFrameData> bt;
+				bt.reserve(bt_size);
+				std::vector<PyObjectHolder> py_frames;
+
+				for (Joint_SizeT i = 0; i < bt_size; ++i)
+				{
+					Joint_StackFrame sf;
+					ret = Joint_GetExceptionBacktraceEntry(ex, i, &sf);
+					if (ret != JOINT_ERROR_NONE)
+					{
+						Joint_Log(JOINT_LOGLEVEL_WARNING, "Joint.Python", "Joint_GetExceptionBacktraceEntry failed: %s", Joint_ErrorToString(ret));
+						continue;
+					}
+
+					bt.emplace_back(joint::devkit::StackFrameData(sf.module, sf.filename, sf.line, sf.code, sf.function));
+				}
+
+				reinterpret_cast<JointException*>(py_ex.Get())->backtrace = new std::vector<joint::devkit::StackFrameData>(bt);
+				PyErr_SetObject((PyObject*)&JointException_type, py_ex);
+
+				return NULL;
 			}
 			break;
 		default:

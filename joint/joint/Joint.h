@@ -187,13 +187,24 @@ extern "C" {
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_DecRefObject(Joint_ObjectHandle handle);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_ObjectHandle* outHandle);
 
-	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_MakeException(const char* message, const char** backtrace, Joint_SizeT backtraceSize, Joint_ExceptionHandle* outHandle);
+	typedef struct
+	{
+		const char*      module;
+		const char*      filename;
+		Joint_SizeT      line;
+		const char*      code;
+		const char*      function;
+	} Joint_StackFrame;
+
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_MakeException(const char* message, const Joint_StackFrame* backtrace, Joint_SizeT backtraceSize, Joint_ExceptionHandle* outHandle);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_ReleaseException(Joint_ExceptionHandle handle);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetExceptionMessageSize(Joint_ExceptionHandle handle, Joint_SizeT* outSize);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetExceptionMessage(Joint_ExceptionHandle handle, char* buf, Joint_SizeT bufSize);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetExceptionBacktraceSize(Joint_ExceptionHandle handle, Joint_SizeT* outSize);
-	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetExceptionBacktraceEntrySize(Joint_ExceptionHandle handle, Joint_SizeT index, Joint_SizeT* outSize);
-	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetExceptionBacktraceEntry(Joint_ExceptionHandle handle, Joint_SizeT index, char* buf, Joint_SizeT bufSize);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetExceptionBacktraceEntry(Joint_ExceptionHandle handle, Joint_SizeT index, Joint_StackFrame* outStackFrame);
+
+	typedef void (*Joint_FunctionPtr)();
+	JOINT_API const char* JointAux_GetModuleName(Joint_FunctionPtr symbol);
 
 #ifdef __cplusplus
 }

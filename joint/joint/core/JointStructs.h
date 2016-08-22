@@ -53,10 +53,19 @@ extern "C"
 	};
 
 
+	struct Joint_StackFrameData
+	{
+		std::string      module;
+		std::string      filename;
+		Joint_SizeT      line;
+		std::string      code;
+		std::string      function;
+	};
+
 	struct Joint_Exception
 	{
-		std::string                 message;
-		std::vector<std::string>    backtrace;
+		std::string                        message;
+		std::vector<Joint_StackFrameData>  backtrace;
 	};
 
 }

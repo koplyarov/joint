@@ -262,12 +262,24 @@ Joint_Error Tests_Create017(Tests* self, test_IInterface0* result, Joint_Excepti
 }
 
 Joint_Error Tests_ThrowNative(Tests* self, Joint_ExceptionHandle* ex)
+{ return JOINT_C_THROW("Requested exception", ex); }
+
+Joint_Error Tests_CatchAll(Tests* self, test_IExceptionTestsCallback cb, JOINT_BOOL* result, Joint_ExceptionHandle* ex)
 {
-	Joint_Error ret = Joint_MakeException("Requested exception", NULL, 0, ex);
-	if (ret != JOINT_ERROR_NONE)
-		Joint_Log(JOINT_LOGLEVEL_WARNING, "Joint.C", "Joint_MakeException failed: %s", Joint_ErrorToString(ret));
-	return JOINT_ERROR_EXCEPTION;
+	Joint_ExceptionHandle internal_ex = JOINT_NULL_HANDLE;
+	Joint_Error ret = test_IExceptionTestsCallback_Method(cb, &internal_ex);
+	if (internal_ex)
+	{
+		Joint_Error ret = Joint_ReleaseException(internal_ex);
+		if (ret != JOINT_ERROR_NONE)
+			Joint_Log(JOINT_LOGLEVEL_WARNING, "Tests.C", "Joint_ReleaseException failed: %s", Joint_ErrorToString(ret));
+	}
+	*result = (ret == JOINT_ERROR_EXCEPTION);
+	return JOINT_ERROR_NONE;
 }
+
+Joint_Error Tests_LetThrough(Tests* self, test_IExceptionTestsCallback cb, Joint_ExceptionHandle* ex)
+{ return test_IExceptionTestsCallback_Method(cb, ex); }
 
 JOINT_C_COMPONENT(Tests, test_IBasicTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests);
 

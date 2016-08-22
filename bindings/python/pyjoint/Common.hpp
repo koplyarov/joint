@@ -9,7 +9,6 @@
 #include <utility>
 
 #include <utils/PythonHeaders.h>
-#include <utils/ScopeExit.hpp>
 
 
 namespace joint_python {

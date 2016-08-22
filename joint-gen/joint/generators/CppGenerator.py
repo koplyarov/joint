@@ -150,8 +150,10 @@ class CppGenerator:
             yield '\t\t\t{};'.format(method_call)
         yield '\t\t\toutRetValue->variant.type = (Joint_Type){};'.format(m.retType.index)
         yield '\t\t}'
+        yield '\t\tcatch (const ::joint::detail::JointCppException& ex)'
+        yield '\t\t{{ return ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, "{}.{}"); }}'.format(ifc.fullname, m.name)
         yield '\t\tcatch (const std::exception& ex)'
-        yield '\t\t{{ return ::joint::detail::WrapCppException(ex, outRetValue, "{}.{}"); }}'.format(ifc.fullname, m.name)
+        yield '\t\t{{ return ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, "{}.{}"); }}'.format(ifc.fullname, m.name)
         yield '\t\tbreak;'
         yield '\t}'
 

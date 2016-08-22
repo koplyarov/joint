@@ -88,6 +88,16 @@ class Tests(test_IBasicTests, test_IObjectTests, test_ILifetimeTests, test_ICast
 
     def ThrowNative(self): raise RuntimeError('Requested exception')
 
+    def CatchAll(self, cb):
+        try:
+            cb.Method()
+            return False
+        except:
+            return True
+
+    def LetThrough(self, cb):
+        cb.Method()
+
 
 def GetTests(jointModule):
     return jointModule.CreateComponent(joint_IObject, Tests, jointModule)

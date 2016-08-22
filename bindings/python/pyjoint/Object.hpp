@@ -3,6 +3,7 @@
 
 
 #include <pyjoint/Common.hpp>
+#include <pyjoint/JointException.hpp>
 
 
 namespace joint_python {

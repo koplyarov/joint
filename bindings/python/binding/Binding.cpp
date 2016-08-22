@@ -2,6 +2,7 @@
 
 #include <joint/Joint.h>
 #include <joint/devkit/Holder.hpp>
+#include <joint/devkit/ScopeExit.hpp>
 #include <joint/utils/CppWrappers.hpp>
 
 #include <algorithm>
@@ -89,13 +90,45 @@ namespace binding
 		PyObjectHolder py_res(o->InvokeMethod(methodId, joint::ArrayView<const Joint_Variant>(params, paramsCount)));
 		if (!py_res)
 		{
-			auto err_info = GetPythonErrorMessage();
-			const auto& msg = err_info.GetMessage();
-			const auto& bt = err_info.GetBacktrace();
+			PyObjectHolder type, value, traceback;
+			PyErr_Fetch(&type, &value, &traceback);
+			//auto sg(joint::devkit::ScopeExit([&]{ PyErr_Restore(type, value, traceback); PyErr_Clear(); }));
+			pyjoint::JointException* ex = nullptr;
 
-			std::vector<const char*> c_bt;
-			c_bt.reserve(bt.size());
-			std::transform(bt.begin(), bt.end(), std::back_inserter(c_bt), [](const std::string& s) { return s.c_str(); });
+			std::string msg = "<No message>";
+
+			if (PyErr_GivenExceptionMatches(type, (PyObject*)&pyjoint::JointException_type))
+			{
+				PyErr_NormalizeException(&type, &value, &traceback);
+				if (PyObject_Type(value) == (PyObject*)&pyjoint::JointException_type)
+				{
+					ex = reinterpret_cast<pyjoint::JointException*>(value.Get());
+					if (ex->message)
+						msg = *ex->message;
+				}
+				else
+				{
+					GetLogger().Warning() << "Exception that matches JointException_type has value of a different type!";
+					GetPythonErrorMessage(value, msg);
+				}
+			}
+			else
+				GetPythonErrorMessage(value, msg);
+
+
+			std::vector<joint::devkit::StackFrameData> bt;
+			GetPythonErrorBacktrace(traceback, bt);
+
+			std::vector<Joint_StackFrame> c_bt;
+			c_bt.reserve(bt.size() + (ex && ex->backtrace ? ex->backtrace->size() : 0));
+
+			auto tr_f = [](const joint::devkit::StackFrameData& sf) {
+					return Joint_StackFrame{sf.GetModule().c_str(), sf.GetFilename().c_str(), sf.GetLine(), sf.GetCode().c_str(), sf.GetFunction().c_str()};
+				};
+
+			if (ex && ex->backtrace)
+				std::transform(ex->backtrace->begin(), ex->backtrace->end(), std::back_inserter(c_bt), tr_f);
+			std::transform(bt.rbegin(), bt.rend(), std::back_inserter(c_bt), tr_f);
 
 			Joint_ExceptionHandle joint_ex;
 			Joint_Error ret = Joint_MakeException(msg.c_str(), c_bt.data(), c_bt.size(), &joint_ex);

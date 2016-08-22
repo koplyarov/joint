@@ -71,7 +71,6 @@ namespace pyjoint
 		PYJOINT_CPP_WRAP_BEGIN
 
 		Module* self = PY_OBJ_CHECK((Module*)type->tp_alloc(type, 0));
-
 		self->handle = JOINT_NULL_HANDLE;
 
 		PYJOINT_CPP_WRAP_END((PyObject*)self, NULL)
@@ -86,7 +85,6 @@ namespace pyjoint
 		PYTHON_CHECK(PyArg_ParseTuple(args, "O", &py_module_handle), "Could not parse arguments");
 		NATIVE_CHECK(PyCapsule_IsValid(py_module_handle, "Joint.Module"), "Could not unwrap joint module handle");
 		Joint_ModuleHandle handle = reinterpret_cast<Joint_ModuleHandle>(PyCapsule_GetPointer(py_module_handle, "Joint.Module"));
-
 		reinterpret_cast<Module*>(self)->handle = handle;
 
 		PYJOINT_CPP_WRAP_END(0, -1, Py_DECREF(self);)
@@ -105,6 +103,8 @@ namespace pyjoint
 				GetLogger().Error() << "Joint_DecRefModule failed: " << ret;
 			m->handle = JOINT_NULL_HANDLE;
 		}
+
+		Py_TYPE(self)->tp_free(self);
 
 		PYJOINT_CPP_WRAP_END_VOID()
 	}

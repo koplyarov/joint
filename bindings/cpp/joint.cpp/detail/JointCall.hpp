@@ -3,7 +3,6 @@
 
 
 #include <joint/Joint.h>
-#include <joint/devkit/CurrentModuleInfo.h>
 
 #include <sstream>
 #include <stdexcept>
@@ -43,17 +42,62 @@ namespace detail
 				throw std::runtime_error("Unexpected return type: " + std::to_string((int)(RetValue_).variant.type)); \
 		} while (false)
 
+	class JointCppStackFrame
+	{
+	private:
+		std::string      _module;
+		std::string      _filename;
+		Joint_SizeT      _line;
+		std::string      _code;
+		std::string      _function;
+
+	public:
+		JointCppStackFrame(std::string module, std::string filename, Joint_SizeT line, std::string code, std::string function)
+			: _module(std::move(module)), _filename(std::move(filename)), _line(line), _code(std::move(code)), _function(std::move(function))
+		{ }
+
+		const std::string&  GetModule() const { return _module; }
+		const std::string&  GetFilename() const { return _filename; }
+		Joint_SizeT         GetLine() const { return _line; }
+		const std::string&  GetCode() const { return _code; }
+		const std::string&  GetFunction() const { return _function; }
+
+		std::string ToString() const
+		{
+			std::stringstream ss;
+			if (!_module.empty())
+				ss << _module;
+
+			if (!_filename.empty())
+			{
+				if (!_module.empty())
+					ss << ", ";
+				ss << _filename << ":" << _line;
+			}
+
+			if (!_module.empty() || !_filename.empty())
+				ss << ": ";
+
+			if (!_code.empty())
+				ss << "'" << _code << "' ";
+
+			if (!_function.empty())
+				ss << "in " << _function;
+
+			return ss.str();
+		}
+	};
 
 	class JointCppException : public std::exception
 	{
 	private:
-		std::string                  _message;
-		std::vector<std::string>     _backtrace;
-		mutable std::string          _what;
-		mutable bool                 _whatCalculated;
+		std::string                       _message;
+		std::vector<JointCppStackFrame>   _backtrace;
+		mutable std::string               _what;
+		mutable bool                      _whatCalculated;
 
 	public:
-		JointCppException(std::string message, std::vector<std::string> backtrace)
+		JointCppException(std::string message, std::vector<JointCppStackFrame> backtrace)
 			: _message(std::move(message)), _backtrace(std::move(backtrace)), _whatCalculated(false)
 		{ }
 
@@ -73,7 +117,7 @@ namespace detail
 					std::stringstream ss;
 					ss << _message;
 					for (auto l : _backtrace)
-						ss << "\n" << l;
+						ss << "\n" << l.ToString();
 
 					_what = ss.str();
 				}
@@ -87,7 +131,7 @@ namespace detail
 		std::string GetMessage() const
 		{ return _message; }
 
-		std::vector<std::string> GetBacktrace() const
+		std::vector<JointCppStackFrame> GetBacktrace() const
 		{ return _backtrace; }
 	};
 
@@ -117,7 +161,7 @@ namespace detail
 			msg.assign(buf.data());
 		}
 
-		std::vector<std::string> bt;
+		std::vector<JointCppStackFrame> bt;
 		Joint_SizeT bt_size = 0;
 		ret = Joint_GetExceptionBacktraceSize(ex, &bt_size);
 		if (ret != JOINT_ERROR_NONE)
@@ -126,31 +170,24 @@ namespace detail
 			return JointCppException(msg, bt);
 		}
 
+		std::stringstream function_ss;
+		function_ss << "C++ proxy for " << methodName;
+
 		bt.reserve(bt_size + 1);
-		std::string current_module(Joint_DevKit_GetCurrentModuleName());
-		bt.push_back(std::string("C++ proxy in ") + current_module + ": " + methodName);
+
 		for (Joint_SizeT i = 0; i < bt_size; ++i)
 		{
-			Joint_SizeT bt_entry_size;
-			ret = Joint_GetExceptionBacktraceEntrySize(ex, i, &bt_entry_size);
-			if (ret != JOINT_ERROR_NONE)
-			{
-				Joint_Log(JOINT_LOGLEVEL_WARNING, "Joint.C++", "Joint_GetExceptionBacktraceEntrySize failed: %s", Joint_ErrorToString(ret));
-				bt.push_back("<Could not obtain backtrace entry #" + std::to_string(i) + ">");
-				continue;
-			}
-
-			buf.resize(bt_entry_size);
-			ret = Joint_GetExceptionBacktraceEntry(ex, i, buf.data(), buf.size());
+			Joint_StackFrame sf;
+			ret = Joint_GetExceptionBacktraceEntry(ex, i, &sf);
 			if (ret != JOINT_ERROR_NONE)
 			{
 				Joint_Log(JOINT_LOGLEVEL_WARNING, "Joint.C++", "Joint_GetExceptionBacktraceEntry failed: %s", Joint_ErrorToString(ret));
-				bt.push_back("<Could not obtain backtrace entry #" + std::to_string(i) + ">");
 				continue;
 			}
 
-			bt.push_back(std::string(buf.data()));
+			bt.push_back(JointCppStackFrame(sf.module, sf.filename, sf.line, sf.code, sf.function));
 		}
+		bt.push_back(JointCppStackFrame(JointAux_GetModuleName((Joint_FunctionPtr)&MakeCppException), "", 0, "", function_ss.str()));
 
 		return JointCppException(msg, bt);
 	}

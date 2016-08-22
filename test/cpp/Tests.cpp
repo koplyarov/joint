@@ -78,8 +78,6 @@ public:
 	~Tests()
 	{ }
 
-	void ThrowNative() { throw std::runtime_error("Requested exception"); }
-
 	uint8_t   AddU8(uint8_t l, uint8_t r)     { return l + r; }
 	int8_t    AddI8(int8_t l, int8_t r)       { return l + r; }
 	uint16_t  AddU16(uint16_t l, uint16_t r)  { return l + r; }
@@ -150,6 +148,23 @@ public:
 
 	IInterface0_Ptr Create017()
 	{ return MakeComponent<IInterface0, CastComponent017>(_module); }
+
+
+	void ThrowNative() { throw std::runtime_error("Requested exception"); }
+
+	bool CatchAll(const test::IExceptionTestsCallback_Ptr& cb)
+	{
+		try
+		{
+			cb->Method();
+			return false;
+		}
+		catch (const std::exception& ex)
+		{ return true; }
+	}
+
+	void LetThrough(const test::IExceptionTestsCallback_Ptr& cb)
+	{ cb->Method(); }
 };
 
 extern "C"

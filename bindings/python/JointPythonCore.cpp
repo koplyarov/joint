@@ -69,6 +69,23 @@ static struct PyModuleDef g_module = {
 #endif
 
 
+#define ADD_TYPE_TO_PYTHON_MODULE(Type_) \
+	if (!Type_##_type.tp_new) \
+		Type_##_type.tp_new = PyType_GenericNew; \
+	if (PyType_Ready(&Type_##_type) < 0) \
+	{ \
+		PyErr_SetString(PyExc_RuntimeError, "Import error: Could not initialize pyjoint." #Type_ " type!"); \
+		RETURN_ERROR; \
+	} \
+	Py_INCREF(&Type_##_type); \
+	if (PyModule_AddObject(m, #Type_, reinterpret_cast<PyObject*>(&Type_##_type)) != 0) \
+	{ \
+		Py_DECREF(&Type_##_type); \
+		PyErr_SetString(PyExc_RuntimeError, "Import error: Could not add pyjoint." #Type_ " type to the module!"); \
+		RETURN_ERROR; \
+	}
+
+
 #if PY_VERSION_HEX >= 0x03000000
 #	define STR_LITERAL_TYPE const char*
 #	define RETURN_ERROR return NULL
@@ -93,33 +110,9 @@ PyMODINIT_FUNC JointPythonCore_InitModule_py2(void)
 		RETURN_ERROR;
 	}
 
-	Module_type.tp_new = PyType_GenericNew;
-	if (PyType_Ready(&Module_type) < 0)
-	{
-		PyErr_SetString(PyExc_RuntimeError, "Import error: Could not initialize pyjoint.Module type!");
-		RETURN_ERROR;
-	}
-
-	Py_INCREF(&Module_type);
-	if (PyModule_AddObject(m, "Module", reinterpret_cast<PyObject*>(&Module_type)) != 0)
-	{
-		PyErr_SetString(PyExc_RuntimeError, "Import error: Could not add pyjoint.Module type to the module!");
-		RETURN_ERROR;
-	}
-
-	Object_type.tp_new = PyType_GenericNew;
-	if (PyType_Ready(&Object_type) < 0)
-	{
-		PyErr_SetString(PyExc_RuntimeError, "Import error: Could not initialize pyjoint.Object type!");
-		RETURN_ERROR;
-	}
-
-	Py_INCREF(&Object_type);
-	if (PyModule_AddObject(m, "Object", reinterpret_cast<PyObject*>(&Object_type)) != 0)
-	{
-		PyErr_SetString(PyExc_RuntimeError, "Import error: Could not add pyjoint.Object type to the module!");
-		RETURN_ERROR;
-	}
+	ADD_TYPE_TO_PYTHON_MODULE(Module);
+	ADD_TYPE_TO_PYTHON_MODULE(Object);
+	ADD_TYPE_TO_PYTHON_MODULE(JointException);
 
 #if PY_VERSION_HEX >= 0x03000000
 	return m.Release();

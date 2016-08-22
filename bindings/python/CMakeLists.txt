@@ -21,6 +21,7 @@ add_library(joint-python-core SHARED
 	binding/Object.cpp
 	pyjoint/Common.cpp
 	pyjoint/Globals.cpp
+	pyjoint/JointException.cpp
 	pyjoint/Module.cpp
 	pyjoint/Object.cpp
 	utils/PythonUtils.cpp

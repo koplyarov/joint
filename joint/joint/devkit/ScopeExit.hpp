@@ -5,7 +5,8 @@
 #include <utility>
 
 
-namespace joint_python
+namespace joint {
+namespace devkit
 {
 
 	namespace Detail
@@ -33,6 +34,6 @@ namespace joint_python
 	Detail::ScopeGuard<Func_> ScopeExit(Func_ f)
 	{ return Detail::ScopeGuard<Func_>(std::move(f)); }
 
-}
+}}
 
 #endif

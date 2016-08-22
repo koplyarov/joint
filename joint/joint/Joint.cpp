@@ -17,6 +17,7 @@
 
 
 #if JOINT_PLATFORM_POSIX
+#	include <dlfcn.h>
 #	include <unistd.h>
 #endif
 
@@ -420,16 +421,19 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_MakeException(const char* message, const char** backtrace, Joint_SizeT backtraceSize, Joint_ExceptionHandle* outHandle)
+	Joint_Error Joint_MakeException(const char* message, const Joint_StackFrame* backtrace, Joint_SizeT backtraceSize, Joint_ExceptionHandle* outHandle)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
 		JOINT_CHECK(outHandle, JOINT_ERROR_INVALID_PARAMETER);
 
-		std::vector<std::string> bt;
-		bt.resize(backtraceSize);
+		std::vector<Joint_StackFrameData> bt;
+		bt.reserve(backtraceSize);
 		for (Joint_SizeT i = 0; i < backtraceSize; ++i)
-			bt[i] = backtrace[i];
+		{
+			auto sf = backtrace[i];
+			bt.push_back(Joint_StackFrameData{sf.module, sf.filename, sf.line, sf.code, sf.function});
+		}
 		*outHandle = new Joint_Exception{message, bt};
 
 		JOINT_CPP_WRAP_END
@@ -488,32 +492,34 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_GetExceptionBacktraceEntrySize(Joint_ExceptionHandle handle, Joint_SizeT index, Joint_SizeT* outSize)
-	{
-		JOINT_CPP_WRAP_BEGIN
-
-		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(outSize, JOINT_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(index < handle->backtrace.size(), JOINT_ERROR_INVALID_PARAMETER);
-
-		*outSize = handle->backtrace[index].size() + 1;
-
-		JOINT_CPP_WRAP_END
-	}
-
-
-	Joint_Error Joint_GetExceptionBacktraceEntry(Joint_ExceptionHandle handle, Joint_SizeT index, char* buf, Joint_SizeT bufSize)
+	Joint_Error Joint_GetExceptionBacktraceEntry(Joint_ExceptionHandle handle, Joint_SizeT index, Joint_StackFrame* outStackFrame)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
 		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(index < handle->backtrace.size(), JOINT_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(buf, JOINT_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(bufSize >= handle->backtrace[index].size() + 1, JOINT_ERROR_INVALID_PARAMETER);
 
-		strcpy(buf, handle->backtrace[index].c_str());
+		const auto& sf = handle->backtrace[index];
+		outStackFrame->module = sf.module.c_str();
+		outStackFrame->filename = sf.filename.c_str();
+		outStackFrame->line = sf.line;
+		outStackFrame->code = sf.code.c_str();
+		outStackFrame->function = sf.function.c_str();
 
 		JOINT_CPP_WRAP_END
 	}
+
+
+#ifdef JOINT_PLATFORM_POSIX
+	const char* JointAux_GetModuleName(Joint_FunctionPtr symbol)
+	{
+		Dl_info dl_info;
+		dladdr((void*)symbol, &dl_info);
+		return dl_info.dli_fname;
+	}
+#else
+	const char* JointAux_GetModuleName(Joint_FunctionPtr symbol)
+	{ return "<Unknown module>"; }
+#endif
 
 }
