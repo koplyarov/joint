@@ -1,4 +1,4 @@
-from ..SemanticGraph import BuiltinType, BuiltinTypeCategory, Interface
+from ..SemanticGraph import BuiltinType, BuiltinTypeCategory, Interface, Enum
 
 class CppGenerator:
     def __init__(self, semanticGraph):
@@ -12,30 +12,64 @@ class CppGenerator:
         yield ''
 
         for p in self.semanticGraph.packages:
-            for l in self._generatePackageContent(p, self._generatePredeclarations):
+            for l in self._generatePackageContent(p, p.enums, self._generateEnum):
                 yield l
 
         for p in self.semanticGraph.packages:
-            for l in self._generatePackageContent(p, self._generateClasses):
+            for l in self._generatePackageContent(p, p.interfaces, self._generatePredeclarations):
                 yield l
 
         for p in self.semanticGraph.packages:
-            for l in self._generatePackageContent(p, self._generateMethods):
+            for l in self._generatePackageContent(p, p.interfaces, self._generateClasses):
+                yield l
+
+        for p in self.semanticGraph.packages:
+            for l in self._generatePackageContent(p, p.enums, self._generateEnumMethods):
+                yield l
+
+        for p in self.semanticGraph.packages:
+            for l in self._generatePackageContent(p, p.interfaces, self._generateMethods):
                 yield l
 
         yield ''
         yield '#include <joint.cpp/detail/GeneratedCodeEpilogue.hpp>'
         yield ''
 
-    def _generatePackageContent(self, p, ifcGenerator):
+    def _generatePackageContent(self, p, types, generator):
         namespaces_count = 0
         for n in p.nameList:
             namespaces_count += 1
             yield 'namespace {} {{'.format(n)
-            for ifc in p.interfaces:
-                for l in ifcGenerator(ifc):
+            for t in types:
+                for l in generator(t):
                     yield '\t{}'.format(l)
         yield '}' * namespaces_count
+        yield ''
+
+    def _generateEnum(self, e):
+        yield 'class {}'.format(e.name)
+        yield '{'
+        yield 'public:'
+        yield '\tenum _Value'
+        yield '\t{'
+        for i,v in enumerate(e.values):
+            yield '\t\t{} = {}{}'.format(v.name, v.value, ', ' if i < len(e.values) - 1 else '')
+        yield '\t};'
+        yield ''
+        yield '\tDETAIL_JOINT_CPP_ENUM_CLASS_INTERNALS({}, {})'.format(e.name, '_Value::{}'.format(e.values[0].name) if e.values else '_Value()')
+        yield '};'
+        yield ''
+
+    def _generateEnumMethods(self, e):
+        yield 'std::string {}::ToString() const'.format(e.name)
+        yield '{'
+        yield '\tswitch (_value)'
+        yield '\t{'
+        for v in e.values:
+            yield '\tcase {v}: return "{v}";'.format(v=v.name)
+        yield '\tdefault: return "<Unknown {} value>";'.format(e.name)
+        yield '\t}'
+        yield '}'
         yield ''
 
     def _generatePredeclarations(self, ifc):
@@ -116,6 +150,14 @@ class CppGenerator:
         yield '}'
         yield ''
 
+    def _toCppParamInitializer(self, p):
+        if isinstance(p.type, BuiltinType) or isinstance(p.type, Interface):
+            return 'params[{i}].value.{v}'.format(i=p.index, v=p.type.variantName)
+        elif isinstance(p.type, Enum):
+            return '{e}(params[{i}].value.{v})'.format(e='{}::_Value'.format(self._mangleType(p.type)), i=p.index, v=p.type.variantName)
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(p.type))
+
     def _generateAccessorInvokeMethodCase(self, ifc, m):
         yield 'case {}:'.format(m.index)
         yield '\t{'
@@ -130,7 +172,7 @@ class CppGenerator:
                 yield '\t\tJOINT_CALL(Joint_IncRefObject(params[{i}].value.{v}));'.format(i=p.index, v=p.type.variantName)
                 yield '\t\t{t} p{i}({w}(params[{i}].value.{v}));'.format(t=self._toCppType(p.type), w=self._mangleType(p.type), i=p.index, v=p.type.variantName)
             else:
-                yield '\t\t{t} p{i}(params[{i}].value.{v});'.format(t=self._toCppType(p.type), i=p.index, v=p.type.variantName)
+                yield '\t\t{t} p{i}({v});'.format(t=self._toCppType(p.type), i=p.index, v=self._toCppParamInitializer(p))
         method_call = 'componentImpl->{}({})'.format(m.name, ', '.join('p{}'.format(p.index) for p in m.params))
         yield '\t\ttry'
         yield '\t\t{'
@@ -181,6 +223,8 @@ class CppGenerator:
                 return varName
         elif isinstance(type, Interface):
             return '{}->_GetObjectHandle()'.format(varName)
+        elif isinstance(type, Enum):
+            return '{}._RawValue()'.format(varName)
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 
@@ -188,13 +232,17 @@ class CppGenerator:
         return self._toCppValue(p.name, p.type)
 
     def _wrapRetValue(self, type):
-        if not isinstance(type, Interface):
+        if isinstance(type, BuiltinType):
             if type.name != 'bool':
                 return '\treturn {}(_joint_internal_ret_val.variant.value.{});'.format(self._toCppType(type), type.variantName)
             else:
                 return '\treturn _joint_internal_ret_val.variant.value.{} != 0;'.format(type.variantName)
-        else:
+        elif isinstance(type, Interface):
             return '\treturn {}({}(_joint_internal_ret_val.variant.value.{}));'.format(self._toCppType(type), self._mangleType(type), type.variantName)
+        elif isinstance(type, Enum):
+            return '\treturn {}::_Value(_joint_internal_ret_val.variant.value.{});'.format(self._toCppType(type), type.variantName)
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
 
     def _toCppType(self, type):
         if isinstance(type, BuiltinType):
@@ -215,6 +263,8 @@ class CppGenerator:
             raise RuntimeError('Unknown type: {}'.format(type))
         elif isinstance(type, Interface):
             return '{}_Ptr'.format(self._mangleType(type));
+        elif isinstance(type, Enum):
+            return '{}'.format(self._mangleType(type));
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 

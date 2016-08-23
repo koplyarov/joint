@@ -57,6 +57,16 @@ namespace detail
 	}
 
 
+#define DETAIL_JOINT_CPP_ENUM_CLASS_INTERNALS(EnumClass_, DefaultValue_) \
+	public: \
+		EnumClass_(_Value value = DefaultValue_) : _value(value) { } \
+		operator _Value() const { return _value; } \
+		_Value _RawValue() const { return _value; } \
+		std::string ToString() const; \
+	private: \
+		_Value _value;
+
+
 	template < typename ExceptionType_ >
 	struct CppExceptionWrapper
 	{

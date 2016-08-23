@@ -30,7 +30,7 @@ class CastComponent017(test_IInterface0, test_IInterface1, test_IInterface7):
     def Method6(self, i): return i
     def Method7(self, i): return i
 
-class Tests(test_IBasicTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests):
+class Tests(test_IBasicTests, test_IObjectTests, test_IEnumTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests):
     def __init__(self, jointModule):
         super(Tests, self).__init__()
         self.jointModule = jointModule
@@ -69,6 +69,11 @@ class Tests(test_IBasicTests, test_IObjectTests, test_ILifetimeTests, test_ICast
     def CallbackF64(self, cb, l, r): return cb.AddF64(l, r)
     def CallbackBool(self, cb, l, r): return cb.And(l, r)
     def CallbackString(self, cb, l, r): return cb.Concat(l, r)
+
+    def StringRepresentation(self, e): return str(e)
+    def GetNextValueInRing(self, e):
+        next_values = { test_Enum.Value1: test_Enum.Value2, test_Enum.Value2: test_Enum.Value3, test_Enum.Value3: test_Enum.Value4, test_Enum.Value4: test_Enum.Value1 }
+        return next_values[e]
 
     def CreateListenable(self):
         return self.jointModule.CreateComponent(test_ILifetimeListenable, LifetimeListenable)

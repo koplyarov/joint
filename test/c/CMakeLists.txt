@@ -13,6 +13,7 @@ endif()
 
 joint_generate_adapters(c Tests_adapters.h
 	../idl/IBasicTests.idl
+	../idl/IEnumTests.idl
 	../idl/IObjectTests.idl
 	../idl/ILifetimeTests.idl
 	../idl/ICastTests.idl

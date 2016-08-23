@@ -64,6 +64,15 @@
 					TEST_REPORT_SUCCESS(#Val_ " == " #__VA_ARGS__); \
 			} )
 
+#define TEST_IS_TRUE(...) \
+		TEST_DOES_NOT_THROW_INTERNAL("TEST_IS_TRUE(" #__VA_ARGS__ ")", { \
+				bool b = (__VA_ARGS__); \
+				if (!b) \
+					TEST_REPORT_ERROR(#__VA_ARGS__); \
+				else \
+					TEST_REPORT_SUCCESS(#__VA_ARGS__); \
+			} )
+
 
 #define TEST_DEFINE_TEST(UserContext_, Name_) \
 	class Name_##Test : private UserContext_ \

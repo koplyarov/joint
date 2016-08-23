@@ -61,6 +61,7 @@ class Tests
 public:
 	typedef TypeList<
 			IBasicTests,
+			IEnumTests,
 			IObjectTests,
 			ILifetimeTests,
 			ICastTests,
@@ -107,6 +108,22 @@ public:
 	double CallbackF64(const IBasicTestsCallbackF64_Ptr& cb, double l, double r) { return cb->AddF64(l, r); }
 	bool CallbackBool(const IBasicTestsCallbackBool_Ptr& cb, bool l, bool r) { return cb->And(l, r); }
 	std::string CallbackString(const IBasicTestsCallbackString_Ptr& cb, const std::string& l, const std::string& r) { return cb->Concat(l, r); }
+
+
+	std::string StringRepresentation(Enum e)
+	{ return e.ToString(); }
+
+	Enum GetNextValueInRing(Enum e)
+	{
+		switch(e)
+		{
+		case Enum::Value1: return Enum::Value2;
+		case Enum::Value2: return Enum::Value3;
+		case Enum::Value3: return Enum::Value4;
+		case Enum::Value4: return Enum::Value1;
+		default: throw std::runtime_error("Unknown enum value!");
+		}
+	}
 
 
 	ISomeObject_Ptr ReturnNull()

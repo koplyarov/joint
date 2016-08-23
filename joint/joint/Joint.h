@@ -100,9 +100,11 @@ extern "C" {
 
 		JOINT_TYPE_UTF8       = 13,
 
-		JOINT_TYPE_OBJ        = 14,
+		JOINT_TYPE_ENUM       = 14,
 
-		JOINT_TYPE_EXCEPTION  = 15
+		JOINT_TYPE_OBJ        = 15,
+
+		JOINT_TYPE_EXCEPTION  = 16
 	} Joint_Type;
 
 
@@ -125,6 +127,8 @@ extern "C" {
 			double                  f64;
 
 			const char*             utf8;
+
+			int32_t                 e;
 
 			Joint_ObjectHandle      obj;
 			Joint_ExceptionHandle   ex;

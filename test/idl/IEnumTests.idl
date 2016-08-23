@@ -1,0 +1,18 @@
+package test
+{
+
+	enum Enum
+	{
+		Value1,
+		Value2,
+		Value3 = 42,
+		Value4
+	}
+
+	interface IEnumTests
+	{
+		string StringRepresentation(Enum e);
+		Enum GetNextValueInRing(Enum e);
+	}
+
+}

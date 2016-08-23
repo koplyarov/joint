@@ -10,7 +10,7 @@ class IdlParser:
     def __init__(self):
         self.locator = Empty().setParseAction(self.locatorParseAction)('location')
 
-        import_entry = Group(Suppress('import') - self.locator + SkipTo(LineEnd())('path'))
+        import_entry = Group(Suppress(Keyword('import')) - self.locator + SkipTo(LineEnd())('path'))
         imports = ZeroOrMore(import_entry)('imports')
 
         type = self.locator + (Word(alphas, alphanums) + ZeroOrMore(Suppress('.') - Word(alphas, alphanums)))('name')
@@ -26,9 +26,14 @@ class IdlParser:
         package = Group(identifier + ZeroOrMore(Suppress('.') + identifier))
 
         basesList = Group(type) + ZeroOrMore(Suppress(',') + Group(type))
-        interface = Suppress('interface') - identifier('name') + Optional(Suppress(':') - basesList)('bases') + Suppress('{') + Group(methodList)('methods') + Suppress('}')
+        interface = self.locator + Keyword('interface')('kind') - identifier('name') + Optional(Suppress(':') - basesList)('bases') + Suppress('{') + Group(methodList)('methods') + Suppress('}')
 
-        package = Suppress('package') + package('package') + Suppress('{') + Group(ZeroOrMore(Group(interface)))('interfaces') + Suppress('}')
+        integerConstant = Word(nums).setParseAction(lambda s, l, t: int(t[0]))
+        enumValue = self.locator + identifier('name') - Optional(Suppress('=') + integerConstant('value'))
+        enumValuesList = Optional(Group(enumValue) + ZeroOrMore(Suppress(',') + Group(enumValue)))
+        enum = self.locator + Keyword('enum')('kind') - identifier('name') + Suppress('{') + Group(enumValuesList)('values') + Suppress('}')
+
+        package = Suppress(Keyword('package')) + package('package') + Suppress('{') + ZeroOrMore(Group(interface) | Group(enum))('types') + Suppress('}')
 
         self.grammar = imports + package
         self.grammar.ignore(cppStyleComment)

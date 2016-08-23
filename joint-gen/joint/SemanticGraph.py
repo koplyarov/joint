@@ -9,19 +9,22 @@ class SemanticGraphException:
         self.message = message
 
 class Parameter:
-    def __init__(self, index, name, type):
+    def __init__(self, index, name, type, location):
         self.index = index
         self.name = name
         self.type = type
+        self.location = location
 
 
 class Method:
-    def __init__(self, index, name, retType):
+    def __init__(self, index, name, retType, location):
         self.index = index
         self.name = name
         self.retType = retType
         self.params = []
         self.inherited = False
+        self.location = location
+
     def copyFromBase(self, newIndex):
         result = copy.copy(self)
         result.index = newIndex
@@ -29,16 +32,39 @@ class Method:
         return result
 
 
+class EnumValue:
+    def __init__(self, name, value, location):
+        self.name = name
+        self.value = value
+        self.location = location
+
+
+class Enum:
+    def __init__(self, name, packageNameList, location):
+        self.name = name
+        self.variantName = 'e'
+        self.index = 14
+        self.packageNameList = packageNameList
+        self.fullname = '{}.{}'.format('.'.join(packageNameList), name)
+        self.values = []
+        self.needRelease = False
+        self.location = location
+
+    def __repr__(self):
+        return self.fullname
+
+
 class Interface:
-    def __init__(self, name, packageNameList):
+    def __init__(self, name, packageNameList, location):
         self.name = name
         self.variantName = 'obj'
-        self.index = 14
+        self.index = 15
         self.packageNameList = packageNameList
         self.fullname = '{}.{}'.format('.'.join(packageNameList), name)
         self.methods = []
         self.bases = []
         self.needRelease = True
+        self.location = location
 
     def __repr__(self):
         return self.fullname
@@ -49,14 +75,17 @@ class Package:
         self.nameList = nameList
         self.fullname = '.'.join(nameList)
         self.interfaces = []
+        self.enums = []
 
     def __repr__(self):
         return '.'.join(self.nameList)
 
-    def findInterface(self, name):
-        result = next((ifc for ifc in self.interfaces if ifc.name == name), None)
+    def findType(self, name):
+        result = next((t for t in self.interfaces if t.name == name), None)
         if not result:
-            raise LookupError('Interface {}.{} was not declared!'.format('.'.join(self.nameList), name))
+            result = next((t for t in self.enums if t.name == name), None)
+        if not result:
+            raise LookupError('Type {}.{} was not declared!'.format('.'.join(self.nameList), name))
         return result
 
 
@@ -111,8 +140,8 @@ class SemanticGraph:
             raise LookupError('Package {} was not declared!'.format('.'.join(nameList)))
         return result
 
-    def findInterface(self, packageNameList, interfaceName):
-        return self.findPackage(packageNameList).findInterface(interfaceName)
+    def findType(self, packageNameList, interfaceName):
+        return self.findPackage(packageNameList).findType(interfaceName)
 
     def makeType(self, currentPackage, typeEntry):
         typeList = typeEntry['name']
@@ -125,7 +154,7 @@ class SemanticGraph:
                 pkg_to_check = currentPackage.nameList[:x] + pkg
                 try:
                     p = self.findPackage(pkg_to_check)
-                    return p.findInterface(typeName)
+                    return p.findType(typeName)
                 except LookupError:
                     continue
 
@@ -150,28 +179,43 @@ class SemanticGraphBuilder:
             except LookupError:
                 pkg = Package(ast['package'])
                 semanticsGraph.packages.append(pkg)
-            for ifc_ast in ast['interfaces']:
-                ifc = Interface(ifc_ast['name'], pkg.nameList)
-                pkg.interfaces.append(ifc)
-                if 'bases' in ifc_ast:
-                    for b_ast in ifc_ast['bases']:
-                        ifc.bases.append(semanticsGraph.makeType(pkg, b_ast))
-                elif ifc.fullname != 'joint.IObject':
-                    ifc.bases.append(semanticsGraph.findInterface(['joint'], 'IObject'))
+            for t_ast in ast['types']:
+                if t_ast['kind'] == 'interface':
+                    ifc = Interface(t_ast['name'], pkg.nameList, t_ast['location'])
+                    pkg.interfaces.append(ifc)
+                    if 'bases' in t_ast:
+                        for b_ast in t_ast['bases']:
+                            base = semanticsGraph.makeType(pkg, b_ast)
+                            if not isinstance(base, Interface):
+                                raise SemanticGraphException(b_ast['location'], '{} is not an interface'.format(base.name))
+                            ifc.bases.append(base)
+                    elif ifc.fullname != 'joint.IObject':
+                        ifc.bases.append(semanticsGraph.findType(['joint'], 'IObject'))
+                elif t_ast['kind'] == 'enum':
+                    e = Enum(t_ast['name'], pkg.nameList, t_ast['location'])
+                    pkg.enums.append(e)
+                    value = 0
+                    if not t_ast['values']:
+                        raise SemanticGraphException(t_ast['location'], 'Empty enum type: {}'.format(e.fullname))
+                    for v_ast in t_ast['values']:
+                        v = EnumValue(v_ast['name'], v_ast['value'] if 'value' in v_ast else value, v_ast['location'])
+                        value = v.value + 1
+                        e.values.append(v)
 
         for ast in parsed_files:
             pkg = semanticsGraph.findPackage(ast['package'])
-            for ifc_ast in ast['interfaces']:
-                ifc = pkg.findInterface(ifc_ast['name'])
-                self._addBaseMethods(ifc, ifc.bases, set())
-                for m_ast in ifc_ast['methods']:
-                    m = Method(len(ifc.methods), m_ast['name'], semanticsGraph.makeType(pkg, m_ast['retType']))
-                    p_index = 0
-                    for p_ast in m_ast['params']:
-                        p = Parameter(p_index, p_ast['name'], semanticsGraph.makeType(pkg, p_ast['type']))
-                        p_index += 1
-                        m.params.append(p)
-                    ifc.methods.append(m)
+            for t_ast in ast['types']:
+                if t_ast['kind'] == 'interface':
+                    ifc = pkg.findType(t_ast['name'])
+                    self._addBaseMethods(ifc, ifc.bases, set())
+                    for m_ast in t_ast['methods']:
+                        m = Method(len(ifc.methods), m_ast['name'], semanticsGraph.makeType(pkg, m_ast['retType']), m_ast['location'])
+                        p_index = 0
+                        for p_ast in m_ast['params']:
+                            p = Parameter(p_index, p_ast['name'], semanticsGraph.makeType(pkg, p_ast['type']), p_ast['location'])
+                            p_index += 1
+                            m.params.append(p)
+                        ifc.methods.append(m)
 
         return semanticsGraph
 

@@ -141,6 +141,7 @@ namespace pyjoint
 				str_params.push_back(Utf8FromPyUnicode(py_param));
 				v.value.utf8 = str_params.back().GetContent();
 				break;
+			case JOINT_TYPE_ENUM: v.value.e = FromPyLong<int32_t>(py_param); break;
 			case JOINT_TYPE_OBJ:
 				v.value.obj = (py_param != Py_None) ? CastPyObject<Object>(py_param, &Object_type)->handle : JOINT_NULL_HANDLE;
 				break;
@@ -177,6 +178,7 @@ namespace pyjoint
 		case JOINT_TYPE_F32: result.Reset(PyFloat_FromDouble(ret_value.variant.value.f32)); break;
 		case JOINT_TYPE_F64: result.Reset(PyFloat_FromDouble(ret_value.variant.value.f64)); break;
 		case JOINT_TYPE_UTF8: result.Reset(PyUnicode_FromString(ret_value.variant.value.utf8)); break;
+		case JOINT_TYPE_ENUM: result.Reset(PyLong_FromLong(ret_value.variant.value.e)); break;
 		case JOINT_TYPE_OBJ:
 			if (ret_value.variant.value.obj != JOINT_NULL_HANDLE)
 			{

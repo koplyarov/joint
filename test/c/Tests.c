@@ -183,6 +183,28 @@ Joint_Error Tests_CallbackString(Tests* self, test_IBasicTestsCallbackString cb,
 { return test_IBasicTestsCallbackString_Concat(cb, l, r, result, ex); }
 
 
+Joint_Error Tests_StringRepresentation(Tests* self, test_Enum e, const char** result, Joint_ExceptionHandle* ex)
+{
+	char* tmp = (char*)malloc(strlen(test_Enum__ToString(e)) + 1);
+	strcpy(tmp, test_Enum__ToString(e));
+	*result = tmp;
+	return JOINT_ERROR_NONE;
+}
+
+Joint_Error Tests_GetNextValueInRing(Tests* self, test_Enum e, test_Enum* result, Joint_ExceptionHandle* ex)
+{
+	switch(e)
+	{
+	case test_Enum_Value1: *result = test_Enum_Value2; break;
+	case test_Enum_Value2: *result = test_Enum_Value3; break;
+	case test_Enum_Value3: *result = test_Enum_Value4; break;
+	case test_Enum_Value4: *result = test_Enum_Value1; break;
+	default: return JOINT_C_THROW("Invalid enum value", ex);
+	}
+	return JOINT_ERROR_NONE;
+}
+
+
 Joint_Error Tests_ReturnNull(Tests* self, test_ISomeObject* result, Joint_ExceptionHandle* ex)
 { *result = NULL; return JOINT_ERROR_NONE; }
 
@@ -281,7 +303,7 @@ Joint_Error Tests_CatchAll(Tests* self, test_IExceptionTestsCallback cb, JOINT_B
 Joint_Error Tests_LetThrough(Tests* self, test_IExceptionTestsCallback cb, Joint_ExceptionHandle* ex)
 { return test_IExceptionTestsCallback_Method(cb, ex); }
 
-JOINT_C_COMPONENT(Tests, test_IBasicTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests);
+JOINT_C_COMPONENT(Tests, test_IBasicTests, test_IEnumTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests);
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -159,6 +159,8 @@ namespace binding
 		case JOINT_TYPE_F32: outRetValue->variant.value.f32 = FromPyFloat<float>(py_res); break;
 		case JOINT_TYPE_F64: outRetValue->variant.value.f64 = FromPyFloat<double>(py_res); break;
 
+		case JOINT_TYPE_ENUM: outRetValue->variant.value.e = FromPyLong<int32_t>(py_res); break;
+
 		case JOINT_TYPE_UTF8:
 			{
 				auto str_data = Utf8FromPyUnicode(py_res);

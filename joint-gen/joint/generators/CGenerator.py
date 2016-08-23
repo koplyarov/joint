@@ -1,4 +1,4 @@
-from ..SemanticGraph import BuiltinType, BuiltinTypeCategory, Interface
+from ..SemanticGraph import BuiltinType, BuiltinTypeCategory, Interface, Enum
 
 class CGenerator:
     def __init__(self, semanticGraph):
@@ -12,22 +12,53 @@ class CGenerator:
         yield ''
 
         for p in self.semanticGraph.packages:
-            for l in self._generatePackageContent(p, self._generateClasses):
+            for l in self._generatePackageContent(p, p.enums, self._generateEnum):
                 yield l
 
         for p in self.semanticGraph.packages:
-            for l in self._generatePackageContent(p, self._generateMethods):
+            for l in self._generatePackageContent(p, p.interfaces, self._generateClasses):
+                yield l
+
+        for p in self.semanticGraph.packages:
+            for l in self._generatePackageContent(p, p.enums, self._generateEnumMethods):
+                yield l
+
+        for p in self.semanticGraph.packages:
+            for l in self._generatePackageContent(p, p.interfaces, self._generateMethods):
                 yield l
 
         yield ''
         yield '#include <joint.c/detail/GeneratedCodeEpilogue.h>'
         yield ''
 
-    def _generatePackageContent(self, p, ifcGenerator):
+    def _generatePackageContent(self, p, types, generator):
         for n in p.nameList:
-            for ifc in p.interfaces:
-                for l in ifcGenerator(ifc):
+            for t in types:
+                for l in generator(t):
                     yield '{}'.format(l)
+        yield ''
+
+    def _generateEnum(self, e):
+        me = self._mangleType(e)
+        yield 'typedef enum'
+        yield '{'
+        for i,v in enumerate(e.values):
+            yield '\t{}_{} = {}{}'.format(me, v.name, v.value, ', ' if i < len(e.values) - 1 else '')
+        yield '}} {};'.format(me)
+        yield 'const char* {e}__ToString({e} value);'.format(e=me)
+        yield ''
+
+    def _generateEnumMethods(self, e):
+        me = self._mangleType(e)
+        yield 'const char* {e}__ToString({e} value)'.format(e=me)
+        yield '{'
+        yield '\tswitch (value)'
+        yield '\t{'
+        for v in e.values:
+            yield '\tcase {e}_{v}: return "{v}";'.format(e=me, v=v.name)
+        yield '\tdefault: return "<Unknown {} value>";'.format(e.name)
+        yield '\t}'
+        yield '}'
         yield ''
 
     def _paramsDecl(self, params):
@@ -161,7 +192,7 @@ class CGenerator:
             else:
                 ret_param = ''
             yield '\t\t\tret = ComponentImpl##_{}(&w->impl{}{}, &outRetValue->variant.value.ex); \\'.format(m.name, ''.join(', p{}'.format(p.index) for p in m.params), ret_param)
-            ret_statement = '' if m.retType.name == 'void' else ', outRetValue->variant.value.{} = {}result;'.format(m.retType.variantName, '' if isinstance(m.retType, BuiltinType) else '(Joint_ObjectHandle)')
+            ret_statement = self._generateRetStatement(m.retType)
             yield '\t\t\tDETAIL_JOINT_C_SET_RET_VALUE("{}.{}", ret, (Joint_Type){}{}) \\'.format(ifc.fullname, m.name, m.retType.index, ret_statement)
             yield '\t\t} \\'
             yield '\t\tbreak; \\'
@@ -173,11 +204,24 @@ class CGenerator:
         yield '\treturn ret; \\'
         yield '}'
 
+    def _generateRetStatement(self, type):
+        if isinstance(type, BuiltinType) or isinstance(type, Enum):
+            if type.name == 'void':
+                return ''
+            else:
+                return ', outRetValue->variant.value.{} = result;'.format(type.variantName)
+        elif isinstance(type, Interface):
+            return ', outRetValue->variant.value.{} = (Joint_ObjectHandle)result;'.format(type.variantName)
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
+
     def _toCValue(self, varName, type):
         if isinstance(type, BuiltinType):
             return varName
         elif isinstance(type, Interface):
             return '(Joint_ObjectHandle){}'.format(varName)
+        elif isinstance(type, Enum):
+            return '(int32_t){}'.format(varName)
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 
@@ -205,6 +249,8 @@ class CGenerator:
                 return 'const char*'
             raise RuntimeError('Unknown type: {}'.format(type))
         elif isinstance(type, Interface):
+            return '{}'.format(self._mangleType(type));
+        elif isinstance(type, Enum):
             return '{}'.format(self._mangleType(type));
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))

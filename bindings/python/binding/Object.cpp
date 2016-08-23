@@ -46,6 +46,8 @@ namespace binding
 
 				case JOINT_TYPE_UTF8: py_p.Reset(PyUnicode_FromString(p.value.utf8)); break;
 
+				case JOINT_TYPE_ENUM: py_p.Reset(PyLong_FromLong(p.value.e)); break;
+
 				case JOINT_TYPE_OBJ:
 					if (p.value.obj != JOINT_NULL_HANDLE)
 					{
