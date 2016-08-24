@@ -34,7 +34,7 @@ class IdlParser:
         enumValuesList = Optional(Group(enumValue) + ZeroOrMore(Suppress(',') + Group(enumValue)))
         enum = self.locator + Keyword('enum')('kind') - identifier('name') + Suppress('{') + Group(enumValuesList)('values') + Suppress('}')
 
-        package = Suppress(Keyword('package')) + package('package') + Suppress('{') + ZeroOrMore(Group(interface) | Group(enum))('types') + Suppress('}')
+        package = Suppress(Keyword('package')) + package('package') + Suppress('{') + Group(ZeroOrMore(Group(interface) | Group(enum)))('types') + Suppress('}')
 
         self.grammar = imports + package
         self.grammar.ignore(cppStyleComment)
