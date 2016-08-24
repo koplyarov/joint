@@ -1,5 +1,6 @@
 from pyparsing import *
 import os
+import json
 
 class IdlParserException(Exception):
     def __init__(self, message, location):
@@ -46,7 +47,11 @@ class IdlParser:
     def parseFile(self, file):
         try:
             self._file = file
-            return self.grammar.parseFile(file).asDict()
+            res = self.grammar.parseFile(file).asDict()
+            print '=== {} ==='.format(file)
+            print json.dumps(res, indent=4, sort_keys=True)
+            print
+            return res
         except (ParseException, ParseSyntaxException) as e:
             raise IdlParserException(str(e), { 'lineno': e.lineno, 'file': file, 'col': e.col})
         finally:
