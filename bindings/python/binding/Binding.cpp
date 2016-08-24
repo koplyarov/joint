@@ -105,7 +105,7 @@ namespace binding
 					if (PyObject_Type(value) == (PyObject*)&pyjoint::JointException_type)
 					{
 						ex = reinterpret_cast<pyjoint::JointException*>(value.Get());
-						if (ex->message)
+						if (ex->jointMessage)
 							msg = *ex->jointMessage;
 						break;
 					}
