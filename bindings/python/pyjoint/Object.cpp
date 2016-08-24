@@ -215,7 +215,7 @@ namespace pyjoint
 				}
 
 				PyObjectHolder py_ex(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&JointException_type, NULL)));
-				reinterpret_cast<JointException*>(py_ex.Get())->message = new std::string(buf.data());
+				reinterpret_cast<JointException*>(py_ex.Get())->jointMessage = new std::string(buf.data());
 
 				Joint_SizeT bt_size = 0;
 				ret = Joint_GetExceptionBacktraceSize(ex, &bt_size);

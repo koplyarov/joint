@@ -16,8 +16,15 @@ namespace pyjoint
 
 	struct JointException
 	{
+#if PY_VERSION_HEX >= 0x03000000
 		PyException_HEAD
-		std::string* message;
+#else
+		PyObject_HEAD
+		PyObject* dict;
+		PyObject* args;
+		PyObject* message;
+#endif
+		std::string* jointMessage;
 		std::vector<joint::devkit::StackFrameData>* backtrace;
 	};
 

@@ -15,8 +15,35 @@ class PythonGenerator:
         self.semanticGraph = semanticGraph
 
     def generate(self,):
+        yield 'import sys'
         yield 'from functools import partial'
-        yield 'from enum import Enum'
+        yield 'if sys.version_info >= (3, 0):'
+        yield '\timport enum'
+        yield 'else:'
+        yield '\tclass _EnumMeta(type):'
+        yield '\t\tdef __init__(self, name, bases, body):'
+        yield '\t\t\tstatic_block = body.pop("__setup_enum__", None)'
+        yield '\t\t\tif static_block:'
+        yield '\t\t\t\tstatic_block(self)'
+        yield '\t\tdef __len__(self):'
+        yield '\t\t\treturn len(self.__values_to_names__)'
+        yield '\t\tdef __iter__(self): return self.__values__.__iter__()'
+        yield '\t\tdef __reversed__(self): return self.__values__.__reversed__()'
+        yield ''
+        yield '\tclass _Enum(object):'
+        yield '\t\t__slots__ = [\'name\', \'value\']'
+        yield '\t\tdef __init__(self, value):'
+        yield '\t\t\tself.name = self.__values_to_names__[value]'
+        yield '\t\t\tself.value = value'
+        yield '\t\tdef __repr__(self): return \'<{}: {}>\'.format(self.name, self.value)'
+        yield '\t\tdef __str__(self): return str(self.name)'
+        yield '\t\tdef __eq__(self, other): return self.value == other.value'
+        yield '\t\tdef __ne__(self, other): return self.value != other.value'
+        yield '\t\tdef __lt__(self, other): raise TypeError("unorderable types: %s() < %s()" % (self.__class__.__name__, other.__class__.__name__))'
+        yield '\t\tdef __gt__(self, other): raise TypeError("unorderable types: %s() < %s()" % (self.__class__.__name__, other.__class__.__name__))'
+        yield '\t\tdef __le__(self, other): raise TypeError("unorderable types: %s() < %s()" % (self.__class__.__name__, other.__class__.__name__))'
+        yield '\t\tdef __ge__(self, other): raise TypeError("unorderable types: %s() < %s()" % (self.__class__.__name__, other.__class__.__name__))'
+        yield '\t\tdef __hash__(self): return hash(self.name)'
         yield ''
         for p in self.semanticGraph.packages:
             yield '########## {} ##########'.format(p.fullname)
@@ -26,10 +53,17 @@ class PythonGenerator:
     def _generatePackage(self, p):
         if p.enums:
             yield ''
-        for e in p.enums:
-            for l in self._generateEnum(e):
-                yield l
-            yield ''
+        if p.enums:
+            yield 'if sys.version_info >= (3, 0):'
+            for e in p.enums:
+                for l in self._generateEnumPy3(e):
+                    yield '\t{}'.format(l)
+                yield ''
+            yield 'else:'
+            for e in p.enums:
+                for l in self._generateEnumPy2(e):
+                    yield '\t{}'.format(l)
+                yield ''
         for ifc in p.interfaces:
             yield ''
             for l in self._generateInterfaceAccessor(ifc):
@@ -42,10 +76,19 @@ class PythonGenerator:
                 yield l
             yield ''
 
-    def _generateEnum(self, e):
-        yield 'class {}(Enum):'.format(self._mangleType(e))
+    def _generateEnumPy3(self, e):
+        yield 'class {}(enum.Enum):'.format(self._mangleType(e))
         for v in e.values:
             yield '\t{} = {}'.format(v.name, v.value)
+
+    def _generateEnumPy2(self, e):
+        yield 'class {}(_Enum):'.format(self._mangleType(e))
+        yield '\t__metaclass__ = _EnumMeta'
+        yield '\t__values_to_names__ = {}'
+        yield '\tdef __setup_enum__(cls):'
+        for v in e.values:
+            yield '\t\tcls.__values_to_names__[{v}] = \'{n}\''.format(n=v.name, v=v.value)
+            yield '\t\tcls.{n} = cls({v})'.format(n=v.name, v=v.value)
 
     def _generateInterfaceAccessor(self, ifc):
         yield 'class {}_accessor:'.format(self._mangleType(ifc))

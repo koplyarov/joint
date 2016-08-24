@@ -97,23 +97,26 @@ namespace binding
 
 			std::string msg = "<No message>";
 
-			if (PyErr_GivenExceptionMatches(type, (PyObject*)&pyjoint::JointException_type))
+			do
 			{
-				PyErr_NormalizeException(&type, &value, &traceback);
-				if (PyObject_Type(value) == (PyObject*)&pyjoint::JointException_type)
+				if (PyErr_GivenExceptionMatches(type, (PyObject*)&pyjoint::JointException_type))
 				{
-					ex = reinterpret_cast<pyjoint::JointException*>(value.Get());
-					if (ex->message)
-						msg = *ex->message;
+					PyErr_NormalizeException(&type, &value, &traceback);
+					if (PyObject_Type(value) == (PyObject*)&pyjoint::JointException_type)
+					{
+						ex = reinterpret_cast<pyjoint::JointException*>(value.Get());
+						if (ex->message)
+							msg = *ex->jointMessage;
+						break;
+					}
+					else
+						GetLogger().Warning() << "Exception that matches JointException_type has value of a different type!";
 				}
-				else
-				{
-					GetLogger().Warning() << "Exception that matches JointException_type has value of a different type!";
-					GetPythonErrorMessage(value, msg);
-				}
-			}
-			else
+				std::string type_str;
 				GetPythonErrorMessage(value, msg);
+				if (PyObjectToStringNoExcept(type, type_str))
+					msg = type_str + " " + msg;
+			} while (false);
 
 
 			std::vector<joint::devkit::StackFrameData> bt;

@@ -68,8 +68,8 @@ namespace pyjoint
 	{
 		PYJOINT_CPP_WRAP_BEGIN
 
-		JointException* self = PY_OBJ_CHECK((JointException*)type->tp_alloc(type, 0));
-		self->message = nullptr;
+		JointException* self = PY_OBJ_CHECK((JointException*)type->tp_base->tp_new(type, args, kwds));
+		self->jointMessage = nullptr;
 		self->backtrace = nullptr;
 
 		PYJOINT_CPP_WRAP_END((PyObject*)self, NULL)
@@ -101,14 +101,20 @@ namespace pyjoint
 		PYJOINT_CPP_WRAP_BEGIN
 
 		auto ex = reinterpret_cast<JointException*>(self);
-		delete ex->message;
+		delete ex->jointMessage;
 		delete ex->backtrace;
 
+#if PY_VERSION_HEX >= 0x03000000
 		Py_CLEAR(ex->dict);
 		Py_CLEAR(ex->args);
 		Py_CLEAR(ex->traceback);
 		Py_CLEAR(ex->cause);
 		Py_CLEAR(ex->context);
+#else
+		Py_CLEAR(ex->dict);
+		Py_CLEAR(ex->args);
+		Py_CLEAR(ex->message);
+#endif
 
 		Py_TYPE(self)->tp_free(self);
 
