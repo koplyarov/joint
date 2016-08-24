@@ -117,7 +117,7 @@ class CppGenerator:
         yield '\t\t\t;'
         yield '\t}'
         yield ''
-        yield '\tstatic Joint_Error InvokeMethodImpl(ComponentImpl_* componentImpl, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);'
+        yield '\tstatic Joint_Error InvokeMethodImpl(ComponentImpl_* componentImpl, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);'
         yield '};'
         yield ''
         yield ''
@@ -138,13 +138,13 @@ class CppGenerator:
         yield '{'
         yield '\tJoint_RetValue _joint_internal_ret_val;'
         if m.params:
-            yield '\tJoint_Variant params[{}];'.format(len(m.params))
+            yield '\tJoint_Parameter params[{}];'.format(len(m.params))
             for p in m.params:
                 yield '\tparams[{}].value.{} = {};'.format(p.index, p.type.variantName, self._toCppParamGetter(p))
                 yield '\tparams[{}].type = (Joint_Type){};'.format(p.index, p.type.index)
         yield '\tJOINT_METHOD_CALL("{}.{}", Joint_InvokeMethod(_obj, {}, {}, {}, (Joint_Type){}, &_joint_internal_ret_val));'.format(ifc.fullname, m.name, m.index, 'params' if m.params else 'nullptr', len(m.params), m.retType.index)
         if m.retType.needRelease:
-            yield '\t::joint::detail::RetValueGuard _joint_internal_rvg(_joint_internal_ret_val);'
+            yield '\t::joint::detail::RetValueGuard<(Joint_Type){}> _joint_internal_rvg(_joint_internal_ret_val);'.format(m.retType.index)
         if m.retType.name != 'void':
             yield self._wrapRetValue(m.retType)
         yield '}'
@@ -183,14 +183,13 @@ class CppGenerator:
                 yield '\t\t\tif (ret != JOINT_ERROR_NONE)'
                 yield '\t\t\t\treturn ret;'
             if m.retType.name != 'string':
-                yield '\t\t\toutRetValue->variant.value.{} = {};'.format(m.retType.variantName, self._toCppValue('result', m.retType))
+                yield '\t\t\toutRetValue->result.value.{} = {};'.format(m.retType.variantName, self._toCppValue('result', m.retType))
             else:
                 yield '\t\t\tchar* result_c_str = new char[result.size() + 1];'
                 yield '\t\t\tstrcpy(result_c_str, result.c_str());'
-                yield '\t\t\toutRetValue->variant.value.{} = result_c_str;'.format(m.retType.variantName)
+                yield '\t\t\toutRetValue->result.value.{} = result_c_str;'.format(m.retType.variantName)
         else:
             yield '\t\t\t{};'.format(method_call)
-        yield '\t\t\toutRetValue->variant.type = (Joint_Type){};'.format(m.retType.index)
         yield '\t\t}'
         yield '\t\tcatch (const ::joint::detail::JointCppException& ex)'
         yield '\t\t{{ return ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, "{}.{}"); }}'.format(ifc.fullname, m.name)
@@ -201,7 +200,7 @@ class CppGenerator:
 
     def _generateAccessorInvokeMethod(self, ifc):
         yield 'template <typename ComponentImpl_>'
-        yield 'Joint_Error {}_accessor<ComponentImpl_>::InvokeMethodImpl(ComponentImpl_* componentImpl, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)'.format(ifc.name)
+        yield 'Joint_Error {}_accessor<ComponentImpl_>::InvokeMethodImpl(ComponentImpl_* componentImpl, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)'.format(ifc.name)
         yield '{'
         yield '\tswitch(methodId)'
         yield '\t{'
@@ -234,13 +233,13 @@ class CppGenerator:
     def _wrapRetValue(self, type):
         if isinstance(type, BuiltinType):
             if type.name != 'bool':
-                return '\treturn {}(_joint_internal_ret_val.variant.value.{});'.format(self._toCppType(type), type.variantName)
+                return '\treturn {}(_joint_internal_ret_val.result.value.{});'.format(self._toCppType(type), type.variantName)
             else:
-                return '\treturn _joint_internal_ret_val.variant.value.{} != 0;'.format(type.variantName)
+                return '\treturn _joint_internal_ret_val.result.value.{} != 0;'.format(type.variantName)
         elif isinstance(type, Interface):
-            return '\treturn {}({}(_joint_internal_ret_val.variant.value.{}));'.format(self._toCppType(type), self._mangleType(type), type.variantName)
+            return '\treturn {}({}(_joint_internal_ret_val.result.value.{}));'.format(self._toCppType(type), self._mangleType(type), type.variantName)
         elif isinstance(type, Enum):
-            return '\treturn {}::_Value(_joint_internal_ret_val.variant.value.{});'.format(self._toCppType(type), type.variantName)
+            return '\treturn {}::_Value(_joint_internal_ret_val.result.value.{});'.format(self._toCppType(type), type.variantName)
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 

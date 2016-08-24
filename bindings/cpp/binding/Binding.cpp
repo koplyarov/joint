@@ -63,7 +63,7 @@ namespace binding
 	}
 
 
-	Joint_Error Binding::InvokeMethod(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
+	Joint_Error Binding::InvokeMethod(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
@@ -95,44 +95,6 @@ namespace binding
 		*outRetValue = const_cast<JointC_Accessor*>(result);
 		return ret;
 
-		JOINT_CPP_WRAP_END
-	}
-
-
-	Joint_Error Binding::ReleaseRetValue(Joint_Variant value)
-	{
-		JOINT_CPP_WRAP_BEGIN
-		switch(value.type)
-		{
-		case JOINT_TYPE_VOID:
-		case JOINT_TYPE_BOOL:
-		case JOINT_TYPE_I8:
-		case JOINT_TYPE_U8:
-		case JOINT_TYPE_I16:
-		case JOINT_TYPE_U16:
-		case JOINT_TYPE_I32:
-		case JOINT_TYPE_U32:
-		case JOINT_TYPE_I64:
-		case JOINT_TYPE_U64:
-		case JOINT_TYPE_F32:
-		case JOINT_TYPE_F64:
-			break;
-		case JOINT_TYPE_UTF8:
-			delete[] value.value.utf8;
-			break;
-		case JOINT_TYPE_OBJ:
-			break;
-		case JOINT_TYPE_EXCEPTION:
-			{
-				Joint_Error ret = Joint_ReleaseException(value.value.ex);
-				if (ret != JOINT_ERROR_NONE)
-					GetLogger().Error() << "Joint_ReleaseException failed: " << ret;
-			}
-			break;
-		default:
-			JOINT_THROW(JOINT_ERROR_GENERIC);
-			break;
-		}
 		JOINT_CPP_WRAP_END
 	}
 

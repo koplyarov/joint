@@ -42,15 +42,13 @@ namespace detail
 #endif
 
 
-	inline Joint_Error _ReleaseRetValue(Joint_Variant value)
+	inline Joint_Error _ReleaseRetValue(Joint_Type type, Joint_Value value)
 	{
-		switch (value.type)
+		switch (type)
 		{
 		case JOINT_TYPE_UTF8:
-			delete[] value.value.utf8;
+			delete[] value.utf8;
 			return JOINT_ERROR_NONE;
-		case JOINT_TYPE_EXCEPTION:
-			return Joint_ReleaseException(value.value.ex);
 		default:
 			return JOINT_ERROR_NONE;
 		}
@@ -90,7 +88,6 @@ namespace detail
 	template < typename ComponentImpl_, typename ExceptionType_ >
 	Joint_Error WrapCppException(const ExceptionType_& ex, Joint_RetValue* outRetValue, const char* methodName)
 	{
-        outRetValue->variant.type = JOINT_TYPE_EXCEPTION;
         outRetValue->releaseValue = &::joint::detail::_ReleaseRetValue;
 
 		std::string msg = CppExceptionWrapper<ExceptionType_>::GetMessage(ex);
@@ -112,7 +109,7 @@ namespace detail
 		if (ret != JOINT_ERROR_NONE)
 			return ret;
 
-		outRetValue->variant.value.ex = joint_ex;
+		outRetValue->result.ex = joint_ex;
 		return JOINT_ERROR_EXCEPTION;
 	}
 

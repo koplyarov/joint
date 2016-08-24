@@ -14,7 +14,7 @@ namespace binding
 	}
 
 
-	PyObjectHolder Object::InvokeMethod(size_t index, joint::ArrayView<const Joint_Variant> params)
+	PyObjectHolder Object::InvokeMethod(size_t index, joint::ArrayView<const Joint_Parameter> params)
 	{
 		PyObject* py_function = PY_OBJ_CHECK_MSG((PyTuple_GetItem(_methods, index)), "Could not find method with id " + std::to_string(index));
 

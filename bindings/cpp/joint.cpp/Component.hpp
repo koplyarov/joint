@@ -206,7 +206,7 @@ namespace joint
 		}
 
 		template < typename Accessor_ >
-		static Joint_Error InvokeMethod(void* component, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
+		static Joint_Error InvokeMethod(void* component, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
 		{
 			ComponentWrapper* inst = reinterpret_cast<ComponentWrapper*>(component);
 			return Accessor_::InvokeMethodImpl(&inst->_componentImpl, methodId, params, paramsCount, retType, outRetValue);

@@ -325,7 +325,7 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
+	Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
@@ -339,18 +339,6 @@ extern "C"
 		JOINT_CHECK(outRetValue->releaseValue, JOINT_ERROR_IMPLEMENTATION_ERROR);
 
 		return ret;
-
-		JOINT_CPP_WRAP_END
-	}
-
-
-	Joint_Error Joint_ReleaseRetValue(Joint_RetValue value)
-	{
-		JOINT_CPP_WRAP_BEGIN
-
-		JOINT_CHECK(value.releaseValue, JOINT_ERROR_INVALID_PARAMETER);
-
-		return value.releaseValue(value.variant);
 
 		JOINT_CPP_WRAP_END
 	}

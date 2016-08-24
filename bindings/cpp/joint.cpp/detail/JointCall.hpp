@@ -27,19 +27,11 @@ namespace detail
 			{ \
 				if (ret == JOINT_ERROR_EXCEPTION) \
 				{ \
-					::joint::detail::RetValueGuard _joint_internal_rvg(_joint_internal_ret_val); \
-					JOINT_CHECK_RETURN_VALUE(MethodName_, 1, _joint_internal_ret_val); \
+					::joint::detail::ExceptionGuard _joint_internal_exg(_joint_internal_ret_val.result.ex); \
+					throw ::joint::detail::MakeCppException(_joint_internal_ret_val.result.ex, MethodName_); \
 				} \
 				throw std::runtime_error(std::string(#__VA_ARGS__ " failed: ") + Joint_ErrorToString(ret)); \
 			} \
-		} while (false)
-
-#define JOINT_CHECK_RETURN_VALUE(MethodName_, RetType_, RetValue_) \
-		do { \
-			if ((RetValue_).variant.type == JOINT_TYPE_EXCEPTION) \
-				throw ::joint::detail::MakeCppException((RetValue_).variant.value.ex, MethodName_); \
-			else if ((RetValue_).variant.type != (RetType_)) \
-				throw std::runtime_error("Unexpected return type: " + std::to_string((int)(RetValue_).variant.type)); \
 		} while (false)
 
 	class JointCppStackFrame

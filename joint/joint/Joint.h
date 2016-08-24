@@ -108,42 +108,46 @@ extern "C" {
 	} Joint_Type;
 
 
+	typedef union
+	{
+		JOINT_BOOL              b;
+
+		int8_t                  i8;
+		uint8_t                 u8;
+		int16_t                 i16;
+		uint16_t                u16;
+		int32_t                 i32;
+		uint32_t                u32;
+		int64_t                 i64;
+		uint64_t                u64;
+
+		float                   f32;
+		double                  f64;
+
+		const char*             utf8;
+
+		int32_t                 e;
+
+		Joint_ObjectHandle      obj;
+	} Joint_Value;
+
+	typedef struct
+	{
+		Joint_Value value;
+		Joint_Type  type;
+	} Joint_Parameter;
+
+
+	typedef Joint_Error Joint_ReleaseRetValue_Func(Joint_Type type, Joint_Value value);
+
 	typedef struct
 	{
 		union
 		{
-			JOINT_BOOL              b;
-
-			int8_t                  i8;
-			uint8_t                 u8;
-			int16_t                 i16;
-			uint16_t                u16;
-			int32_t                 i32;
-			uint32_t                u32;
-			int64_t                 i64;
-			uint64_t                u64;
-
-			float                   f32;
-			double                  f64;
-
-			const char*             utf8;
-
-			int32_t                 e;
-
-			Joint_ObjectHandle      obj;
+			Joint_Value             value;
 			Joint_ExceptionHandle   ex;
-		} value;
-
-		Joint_Type type;
-	} Joint_Variant;
-
-
-	typedef Joint_Error Joint_ReleaseRetValue_Func(Joint_Variant value);
-
-	typedef struct
-	{
-		Joint_Variant                   variant;
-		Joint_ReleaseRetValue_Func*     releaseValue;
+		} result;
+		Joint_ReleaseRetValue_Func*   releaseValue;
 	} Joint_RetValue;
 
 	struct Joint_Context;
@@ -151,7 +155,7 @@ extern "C" {
 
 	typedef Joint_Error Joint_GetRootObject_Func(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, const char* getterName, Joint_ObjectHandle* outObject);
 	typedef Joint_Error Joint_ReleaseObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal object);
-	typedef Joint_Error Joint_InvokeMethod_Func(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
+	typedef Joint_Error Joint_InvokeMethod_Func(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
 	typedef Joint_Error Joint_CastObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_InterfaceId interfaceId, Joint_ObjectHandleInternal* outRetValue);
 	typedef Joint_Error Joint_LoadModule_Func(void* bindingUserData, const char* moduleName, Joint_ModuleHandleInternal* outModule);
 	typedef Joint_Error Joint_UnloadModule_Func(void* bindingUserData, Joint_ModuleHandleInternal module);
@@ -185,8 +189,7 @@ extern "C" {
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_CreateObject(Joint_ModuleHandle module, Joint_ObjectHandleInternal internal, Joint_ObjectHandle* outObject);
 
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetRootObject(Joint_ModuleHandle module, const char* getterName, Joint_ObjectHandle* outObject);
-	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
-	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_ReleaseRetValue(Joint_RetValue value);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_IncRefObject(Joint_ObjectHandle handle);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_DecRefObject(Joint_ObjectHandle handle);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_ObjectHandle* outHandle);

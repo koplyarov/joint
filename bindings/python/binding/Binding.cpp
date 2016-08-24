@@ -83,11 +83,11 @@ namespace binding
 	}
 
 
-	Joint_Error Binding::InvokeMethod(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
+	Joint_Error Binding::InvokeMethod(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
 	{
 		JOINT_CPP_WRAP_BEGIN
 		auto o = reinterpret_cast<Object*>(obj);
-		PyObjectHolder py_res(o->InvokeMethod(methodId, joint::ArrayView<const Joint_Variant>(params, paramsCount)));
+		PyObjectHolder py_res(o->InvokeMethod(methodId, joint::ArrayView<const Joint_Parameter>(params, paramsCount)));
 		if (!py_res)
 		{
 			PyObjectHolder type, value, traceback;
@@ -137,8 +137,7 @@ namespace binding
 			Joint_Error ret = Joint_MakeException(msg.c_str(), c_bt.data(), c_bt.size(), &joint_ex);
 			JOINT_CHECK(ret == JOINT_ERROR_NONE, std::string("Joint_MakeException failed: ") + Joint_ErrorToString(ret));
 			outRetValue->releaseValue = &Binding::ReleaseRetValue;
-			outRetValue->variant.type = JOINT_TYPE_EXCEPTION;
-			outRetValue->variant.value.ex = joint_ex;
+			outRetValue->result.ex = joint_ex;
 
 			return JOINT_ERROR_EXCEPTION;
 		}
@@ -148,21 +147,21 @@ namespace binding
 		case JOINT_TYPE_VOID:
 			break;
 
-		case JOINT_TYPE_BOOL: outRetValue->variant.value.b = AsBool(py_res); break;
+		case JOINT_TYPE_BOOL: outRetValue->result.value.b = AsBool(py_res); break;
 
-		case JOINT_TYPE_U8: outRetValue->variant.value.u8 = FromPyLong<uint8_t>(py_res); break;
-		case JOINT_TYPE_I8: outRetValue->variant.value.i8 = FromPyLong<int8_t>(py_res); break;
-		case JOINT_TYPE_U16: outRetValue->variant.value.u16 = FromPyLong<uint16_t>(py_res); break;
-		case JOINT_TYPE_I16: outRetValue->variant.value.i16 = FromPyLong<int16_t>(py_res); break;
-		case JOINT_TYPE_U32: outRetValue->variant.value.u32 = FromPyLong<uint32_t>(py_res); break;
-		case JOINT_TYPE_I32: outRetValue->variant.value.i32 = FromPyLong<int32_t>(py_res); break;
-		case JOINT_TYPE_U64: outRetValue->variant.value.u64 = FromPyLong<uint64_t>(py_res); break;
-		case JOINT_TYPE_I64: outRetValue->variant.value.i64 = FromPyLong<int64_t>(py_res); break;
+		case JOINT_TYPE_U8: outRetValue->result.value.u8 = FromPyLong<uint8_t>(py_res); break;
+		case JOINT_TYPE_I8: outRetValue->result.value.i8 = FromPyLong<int8_t>(py_res); break;
+		case JOINT_TYPE_U16: outRetValue->result.value.u16 = FromPyLong<uint16_t>(py_res); break;
+		case JOINT_TYPE_I16: outRetValue->result.value.i16 = FromPyLong<int16_t>(py_res); break;
+		case JOINT_TYPE_U32: outRetValue->result.value.u32 = FromPyLong<uint32_t>(py_res); break;
+		case JOINT_TYPE_I32: outRetValue->result.value.i32 = FromPyLong<int32_t>(py_res); break;
+		case JOINT_TYPE_U64: outRetValue->result.value.u64 = FromPyLong<uint64_t>(py_res); break;
+		case JOINT_TYPE_I64: outRetValue->result.value.i64 = FromPyLong<int64_t>(py_res); break;
 
-		case JOINT_TYPE_F32: outRetValue->variant.value.f32 = FromPyFloat<float>(py_res); break;
-		case JOINT_TYPE_F64: outRetValue->variant.value.f64 = FromPyFloat<double>(py_res); break;
+		case JOINT_TYPE_F32: outRetValue->result.value.f32 = FromPyFloat<float>(py_res); break;
+		case JOINT_TYPE_F64: outRetValue->result.value.f64 = FromPyFloat<double>(py_res); break;
 
-		case JOINT_TYPE_ENUM: outRetValue->variant.value.e = FromPyLong<int32_t>(py_res); break;
+		case JOINT_TYPE_ENUM: outRetValue->result.value.e = FromPyLong<int32_t>(py_res); break;
 
 		case JOINT_TYPE_UTF8:
 			{
@@ -176,7 +175,7 @@ namespace binding
 #ifdef _MSC_VER
 #	pragma warning(pop)
 #endif
-				outRetValue->variant.value.utf8 = result_str.release();
+				outRetValue->result.value.utf8 = result_str.release();
 			}
 			break;
 		case JOINT_TYPE_OBJ:
@@ -184,19 +183,18 @@ namespace binding
 				if (py_res.Get() != Py_None)
 				{
 					PyObjectHolder py_joint_obj(PY_OBJ_CHECK(PyObject_GetAttrString(py_res, "obj")));
-					outRetValue->variant.value.obj = CastPyObject<pyjoint::Object>(py_joint_obj, &pyjoint::Object_type)->handle;
-					Joint_Error ret = Joint_IncRefObject(outRetValue->variant.value.obj);
+					outRetValue->result.value.obj = CastPyObject<pyjoint::Object>(py_joint_obj, &pyjoint::Object_type)->handle;
+					Joint_Error ret = Joint_IncRefObject(outRetValue->result.value.obj);
 					JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 				}
 				else
-					outRetValue->variant.value.obj = JOINT_NULL_HANDLE;
+					outRetValue->result.value.obj = JOINT_NULL_HANDLE;
 			}
 			break;
 		default:
 			JOINT_THROW(std::runtime_error("Unknown type"));
 		}
 
-		outRetValue->variant.type = retType;
 		outRetValue->releaseValue = &Binding::ReleaseRetValue;
 
 		JOINT_CPP_WRAP_END
@@ -268,35 +266,15 @@ namespace binding
 	}
 
 
-	Joint_Error Binding::ReleaseRetValue(Joint_Variant value)
+	Joint_Error Binding::ReleaseRetValue(Joint_Type type, Joint_Value value)
 	{
 		JOINT_CPP_WRAP_BEGIN
-		switch(value.type)
+		switch(type)
 		{
-		case JOINT_TYPE_VOID:
-		case JOINT_TYPE_BOOL:
-		case JOINT_TYPE_I8:
-		case JOINT_TYPE_U8:
-		case JOINT_TYPE_I16:
-		case JOINT_TYPE_U16:
-		case JOINT_TYPE_I32:
-		case JOINT_TYPE_U32:
-		case JOINT_TYPE_I64:
-		case JOINT_TYPE_U64:
-		case JOINT_TYPE_F32:
-		case JOINT_TYPE_F64:
-			break;
 		case JOINT_TYPE_UTF8:
-			delete[] value.value.utf8;
+			delete[] value.utf8;
 			break;
 		case JOINT_TYPE_OBJ:
-			break;
-		case JOINT_TYPE_EXCEPTION:
-			{
-				Joint_Error ret = Joint_ReleaseException(value.value.ex);
-				if (ret != JOINT_ERROR_NONE)
-					GetLogger().Error() << "Joint_ReleaseException failed: " << ret;
-			}
 			break;
 		default:
 			JOINT_THROW(JOINT_ERROR_GENERIC);

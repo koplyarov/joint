@@ -135,7 +135,7 @@ class CGenerator:
         yield '{'
         yield '\tJoint_RetValue _joint_internal_ret_val;'
         if m.params:
-            yield '\tJoint_Variant params[{}];'.format(len(m.params))
+            yield '\tJoint_Parameter params[{}];'.format(len(m.params))
             for p in m.params:
                 yield '\tparams[{}].value.{} = {};'.format(p.index, p.type.variantName, self._toCParamGetter(p))
                 yield '\tparams[{}].type = (Joint_Type){};'.format(p.index, p.type.index)
@@ -143,14 +143,14 @@ class CGenerator:
         yield '\tif (_ret != JOINT_ERROR_NONE)'
         yield '\t{'
         yield '\t\tif (_ret == JOINT_ERROR_EXCEPTION)'
-        yield '\t\t\t*_ex = _joint_internal_ret_val.variant.value.ex;'
+        yield '\t\t\t*_ex = _joint_internal_ret_val.result.ex;'
         yield '\t\treturn _ret;'
         yield '\t}'
         if m.retType.name == 'string':
-            result_var = '_joint_internal_ret_val.variant.value.utf8'
+            result_var = '_joint_internal_ret_val.result.value.utf8'
             yield '\tchar* _tmpResult = (char*)malloc(strlen({}) + 1);'.format(result_var)
             yield '\tstrcpy(_tmpResult, {});'.format(result_var)
-            yield '\t_ret = Joint_ReleaseRetValue(_joint_internal_ret_val);'
+            yield '\t_ret = _joint_internal_ret_val.releaseValue((Joint_Type){}, _joint_internal_ret_val.result.value);'.format(m.retType.index)
             yield '\t*_outResult = _tmpResult;'
         elif m.retType.name != 'void':
             yield self._wrapRetValue(m.retType)
@@ -163,7 +163,7 @@ class CGenerator:
         yield '#define DETAIL_DEFINE_INVOKE_METHOD__{}(ComponentImpl, IfcPrefix) \\'.format(mangled_ifc)
         for b in ifc.bases:
             yield 'DETAIL_DEFINE_INVOKE_METHOD__{}(ComponentImpl, IfcPrefix##__##{}) \\'.format(self._mangleType(b), mangled_ifc)
-        yield 'Joint_Error Detail__##ComponentImpl##IfcPrefix##__{}__InvokeMethod(void* componentWrapper, Joint_SizeT methodId, const Joint_Variant* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue) \\'.format(mangled_ifc)
+        yield 'Joint_Error Detail__##ComponentImpl##IfcPrefix##__{}__InvokeMethod(void* componentWrapper, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue) \\'.format(mangled_ifc)
         yield '{ \\'
         yield '\tComponentImpl##__wrapper* w = (ComponentImpl##__wrapper*)componentWrapper; \\'
         yield '\t(void)w; \\'
@@ -191,7 +191,7 @@ class CGenerator:
                 ret_param = ', &result'
             else:
                 ret_param = ''
-            yield '\t\t\tret = ComponentImpl##_{}(&w->impl{}{}, &outRetValue->variant.value.ex); \\'.format(m.name, ''.join(', p{}'.format(p.index) for p in m.params), ret_param)
+            yield '\t\t\tret = ComponentImpl##_{}(&w->impl{}{}, &outRetValue->result.ex); \\'.format(m.name, ''.join(', p{}'.format(p.index) for p in m.params), ret_param)
             ret_statement = self._generateRetStatement(m.retType)
             yield '\t\t\tDETAIL_JOINT_C_SET_RET_VALUE("{}.{}", ret, (Joint_Type){}{}) \\'.format(ifc.fullname, m.name, m.retType.index, ret_statement)
             yield '\t\t} \\'
@@ -209,9 +209,9 @@ class CGenerator:
             if type.name == 'void':
                 return ''
             else:
-                return ', outRetValue->variant.value.{} = result;'.format(type.variantName)
+                return ', outRetValue->result.value.{} = result;'.format(type.variantName)
         elif isinstance(type, Interface):
-            return ', outRetValue->variant.value.{} = (Joint_ObjectHandle)result;'.format(type.variantName)
+            return ', outRetValue->result.value.{} = (Joint_ObjectHandle)result;'.format(type.variantName)
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 
@@ -229,7 +229,7 @@ class CGenerator:
         return self._toCValue(p.name, p.type)
 
     def _wrapRetValue(self, type):
-        return '\t*_outResult = ({})_joint_internal_ret_val.variant.value.{};'.format(self._toCType(type), type.variantName)
+        return '\t*_outResult = ({})_joint_internal_ret_val.result.value.{};'.format(self._toCType(type), type.variantName)
 
     def _toCType(self, type):
         if isinstance(type, BuiltinType):

@@ -25,7 +25,7 @@ namespace binding
 		PyObjectHolder GetObject() const
 		{ return _obj; }
 
-		PyObjectHolder InvokeMethod(size_t index, joint::ArrayView<const Joint_Variant> params);
+		PyObjectHolder InvokeMethod(size_t index, joint::ArrayView<const Joint_Parameter> params);
 	};
 
 }}

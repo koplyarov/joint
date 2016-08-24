@@ -5,15 +5,13 @@
 #include <joint.c/Component.h>
 #include <string.h>
 
-Joint_Error JointC_ReleaseRetValue(Joint_Variant value)
+Joint_Error JointC_ReleaseRetValue(Joint_Type type, Joint_Value value)
 {
-	switch (value.type)
+	switch (type)
 	{
 	case JOINT_TYPE_UTF8:
-		free((void*)value.value.utf8);
+		free((void*)value.utf8);
 		return JOINT_ERROR_NONE;
-	case JOINT_TYPE_EXCEPTION:
-		return Joint_ReleaseException(value.value.ex);
 	default:
 		return JOINT_ERROR_NONE;
 	}
@@ -33,7 +31,6 @@ Joint_Error JointC_ThrowException(const char* msg, const char* file, int line, c
 #define DETAIL_JOINT_C_SET_RET_VALUE(MethodName_, RetCode_, RetType_, ...) \
 			if ((RetCode_) == JOINT_ERROR_NONE) \
 			{ \
-				outRetValue->variant.type = (RetType_); \
 				__VA_ARGS__ \
 			} \
 			else \
@@ -45,11 +42,10 @@ Joint_Error JointC_ThrowException(const char* msg, const char* file, int line, c
 					snprintf(func_buf, 256, "C proxy of %s", MethodName_); \
 					func_buf[255] = '\0'; \
 					Joint_StackFrame bt[] = { { JointAux_GetModuleName((void*)&JointC_ReleaseRetValue), "", 0, "", func_buf } }; \
-					Joint_Error ret = Joint_MakeException("Unknown exception", bt, 1, &outRetValue->variant.value.ex); \
+					Joint_Error ret = Joint_MakeException("Unknown exception", bt, 1, &outRetValue->result.ex); \
 					if (ret != JOINT_ERROR_NONE) \
 						Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C", "Joint_MakeException failed: %s", Joint_ErrorToString(ret)); \
 				} \
-				outRetValue->variant.type = JOINT_TYPE_EXCEPTION; \
 			}
 
 #endif
