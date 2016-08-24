@@ -31,6 +31,7 @@ class PythonGenerator:
         yield '\t\tdef __reversed__(self): return self.__values__.__reversed__()'
         yield ''
         yield '\tclass _Enum(object):'
+        yield '\t\t__metaclass__ = _EnumMeta'
         yield '\t\t__slots__ = [\'name\', \'value\']'
         yield '\t\tdef __init__(self, value):'
         yield '\t\t\tself.name = self.__values_to_names__[value]'
@@ -83,8 +84,9 @@ class PythonGenerator:
 
     def _generateEnumPy2(self, e):
         yield 'class {}(_Enum):'.format(self._mangleType(e))
-        yield '\t__metaclass__ = _EnumMeta'
+        yield '\t__slots__ = []'
         yield '\t__values_to_names__ = {}'
+        yield '\t__values__ = []'
         yield '\tdef __setup_enum__(cls):'
         for v in e.values:
             yield '\t\tcls.__values_to_names__[{v}] = \'{n}\''.format(n=v.name, v=v.value)
