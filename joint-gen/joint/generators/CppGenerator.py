@@ -166,6 +166,9 @@ class CppGenerator:
     def _generateAccessorInvokeMethodCase(self, ifc, m):
         yield 'case {}:'.format(m.index)
         yield '\t{'
+        if isinstance(m.retType, Interface):
+            yield '\t\tif (retType.payload.interfaceChecksum != {}::_GetInterfaceChecksum())'.format(self._mangleType(m.retType))
+            yield '\t\t\treturn JOINT_ERROR_INVALID_INTERFACE_CHECKSUM;'
         for p in m.params:
             if isinstance(p.type, Interface):
                 yield '\t\tJOINT_CALL(Joint_IncRefObject(params[{i}].value.{v}));'.format(i=p.index, v=p.type.variantName)

@@ -182,6 +182,11 @@ namespace binding
 			{
 				if (py_res.Get() != Py_None)
 				{
+					PyObjectHolder py_proxy_type(PY_OBJ_CHECK(PyObject_Type(py_res)));
+					PyObjectHolder py_checksum(PY_OBJ_CHECK(PyObject_GetAttrString(py_proxy_type, "interfaceChecksum")));
+					if (FromPyLong<Joint_InterfaceChecksum>(py_checksum) != retType.payload.interfaceChecksum)
+						JOINT_THROW(JOINT_ERROR_INVALID_INTERFACE_CHECKSUM);
+
 					PyObjectHolder py_joint_obj(PY_OBJ_CHECK(PyObject_GetAttrString(py_res, "obj")));
 					outRetValue->result.value.obj = CastPyObject<pyjoint::Object>(py_joint_obj, &pyjoint::Object_type)->handle;
 					Joint_Error ret = Joint_IncRefObject(outRetValue->result.value.obj);

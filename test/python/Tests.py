@@ -98,7 +98,7 @@ class Tests(test_IBasicTests, test_IObjectTests, test_IEnumTests, test_ILifetime
     def CastTo7(self, obj): return pyjoint.Cast(obj, test_IInterface7)
 
     def Create017(self):
-        return self.jointModule.CreateComponent(test_IInterface1, CastComponent017)
+        return self.jointModule.CreateComponent(test_IInterface0, CastComponent017)
 
     def ThrowNative(self): raise RuntimeError('Requested exception')
 

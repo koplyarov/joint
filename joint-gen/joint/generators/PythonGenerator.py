@@ -150,6 +150,7 @@ class PythonGenerator:
     def _generateInterfaceProxy(self, ifc):
         yield 'class {}_proxy:'.format(self._mangleType(ifc))
         yield '\t__slots__ = [\'obj\'{}]'.format(''.join(', \'{}\''.format(m.name) for m in ifc.methods if not self._methodNeedsProxy(m)))
+        yield '\tinterfaceChecksum = {}'.format(hex(ifc.checksum))
         yield '\tdef __init__(self, obj):'
         yield '\t\tself.obj = obj'
         for m in ifc.methods:

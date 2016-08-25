@@ -49,7 +49,7 @@ TEST_DEFINE_TEST(TestCtx, InterfaceChecksumTests)
 	}
 
 	TEST_THROWS_NOTHING(t->Return1());
-	//TEST_LOGS_ERROR(TEST_THROWS_ANYTHING(t->Return2()));
+	TEST_LOGS_ERROR(TEST_THROWS_ANYTHING(t->Return2()));
 
 	test::IInterfaceCS1_Ptr i12;
 	TEST_THROWS_NOTHING(i12 = t->Return12());
