@@ -26,7 +26,7 @@ namespace detail
 		do { \
 			Joint_Error ret = (__VA_ARGS__); \
 			if (ret != JOINT_ERROR_NONE) \
-				::joint::detail::ThrowCppException(_joint_internal_ret_val.result.ex, MethodName_, ret); \
+				::joint::detail::ThrowCppException(_ret_val.result.ex, MethodName_, ret); \
 		} while (false)
 
 	class JointCppStackFrame
@@ -184,7 +184,7 @@ namespace detail
 	{
 		if (ret == JOINT_ERROR_EXCEPTION)
 		{
-			::joint::detail::ExceptionGuard _joint_internal_exg(ex);
+			::joint::detail::ExceptionGuard _exg(ex);
 			throw ::joint::detail::MakeCppException(ex, "Blahblah");
 		}
 		throw std::runtime_error(std::string("Blahblah failed: ") + Joint_ErrorToString(ret));

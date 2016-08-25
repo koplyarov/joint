@@ -107,8 +107,13 @@ namespace pyjoint
 		auto tuple_size = PyTuple_Size(args);
 		NATIVE_CHECK(tuple_size >= 2, "Could not parse arguments");
 
-		auto method_id = FromPyLong<int>(PyTuple_GetItem(args, 0));
-		Joint_Type ret_type = FromPyLong<Joint_Type>(PyTuple_GetItem(args, 1));
+		auto method_id = FromPyLong<int>(PY_OBJ_CHECK(PyTuple_GetItem(args, 0)));
+		PyObject* py_ret_type = PY_OBJ_CHECK(PyTuple_GetItem(args, 1));
+
+		Joint_Type ret_type;
+		ret_type.id = FromPyLong<Joint_TypeId>(PY_OBJ_CHECK(PyTuple_GetItem(py_ret_type, 0)));
+		if (ret_type.id == JOINT_TYPE_OBJ)
+			ret_type.payload.interfaceChecksum = FromPyLong<Joint_InterfaceChecksum>(PY_OBJ_CHECK(PyTuple_GetItem(py_ret_type, 1)));
 
 		// TODO: use stack allocations for smaller tuples
 		std::vector<Joint_Parameter> params;
@@ -121,10 +126,13 @@ namespace pyjoint
 			PyObject* py_param_tuple = PY_OBJ_CHECK(PyTuple_GetItem(args, i));
 
 			Joint_Parameter v = { };
-			v.type = FromPyLong<Joint_Type>(PyTuple_GetItem(py_param_tuple, 0));
+			PyObject* py_param_type = PY_OBJ_CHECK(PyTuple_GetItem(py_param_tuple, 0));
+			v.type.id = FromPyLong<Joint_TypeId>(PyTuple_GetItem(py_param_type, 0));
+			if (v.type.id == JOINT_TYPE_OBJ)
+				v.type.payload.interfaceChecksum = FromPyLong<Joint_InterfaceChecksum>(PyTuple_GetItem(py_param_type, 1));
 
 			PyObject* py_param = PyTuple_GetItem(py_param_tuple, 1);
-			switch (v.type)
+			switch (v.type.id)
 			{
 			case JOINT_TYPE_BOOL: v.value.b = PyObject_IsTrue(py_param); break;
 			case JOINT_TYPE_I8: v.value.i8 = FromPyLong<int8_t>(py_param); break;
@@ -146,7 +154,7 @@ namespace pyjoint
 				v.value.obj = (py_param != Py_None) ? CastPyObject<Object>(py_param, &Object_type)->handle : JOINT_NULL_HANDLE;
 				break;
 			default:
-				NATIVE_THROW("Unknown parameter type: " + std::to_string(v.type));
+				NATIVE_THROW("Unknown parameter type: " + std::to_string(v.type.id));
 			}
 
 			params.push_back(v);
@@ -166,7 +174,7 @@ namespace pyjoint
 					GetLogger().Error() << "Joint_RetValue::releaseValue failed: " << ret;
 			}));
 
-			switch (ret_type)
+			switch (ret_type.id)
 			{
 			case JOINT_TYPE_VOID: Py_RETURN_NONE; break;
 			case JOINT_TYPE_BOOL: result.Reset(PyBool_FromLong(ret_value.result.value.b)); break;
@@ -195,7 +203,7 @@ namespace pyjoint
 				}
 				break;
 			default:
-				NATIVE_THROW("Unknown return type: " + std::to_string(ret_type));
+				NATIVE_THROW("Unknown return type: " + std::to_string(ret_type.id));
 			}
 		}
 		else if (ret == JOINT_ERROR_EXCEPTION)

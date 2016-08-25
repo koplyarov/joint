@@ -135,15 +135,21 @@ class CppGenerator:
     def _generateMethodDefinition(self, ifc, m):
         yield '{} {}::{}({})'.format(self._toCppType(m.retType), ifc.name, m.name, ', '.join('{} {}'.format(self._toCppType(p.type), p.name) for p in m.params))
         yield '{'
-        yield '\tJoint_RetValue _joint_internal_ret_val;'
+        yield '\tJoint_RetValue _ret_val;'
+        yield '\tJoint_Type _ret_val_type;'
+        yield '\t_ret_val_type.id = (Joint_TypeId){};'.format(m.retType.index)
+        if isinstance(m.retType, Interface):
+            yield '\t_ret_val_type.payload.interfaceChecksum = {}::_GetInterfaceChecksum();'.format(self._mangleType(m.retType))
         if m.params:
             yield '\tJoint_Parameter params[{}];'.format(len(m.params))
             for p in m.params:
                 yield '\tparams[{}].value.{} = {};'.format(p.index, p.type.variantName, self._toCppParamGetter(p))
-                yield '\tparams[{}].type = (Joint_Type){};'.format(p.index, p.type.index)
-        yield '\tJOINT_METHOD_CALL("{}.{}", Joint_InvokeMethod(_obj, {}, {}, {}, (Joint_Type){}, &_joint_internal_ret_val));'.format(ifc.fullname, m.name, m.index, 'params' if m.params else 'nullptr', len(m.params), m.retType.index)
+                yield '\tparams[{}].type.id = (Joint_TypeId){};'.format(p.index, p.type.index)
+                if isinstance(p.type, Interface):
+                    yield '\tparams[{}].type.payload.interfaceChecksum = {}::_GetInterfaceChecksum();'.format(p.index, self._mangleType(p.type))
+        yield '\tJOINT_METHOD_CALL("{}.{}", Joint_InvokeMethod(_obj, {}, {}, {}, _ret_val_type, &_ret_val));'.format(ifc.fullname, m.name, m.index, 'params' if m.params else 'nullptr', len(m.params), m.retType.index)
         if m.retType.needRelease:
-            yield '\t::joint::detail::RetValueGuard<(Joint_Type){}> _joint_internal_rvg(_joint_internal_ret_val);'.format(m.retType.index)
+            yield '\t::joint::detail::RetValueGuard _rvg(_ret_val_type, _ret_val);'.format(m.retType.index)
         if m.retType.name != 'void':
             yield self._wrapRetValue(m.retType)
         yield '}'
@@ -160,12 +166,6 @@ class CppGenerator:
     def _generateAccessorInvokeMethodCase(self, ifc, m):
         yield 'case {}:'.format(m.index)
         yield '\t{'
-        yield '\t\tif (paramsCount != {}'.format(len(m.params))
-        yield '\t\t\t|| retType != (Joint_Type){}'.format(m.retType.index)
-        for p in m.params:
-            yield '\t\t\t|| params[{}].type != (Joint_Type){}'.format(p.index, p.type.index)
-        yield '\t\t) { return JOINT_ERROR_GENERIC; }'
-        yield ''
         for p in m.params:
             if isinstance(p.type, Interface):
                 yield '\t\tJOINT_CALL(Joint_IncRefObject(params[{i}].value.{v}));'.format(i=p.index, v=p.type.variantName)
@@ -238,13 +238,13 @@ class CppGenerator:
     def _wrapRetValue(self, type):
         if isinstance(type, BuiltinType):
             if type.name != 'bool':
-                return '\treturn {}(_joint_internal_ret_val.result.value.{});'.format(self._toCppType(type), type.variantName)
+                return '\treturn {}(_ret_val.result.value.{});'.format(self._toCppType(type), type.variantName)
             else:
-                return '\treturn _joint_internal_ret_val.result.value.{} != 0;'.format(type.variantName)
+                return '\treturn _ret_val.result.value.{} != 0;'.format(type.variantName)
         elif isinstance(type, Interface):
-            return '\treturn {}({}(_joint_internal_ret_val.result.value.{}));'.format(self._toCppType(type), self._mangleType(type), type.variantName)
+            return '\treturn {}({}(_ret_val.result.value.{}));'.format(self._toCppType(type), self._mangleType(type), type.variantName)
         elif isinstance(type, Enum):
-            return '\treturn {}::_Value(_joint_internal_ret_val.result.value.{});'.format(self._toCppType(type), type.variantName)
+            return '\treturn {}::_Value(_ret_val.result.value.{});'.format(self._toCppType(type), type.variantName)
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 

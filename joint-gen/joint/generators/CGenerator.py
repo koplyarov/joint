@@ -138,24 +138,30 @@ class CGenerator:
         mangled_ifc = self._mangleType(ifc)
         yield 'Joint_Error {n}_{m}({n} _obj{p}{r}, Joint_ExceptionHandle* _ex)'.format(n=mangled_ifc, m=m.name, p=self._paramsDecl(m.params), r=self._retDecl(m.retType))
         yield '{'
-        yield '\tJoint_RetValue _joint_internal_ret_val;'
+        yield '\tJoint_RetValue _ret_val;'
+        yield '\tJoint_Type _ret_val_type;'
+        yield '\t_ret_val_type.id = (Joint_TypeId){};'.format(m.retType.index)
+        if isinstance(m.retType, Interface):
+            yield '\t_ret_val_type.payload.interfaceChecksum = {}__checksum;'.format(self._mangleType(m.retType))
         if m.params:
             yield '\tJoint_Parameter params[{}];'.format(len(m.params))
             for p in m.params:
                 yield '\tparams[{}].value.{} = {};'.format(p.index, p.type.variantName, self._toCParamGetter(p))
-                yield '\tparams[{}].type = (Joint_Type){};'.format(p.index, p.type.index)
-        yield '\tJoint_Error _ret = Joint_InvokeMethod((Joint_ObjectHandle)_obj, {}, {}, {}, (Joint_Type){}, &_joint_internal_ret_val);'.format(m.index, 'params' if m.params else 'NULL', len(m.params), m.retType.index)
+                yield '\tparams[{}].type.id = (Joint_TypeId){};'.format(p.index, p.type.index)
+                if isinstance(p.type, Interface):
+                    yield '\tparams[{}].type.payload.interfaceChecksum = {}__checksum;'.format(p.index, self._mangleType(p.type))
+        yield '\tJoint_Error _ret = Joint_InvokeMethod((Joint_ObjectHandle)_obj, {}, {}, {}, _ret_val_type, &_ret_val);'.format(m.index, 'params' if m.params else 'NULL', len(m.params))
         yield '\tif (_ret != JOINT_ERROR_NONE)'
         yield '\t{'
         yield '\t\tif (_ret == JOINT_ERROR_EXCEPTION)'
-        yield '\t\t\t*_ex = _joint_internal_ret_val.result.ex;'
+        yield '\t\t\t*_ex = _ret_val.result.ex;'
         yield '\t\treturn _ret;'
         yield '\t}'
         if m.retType.name == 'string':
-            result_var = '_joint_internal_ret_val.result.value.utf8'
+            result_var = '_ret_val.result.value.utf8'
             yield '\tchar* _tmpResult = (char*)malloc(strlen({}) + 1);'.format(result_var)
             yield '\tstrcpy(_tmpResult, {});'.format(result_var)
-            yield '\t_ret = _joint_internal_ret_val.releaseValue((Joint_Type){}, _joint_internal_ret_val.result.value);'.format(m.retType.index)
+            yield '\t_ret = _ret_val.releaseValue(_ret_val_type, _ret_val.result.value);'.format(m.retType.index)
             yield '\t*_outResult = _tmpResult;'
         elif m.retType.name != 'void':
             yield self._wrapRetValue(m.retType)
@@ -178,16 +184,6 @@ class CGenerator:
         for m in ifc.methods:
             yield '\tcase {}: \\'.format(m.index)
             yield '\t\t{ \\'
-            yield '\t\t\tif (paramsCount != {} \\'.format(len(m.params))
-            yield '\t\t\t\t|| retType != (Joint_Type){} \\'.format(m.retType.index)
-            for p in m.params:
-                yield '\t\t\t\t|| params[{}].type != (Joint_Type){} \\'.format(p.index, p.type.index)
-            yield '\t\t\t) \\'
-            yield '\t\t\t{ \\'
-            yield '\t\t\t\tJoint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C", "Invalid {}.{} parameters or return type"); \\'.format(ifc.fullname, m.name)
-            yield '\t\t\t\treturn JOINT_ERROR_GENERIC; \\'
-            yield '\t\t\t} \\'
-            yield '\t\t\t\\'
             if m.retType.name != 'void':
                 yield '\t\t\t{} result; \\'.format(self._toCType(m.retType))
             for p in m.params:
@@ -198,7 +194,7 @@ class CGenerator:
                 ret_param = ''
             yield '\t\t\tret = ComponentImpl##_{}(&w->impl{}{}, &outRetValue->result.ex); \\'.format(m.name, ''.join(', p{}'.format(p.index) for p in m.params), ret_param)
             ret_statement = self._generateRetStatement(m.retType)
-            yield '\t\t\tDETAIL_JOINT_C_SET_RET_VALUE("{}.{}", ret, (Joint_Type){}{}) \\'.format(ifc.fullname, m.name, m.retType.index, ret_statement)
+            yield '\t\t\tDETAIL_JOINT_C_SET_RET_VALUE("{}.{}", ret{}) \\'.format(ifc.fullname, m.name, ret_statement)
             yield '\t\t} \\'
             yield '\t\tbreak; \\'
         yield '\tdefault: \\'
@@ -234,7 +230,7 @@ class CGenerator:
         return self._toCValue(p.name, p.type)
 
     def _wrapRetValue(self, type):
-        return '\t*_outResult = ({})_joint_internal_ret_val.result.value.{};'.format(self._toCType(type), type.variantName)
+        return '\t*_outResult = ({})_ret_val.result.value.{};'.format(self._toCType(type), type.variantName)
 
     def _toCType(self, type):
         if isinstance(type, BuiltinType):

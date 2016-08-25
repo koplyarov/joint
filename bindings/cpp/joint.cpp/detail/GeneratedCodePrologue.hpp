@@ -44,7 +44,7 @@ namespace detail
 
 	inline Joint_Error _ReleaseRetValue(Joint_Type type, Joint_Value value)
 	{
-		switch (type)
+		switch (type.id)
 		{
 		case JOINT_TYPE_UTF8:
 			delete[] value.utf8;

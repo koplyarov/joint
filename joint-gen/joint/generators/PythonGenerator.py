@@ -155,15 +155,23 @@ class PythonGenerator:
         for m in ifc.methods:
             if self._methodNeedsProxy(m):
                 continue
-            yield '\t\tself.{} = partial(self.obj, {}, {})'.format(m.name, m.index, m.retType.index)
+            yield '\t\tself.{} = partial(self.obj, {}, {})'.format(m.name, m.index, self._typeTuple(m.retType))
         for m in ifc.methods:
             if not self._methodNeedsProxy(m):
                 continue
             yield ''
             yield '\tdef {}(self{}):'.format(m.name, ''.join(', {}'.format(p.name) for p in m.params))
-            method_invokation = 'self.obj({}, {}{})'.format( m.index, m.retType.index, ''.join([ ', ({}, {})'.format(p.type.index, self._unwrapParameter(p)) for p in m.params]))
+            method_invokation = 'self.obj({}, {}{})'.format( m.index, self._typeTuple(m.retType), ''.join([ ', ({}, {})'.format(self._typeTuple(p.type), self._unwrapParameter(p)) for p in m.params]))
             for l in self._wrapRetValue(m.retType, method_invokation):
                 yield '\t\t{}'.format(l)
+
+    def _typeTuple(self, type):
+        if isinstance(type, BuiltinType) or isinstance(type, Enum):
+            return self._tuple([str(type.index)])
+        elif isinstance(type, Interface):
+            return self._tuple([str(type.index), hex(type.checksum)])
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
 
     def _generateInterface(self, ifc):
         mangled_name = self._mangleType(ifc)

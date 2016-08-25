@@ -28,7 +28,7 @@ namespace binding
 				auto p = params[i];
 
 				PyObjectHolder py_p;
-				switch (p.type)
+				switch (p.type.id)
 				{
 				case JOINT_TYPE_BOOL: py_p.Reset(PyBool_FromLong(p.value.b)); break;
 

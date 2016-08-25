@@ -142,7 +142,7 @@ namespace binding
 			return JOINT_ERROR_EXCEPTION;
 		}
 
-		switch (retType)
+		switch (retType.id)
 		{
 		case JOINT_TYPE_VOID:
 			break;
@@ -273,7 +273,7 @@ namespace binding
 	Joint_Error Binding::ReleaseRetValue(Joint_Type type, Joint_Value value)
 	{
 		JOINT_CPP_WRAP_BEGIN
-		switch(type)
+		switch(type.id)
 		{
 		case JOINT_TYPE_UTF8:
 			delete[] value.utf8;

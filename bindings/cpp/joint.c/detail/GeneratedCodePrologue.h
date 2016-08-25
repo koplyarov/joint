@@ -7,7 +7,7 @@
 
 Joint_Error JointC_ReleaseRetValue(Joint_Type type, Joint_Value value)
 {
-	switch (type)
+	switch (type.id)
 	{
 	case JOINT_TYPE_UTF8:
 		free((void*)value.utf8);
@@ -28,7 +28,7 @@ Joint_Error JointC_ThrowException(const char* msg, const char* file, int line, c
 	return JOINT_ERROR_EXCEPTION;
 }
 
-#define DETAIL_JOINT_C_SET_RET_VALUE(MethodName_, RetCode_, RetType_, ...) \
+#define DETAIL_JOINT_C_SET_RET_VALUE(MethodName_, RetCode_, ...) \
 			if ((RetCode_) == JOINT_ERROR_NONE) \
 			{ \
 				__VA_ARGS__ \

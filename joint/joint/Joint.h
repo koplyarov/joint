@@ -104,6 +104,20 @@ extern "C" {
 		JOINT_TYPE_ENUM       = 14,
 
 		JOINT_TYPE_OBJ        = 15,
+	} Joint_TypeId;
+
+
+	typedef union
+	{
+		struct _Joint_Type_t*   arrayElementType;
+		Joint_InterfaceChecksum interfaceChecksum;
+	} Joint_TypePayload;
+
+
+	typedef struct _Joint_Type_t
+	{
+		Joint_TypeId            id;
+		Joint_TypePayload       payload;
 	} Joint_Type;
 
 
