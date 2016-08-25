@@ -39,7 +39,7 @@ namespace pyjoint
 		0,                         // tp_as_sequence
 		0,                         // tp_as_mapping
 		0,                         // tp_hash
-		0,                         // tp_call
+		Object_InvokeMethod,       // tp_call
 		0,                         // tp_str
 		0,                         // tp_getattro
 		0,                         // tp_setattro

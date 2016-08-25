@@ -149,20 +149,19 @@ class PythonGenerator:
 
     def _generateInterfaceProxy(self, ifc):
         yield 'class {}_proxy:'.format(self._mangleType(ifc))
-        yield '\t__slots__ = [\'obj\', \'InvokeMethod\'{}]'.format(''.join(', \'{}\''.format(m.name) for m in ifc.methods if not self._methodNeedsProxy(m)))
+        yield '\t__slots__ = [\'obj\'{}]'.format(''.join(', \'{}\''.format(m.name) for m in ifc.methods if not self._methodNeedsProxy(m)))
         yield '\tdef __init__(self, obj):'
         yield '\t\tself.obj = obj'
-        yield '\t\tself.InvokeMethod = self.obj.InvokeMethod'
         for m in ifc.methods:
             if self._methodNeedsProxy(m):
                 continue
-            yield '\t\tself.{} = partial(self.InvokeMethod, {}, {})'.format(m.name, m.index, m.retType.index)
+            yield '\t\tself.{} = partial(self.obj, {}, {})'.format(m.name, m.index, m.retType.index)
         for m in ifc.methods:
             if not self._methodNeedsProxy(m):
                 continue
             yield ''
             yield '\tdef {}(self{}):'.format(m.name, ''.join(', {}'.format(p.name) for p in m.params))
-            method_invokation = 'self.InvokeMethod({}, {}{})'.format( m.index, m.retType.index, ''.join([ ', ({}, {})'.format(p.type.index, self._unwrapParameter(p)) for p in m.params]))
+            method_invokation = 'self.obj({}, {}{})'.format( m.index, m.retType.index, ''.join([ ', ({}, {})'.format(p.type.index, self._unwrapParameter(p)) for p in m.params]))
             for l in self._wrapRetValue(m.retType, method_invokation):
                 yield '\t\t{}'.format(l)
 
