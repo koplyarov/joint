@@ -1,0 +1,19 @@
+package test
+{
+	interface IInterfaceCS1
+	{ }
+
+	interface IInterfaceCS2
+	{ }
+
+	interface IInterfaceChecksumTests
+	{
+		IInterfaceCS1 Return1();
+		IInterfaceCS2 Return2();
+		IInterfaceCS1 Return12();
+
+		void AcceptCS1(IInterfaceCS1 obj);
+		void AcceptCS2(IInterfaceCS2 obj);
+		void CastToCS2(IInterfaceCS1 obj);
+	}
+}

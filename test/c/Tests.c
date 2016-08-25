@@ -91,6 +91,23 @@ JOINT_C_COMPONENT(CastComponent017, test_IInterface0, test_IInterface1, test_IIn
 
 ////////////////////////////////////////////////////////////////////////////////
 
+typedef struct { } InterfaceChecksumComponent1;
+Joint_Error InterfaceChecksumComponent1_Init(InterfaceChecksumComponent1* self) { return JOINT_ERROR_NONE; }
+Joint_Error InterfaceChecksumComponent1_Deinit(InterfaceChecksumComponent1* self) { return JOINT_ERROR_NONE; }
+JOINT_C_COMPONENT(InterfaceChecksumComponent1, test_IInterfaceCS1);
+
+typedef struct { } InterfaceChecksumComponent2;
+Joint_Error InterfaceChecksumComponent2_Init(InterfaceChecksumComponent2* self) { return JOINT_ERROR_NONE; }
+Joint_Error InterfaceChecksumComponent2_Deinit(InterfaceChecksumComponent2* self) { return JOINT_ERROR_NONE; }
+JOINT_C_COMPONENT(InterfaceChecksumComponent2, test_IInterfaceCS2);
+
+typedef struct { } InterfaceChecksumComponent12;
+Joint_Error InterfaceChecksumComponent12_Init(InterfaceChecksumComponent12* self) { return JOINT_ERROR_NONE; }
+Joint_Error InterfaceChecksumComponent12_Deinit(InterfaceChecksumComponent12* self) { return JOINT_ERROR_NONE; }
+JOINT_C_COMPONENT(InterfaceChecksumComponent12, test_IInterfaceCS1, test_IInterfaceCS2);
+
+////////////////////////////////////////////////////////////////////////////////
+
 typedef struct {
 	Joint_ModuleHandle module;
 } Tests;
@@ -299,7 +316,48 @@ Joint_Error Tests_CatchAll(Tests* self, test_IExceptionTestsCallback cb, JOINT_B
 Joint_Error Tests_LetThrough(Tests* self, test_IExceptionTestsCallback cb, Joint_ExceptionHandle* ex)
 { return test_IExceptionTestsCallback_Method(cb, ex); }
 
-JOINT_C_COMPONENT(Tests, test_IBasicTests, test_IEnumTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests);
+
+Joint_Error Tests_Return1(Tests* self, test_IInterfaceCS1* result, Joint_ExceptionHandle* ex)
+{
+	InterfaceChecksumComponent1__wrapper* t = JointC_Wrap__InterfaceChecksumComponent1();
+	InterfaceChecksumComponent1_Init(&t->impl);
+	*result = (test_IInterfaceCS1)InterfaceChecksumComponent1__as__test_IInterfaceCS1(self->module, t);
+	return JOINT_ERROR_NONE;
+}
+
+Joint_Error Tests_Return2(Tests* self, test_IInterfaceCS2* result, Joint_ExceptionHandle* ex)
+{
+	InterfaceChecksumComponent2__wrapper* t = JointC_Wrap__InterfaceChecksumComponent2();
+	InterfaceChecksumComponent2_Init(&t->impl);
+	*result = (test_IInterfaceCS2)InterfaceChecksumComponent2__as__test_IInterfaceCS2(self->module, t);
+	return JOINT_ERROR_NONE;
+}
+
+Joint_Error Tests_Return12(Tests* self, test_IInterfaceCS1* result, Joint_ExceptionHandle* ex)
+{
+	InterfaceChecksumComponent12__wrapper* t = JointC_Wrap__InterfaceChecksumComponent12();
+	InterfaceChecksumComponent12_Init(&t->impl);
+	*result = (test_IInterfaceCS1)InterfaceChecksumComponent12__as__test_IInterfaceCS1(self->module, t);
+	return JOINT_ERROR_NONE;
+}
+
+Joint_Error Tests_AcceptCS1(Tests* self, test_IInterfaceCS1 obj, Joint_ExceptionHandle* ex)
+{ return JOINT_ERROR_NONE; }
+
+Joint_Error Tests_AcceptCS2(Tests* self, test_IInterfaceCS2 obj, Joint_ExceptionHandle* ex)
+{ return JOINT_ERROR_NONE; }
+
+Joint_Error Tests_CastToCS2(Tests* self, test_IInterfaceCS1 obj, Joint_ExceptionHandle* ex)
+{
+	test_IInterfaceCS2 tmp = NULL;
+	Joint_Error ret = JointC_CastTo__test_IInterfaceCS2(obj, &tmp);
+	if (ret != JOINT_ERROR_NONE)
+		return JOINT_C_THROW("Could not cast to test.IInterfaceCS2", ex);
+	return JOINT_ERROR_NONE;
+}
+
+
+JOINT_C_COMPONENT(Tests, test_IBasicTests, test_IEnumTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests, test_IInterfaceChecksumTests);
 
 ////////////////////////////////////////////////////////////////////////////////
 

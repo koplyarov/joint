@@ -7,6 +7,7 @@ joint_generate_adapters(python ${CMAKE_CURRENT_SOURCE_DIR}/Tests_adapters.py
 	../idl/ILifetimeTests.idl
 	../idl/ICastTests.idl
 	../idl/IExceptionTests.idl
+	../idl/IInterfaceChecksumTests.idl
 )
 
 add_custom_target(test-adapters-py ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Tests_adapters.py)

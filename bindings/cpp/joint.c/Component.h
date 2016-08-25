@@ -24,7 +24,7 @@
 	{ \
 		Joint_ObjectHandle result = JOINT_NULL_HANDLE; \
 		JointC_Accessor* internal = NULL; \
-		Joint_Error ret = Detail__##ComponentImpl##__Cast(w, Ifc##__id, (const JointC_Accessor**)&internal); \
+		Joint_Error ret = Detail__##ComponentImpl##__Cast(w, Ifc##__id, Ifc##__checksum, (const JointC_Accessor**)&internal); \
 		--w->refCount; \
 		if (ret != JOINT_ERROR_NONE) \
 		{ \
@@ -72,7 +72,7 @@
 		} \
 		return JOINT_ERROR_NONE; \
 	} \
-	static Joint_Error Detail__##C##__Cast(void* componentWrapper, Joint_InterfaceId interfaceId, const JointC_Accessor** outAccessor) \
+	static Joint_Error Detail__##C##__Cast(void* componentWrapper, Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, const JointC_Accessor** outAccessor) \
 	{ \
 		C##__wrapper* w = (C##__wrapper*)componentWrapper; \
 		if (0) ;\

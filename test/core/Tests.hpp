@@ -64,6 +64,21 @@
 					TEST_REPORT_SUCCESS(#Val_ " == " #__VA_ARGS__); \
 			} )
 
+#define TEST_RELATION(Rel_, Val_, ...) \
+		TEST_DOES_NOT_THROW_INTERNAL("TEST_EQUALS(" #Val_ ", " #__VA_ARGS__ ")", { \
+				auto&& l = (Val_); \
+				auto&& r = (__VA_ARGS__); \
+				if (!((l) Rel_ (r))) \
+					TEST_REPORT_ERROR("'" #Val_ " " #Rel_ " " #__VA_ARGS__ "': " + ::test::ToString(l) + " and " + ::test::ToString(r)); \
+				else \
+					TEST_REPORT_SUCCESS(#Val_ " " #Rel_ " " #__VA_ARGS__); \
+			} )
+
+#define TEST_LESS(Val_, ...) TEST_RELATION(<, Val_, __VA_ARGS__)
+#define TEST_LESS_OR_EQUAL(Val_, ...) TEST_RELATION(<=, Val_, __VA_ARGS__)
+#define TEST_GREATER(Val_, ...) TEST_RELATION(>, Val_, __VA_ARGS__)
+#define TEST_GREATER_OR_EQUAL(Val_, ...) TEST_RELATION(>=, Val_, __VA_ARGS__)
+
 #define TEST_IS_TRUE(...) \
 		TEST_DOES_NOT_THROW_INTERNAL("TEST_IS_TRUE(" #__VA_ARGS__ ")", { \
 				bool b = (__VA_ARGS__); \

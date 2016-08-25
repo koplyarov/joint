@@ -86,7 +86,7 @@ namespace joint
 			return Ptr<Dst_>();
 
 		Joint_ObjectHandle result_handle;
-		Joint_Error ret = Joint_CastObject(src->_GetObjectHandle(), Dst_::_GetInterfaceId(), &result_handle);
+		Joint_Error ret = Joint_CastObject(src->_GetObjectHandle(), Dst_::_GetInterfaceId(), Dst_::_GetInterfaceChecksum(), &result_handle);
 		if (ret == JOINT_ERROR_NONE)
 			return Ptr<Dst_>(Dst_(result_handle));
 		else if (ret == JOINT_ERROR_CAST_FAILED)

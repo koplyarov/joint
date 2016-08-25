@@ -82,13 +82,13 @@ namespace binding
 	}
 
 
-	Joint_Error Binding::CastObject(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_InterfaceId interfaceId, Joint_ObjectHandleInternal* outRetValue)
+	Joint_Error Binding::CastObject(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, Joint_ObjectHandleInternal* outRetValue)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
 		auto accessor = reinterpret_cast<JointC_Accessor*>(obj);
 		const JointC_Accessor* result = nullptr;
-		Joint_Error ret = accessor->VTable->CastObject(accessor->Component, interfaceId, &result);
+		Joint_Error ret = accessor->VTable->CastObject(accessor->Component, interfaceId, checksum, &result);
 		*outRetValue = const_cast<JointC_Accessor*>(result);
 		return ret;
 

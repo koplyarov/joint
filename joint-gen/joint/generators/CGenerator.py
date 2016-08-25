@@ -69,6 +69,7 @@ class CGenerator:
 
     def _generateClasses(self, ifc):
         mangled_ifc = self._mangleType(ifc)
+        yield 'Joint_InterfaceChecksum {}__checksum = {}UL;'.format(mangled_ifc, hex(ifc.checksum))
         yield 'const char* {}__id = "{}";'.format(mangled_ifc, ifc.fullname)
         yield ''
         yield 'typedef struct {n}_s* {n};'.format(n=mangled_ifc)
@@ -106,7 +107,11 @@ class CGenerator:
         yield ''
         yield '#define DETAIL_TRY_CAST__{}(Accessors) \\'.format(mangled_ifc)
         yield '\telse if (strcmp(interfaceId, {}__id) == 0) \\'.format(mangled_ifc)
+        yield '\t{ \\'
+        yield '\t\tif (checksum != {}__checksum) \\'.format(mangled_ifc)
+        yield '\t\t\treturn JOINT_ERROR_INVALID_INTERFACE_CHECKSUM; \\'
         yield '\t\t*outAccessor = &DETAIL_ACCESSOR__{}(Accessors); \\'.format(mangled_ifc)
+        yield '\t} \\'
         for b in ifc.bases:
             yield '\tDETAIL_TRY_CAST__{mn}((Accessors).{mn}__accessors) \\'.format(mn=self._mangleType(b))
         yield ''
@@ -119,7 +124,7 @@ class CGenerator:
         yield '\tif (!obj)'
         yield '\t\t*result = JOINT_NULL_HANDLE;'
         yield '\telse'
-        yield '\t\tret = Joint_CastObject((Joint_ObjectHandle)obj, {mn}__id, (Joint_ObjectHandle*)result);'.format(mn=self._mangleType(ifc))
+        yield '\t\tret = Joint_CastObject((Joint_ObjectHandle)obj, {mn}__id, {mn}__checksum, (Joint_ObjectHandle*)result);'.format(mn=self._mangleType(ifc))
         yield '\treturn ret == JOINT_ERROR_CAST_FAILED ? JOINT_ERROR_NONE : ret;'
         yield '}'
         for m in ifc.methods:

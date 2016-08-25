@@ -134,7 +134,7 @@ extern "C"
 		DETAIL_JOINT_ERR_TO_STRING(JOINT_ERROR_INVALID_PARAMETER);
 		DETAIL_JOINT_ERR_TO_STRING(JOINT_ERROR_OUT_OF_MEMORY);
 		DETAIL_JOINT_ERR_TO_STRING(JOINT_ERROR_IMPLEMENTATION_ERROR);
-		DETAIL_JOINT_ERR_TO_STRING(JOINT_ERROR_UNEXPECTED_TYPE);
+		DETAIL_JOINT_ERR_TO_STRING(JOINT_ERROR_INVALID_INTERFACE_CHECKSUM);
 		}
 #undef DETAIL_JOINT_ERR_TO_STRING
 
@@ -379,7 +379,7 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_ObjectHandle* outHandle)
+	Joint_Error Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, Joint_ObjectHandle* outHandle)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
@@ -388,7 +388,7 @@ extern "C"
 		JOINT_CHECK(interfaceId, JOINT_ERROR_INVALID_PARAMETER);
 
 		Joint_ObjectHandleInternal internal = NULL;
-		Joint_Error ret = handle->module->binding->desc.castObject(handle->module->binding->userData, handle->module->internal, handle->internal, interfaceId, &internal);
+		Joint_Error ret = handle->module->binding->desc.castObject(handle->module->binding->userData, handle->module->internal, handle->internal, interfaceId, checksum, &internal);
 		if (ret != JOINT_ERROR_NONE)
 		{
 			if (ret == JOINT_ERROR_CAST_FAILED)

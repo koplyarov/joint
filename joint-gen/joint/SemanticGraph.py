@@ -1,3 +1,4 @@
+import binascii
 import copy
 import os
 from .IdlParser import IdlParser
@@ -8,36 +9,12 @@ class SemanticGraphException:
         self.location = location
         self.message = message
 
-class Parameter:
-    def __init__(self, index, name, type, location):
-        self.index = index
-        self.name = name
-        self.type = type
-        self.location = location
-
-
-class Method:
-    def __init__(self, index, name, retType, location):
-        self.index = index
-        self.name = name
-        self.retType = retType
-        self.params = []
-        self.inherited = False
-        self.location = location
-
-    def copyFromBase(self, newIndex):
-        result = copy.copy(self)
-        result.index = newIndex
-        result.inherited = True
-        return result
-
 
 class EnumValue:
     def __init__(self, name, value, location):
         self.name = name
         self.value = value
         self.location = location
-
 
 class Enum:
     def __init__(self, name, packageNameList, location):
@@ -54,6 +31,46 @@ class Enum:
         return self.fullname
 
 
+class StructMember:
+    def __init__(self, name, type, location):
+        self.name = name
+        self.type = type
+        self.location = location
+
+class Struct:
+    def __init__(self, name, packageNameList, location):
+        self.name = name
+        self.packageNameList = packageNameList
+        self.fullname = '{}.{}'.format('.'.join(packageNameList), name)
+        self.members = []
+        self.location = location
+
+    def __repr__(self):
+        return self.fullname
+
+
+class Parameter:
+    def __init__(self, index, name, type, location):
+        self.index = index
+        self.name = name
+        self.type = type
+        self.location = location
+
+class Method:
+    def __init__(self, index, name, retType, location):
+        self.index = index
+        self.name = name
+        self.retType = retType
+        self.params = []
+        self.inherited = False
+        self.location = location
+
+    def copyFromBase(self, newIndex):
+        result = copy.copy(self)
+        result.index = newIndex
+        result.inherited = True
+        return result
+
 class Interface:
     def __init__(self, name, packageNameList, location):
         self.name = name
@@ -66,6 +83,29 @@ class Interface:
         self.needRelease = True
         self.location = location
 
+    def calculateChecksum(self):
+        ifc_str = self._ifcStr()
+        self.checksum = binascii.crc32(ifc_str) % (1 << 32)
+
+    def _ifcStr(self):
+        return'{}({}){{{}}}'.format(self.fullname, ','.join('{}'.format(b._ifcStr()) for b in self.bases), ','.join(self._methodStr(m) for m in self.methods))
+
+    def _methodStr(self, m):
+        return '{} {}({})'.format(self._typeStr(m.retType), m.name, ','.join(self._paramStr(p) for p in m.params))
+
+    def _paramStr(self, p):
+        return '{}'.format(self._typeStr(p.type))
+
+    def _typeStr(self, t):
+        if isinstance(t, BuiltinType) or isinstance(t, Interface):
+            return t.fullname
+        elif isinstance(t, Enum):
+            return '{}{{{}}}'.format(t.fullname, ','.join('{}:{}'.format(v.name, v.value) for v in t.values))
+        elif isinstance(t, Struct):
+            return '{}{{{}}}'.format(t.fullname, ','.join('{} {}'.format(self._typeStr(m.type), m.name) for m in t.members))
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(t))
+
     def __repr__(self):
         return self.fullname
 
@@ -76,6 +116,7 @@ class Package:
         self.fullname = '.'.join(nameList)
         self.interfaces = []
         self.enums = []
+        self.structs = []
 
     def __repr__(self):
         return '.'.join(self.nameList)
@@ -84,6 +125,8 @@ class Package:
         result = next((t for t in self.interfaces if t.name == name), None)
         if not result:
             result = next((t for t in self.enums if t.name == name), None)
+        if not result:
+            result = next((t for t in self.structs if t.name == name), None)
         if not result:
             raise LookupError('Type {}.{} was not declared!'.format('.'.join(self.nameList), name))
         return result
@@ -104,6 +147,7 @@ class BuiltinTypeCategory:
 class BuiltinType:
     def __init__(self, name, variantName, index, category, bits = 0, signed = False):
         self.name = name
+        self.fullname = name
         self.variantName = variantName
         self.index = index
         self.category = category
@@ -201,6 +245,12 @@ class SemanticGraphBuilder:
                         v = EnumValue(v_ast['name'], v_ast['value'] if 'value' in v_ast else value, v_ast['location'])
                         value = v.value + 1
                         e.values.append(v)
+                elif t_ast['kind'] == 'struct':
+                    s = Struct(t_ast['name'], pkg.nameList, t_ast['location'])
+                    pkg.structs.append(s)
+                    for m_ast in t_ast['members']:
+                        m = StructMember(m_ast['name'], semanticsGraph.makeType(pkg, m_ast['type']), m_ast['location'])
+                        s.members.append(m)
 
         for ast in parsed_files:
             pkg = semanticsGraph.findPackage(ast['package'])
@@ -216,6 +266,10 @@ class SemanticGraphBuilder:
                             p_index += 1
                             m.params.append(p)
                         ifc.methods.append(m)
+
+        for pkg in semanticsGraph.packages:
+            for ifc in pkg.interfaces:
+                ifc.calculateChecksum()
 
         return semanticsGraph
 

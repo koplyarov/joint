@@ -56,6 +56,16 @@ public:
 };
 
 
+struct InterfaceChecksumComponent1
+{ typedef TypeList<IInterfaceCS1> JointInterfaces; };
+
+struct InterfaceChecksumComponent2
+{ typedef TypeList<IInterfaceCS2> JointInterfaces; };
+
+struct InterfaceChecksumComponent12
+{ typedef TypeList<IInterfaceCS1, IInterfaceCS2> JointInterfaces; };
+
+
 class Tests
 {
 public:
@@ -65,7 +75,8 @@ public:
 			IObjectTests,
 			ILifetimeTests,
 			ICastTests,
-			IExceptionTests
+			IExceptionTests,
+			IInterfaceChecksumTests
 		> JointInterfaces;
 
 private:
@@ -182,6 +193,14 @@ public:
 
 	void LetThrough(const test::IExceptionTestsCallback_Ptr& cb)
 	{ cb->Method(); }
+
+	IInterfaceCS1_Ptr Return1() { return MakeComponent<IInterfaceCS1, InterfaceChecksumComponent1>(_module); }
+	IInterfaceCS2_Ptr Return2() { return MakeComponent<IInterfaceCS2, InterfaceChecksumComponent2>(_module); }
+	IInterfaceCS1_Ptr Return12() { return MakeComponent<IInterfaceCS1, InterfaceChecksumComponent12>(_module); }
+
+	void AcceptCS1(const IInterfaceCS1_Ptr& obj) { }
+	void AcceptCS2(const IInterfaceCS2_Ptr& obj) { }
+	void CastToCS2(const IInterfaceCS1_Ptr& obj) { joint::Cast<IInterfaceCS2>(obj); }
 };
 
 extern "C"

@@ -92,6 +92,7 @@ class CppGenerator:
         yield '\t{}(Joint_ObjectHandle obj) : _obj(obj) {{ }}'.format(ifc.name);
         yield ''
         yield '\tJoint_ObjectHandle _GetObjectHandle() const { return _obj; }'
+        yield '\tstatic Joint_InterfaceChecksum _GetInterfaceChecksum() {{ return {}UL; }}'.format(hex(ifc.checksum))
         yield '\tstatic const char* _GetInterfaceId() {{ return "{}"; }}'.format(ifc.fullname)
         yield ''
         for m in ifc.methods:
@@ -103,18 +104,16 @@ class CppGenerator:
         yield 'class {}_accessor'.format(ifc.name)
         yield '{'
         yield 'public:'
-        yield '\tstatic bool InheritsInterface(Joint_InterfaceId interfaceId)'
+        yield '\tstatic Joint_Error InheritsInterface(Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum)'
         yield '\t{'
-        yield '\t\treturn false'
         b = ifc
         while b:
-            yield '\t\t\t|| strcmp(interfaceId, "{}") == 0'.format(b.fullname)
+            yield '\t\tif (strcmp(interfaceId, "{}") == 0)'.format(b.fullname)
+            yield '\t\t\treturn (checksum == {}::_GetInterfaceChecksum()) ? JOINT_ERROR_NONE : JOINT_ERROR_INVALID_INTERFACE_CHECKSUM;'.format(self._mangleType(b))
             if not b.bases:
                 break
-            #if len(b.bases) > 1:
-                #raise RuntimeError('Not implemented')
             b = b.bases[0]
-        yield '\t\t\t;'
+        yield '\t\treturn JOINT_ERROR_CAST_FAILED;'
         yield '\t}'
         yield ''
         yield '\tstatic Joint_Error InvokeMethodImpl(ComponentImpl_* componentImpl, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);'
@@ -159,37 +158,37 @@ class CppGenerator:
             raise RuntimeError('Not implemented (type: {})!'.format(p.type))
 
     def _generateAccessorInvokeMethodCase(self, ifc, m):
-        yield '\tcase {}:'.format(m.index)
-        yield '\t\t{'
-        yield '\t\t\tif (paramsCount != {}'.format(len(m.params))
-        yield '\t\t\t\t|| retType != (Joint_Type){}'.format(m.retType.index)
+        yield 'case {}:'.format(m.index)
+        yield '\t{'
+        yield '\t\tif (paramsCount != {}'.format(len(m.params))
+        yield '\t\t\t|| retType != (Joint_Type){}'.format(m.retType.index)
         for p in m.params:
-            yield '\t\t\t\t|| params[{}].type != (Joint_Type){}'.format(p.index, p.type.index)
-        yield '\t\t\t) { return JOINT_ERROR_GENERIC; }'
+            yield '\t\t\t|| params[{}].type != (Joint_Type){}'.format(p.index, p.type.index)
+        yield '\t\t) { return JOINT_ERROR_GENERIC; }'
         yield ''
         for p in m.params:
             if isinstance(p.type, Interface):
-                yield '\t\t\tJOINT_CALL(Joint_IncRefObject(params[{i}].value.{v}));'.format(i=p.index, v=p.type.variantName)
-                yield '\t\t\t{t} p{i}({w}(params[{i}].value.{v}));'.format(t=self._toCppType(p.type), w=self._mangleType(p.type), i=p.index, v=p.type.variantName)
+                yield '\t\tJOINT_CALL(Joint_IncRefObject(params[{i}].value.{v}));'.format(i=p.index, v=p.type.variantName)
+                yield '\t\t{t} p{i}({w}(params[{i}].value.{v}));'.format(t=self._toCppType(p.type), w=self._mangleType(p.type), i=p.index, v=p.type.variantName)
             else:
-                yield '\t\t\t{t} p{i}({v});'.format(t=self._toCppType(p.type), i=p.index, v=self._toCppParamInitializer(p))
+                yield '\t\t{t} p{i}({v});'.format(t=self._toCppType(p.type), i=p.index, v=self._toCppParamInitializer(p))
         method_call = 'componentImpl->{}({})'.format(m.name, ', '.join('p{}'.format(p.index) for p in m.params))
         if m.retType.name != 'void':
-            yield '\t\t\t{} result({});'.format(self._toCppType(m.retType), method_call)
+            yield '\t\t{} result({});'.format(self._toCppType(m.retType), method_call)
             if isinstance(m.retType, Interface):
-                yield '\t\t\tJoint_Error ret = Joint_IncRefObject(result->_GetObjectHandle());'
-                yield '\t\t\tif (ret != JOINT_ERROR_NONE)'
-                yield '\t\t\t\treturn ret;'
+                yield '\t\tJoint_Error ret = Joint_IncRefObject(result->_GetObjectHandle());'
+                yield '\t\tif (ret != JOINT_ERROR_NONE)'
+                yield '\t\t\treturn ret;'
             if m.retType.name != 'string':
-                yield '\t\t\toutRetValue->result.value.{} = {};'.format(m.retType.variantName, self._toCppValue('result', m.retType))
+                yield '\t\toutRetValue->result.value.{} = {};'.format(m.retType.variantName, self._toCppValue('result', m.retType))
             else:
-                yield '\t\t\tchar* result_c_str = new char[result.size() + 1];'
-                yield '\t\t\tstrcpy(result_c_str, result.c_str());'
-                yield '\t\t\toutRetValue->result.value.{} = result_c_str;'.format(m.retType.variantName)
+                yield '\t\tchar* result_c_str = new char[result.size() + 1];'
+                yield '\t\tstrcpy(result_c_str, result.c_str());'
+                yield '\t\toutRetValue->result.value.{} = result_c_str;'.format(m.retType.variantName)
         else:
-            yield '\t\t\t{};'.format(method_call)
-        yield '\t\t}'
-        yield '\t\tbreak;'
+            yield '\t\t{};'.format(method_call)
+        yield '\t}'
+        yield '\tbreak;'
 
     def _generateAccessorInvokeMethod(self, ifc):
         yield 'template <typename ComponentImpl_>'

@@ -36,10 +36,12 @@ namespace pyjoint
 		PyObjectHolder py_interface_id_attr(PY_OBJ_CHECK(PyObject_GetAttrString(py_interface, "interfaceId")));
 		PyObjectHolder py_interface_id(PY_OBJ_CHECK(PyObject_Unicode(py_interface_id_attr)));
 #endif
+		PyObjectHolder py_checksum(PY_OBJ_CHECK(PyObject_GetAttrString(py_interface, "interfaceChecksum")));
+		Joint_InterfaceChecksum checksum = FromPyLong<Joint_InterfaceChecksum>(py_checksum);
 		auto interface_id = Utf8FromPyUnicode(py_interface_id);
 
 		Joint_ObjectHandle casted_obj;
-		Joint_Error ret = Joint_CastObject(obj->handle, interface_id.GetContent(), &casted_obj);
+		Joint_Error ret = Joint_CastObject(obj->handle, interface_id.GetContent(), checksum, &casted_obj);
 		if (ret == JOINT_ERROR_CAST_FAILED)
 		{
 			Py_INCREF(Py_None);

@@ -30,7 +30,16 @@ class CastComponent017(test_IInterface0, test_IInterface1, test_IInterface7):
     def Method6(self, i): return i
     def Method7(self, i): return i
 
-class Tests(test_IBasicTests, test_IObjectTests, test_IEnumTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests):
+class InterfaceChecksumComponent1(test_IInterfaceCS1):
+    pass
+
+class InterfaceChecksumComponent2(test_IInterfaceCS2):
+    pass
+
+class InterfaceChecksumComponent12(test_IInterfaceCS1, test_IInterfaceCS2):
+    pass
+
+class Tests(test_IBasicTests, test_IObjectTests, test_IEnumTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests, test_IInterfaceChecksumTests):
     def __init__(self, jointModule):
         super(Tests, self).__init__()
         self.jointModule = jointModule
@@ -102,6 +111,14 @@ class Tests(test_IBasicTests, test_IObjectTests, test_IEnumTests, test_ILifetime
 
     def LetThrough(self, cb):
         cb.Method()
+
+    def Return1(self): return self.jointModule.CreateComponent(test_IInterfaceCS1, InterfaceChecksumComponent1)
+    def Return2(self): return self.jointModule.CreateComponent(test_IInterfaceCS1, InterfaceChecksumComponent2)
+    def Return12(self): return self.jointModule.CreateComponent(test_IInterfaceCS1, InterfaceChecksumComponent12)
+
+    def AcceptCS1(self, obj): pass
+    def AcceptCS2(self, obj): pass
+    def CastToCS2(self, obj): pyjoint.Cast(obj, test_IInterfaceCS2)
 
 
 def GetTests(jointModule):

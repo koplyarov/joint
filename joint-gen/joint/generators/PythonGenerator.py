@@ -174,6 +174,7 @@ class PythonGenerator:
             bases = [ self._mangleType(b) for b in ifc.bases ]
         yield 'class {}({}):'.format(mangled_name, ', '.join(bases))
         yield '\t__slots__ = []'
+        yield '\tinterfaceChecksum = {}'.format(hex(ifc.checksum))
         yield '\tinterfaceId = \'{}\''.format(ifc.fullname)
         yield '\taccessor = {}_accessor'.format(mangled_name)
         yield '\tproxy = {}_proxy'.format(mangled_name)

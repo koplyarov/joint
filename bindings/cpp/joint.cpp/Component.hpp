@@ -110,15 +110,16 @@ namespace joint
 			const JointC_Accessor* GetAccessor() const
 			{ return &_accessor; }
 
-			bool GetAccessorById(Joint_InterfaceId interfaceId, const JointC_Accessor** outAccessor)
+			Joint_Error GetAccessorById(Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, const JointC_Accessor** outAccessor)
 			{
-				if (AccessorType::InheritsInterface(interfaceId))
+				Joint_Error ret = AccessorType::InheritsInterface(interfaceId, checksum);
+				if (ret == JOINT_ERROR_NONE || ret == JOINT_ERROR_INVALID_INTERFACE_CHECKSUM)
 				{
 					*outAccessor = &_accessor;
-					return true;
+					return ret;
 				}
 				else
-					return _tail.GetAccessorById(interfaceId, outAccessor);
+					return _tail.GetAccessorById(interfaceId, checksum, outAccessor);
 			}
 		};
 
@@ -130,8 +131,8 @@ namespace joint
 			void Init(void* component)
 			{ }
 
-			bool GetAccessorById(Joint_InterfaceId interfaceId, const JointC_Accessor** outAccessor)
-			{ return false; }
+			Joint_Error GetAccessorById(Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, const JointC_Accessor** outAccessor)
+			{ return JOINT_ERROR_CAST_FAILED; }
 		};
 	}
 
@@ -196,10 +197,10 @@ namespace joint
 			return JOINT_ERROR_NONE;
 		}
 
-		static Joint_Error CastObject(void* component, Joint_InterfaceId interfaceId, const JointC_Accessor** outAccessor)
+		static Joint_Error CastObject(void* component, Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, const JointC_Accessor** outAccessor)
 		{
 			ComponentWrapper* inst = reinterpret_cast<ComponentWrapper*>(component);
-			Joint_Error ret = inst->_accessors.GetAccessorById(interfaceId, outAccessor) ? JOINT_ERROR_NONE : JOINT_ERROR_CAST_FAILED;
+			Joint_Error ret = inst->_accessors.GetAccessorById(interfaceId, checksum, outAccessor);
 			if (ret == JOINT_ERROR_NONE)
 				++inst->_refCount;
 			return ret;

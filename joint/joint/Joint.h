@@ -23,6 +23,7 @@ extern "C" {
 #define JOINT_TRUE 1
 #define JOINT_FALSE 0
 
+	typedef uint32_t Joint_InterfaceChecksum;
 	typedef const char* Joint_InterfaceId;
 
 	struct Joint_Binding;
@@ -56,7 +57,7 @@ extern "C" {
 		JOINT_ERROR_INVALID_PARAMETER = 7,
 		JOINT_ERROR_OUT_OF_MEMORY = 8,
 		JOINT_ERROR_IMPLEMENTATION_ERROR = 9,
-		JOINT_ERROR_UNEXPECTED_TYPE = 10
+		JOINT_ERROR_INVALID_INTERFACE_CHECKSUM = 10
 	} Joint_Error;
 
 	JOINT_API const char* Joint_ErrorToString(Joint_Error err);
@@ -154,7 +155,7 @@ extern "C" {
 	typedef Joint_Error Joint_GetRootObject_Func(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, const char* getterName, Joint_ObjectHandle* outObject);
 	typedef Joint_Error Joint_ReleaseObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal object);
 	typedef Joint_Error Joint_InvokeMethod_Func(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
-	typedef Joint_Error Joint_CastObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_InterfaceId interfaceId, Joint_ObjectHandleInternal* outRetValue);
+	typedef Joint_Error Joint_CastObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, Joint_ObjectHandleInternal* outRetValue);
 	typedef Joint_Error Joint_LoadModule_Func(void* bindingUserData, const char* moduleName, Joint_ModuleHandleInternal* outModule);
 	typedef Joint_Error Joint_UnloadModule_Func(void* bindingUserData, Joint_ModuleHandleInternal module);
 	typedef Joint_Error Joint_DeinitBinding_Func(void* bindingUserData);
@@ -190,7 +191,7 @@ extern "C" {
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_IncRefObject(Joint_ObjectHandle handle);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_DecRefObject(Joint_ObjectHandle handle);
-	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_ObjectHandle* outHandle);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, Joint_ObjectHandle* outHandle);
 
 	typedef struct
 	{
