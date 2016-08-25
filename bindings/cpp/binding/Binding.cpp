@@ -65,12 +65,9 @@ namespace binding
 
 	Joint_Error Binding::InvokeMethod(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
 	{
-		JOINT_CPP_WRAP_BEGIN
-
+		// Nothing here may throw, so there is no JOINT_CPP_WRAP macros. This improves performance
 		auto accessor = reinterpret_cast<JointC_Accessor*>(obj);
 		return accessor->VTable->InvokeMethod(accessor->Component, methodId, params, paramsCount, retType, outRetValue);
-
-		JOINT_CPP_WRAP_END
 	}
 
 

@@ -21,6 +21,7 @@ namespace joint
 
 #define JOINT_THROW(...) do { throw ::joint::MakeException(__VA_ARGS__); } while (false)
 #define JOINT_CHECK(Expr_, ...) do { if (!(Expr_)) { GetLogger().Error() << "JOINT_CHECK failed: " #Expr_ " in function " << __func__ << " at " << JOINT_SOURCE_LOCATION; JOINT_THROW(__VA_ARGS__); } } while (false)
+#define JOINT_CHECK_NOTHROW(Expr_, ...) do { if (!(Expr_)) { GetLogger().Error() << "JOINT_CHECK failed: " #Expr_ " in function " << __func__ << " at " << JOINT_SOURCE_LOCATION; return (__VA_ARGS__); } } while (false)
 
 	class JointException : public std::exception
 	{

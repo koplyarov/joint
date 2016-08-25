@@ -103,8 +103,6 @@ extern "C" {
 		JOINT_TYPE_ENUM       = 14,
 
 		JOINT_TYPE_OBJ        = 15,
-
-		JOINT_TYPE_EXCEPTION  = 16
 	} Joint_Type;
 
 
@@ -204,7 +202,7 @@ extern "C" {
 	} Joint_StackFrame;
 
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_MakeException(const char* message, const Joint_StackFrame* backtrace, Joint_SizeT backtraceSize, Joint_ExceptionHandle* outHandle);
-	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_ReleaseException(Joint_ExceptionHandle handle);
+	JOINT_API void Joint_ReleaseException(Joint_ExceptionHandle handle);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetExceptionMessageSize(Joint_ExceptionHandle handle, Joint_SizeT* outSize);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetExceptionMessage(Joint_ExceptionHandle handle, char* buf, Joint_SizeT bufSize);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetExceptionBacktraceSize(Joint_ExceptionHandle handle, Joint_SizeT* outSize);

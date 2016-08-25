@@ -291,11 +291,7 @@ Joint_Error Tests_CatchAll(Tests* self, test_IExceptionTestsCallback cb, JOINT_B
 	Joint_ExceptionHandle internal_ex = JOINT_NULL_HANDLE;
 	Joint_Error ret = test_IExceptionTestsCallback_Method(cb, &internal_ex);
 	if (internal_ex)
-	{
-		Joint_Error ret = Joint_ReleaseException(internal_ex);
-		if (ret != JOINT_ERROR_NONE)
-			Joint_Log(JOINT_LOGLEVEL_WARNING, "Tests.C", "Joint_ReleaseException failed: %s", Joint_ErrorToString(ret));
-	}
+		Joint_ReleaseException(internal_ex);
 	*result = (ret == JOINT_ERROR_EXCEPTION);
 	return JOINT_ERROR_NONE;
 }

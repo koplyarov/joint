@@ -14,20 +14,20 @@ Joint_Error Benchmarks_Init(Benchmarks* self)
 Joint_Error Benchmarks_Deinit(Benchmarks* self)
 { return JOINT_ERROR_NONE; }
 
-Joint_Error Benchmarks_NoParamsMethod(Benchmarks* self)
+Joint_Error Benchmarks_NoParamsMethod(Benchmarks* self, Joint_ExceptionHandle* ex)
 { return JOINT_ERROR_NONE; }
 
-Joint_Error Benchmarks_MeasureNativeNoParams(Benchmarks* self, int64_t n)
+Joint_Error Benchmarks_MeasureNativeNoParams(Benchmarks* self, int64_t n, Joint_ExceptionHandle* ex)
 {
 	for (int64_t i = 0; i < n; ++i)
 		NoParamsFunc();
 	return JOINT_ERROR_NONE;
 }
 
-Joint_Error Benchmarks_MeasureOutgoingNoParams(Benchmarks* self, benchmarks_IInvokable invokable, int64_t n)
+Joint_Error Benchmarks_MeasureOutgoingNoParams(Benchmarks* self, benchmarks_IInvokable invokable, int64_t n, Joint_ExceptionHandle* ex)
 {
 	for (int64_t i = 0; i < n; ++i)
-		benchmarks_IInvokable_NoParamsMethod(invokable);
+		benchmarks_IInvokable_NoParamsMethod(invokable, ex);
 	return JOINT_ERROR_NONE;
 }
 

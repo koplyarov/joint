@@ -20,4 +20,10 @@
 				return JOINT_ERROR_GENERIC; \
 			}
 
+#define JOINT_CPP_WRAP_END_VOID \
+			} \
+			catch (const std::exception& ex) { \
+				GetLogger().Error() << __func__ << " failed: " << ex; \
+			}
+
 #endif

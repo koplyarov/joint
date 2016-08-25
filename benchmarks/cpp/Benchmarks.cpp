@@ -11,12 +11,8 @@ class Benchmarks
 public:
 	typedef TypeList<benchmarks::IBenchmarks>	JointInterfaces;
 
-private:
-	Joint_ModuleHandle   _module;
-
 public:
-	Benchmarks(Joint_ModuleHandle module)
-		: _module(module)
+	Benchmarks()
 	{ }
 
 	~Benchmarks()
@@ -44,6 +40,6 @@ extern "C"
 	__declspec(dllexport)
 #endif
 	Joint_ObjectHandle GetBenchmarks(Joint_ModuleHandle module)
-	{ return Export(MakeComponent<IObject, Benchmarks>(module, module)); }
+	{ return Export(MakeComponent<IObject, Benchmarks>(module)); }
 
 }

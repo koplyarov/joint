@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include <joint.cpp/detail/RetValueGuard.hpp>
+
 
 namespace joint {
 namespace detail
@@ -24,14 +26,7 @@ namespace detail
 		do { \
 			Joint_Error ret = (__VA_ARGS__); \
 			if (ret != JOINT_ERROR_NONE) \
-			{ \
-				if (ret == JOINT_ERROR_EXCEPTION) \
-				{ \
-					::joint::detail::ExceptionGuard _joint_internal_exg(_joint_internal_ret_val.result.ex); \
-					throw ::joint::detail::MakeCppException(_joint_internal_ret_val.result.ex, MethodName_); \
-				} \
-				throw std::runtime_error(std::string(#__VA_ARGS__ " failed: ") + Joint_ErrorToString(ret)); \
-			} \
+				::joint::detail::ThrowCppException(_joint_internal_ret_val.result.ex, MethodName_, ret); \
 		} while (false)
 
 	class JointCppStackFrame
@@ -182,6 +177,17 @@ namespace detail
 		bt.push_back(JointCppStackFrame(JointAux_GetModuleName((Joint_FunctionPtr)&MakeCppException), "", 0, "", function_ss.str()));
 
 		return JointCppException(msg, bt);
+	}
+
+
+	inline void ThrowCppException(Joint_ExceptionHandle ex, const char* methodName, Joint_Error ret)
+	{
+		if (ret == JOINT_ERROR_EXCEPTION)
+		{
+			::joint::detail::ExceptionGuard _joint_internal_exg(ex);
+			throw ::joint::detail::MakeCppException(ex, "Blahblah");
+		}
+		throw std::runtime_error(std::string("Blahblah failed: ") + Joint_ErrorToString(ret));
 	}
 
 }}

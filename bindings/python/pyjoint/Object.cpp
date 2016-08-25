@@ -200,11 +200,7 @@ namespace pyjoint
 		}
 		else if (ret == JOINT_ERROR_EXCEPTION)
 		{
-			auto sg(joint::devkit::ScopeExit([&]{
-				Joint_Error ret = Joint_ReleaseException(ret_value.result.ex);
-				if (ret != JOINT_ERROR_NONE)
-					GetLogger().Error() << "Joint_ReleaseException failed: " << ret;
-			}));
+			auto sg(joint::devkit::ScopeExit([&]{ Joint_ReleaseException(ret_value.result.ex); }));
 
 			Joint_SizeT buf_size = 0;
 			std::vector<char> buf;

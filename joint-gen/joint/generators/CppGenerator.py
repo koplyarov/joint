@@ -159,23 +159,21 @@ class CppGenerator:
             raise RuntimeError('Not implemented (type: {})!'.format(p.type))
 
     def _generateAccessorInvokeMethodCase(self, ifc, m):
-        yield 'case {}:'.format(m.index)
-        yield '\t{'
-        yield '\t\tif (paramsCount != {}'.format(len(m.params))
-        yield '\t\t\t|| retType != (Joint_Type){}'.format(m.retType.index)
+        yield '\tcase {}:'.format(m.index)
+        yield '\t\t{'
+        yield '\t\t\tif (paramsCount != {}'.format(len(m.params))
+        yield '\t\t\t\t|| retType != (Joint_Type){}'.format(m.retType.index)
         for p in m.params:
-            yield '\t\t\t|| params[{}].type != (Joint_Type){}'.format(p.index, p.type.index)
-        yield '\t\t) { return JOINT_ERROR_GENERIC; }'
+            yield '\t\t\t\t|| params[{}].type != (Joint_Type){}'.format(p.index, p.type.index)
+        yield '\t\t\t) { return JOINT_ERROR_GENERIC; }'
         yield ''
         for p in m.params:
             if isinstance(p.type, Interface):
-                yield '\t\tJOINT_CALL(Joint_IncRefObject(params[{i}].value.{v}));'.format(i=p.index, v=p.type.variantName)
-                yield '\t\t{t} p{i}({w}(params[{i}].value.{v}));'.format(t=self._toCppType(p.type), w=self._mangleType(p.type), i=p.index, v=p.type.variantName)
+                yield '\t\t\tJOINT_CALL(Joint_IncRefObject(params[{i}].value.{v}));'.format(i=p.index, v=p.type.variantName)
+                yield '\t\t\t{t} p{i}({w}(params[{i}].value.{v}));'.format(t=self._toCppType(p.type), w=self._mangleType(p.type), i=p.index, v=p.type.variantName)
             else:
-                yield '\t\t{t} p{i}({v});'.format(t=self._toCppType(p.type), i=p.index, v=self._toCppParamInitializer(p))
+                yield '\t\t\t{t} p{i}({v});'.format(t=self._toCppType(p.type), i=p.index, v=self._toCppParamInitializer(p))
         method_call = 'componentImpl->{}({})'.format(m.name, ', '.join('p{}'.format(p.index) for p in m.params))
-        yield '\t\ttry'
-        yield '\t\t{'
         if m.retType.name != 'void':
             yield '\t\t\t{} result({});'.format(self._toCppType(m.retType), method_call)
             if isinstance(m.retType, Interface):
@@ -191,24 +189,32 @@ class CppGenerator:
         else:
             yield '\t\t\t{};'.format(method_call)
         yield '\t\t}'
-        yield '\t\tcatch (const ::joint::detail::JointCppException& ex)'
-        yield '\t\t{{ return ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, "{}.{}"); }}'.format(ifc.fullname, m.name)
-        yield '\t\tcatch (const std::exception& ex)'
-        yield '\t\t{{ return ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, "{}.{}"); }}'.format(ifc.fullname, m.name)
         yield '\t\tbreak;'
-        yield '\t}'
 
     def _generateAccessorInvokeMethod(self, ifc):
         yield 'template <typename ComponentImpl_>'
         yield 'Joint_Error {}_accessor<ComponentImpl_>::InvokeMethodImpl(ComponentImpl_* componentImpl, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)'.format(ifc.name)
         yield '{'
-        yield '\tswitch(methodId)'
+        yield '\ttry'
         yield '\t{'
+        yield '\t\tswitch(methodId)'
+        yield '\t\t{'
         for m in ifc.methods:
             for l in self._generateAccessorInvokeMethodCase(ifc, m):
-                yield '\t{}'.format(l)
-        yield '\tdefault:'
-        yield '\t\treturn JOINT_ERROR_GENERIC;'
+                yield '\t\t{}'.format(l)
+        yield '\t\tdefault:'
+        yield '\t\t\treturn JOINT_ERROR_GENERIC;'
+        yield '\t\t}'
+        yield '\t}'
+        yield '\tcatch (const ::joint::detail::JointCppException& ex)'
+        yield '\t{'
+        yield '\t\tconst char* method_names[] = {{ {} }};'.format(', '.join('"{}.{}"'.format(ifc.fullname, m.name) for m in ifc.methods))
+        yield '\t\treturn ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, method_names[methodId]);'
+        yield '\t}'
+        yield '\tcatch (const std::exception& ex)'
+        yield '\t{'
+        yield '\t\tconst char* method_names[] = {{ {} }};'.format(', '.join('"{}.{}"'.format(ifc.fullname, m.name) for m in ifc.methods))
+        yield '\t\treturn ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, method_names[methodId]);'
         yield '\t}'
         yield '\toutRetValue->releaseValue = &::joint::detail::_ReleaseRetValue;'
         yield '\treturn JOINT_ERROR_NONE;'

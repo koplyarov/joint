@@ -31,4 +31,21 @@
 #	define JOINT_IMPORT
 #endif
 
+
+#if defined(__GNUC__) || defined(__clang)
+#	if !defined(JOINT_LIKELY)
+#		define JOINT_LIKELY(Expr_)        __builtin_expect(!!(Expr_), 1)
+#	endif
+#	if !defined(JOINT_UNLIKELY)
+#		define JOINT_UNLIKELY(Expr_)      __builtin_expect((Expr_), 0)
+#	endif
+#else
+#	if !defined(JOINT_LIKELY)
+#		define JOINT_LIKELY(Expr_)        (Expr_)
+#	endif
+#	if !defined(JOINT_UNLIKELY)
+#		define JOINT_UNLIKELY(Expr_)      (Expr_)
+#	endif
+#endif
+
 #endif

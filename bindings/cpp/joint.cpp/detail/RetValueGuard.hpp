@@ -40,11 +40,7 @@ namespace detail
 		{ }
 
 		~ExceptionGuard()
-		{
-			Joint_Error ret = Joint_ReleaseException(_ex);
-			if (ret != JOINT_ERROR_NONE)
-				Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C++", "Joint_ReleaseException failed: %s", Joint_ErrorToString(ret));
-		}
+		{ Joint_ReleaseException(_ex); }
 	};
 
 

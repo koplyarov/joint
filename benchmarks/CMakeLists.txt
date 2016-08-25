@@ -13,7 +13,7 @@ if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PythonLibs_FOUND)
 		add_definitions(-DPy_ENABLE_SHARED)
 	else()
 		add_definitions(-Wall)
-		add_definitions(-std=c++11)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 	endif()
 
 	################################################################################

@@ -327,20 +327,18 @@ extern "C"
 
 	Joint_Error Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
 	{
-		JOINT_CPP_WRAP_BEGIN
+		// Nothing here may throw, so there is no JOINT_CPP_WRAP macros. This improves performance
 
-		JOINT_CHECK(obj != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(obj->refCount.load(std::memory_order_relaxed) > 0, JOINT_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(params || paramsCount == 0, JOINT_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(outRetValue, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK_NOTHROW(obj != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK_NOTHROW(obj->refCount.load(std::memory_order_relaxed) > 0, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK_NOTHROW(params || paramsCount == 0, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK_NOTHROW(outRetValue, JOINT_ERROR_INVALID_PARAMETER);
 
 		Joint_Error ret = obj->module->binding->desc.invokeMethod(obj->module, obj->module->binding->userData, obj->module->internal, obj->internal, methodId, params, paramsCount, retType, outRetValue);
-		JOINT_CHECK(ret == JOINT_ERROR_NONE || ret == JOINT_ERROR_EXCEPTION, ret);
-		JOINT_CHECK(outRetValue->releaseValue, JOINT_ERROR_IMPLEMENTATION_ERROR);
+		JOINT_CHECK_NOTHROW(ret == JOINT_ERROR_NONE || ret == JOINT_ERROR_EXCEPTION, ret);
+		JOINT_CHECK_NOTHROW(outRetValue->releaseValue, JOINT_ERROR_IMPLEMENTATION_ERROR);
 
 		return ret;
-
-		JOINT_CPP_WRAP_END
 	}
 
 
@@ -428,7 +426,7 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_ReleaseException(Joint_ExceptionHandle handle)
+	void Joint_ReleaseException(Joint_ExceptionHandle handle)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
@@ -436,7 +434,7 @@ extern "C"
 
 		delete handle;
 
-		JOINT_CPP_WRAP_END
+		JOINT_CPP_WRAP_END_VOID
 	}
 
 
