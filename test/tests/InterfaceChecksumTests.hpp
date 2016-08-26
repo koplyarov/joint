@@ -9,7 +9,7 @@ static bool g_errorsReported = false, g_gotInterfaceWord = false, g_gotChecksumW
 static void ChecksumTestsLogCallback(Joint_LogLevel logLevel, const char* subsystem, const char* message)
 {
 	if (logLevel >= JOINT_LOGLEVEL_ERROR)
-		++g_errorsReported;
+		g_errorsReported = true;
 
 	std::string msg(message);
 	std::transform(msg.begin(), msg.end(), msg.begin(), ::tolower);
