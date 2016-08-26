@@ -16,7 +16,7 @@ namespace detail
 		Joint_RetValue&    _retValue;
 
 	public:
-		RetValueGuard(Joint_Type type, Joint_RetValue& retValue)
+		RetValueGuard(const Joint_Type& type, Joint_RetValue& retValue)
 			: _type(type), _retValue(retValue)
 		{ }
 
