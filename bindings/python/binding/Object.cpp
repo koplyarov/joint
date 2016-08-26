@@ -54,6 +54,7 @@ namespace binding
 						py_p.Reset(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&pyjoint::Object_type, NULL)));
 						PYTHON_CHECK(Joint_IncRefObject(p.value.obj) == JOINT_ERROR_NONE, "Joint_IncRefObject failed!");
 						reinterpret_cast<pyjoint::Object*>(py_p.Get())->handle = p.value.obj;
+						reinterpret_cast<pyjoint::Object*>(py_p.Get())->checksum = p.type.payload.interfaceChecksum;
 					}
 					else
 					{

@@ -187,6 +187,10 @@ class CGenerator:
             if isinstance(m.retType, Interface):
                 yield '\t\t\tif (retType.payload.interfaceChecksum != {}__checksum) \\'.format(self._mangleType(m.retType))
                 yield '\t\t\t\treturn JOINT_ERROR_INVALID_INTERFACE_CHECKSUM; \\'
+            for p in m.params:
+                if isinstance(p.type, Interface):
+                    yield '\t\t\tif (params[{}].type.payload.interfaceChecksum != {}__checksum) \\'.format(p.index, self._mangleType(p.type))
+                    yield '\t\t\t\treturn JOINT_ERROR_INVALID_INTERFACE_CHECKSUM; \\'
             if m.retType.name != 'void':
                 yield '\t\t\t{} result; \\'.format(self._toCType(m.retType))
             for p in m.params:

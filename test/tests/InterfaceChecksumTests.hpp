@@ -2,25 +2,33 @@
 #define TEST_TESTS_INTERFACECHECKSUMTESTS_HPP
 
 
-static int g_errorsReported = 0;
+#include <algorithm>
+
+
+static bool g_errorsReported = false, g_gotInterfaceWord = false, g_gotChecksumWord = false;
 static void ChecksumTestsLogCallback(Joint_LogLevel logLevel, const char* subsystem, const char* message)
 {
 	if (logLevel >= JOINT_LOGLEVEL_ERROR)
 		++g_errorsReported;
-}
 
-#define SUPPRESS_LOGS(...) \
-	do { \
-		JOINT_CALL(Joint_SetLogCallback(&ChecksumTestsLogCallback)); \
-		__VA_ARGS__; \
-		JOINT_CALL(Joint_SetLogCallback(nullptr)); \
-	} while (false)
+	std::string msg(message);
+	std::transform(msg.begin(), msg.end(), msg.begin(), ::tolower);
+
+	g_gotInterfaceWord = g_gotInterfaceWord || (msg.find("interface") != std::string::npos);
+	g_gotChecksumWord = g_gotChecksumWord || (msg.find("checksum") != std::string::npos);
+}
 
 #define TEST_LOGS_ERROR(...) \
 	do { \
-		g_errorsReported = 0; \
-		SUPPRESS_LOGS(__VA_ARGS__); \
-		TEST_GREATER(g_errorsReported, 0); \
+		g_errorsReported = false; \
+		g_gotInterfaceWord = false; \
+		g_gotChecksumWord = false; \
+		JOINT_CALL(Joint_SetLogCallback(&ChecksumTestsLogCallback)); \
+		__VA_ARGS__; \
+		JOINT_CALL(Joint_SetLogCallback(nullptr)); \
+		TEST_EQUALS(g_errorsReported, true); \
+		if (!g_gotInterfaceWord || !g_gotChecksumWord) \
+			TEST_REPORT_WARNING("It is better if you have the words 'interface' and 'checksum' in the logged error message"); \
 	} while (false)
 
 struct InterfaceChecksumComponent1
@@ -59,7 +67,7 @@ TEST_DEFINE_TEST(TestCtx, InterfaceChecksumTests)
 	auto c2 = Ctx.MakeComponent<test::IInterfaceCS2, InterfaceChecksumComponent2>();
 	auto c12 = Ctx.MakeComponent<test::IInterfaceCS1, InterfaceChecksumComponent12>();
 	TEST_THROWS_NOTHING(t->AcceptCS1(c1));
-	//TEST_LOGS_ERROR(TEST_THROWS_ANYTHING(t->AcceptCS2(c2)));
+	TEST_LOGS_ERROR(TEST_THROWS_ANYTHING(t->AcceptCS2(c2)));
 	TEST_LOGS_ERROR(TEST_THROWS_ANYTHING(t->CastToCS2(c12)));
 }
 

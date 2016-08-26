@@ -171,6 +171,10 @@ class CppGenerator:
             yield '\t\t\treturn JOINT_ERROR_INVALID_INTERFACE_CHECKSUM;'
         for p in m.params:
             if isinstance(p.type, Interface):
+                yield '\t\tif (params[{}].type.payload.interfaceChecksum != {}::_GetInterfaceChecksum())'.format(p.index, self._mangleType(p.type))
+                yield '\t\t\treturn JOINT_ERROR_INVALID_INTERFACE_CHECKSUM;'
+        for p in m.params:
+            if isinstance(p.type, Interface):
                 yield '\t\tJOINT_CALL(Joint_IncRefObject(params[{i}].value.{v}));'.format(i=p.index, v=p.type.variantName)
                 yield '\t\t{t} p{i}({w}(params[{i}].value.{v}));'.format(t=self._toCppType(p.type), w=self._mangleType(p.type), i=p.index, v=p.type.variantName)
             else:

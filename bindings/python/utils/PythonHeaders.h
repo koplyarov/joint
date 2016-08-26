@@ -4,9 +4,11 @@
 #if defined(_DEBUG)
 #	undef _DEBUG
 #	include <Python.h>
+#	include <structmember.h>
 #	define _DEBUG
 #else
 #	include <Python.h>
+#	include <structmember.h>
 #endif
 
 #endif

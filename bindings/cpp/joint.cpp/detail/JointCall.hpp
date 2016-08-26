@@ -185,9 +185,9 @@ namespace detail
 		if (ret == JOINT_ERROR_EXCEPTION)
 		{
 			::joint::detail::ExceptionGuard _exg(ex);
-			throw ::joint::detail::MakeCppException(ex, "Blahblah");
+			throw ::joint::detail::MakeCppException(ex, methodName);
 		}
-		throw std::runtime_error(std::string("Blahblah failed: ") + Joint_ErrorToString(ret));
+		throw std::runtime_error(std::string("Joint_InvokeMethod (") + methodName +") failed: " + Joint_ErrorToString(ret));
 	}
 
 }}

@@ -14,6 +14,7 @@
 #include <binding/Module.hpp>
 #include <binding/Object.hpp>
 #include <pyjoint/Common.hpp>
+#include <pyjoint/Globals.hpp>
 #include <pyjoint/Object.hpp>
 #include <utils/PythonUtils.hpp>
 
@@ -112,6 +113,8 @@ namespace binding
 					else
 						GetLogger().Warning() << "Exception that matches JointException_type has value of a different type!";
 				}
+				else if (PyErr_GivenExceptionMatches(type, pyjoint::InvalidInterfaceChecksumException))
+					GetLogger().Error() << "Invalid interface checksum!";
 				std::string type_str;
 				GetPythonErrorMessage(value, msg);
 				if (PyObjectToStringNoExcept(type, type_str))

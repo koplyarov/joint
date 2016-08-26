@@ -114,6 +114,10 @@ PyMODINIT_FUNC JointPythonCore_InitModule_py2(void)
 	ADD_TYPE_TO_PYTHON_MODULE(Object);
 	ADD_TYPE_TO_PYTHON_MODULE(JointException);
 
+    InvalidInterfaceChecksumException = PyErr_NewException("pyjoint.InvalidInterfaceChecksumException", NULL, NULL);
+    Py_INCREF(InvalidInterfaceChecksumException);
+    PyModule_AddObject(m, "InvalidInterfaceChecksumException", InvalidInterfaceChecksumException);
+
 #if PY_VERSION_HEX >= 0x03000000
 	return m.Release();
 #else

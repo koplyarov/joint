@@ -9,6 +9,7 @@ namespace joint_python {
 namespace pyjoint
 {
 
+	extern PyObject* InvalidInterfaceChecksumException;
 	PyObject* Cast(PyObject* self, PyObject* args, PyObject* kwds);
 
 }}

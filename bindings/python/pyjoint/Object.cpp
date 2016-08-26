@@ -24,6 +24,23 @@ namespace pyjoint
 		{NULL}  /* Sentinel */
 	};
 
+
+	static_assert(
+		sizeof(unsigned int) == sizeof(Joint_InterfaceChecksum) ||
+		sizeof(unsigned long) == sizeof(Joint_InterfaceChecksum),
+		"No suitable python member type descriptor for Joint_InterfaceChecksum"
+		);
+	static const int Joint_InterfaceChecksum_PyType =
+		sizeof(unsigned int) == sizeof(Joint_InterfaceChecksum) ? T_UINT :
+		(sizeof(unsigned long) == sizeof(Joint_InterfaceChecksum) ? T_ULONG : -1);
+
+	static PyMemberDef Object_members[] =
+	{
+		{(char*)"checksum", Joint_InterfaceChecksum_PyType, offsetof(Object, checksum), READONLY},
+		{NULL}
+	};
+
+
 	PyTypeObject Object_type = {
 		PyVarObject_HEAD_INIT(NULL, 0)
 		"pyjoint.Object",          // tp_name
@@ -53,7 +70,7 @@ namespace pyjoint
 		0,                         // tp_iter
 		0,                         // tp_iternext
 		Object_methods,            // tp_methods
-		NULL,                      // tp_members
+		Object_members,            // tp_members
 		0,                         // tp_getset
 		0,                         // tp_base
 		0,                         // tp_dict
@@ -73,6 +90,7 @@ namespace pyjoint
 		Object* self = PY_OBJ_CHECK((Object*)type->tp_alloc(type, 0));
 
 		self->handle = JOINT_NULL_HANDLE;
+		self->checksum = 0;
 
 		PYJOINT_CPP_WRAP_END((PyObject*)self, NULL)
 	}
@@ -195,6 +213,7 @@ namespace pyjoint
 				{
 					result.Reset(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&Object_type, NULL)));
 					reinterpret_cast<Object*>(result.Get())->handle = ret_value.result.value.obj;
+					reinterpret_cast<Object*>(result.Get())->checksum = ret_type.payload.interfaceChecksum;
 				}
 				else
 				{

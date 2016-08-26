@@ -16,6 +16,7 @@ class PythonGenerator:
 
     def generate(self,):
         yield 'import sys'
+        yield 'import pyjoint'
         yield 'from functools import partial'
         yield 'if sys.version_info >= (3, 0):'
         yield '\timport enum'
@@ -152,6 +153,8 @@ class PythonGenerator:
         yield '\t__slots__ = [\'obj\'{}]'.format(''.join(', \'{}\''.format(m.name) for m in ifc.methods if not self._methodNeedsProxy(m)))
         yield '\tinterfaceChecksum = {}'.format(hex(ifc.checksum))
         yield '\tdef __init__(self, obj):'
+        yield '\t\tif obj.checksum != {}_proxy.interfaceChecksum:'.format(self._mangleType(ifc))
+        yield '\t\t\traise pyjoint.InvalidInterfaceChecksumException()'
         yield '\t\tself.obj = obj'
         for m in ifc.methods:
             if self._methodNeedsProxy(m):

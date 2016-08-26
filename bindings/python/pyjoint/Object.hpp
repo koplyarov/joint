@@ -13,7 +13,8 @@ namespace pyjoint
 	struct Object
 	{
 		PyObject_HEAD
-		Joint_ObjectHandle		handle;
+		Joint_ObjectHandle         handle;
+		Joint_InterfaceChecksum    checksum;
 	};
 
 

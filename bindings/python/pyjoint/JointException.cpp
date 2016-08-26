@@ -83,15 +83,6 @@ namespace pyjoint
 		if (JointException_type.tp_base->tp_init(self, args, kwds) == -1)
 			return -1;
 
-		//JointException* ex = reinterpret_cast<JointException*>(self);
-
-		//PyObject* py_module_handle;
-		//PYTHON_CHECK(PyArg_ParseTuple(args, "O", &py_module_handle), "Could not parse arguments");
-		//NATIVE_CHECK(PyCapsule_IsValid(py_module_handle, "Joint.JointException"), "Could not unwrap joint module handle");
-		//Joint_JointExceptionHandle handle = reinterpret_cast<Joint_JointExceptionHandle>(PyCapsule_GetPointer(py_module_handle, "Joint.JointException"));
-
-		//reinterpret_cast<JointException*>(self)->handle = handle;
-
 		PYJOINT_CPP_WRAP_END(0, -1, Py_DECREF(self);)
 	}
 
@@ -120,27 +111,5 @@ namespace pyjoint
 
 		PYJOINT_CPP_WRAP_END_VOID()
 	}
-
-
-	//static PyObject* JointException_GetRootObject(PyObject* self, PyObject* args, PyObject* kwds)
-	//{
-		//PYJOINT_CPP_WRAP_BEGIN
-
-		//auto m = reinterpret_cast<JointException*>(self);
-		//NATIVE_CHECK(m && m->handle, "Uninitialized module object");
-
-		//const char* getter_name;
-		//PYTHON_CHECK(PyArg_ParseTuple(args, "s", &getter_name), "Could not parse arguments");
-
-		//Joint_ObjectHandle obj;
-		//Joint_Error ret = Joint_GetRootObject(m->handle, getter_name, &obj);
-		//NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_GetRootObject failed: ") + Joint_ErrorToString(ret)).c_str());
-
-		//PyObjectHolder py_obj(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&Object_type, NULL)));
-
-		//reinterpret_cast<Object*>(py_obj.Get())->handle = obj;
-
-		//PYJOINT_CPP_WRAP_END(py_obj.Release(), Py_None, Py_INCREF(Py_None);)
-	//}
 
 }}

@@ -10,6 +10,8 @@ namespace joint_python {
 namespace pyjoint
 {
 
+	PyObject* InvalidInterfaceChecksumException = NULL;
+
 	JOINT_DEVKIT_LOGGER("Joint.Python.PyJoint.Globals")
 
 	PyObject* Cast(PyObject* self, PyObject* args, PyObject* kwds)
@@ -52,6 +54,7 @@ namespace pyjoint
 
 		PyObjectHolder result_obj(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&Object_type, NULL)));
 		reinterpret_cast<Object*>(result_obj.Get())->handle = casted_obj;
+		reinterpret_cast<Object*>(result_obj.Get())->checksum = checksum;
 
 		PyObjectHolder py_proxy_type(PY_OBJ_CHECK(PyObject_GetAttrString(py_interface, "proxy")));
 

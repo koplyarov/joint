@@ -145,6 +145,9 @@ namespace pyjoint
 		PyObject* interface = PY_OBJ_CHECK(PyTuple_GetItem(args, 0));
 		PyObject* type = PY_OBJ_CHECK(PyTuple_GetItem(args, 1));
 
+		PyObjectHolder py_checksum(PY_OBJ_CHECK(PyObject_GetAttrString(interface, "interfaceChecksum")));
+		Joint_InterfaceChecksum checksum = FromPyLong<Joint_InterfaceChecksum>(py_checksum);
+
 		auto args_count = tuple_size - 2;
 		PyObjectHolder py_args(PY_OBJ_CHECK(PyTuple_New(args_count)));
 		for (auto i = 0; i < args_count; ++i)
@@ -170,6 +173,7 @@ namespace pyjoint
 
 		PyObjectHolder py_obj(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&Object_type, NULL)));
 		reinterpret_cast<Object*>(py_obj.Get())->handle = obj;
+		reinterpret_cast<Object*>(py_obj.Get())->checksum = checksum;
 
 		PyObjectHolder proxy_type(PY_OBJ_CHECK(PyObject_GetAttrString(interface, "proxy")));
 		PyObjectHolder proxy_ctor_args(PY_OBJ_CHECK(Py_BuildValue("(O)", (PyObject*)py_obj)));
