@@ -26,6 +26,10 @@ namespace joint
 			: _raw()
 		{ }
 
+		explicit Ptr(Joint_ObjectHandle obj)
+			: _raw(obj)
+		{ }
+
 		Ptr(Ptr&& other)
 			: _raw(other._raw)
 		{ other._raw = T_(); }

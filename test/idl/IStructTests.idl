@@ -1,0 +1,17 @@
+package test
+{
+
+	struct S1
+	{
+		i32 i;
+		string s;
+	}
+
+	interface IStructTests
+	{
+		S1 MakeS1(i32 i, string s);
+		string GetS(S1 s);
+		i32 GetI(S1 s);
+	}
+
+}

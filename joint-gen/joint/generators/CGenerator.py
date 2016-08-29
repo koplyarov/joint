@@ -1,4 +1,5 @@
-from ..SemanticGraph import BuiltinType, BuiltinTypeCategory, Interface, Enum
+from ..SemanticGraph import BuiltinType, BuiltinTypeCategory, Interface, Enum, Struct
+from ..GeneratorHelpers import CodeWithInitialization
 
 class CGenerator:
     def __init__(self, semanticGraph):
@@ -13,6 +14,10 @@ class CGenerator:
 
         for p in self.semanticGraph.packages:
             for l in self._generatePackageContent(p, p.enums, self._generateEnum):
+                yield l
+
+        for p in self.semanticGraph.packages:
+            for l in self._generatePackageContent(p, p.structs, self._generateStruct):
                 yield l
 
         for p in self.semanticGraph.packages:
@@ -58,6 +63,32 @@ class CGenerator:
             yield '\tcase {e}_{v}: return "{v}";'.format(e=me, v=v.name)
         yield '\tdefault: return "<Unknown {} value>";'.format(e.name)
         yield '\t}'
+        yield '}'
+        yield ''
+
+    def _generateStruct(self, s):
+        yield 'typedef struct'
+        yield '{'
+        for m in s.members:
+            yield '\t{} {};'.format(self._toCType(m.type), m.name)
+        yield '}} {};'.format(self._mangleType(s))
+        yield 'Joint_StructDescriptor* {}__GetStructDescriptor()'.format(self._mangleType(s))
+        yield '{'
+        yield '\tstatic Joint_Type member_types[{}];'.format(len(s.members))
+        for i, m in enumerate(s.members):
+            if isinstance(m.type, BuiltinType) or isinstance(m.type, Enum):
+                payload_init = ''
+            elif isinstance(m.type, Interface):
+                payload_init = '{}__checksum'.format(self._mangleType(m.type))
+            elif isinstance(m.type, Struct):
+                payload_init = '{}::__GetStructDescriptor()'.format(self._mangleType(m.type))
+            else:
+                raise RuntimeError('Not implemented (type: {})!'.format(m.type))
+            yield '\tmember_types[{}].id = (Joint_TypeId){};'.format(i, m.type.index)
+            if payload_init:
+                yield '\tmember_types[{}].payload = {};'.format(i, payload_init)
+        yield '\tstatic Joint_StructDescriptor desc = {{ {}, member_types }};'.format(len(s.members))
+        yield '\treturn &desc;'
         yield '}'
         yield ''
 
@@ -146,7 +177,10 @@ class CGenerator:
         if m.params:
             yield '\tJoint_Parameter params[{}];'.format(len(m.params))
             for p in m.params:
-                yield '\tparams[{}].value.{} = {};'.format(p.index, p.type.variantName, self._toCParamGetter(p))
+                param_val = self._toJointParam(p.type, p.name)
+                for l in param_val.initialization:
+                    yield '\t{}'.format(l)
+                yield '\tparams[{}].value.{} = {};'.format(p.index, p.type.variantName, param_val.code)
                 yield '\tparams[{}].type.id = (Joint_TypeId){};'.format(p.index, p.type.index)
                 if isinstance(p.type, Interface):
                     yield '\tparams[{}].type.payload.interfaceChecksum = {}__checksum;'.format(p.index, self._mangleType(p.type))
@@ -157,14 +191,13 @@ class CGenerator:
         yield '\t\t\t*_ex = _ret_val.result.ex;'
         yield '\t\treturn _ret;'
         yield '\t}'
-        if m.retType.name == 'string':
-            result_var = '_ret_val.result.value.utf8'
-            yield '\tchar* _tmpResult = (char*)malloc(strlen({}) + 1);'.format(result_var)
-            yield '\tstrcpy(_tmpResult, {});'.format(result_var)
-            yield '\t_ret = _ret_val.releaseValue(_ret_val_type, _ret_val.result.value);'.format(m.retType.index)
-            yield '\t*_outResult = _tmpResult;'
-        elif m.retType.name != 'void':
-            yield self._wrapRetValue(m.retType)
+        if m.retType.name != 'void':
+            ret_val = self._fromJointRetValue(m.retType, '_ret_val.result.value')
+            for l in ret_val.initialization:
+                yield '\t{}'.format(l)
+            yield '\t*_outResult = {};'.format(ret_val.code)
+            if m.retType.needRelease:
+                yield '\t_ret_val.releaseValue(_ret_val_type, _ret_val.result.value);'
         yield '\treturn _ret;'
         yield '}'
         yield ''
@@ -188,20 +221,24 @@ class CGenerator:
                 yield '\t\t\tif (retType.payload.interfaceChecksum != {}__checksum) \\'.format(self._mangleType(m.retType))
                 yield '\t\t\t\treturn JOINT_ERROR_INVALID_INTERFACE_CHECKSUM; \\'
             for p in m.params:
-                if isinstance(p.type, Interface):
-                    yield '\t\t\tif (params[{}].type.payload.interfaceChecksum != {}__checksum) \\'.format(p.index, self._mangleType(p.type))
-                    yield '\t\t\t\treturn JOINT_ERROR_INVALID_INTERFACE_CHECKSUM; \\'
-            if m.retType.name != 'void':
+                for l in self._validateJointParam(p.type, 'params[{}].type'.format(p.index)):
+                    yield '\t\t\t{} \\'.format(l)
+            if m.retType.fullname != 'void':
                 yield '\t\t\t{} result; \\'.format(self._toCType(m.retType))
             for p in m.params:
-                yield '\t\t\t{t} p{i} = ({t})params[{i}].value.{v}; \\'.format(t=self._toCType(p.type), i=p.index, v=p.type.variantName)
-            if m.retType.name != 'void':
-                ret_param = ', &result'
-            else:
-                ret_param = ''
+                param_val = self._fromJointParam(p.type, 'params[{}].value'.format(p.index))
+                for l in param_val.initialization:
+                    yield '\t\t\t{} \\'.format(l)
+                yield '\t\t\t{} p{} = {}; \\'.format(self._toCType(p.type), p.index, param_val.code)
+            ret_param = ', &result' if m.retType.fullname != 'void' else ''
             yield '\t\t\tret = ComponentImpl##_{}(&w->impl{}{}, &outRetValue->result.ex); \\'.format(m.name, ''.join(', p{}'.format(p.index) for p in m.params), ret_param)
-            ret_statement = self._generateRetStatement(m.retType)
-            yield '\t\t\tDETAIL_JOINT_C_SET_RET_VALUE("{}.{}", ret{}) \\'.format(ifc.fullname, m.name, ret_statement)
+            if m.retType.fullname == 'void':
+                yield '\t\t\tDETAIL_JOINT_C_SET_RET_VALUE("{}.{}", ret) \\'.format(ifc.fullname, m.name)
+            else:
+                ret_val = self._toJointRetValue(m.retType, 'result')
+                for l in ret_val.initialization:
+                    yield '\t\t\t{} \\'.format(l)
+                yield '\t\t\tDETAIL_JOINT_C_SET_RET_VALUE("{}.{}", ret, outRetValue->result.value.{} = {};) \\'.format(ifc.fullname, m.name, m.retType.variantName, ret_val.code)
             yield '\t\t} \\'
             yield '\t\tbreak; \\'
         yield '\tdefault: \\'
@@ -212,33 +249,6 @@ class CGenerator:
         yield '\treturn ret; \\'
         yield '}'
 
-    def _generateRetStatement(self, type):
-        if isinstance(type, BuiltinType) or isinstance(type, Enum):
-            if type.name == 'void':
-                return ''
-            else:
-                return ', outRetValue->result.value.{} = result;'.format(type.variantName)
-        elif isinstance(type, Interface):
-            return ', outRetValue->result.value.{} = (Joint_ObjectHandle)result;'.format(type.variantName)
-        else:
-            raise RuntimeError('Not implemented (type: {})!'.format(type))
-
-    def _toCValue(self, varName, type):
-        if isinstance(type, BuiltinType):
-            return varName
-        elif isinstance(type, Interface):
-            return '(Joint_ObjectHandle){}'.format(varName)
-        elif isinstance(type, Enum):
-            return '(int32_t){}'.format(varName)
-        else:
-            raise RuntimeError('Not implemented (type: {})!'.format(type))
-
-    def _toCParamGetter(self, p):
-        return self._toCValue(p.name, p.type)
-
-    def _wrapRetValue(self, type):
-        return '\t*_outResult = ({})_ret_val.result.value.{};'.format(self._toCType(type), type.variantName)
-
     def _toCType(self, type):
         if isinstance(type, BuiltinType):
             if type.category == BuiltinTypeCategory.void:
@@ -246,7 +256,7 @@ class CGenerator:
             if type.category == BuiltinTypeCategory.int:
                 return '{}int{}_t'.format('' if type.signed else 'u', type.bits)
             if type.category == BuiltinTypeCategory.bool:
-                return 'JOINT_BOOL'
+                return 'Joint_Bool'
             if type.category == BuiltinTypeCategory.float:
                 if type.bits == 32:
                     return 'float'
@@ -260,8 +270,111 @@ class CGenerator:
             return '{}'.format(self._mangleType(type));
         elif isinstance(type, Enum):
             return '{}'.format(self._mangleType(type));
+        elif isinstance(type, Struct):
+            return '{}'.format(self._mangleType(type));
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 
     def _mangleType(self, ifc):
-        return '{}_{}'.format('_'.join(ifc.packageNameList), ifc.name)
+        return '{}'.format('_'.join(ifc.packageNameList + [ ifc.name ]))
+
+    def _toJointParam(self, type, cValue):
+        if isinstance(type, BuiltinType):
+            return CodeWithInitialization(cValue)
+        elif isinstance(type, Interface):
+            return CodeWithInitialization('(Joint_ObjectHandle){}'.format(cValue))
+        elif isinstance(type, Enum):
+            return CodeWithInitialization('(int32_t){}'.format(cValue))
+        elif isinstance(type, Struct):
+            mangled_value = cValue.replace('.', '_')
+            initialization = []
+            member_values = []
+            for m in type.members:
+                member_val = self._toJointParam(m.type, '{}.{}'.format(cValue, m.name))
+                initialization += member_val.initialization
+                member_values.append(member_val.code);
+            initialization.append('Joint_Value {}_members[{}];'.format(mangled_value, len(type.members)))
+            for i,m in enumerate(member_values):
+                initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, type.members[i].type.variantName, m))
+            return CodeWithInitialization('{}_members'.format(mangled_value), initialization)
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
+
+    def _toJointRetValue(self, type, cValue):
+        if isinstance(type, BuiltinType):
+            return CodeWithInitialization(cValue)
+        elif isinstance(type, Interface):
+            return CodeWithInitialization('(Joint_ObjectHandle)({})'.format(cValue))
+        elif isinstance(type, Enum):
+            return CodeWithInitialization('(int32_t)({})'.format(cValue))
+        elif isinstance(type, Struct):
+            mangled_value = cValue.replace('.', '_')
+            initialization = []
+            member_values = []
+            for m in type.members:
+                member_val = self._toJointRetValue(m.type, '{}.{}'.format(cValue, m.name))
+                initialization += member_val.initialization
+                member_values.append(member_val.code);
+            initialization.append('Joint_Value* {}_members = (Joint_Value*)malloc(sizeof(Joint_Value) * {});'.format(mangled_value, len(type.members)))
+            for i,m in enumerate(member_values):
+                initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, type.members[i].type.variantName, m))
+            return CodeWithInitialization('{}_members'.format(mangled_value), initialization)
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
+
+    def _validateJointParam(self, type, jointType):
+        if isinstance(type, BuiltinType) or isinstance(type, Enum):
+            return
+        elif isinstance(type, Interface):
+            yield 'if ({}.payload.interfaceChecksum != {}__checksum)'.format(jointType, self._mangleType(type))
+            yield '\treturn JOINT_ERROR_INVALID_INTERFACE_CHECKSUM;'
+        elif isinstance(type, Struct):
+            for i,m in enumerate(type.members):
+                for l in self._validateJointParam(m.type, '{}.memberTypes[{}]'.format(jointType, i)):
+                    yield l
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
+
+    def _fromJointParam(self, type, jointValue):
+        if isinstance(type, BuiltinType):
+            return CodeWithInitialization('{}.{}'.format(jointValue, type.variantName))
+        elif isinstance(type, Enum) or isinstance(type, Interface):
+            return CodeWithInitialization('({})({}.{})'.format(self._toCType(type), jointValue, type.variantName))
+        elif isinstance(type, Struct):
+            initialization = []
+            member_values = []
+            for i,m in enumerate(type.members):
+                member_code = self._fromJointParam(m.type, '{}.members[{}]'.format(jointValue, i))
+                initialization += member_code.initialization
+                member_values.append(member_code.code)
+            return CodeWithInitialization('{{ {} }}'.format(', '.join(member_values)), initialization)
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
+
+    def _fromJointRetValue(self, type, jointValue):
+        if isinstance(type, BuiltinType):
+            if type.category == BuiltinTypeCategory.bool:
+                return CodeWithInitialization('{}.{} != 0'.format(jointValue, type.variantName))
+            elif type.category == BuiltinTypeCategory.string:
+                mangled_value = jointValue.replace('.', '_').replace('[', '_').replace(']', '_')
+                initialization = [
+                    'char* _{}_copy = (char*)malloc(strlen({}.{}) + 1);'.format(mangled_value, jointValue, type.variantName),
+                    'strcpy(_{}_copy, {}.{});'.format(mangled_value, jointValue, type.variantName)
+                ]
+                return CodeWithInitialization('_{}_copy'.format(mangled_value), initialization)
+            else:
+                return CodeWithInitialization('{}.{}'.format(jointValue, type.variantName))
+        elif isinstance(type, Interface) or isinstance(type, Enum):
+            return CodeWithInitialization('({})({}.{})'.format(self._toCType(type), jointValue, type.variantName))
+        elif isinstance(type, Struct):
+            mangled_value = jointValue.replace('.', '_').replace('[', '_').replace(']', '_')
+            initialization = []
+            member_values = []
+            for i,m in enumerate(type.members):
+                member_code = self._fromJointRetValue(m.type, '{}.members[{}]'.format(jointValue, i))
+                initialization += member_code.initialization
+                member_values.append(member_code.code)
+            initialization.append('{} {}_tmp = {{ {} }};'.format(self._toCType(type), mangled_value, ', '.join(member_values)))
+            return CodeWithInitialization('{}_tmp'.format(mangled_value), initialization)
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))

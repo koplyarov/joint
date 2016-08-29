@@ -19,9 +19,10 @@ extern "C" {
 
 #define JOINT_NULL_HANDLE NULL
 
-#define JOINT_BOOL int32_t
 #define JOINT_TRUE 1
 #define JOINT_FALSE 0
+
+	typedef int32_t Joint_Bool;
 
 	typedef uint32_t Joint_InterfaceChecksum;
 	typedef const char* Joint_InterfaceId;
@@ -84,9 +85,7 @@ extern "C" {
 	typedef enum
 	{
 		JOINT_TYPE_VOID       = 1,
-
 		JOINT_TYPE_BOOL       = 2,
-
 		JOINT_TYPE_I8         = 3,
 		JOINT_TYPE_U8         = 4,
 		JOINT_TYPE_I16        = 5,
@@ -95,22 +94,26 @@ extern "C" {
 		JOINT_TYPE_U32        = 8,
 		JOINT_TYPE_I64        = 9,
 		JOINT_TYPE_U64        = 10,
-
 		JOINT_TYPE_F32        = 11,
 		JOINT_TYPE_F64        = 12,
-
 		JOINT_TYPE_UTF8       = 13,
-
 		JOINT_TYPE_ENUM       = 14,
-
-		JOINT_TYPE_OBJ        = 15,
+		JOINT_TYPE_STRUCT     = 15,
+		JOINT_TYPE_OBJ        = 16,
 	} Joint_TypeId;
 
 
-	typedef union
+	typedef struct
+	{
+		int32_t                 membersCount;
+		struct _Joint_Type_t*   memberTypes;
+	} Joint_StructDescriptor;
+
+	typedef union _Joint_TypePayload_t
 	{
 		struct _Joint_Type_t*   arrayElementType;
 		Joint_InterfaceChecksum interfaceChecksum;
+		Joint_StructDescriptor* structDescriptor;
 	} Joint_TypePayload;
 
 
@@ -121,10 +124,9 @@ extern "C" {
 	} Joint_Type;
 
 
-	typedef union
+	typedef union _Joint_Value_t
 	{
-		JOINT_BOOL              b;
-
+		Joint_Bool              b;
 		int8_t                  i8;
 		uint8_t                 u8;
 		int16_t                 i16;
@@ -133,16 +135,14 @@ extern "C" {
 		uint32_t                u32;
 		int64_t                 i64;
 		uint64_t                u64;
-
 		float                   f32;
 		double                  f64;
-
 		const char*             utf8;
-
 		int32_t                 e;
-
+		union _Joint_Value_t*   members;
 		Joint_ObjectHandle      obj;
 	} Joint_Value;
+
 
 	typedef struct
 	{

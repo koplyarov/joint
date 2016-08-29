@@ -159,7 +159,7 @@ Joint_Error Tests_Concat(Tests* self, const char* l, const char* r, const char**
 	return JOINT_ERROR_NONE;
 }
 
-Joint_Error Tests_And(Tests* self, JOINT_BOOL l, JOINT_BOOL r, JOINT_BOOL* result, Joint_ExceptionHandle* ex)
+Joint_Error Tests_And(Tests* self, Joint_Bool l, Joint_Bool r, Joint_Bool* result, Joint_ExceptionHandle* ex)
 { *result = l && r; return JOINT_ERROR_NONE; }
 
 
@@ -193,7 +193,7 @@ Joint_Error Tests_CallbackF32(Tests* self, test_IBasicTestsCallbackF32 cb, float
 Joint_Error Tests_CallbackF64(Tests* self, test_IBasicTestsCallbackF64 cb, double l, double r, double* result, Joint_ExceptionHandle* ex)
 { return test_IBasicTestsCallbackF64_AddF64(cb, l, r, result, ex); }
 
-Joint_Error Tests_CallbackBool(Tests* self, test_IBasicTestsCallbackBool cb, JOINT_BOOL l, JOINT_BOOL r, JOINT_BOOL* result, Joint_ExceptionHandle* ex)
+Joint_Error Tests_CallbackBool(Tests* self, test_IBasicTestsCallbackBool cb, Joint_Bool l, Joint_Bool r, Joint_Bool* result, Joint_ExceptionHandle* ex)
 { return test_IBasicTestsCallbackBool_And(cb, l, r, result, ex); }
 
 Joint_Error Tests_CallbackString(Tests* self, test_IBasicTestsCallbackString cb, const char* l, const char* r, const char** result, Joint_ExceptionHandle* ex)
@@ -225,7 +225,7 @@ Joint_Error Tests_GetNextValueInRing(Tests* self, test_Enum e, test_Enum* result
 Joint_Error Tests_ReturnNull(Tests* self, test_ISomeObject* result, Joint_ExceptionHandle* ex)
 { *result = NULL; return JOINT_ERROR_NONE; }
 
-Joint_Error Tests_CheckNotNull(Tests* self, test_ISomeObject o, JOINT_BOOL* result, Joint_ExceptionHandle* ex)
+Joint_Error Tests_CheckNotNull(Tests* self, test_ISomeObject o, Joint_Bool* result, Joint_ExceptionHandle* ex)
 {
 	*result = o != NULL;
 	return JOINT_ERROR_NONE;
@@ -234,7 +234,7 @@ Joint_Error Tests_CheckNotNull(Tests* self, test_ISomeObject o, JOINT_BOOL* resu
 Joint_Error Tests_CallbackReturn(Tests* self, test_IObjectTestsCallbackReturn cb, test_ISomeObject* result, Joint_ExceptionHandle* ex)
 { return test_IObjectTestsCallbackReturn_Return(cb, result, ex); }
 
-Joint_Error Tests_CallbackParam(Tests* self, test_IObjectTestsCallbackParam cb, test_ISomeObject o, JOINT_BOOL* result, Joint_ExceptionHandle* ex)
+Joint_Error Tests_CallbackParam(Tests* self, test_IObjectTestsCallbackParam cb, test_ISomeObject o, Joint_Bool* result, Joint_ExceptionHandle* ex)
 { return test_IObjectTestsCallbackParam_Method(cb, o, result, ex); }
 
 
@@ -303,7 +303,7 @@ Joint_Error Tests_Create017(Tests* self, test_IInterface0* result, Joint_Excepti
 Joint_Error Tests_ThrowNative(Tests* self, Joint_ExceptionHandle* ex)
 { return JOINT_C_THROW("Requested exception", ex); }
 
-Joint_Error Tests_CatchAll(Tests* self, test_IExceptionTestsCallback cb, JOINT_BOOL* result, Joint_ExceptionHandle* ex)
+Joint_Error Tests_CatchAll(Tests* self, test_IExceptionTestsCallback cb, Joint_Bool* result, Joint_ExceptionHandle* ex)
 {
 	Joint_ExceptionHandle internal_ex = JOINT_NULL_HANDLE;
 	Joint_Error ret = test_IExceptionTestsCallback_Method(cb, &internal_ex);
@@ -357,7 +357,31 @@ Joint_Error Tests_CastToCS2(Tests* self, test_IInterfaceCS1 obj, Joint_Exception
 }
 
 
-JOINT_C_COMPONENT(Tests, test_IBasicTests, test_IEnumTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests, test_IInterfaceChecksumTests);
+Joint_Error Tests_MakeS1(Tests* self, int32_t i, const char* s, test_S1* result, Joint_ExceptionHandle* ex)
+{
+	char* tmp = (char*)malloc(strlen(s) + 1);
+	strcpy(tmp, s);
+	result->i = i;
+	result->s = tmp;
+	return JOINT_ERROR_NONE;
+}
+
+Joint_Error Tests_GetS(Tests* self, test_S1 s, const char** result, Joint_ExceptionHandle* ex)
+{
+	char* tmp = (char*)malloc(strlen(s.s) + 1);
+	strcpy(tmp, s.s);
+	*result = tmp;
+	return JOINT_ERROR_NONE;
+}
+
+Joint_Error Tests_GetI(Tests* self, test_S1 s, int32_t* result, Joint_ExceptionHandle* ex)
+{
+	*result = s.i;
+	return JOINT_ERROR_NONE;
+}
+
+
+JOINT_C_COMPONENT(Tests, test_IBasicTests, test_IEnumTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests, test_IInterfaceChecksumTests, test_IStructTests);
 
 ////////////////////////////////////////////////////////////////////////////////
 

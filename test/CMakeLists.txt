@@ -43,6 +43,7 @@ joint_generate_adapters(c++ Tests_adapters.hpp
 	idl/ICastTests.idl
 	idl/IExceptionTests.idl
 	idl/IEnumTests.idl
+	idl/IStructTests.idl
 	IInterfaceChecksumTests.idl
 )
 

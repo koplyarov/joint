@@ -4,6 +4,19 @@ import os
 from .IdlParser import IdlParser
 
 
+class TypeBase(object):
+    def __init__(self, name, packageNameList, location, variantName, index, needRelease):
+        self.name = name
+        self.packageNameList = packageNameList
+        self.location = location
+        self.variantName = variantName
+        self.index = index
+        self.fullname = '.'.join(packageNameList + [ name ])
+        self.needRelease = needRelease
+
+    def __repr__(self):
+        return self.fullname
+
 class SemanticGraphException:
     def __init__(self, location, message):
         self.location = location
@@ -16,19 +29,10 @@ class EnumValue:
         self.value = value
         self.location = location
 
-class Enum:
+class Enum(TypeBase):
     def __init__(self, name, packageNameList, location):
-        self.name = name
-        self.variantName = 'e'
-        self.index = 14
-        self.packageNameList = packageNameList
-        self.fullname = '{}.{}'.format('.'.join(packageNameList), name)
+        super(Enum, self).__init__(name, packageNameList, location, variantName='e', index=14, needRelease=False)
         self.values = []
-        self.needRelease = False
-        self.location = location
-
-    def __repr__(self):
-        return self.fullname
 
 
 class StructMember:
@@ -37,16 +41,10 @@ class StructMember:
         self.type = type
         self.location = location
 
-class Struct:
+class Struct(TypeBase):
     def __init__(self, name, packageNameList, location):
-        self.name = name
-        self.packageNameList = packageNameList
-        self.fullname = '{}.{}'.format('.'.join(packageNameList), name)
+        super(Struct, self).__init__(name, packageNameList, location, variantName='members', index=15, needRelease=True)
         self.members = []
-        self.location = location
-
-    def __repr__(self):
-        return self.fullname
 
 
 class Parameter:
@@ -71,17 +69,11 @@ class Method:
         result.inherited = True
         return result
 
-class Interface:
+class Interface(TypeBase):
     def __init__(self, name, packageNameList, location):
-        self.name = name
-        self.variantName = 'obj'
-        self.index = 15
-        self.packageNameList = packageNameList
-        self.fullname = '{}.{}'.format('.'.join(packageNameList), name)
+        super(Interface, self).__init__(name, packageNameList, location, variantName='obj', index=16, needRelease=True)
         self.methods = []
         self.bases = []
-        self.needRelease = True
-        self.location = location
 
     def calculateChecksum(self):
         ifc_str = self._ifcStr()
@@ -105,9 +97,6 @@ class Interface:
             return '{}{{{}}}'.format(t.fullname, ','.join('{} {}'.format(self._typeStr(m.type), m.name) for m in t.members))
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(t))
-
-    def __repr__(self):
-        return self.fullname
 
 
 class Package:
@@ -144,8 +133,9 @@ class BuiltinTypeCategory:
     string = BuiltinTypeCategoryValue(True)
 
 
-class BuiltinType:
+class BuiltinType(TypeBase):
     def __init__(self, name, variantName, index, category, bits = 0, signed = False):
+        super(BuiltinType, self).__init__(name, [], location=None, variantName=variantName, index=index, needRelease=category.needRelease)
         self.name = name
         self.fullname = name
         self.variantName = variantName
@@ -154,9 +144,6 @@ class BuiltinType:
         self.needRelease = category.needRelease
         self.signed = signed
         self.bits = bits
-
-    def __repr__(self):
-        return self.name
 
 
 class SemanticGraph:
@@ -235,6 +222,21 @@ class SemanticGraphBuilder:
                             ifc.bases.append(base)
                     elif ifc.fullname != 'joint.IObject':
                         ifc.bases.append(semanticsGraph.findType(['joint'], 'IObject'))
+
+        for ast in parsed_files:
+            pkg = semanticsGraph.findPackage(ast['package'])
+            for t_ast in ast['types']:
+                if t_ast['kind'] == 'interface':
+                    ifc = pkg.findType(t_ast['name'])
+                    self._addBaseMethods(ifc, ifc.bases, set())
+                    for m_ast in t_ast['methods']:
+                        m = Method(len(ifc.methods), m_ast['name'], semanticsGraph.makeType(pkg, m_ast['retType']), m_ast['location'])
+                        p_index = 0
+                        for p_ast in m_ast['params']:
+                            p = Parameter(p_index, p_ast['name'], semanticsGraph.makeType(pkg, p_ast['type']), p_ast['location'])
+                            p_index += 1
+                            m.params.append(p)
+                        ifc.methods.append(m)
                 elif t_ast['kind'] == 'enum':
                     e = Enum(t_ast['name'], pkg.nameList, t_ast['location'])
                     pkg.enums.append(e)
@@ -251,21 +253,6 @@ class SemanticGraphBuilder:
                     for m_ast in t_ast['members']:
                         m = StructMember(m_ast['name'], semanticsGraph.makeType(pkg, m_ast['type']), m_ast['location'])
                         s.members.append(m)
-
-        for ast in parsed_files:
-            pkg = semanticsGraph.findPackage(ast['package'])
-            for t_ast in ast['types']:
-                if t_ast['kind'] == 'interface':
-                    ifc = pkg.findType(t_ast['name'])
-                    self._addBaseMethods(ifc, ifc.bases, set())
-                    for m_ast in t_ast['methods']:
-                        m = Method(len(ifc.methods), m_ast['name'], semanticsGraph.makeType(pkg, m_ast['retType']), m_ast['location'])
-                        p_index = 0
-                        for p_ast in m_ast['params']:
-                            p = Parameter(p_index, p_ast['name'], semanticsGraph.makeType(pkg, p_ast['type']), p_ast['location'])
-                            p_index += 1
-                            m.params.append(p)
-                        ifc.methods.append(m)
 
         for pkg in semanticsGraph.packages:
             for ifc in pkg.interfaces:

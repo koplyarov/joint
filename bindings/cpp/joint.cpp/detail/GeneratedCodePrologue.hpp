@@ -49,6 +49,11 @@ namespace detail
 		case JOINT_TYPE_UTF8:
 			delete[] value.utf8;
 			return JOINT_ERROR_NONE;
+		case JOINT_TYPE_STRUCT:
+			for (int32_t i = 0; i < type.payload.structDescriptor->membersCount; ++i)
+				_ReleaseRetValue(type.payload.structDescriptor->memberTypes[i], value.members[i]);
+			delete[] value.members;
+			return JOINT_ERROR_NONE;
 		default:
 			return JOINT_ERROR_NONE;
 		}

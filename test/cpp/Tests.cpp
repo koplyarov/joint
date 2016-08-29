@@ -76,7 +76,8 @@ public:
 			ILifetimeTests,
 			ICastTests,
 			IExceptionTests,
-			IInterfaceChecksumTests
+			IInterfaceChecksumTests,
+			IStructTests
 		> JointInterfaces;
 
 private:
@@ -201,6 +202,10 @@ public:
 	void AcceptCS1(const IInterfaceCS1_Ptr& obj) { }
 	void AcceptCS2(const IInterfaceCS2_Ptr& obj) { }
 	void CastToCS2(const IInterfaceCS1_Ptr& obj) { joint::Cast<IInterfaceCS2>(obj); }
+
+	S1 MakeS1(int32_t i, const std::string& s) { return S1(i, s); }
+	std::string GetS(S1 s) { return s.s; }
+	int32_t GetI(S1 s) { return s.i; }
 };
 
 extern "C"

@@ -1,4 +1,6 @@
-from ..SemanticGraph import BuiltinType, BuiltinTypeCategory, Interface, Enum
+from ..SemanticGraph import BuiltinType, BuiltinTypeCategory, Interface, Enum, Struct
+from ..GeneratorHelpers import CodeWithInitialization
+
 
 class CppGenerator:
     def __init__(self, semanticGraph):
@@ -17,6 +19,10 @@ class CppGenerator:
 
         for p in self.semanticGraph.packages:
             for l in self._generatePackageContent(p, p.interfaces, self._generatePredeclarations):
+                yield l
+
+        for p in self.semanticGraph.packages:
+            for l in self._generatePackageContent(p, p.structs, self._generateStruct):
                 yield l
 
         for p in self.semanticGraph.packages:
@@ -60,6 +66,44 @@ class CppGenerator:
         yield '};'
         yield ''
 
+    def _generateStruct(self, s):
+        yield 'struct {}'.format(s.name)
+        yield '{'
+        for m in s.members:
+            yield '\t{} {};'.format(self._toCppType(m.type), m.name)
+        yield ''
+        yield '\t{}() {{ }}'.format(s.name)
+        if s.members:
+            yield '\t#if DETAIL_JOINT_CPP_MOVE_SUPPORTED'
+            yield '\t{}({})'.format(s.name, ', '.join(self._toCppParamDecl(m) for m in s.members))
+            yield '\t\t: {}'.format(', '.join('{m}({m})'.format(m=m.name) for m in s.members))
+            yield '\t{}'
+            yield '\t#else'
+            yield '\t{}({})'.format(s.name, ', '.join('{} {}'.format(self._toCppType(m.type), m.name) for m in s.members))
+            yield '\t\t: {}'.format(', '.join('{}({})'.format(m.name, self._moveParam(m)) for m in s.members))
+            yield '\t{}'
+            yield '\t#endif'
+        yield ''
+        yield '\tstatic Joint_StructDescriptor* _GetStructDescriptor()'
+        yield '\t{'
+        yield '\t\tstatic Joint_Type member_types[] = {'
+        for i, m in enumerate(s.members):
+            if isinstance(m.type, BuiltinType) or isinstance(m.type, Enum):
+                payload_init = ''
+            elif isinstance(m.type, Interface):
+                payload_init = '{}::_GetInterfaceChecksum()'.format(self._mangleType(m.type))
+            elif isinstance(m.type, Struct):
+                payload_init = '{}::_GetStructDescriptor()'.format(self._mangleType(m.type))
+            else:
+                raise RuntimeError('Not implemented (type: {})!'.format(m.type))
+            yield '\t\t\t{{ (Joint_TypeId){}, Joint_TypePayload({}) }}{}'.format(m.type.index, payload_init, '' if i == len(s.members) - 1 else ',')
+        yield '\t\t};'
+        yield '\t\tstatic Joint_StructDescriptor desc = {{ {}, member_types }};'.format(len(s.members))
+        yield '\t\treturn &desc;'
+        yield '\t}'
+        yield '};'
+        yield ''
+
     def _generateEnumMethods(self, e):
         yield 'std::string {}::ToString() const'.format(e.name)
         yield '{'
@@ -96,7 +140,7 @@ class CppGenerator:
         yield '\tstatic const char* _GetInterfaceId() {{ return "{}"; }}'.format(ifc.fullname)
         yield ''
         for m in ifc.methods:
-            for l in self._generateMethodDeclaration(m):
+            for l in self._generateProxyMethodDeclaration(m):
                 yield '\t{}'.format(l)
         yield '};'
         yield ''
@@ -123,45 +167,48 @@ class CppGenerator:
 
     def _generateMethods(self, ifc):
         for m in ifc.methods:
-            for l in self._generateMethodDefinition(ifc, m):
+            for l in self._generateProxyMethodDefinition(ifc, m):
                 yield '{}'.format(l)
 
         for l in self._generateAccessorInvokeMethod(ifc):
             yield '{}'.format(l)
 
-    def _generateMethodDeclaration(self, m):
+    def _generateProxyMethodDeclaration(self, m):
         yield '{} {}({});'.format(self._toCppType(m.retType), m.name, ', '.join('{} {}'.format(self._toCppType(p.type), p.name) for p in m.params))
 
-    def _generateMethodDefinition(self, ifc, m):
+    def _generateProxyMethodDefinition(self, ifc, m):
         yield '{} {}::{}({})'.format(self._toCppType(m.retType), ifc.name, m.name, ', '.join('{} {}'.format(self._toCppType(p.type), p.name) for p in m.params))
         yield '{'
+        yield '\tusing namespace ::joint::detail;'
         yield '\tJoint_RetValue _ret_val;'
         yield '\tJoint_Type _ret_val_type;'
         yield '\t_ret_val_type.id = (Joint_TypeId){};'.format(m.retType.index)
         if isinstance(m.retType, Interface):
             yield '\t_ret_val_type.payload.interfaceChecksum = {}::_GetInterfaceChecksum();'.format(self._mangleType(m.retType))
+        elif isinstance(m.retType, Struct):
+            yield '\t_ret_val_type.payload.structDescriptor = {}::_GetStructDescriptor();'.format(self._mangleType(m.retType))
         if m.params:
             yield '\tJoint_Parameter params[{}];'.format(len(m.params))
             for p in m.params:
-                yield '\tparams[{}].value.{} = {};'.format(p.index, p.type.variantName, self._toCppParamGetter(p))
+                param_val = self._toJointParam(p.type, p.name)
+                for l in param_val.initialization:
+                    yield '\t{}'.format(l)
+                yield '\tparams[{}].value.{} = {};'.format(p.index, p.type.variantName, param_val.code)
                 yield '\tparams[{}].type.id = (Joint_TypeId){};'.format(p.index, p.type.index)
                 if isinstance(p.type, Interface):
                     yield '\tparams[{}].type.payload.interfaceChecksum = {}::_GetInterfaceChecksum();'.format(p.index, self._mangleType(p.type))
+                elif isinstance(p.type, Struct):
+                    yield '\tparams[{}].type.payload.structDescriptor = {}::_GetStructDescriptor();'.format(p.index, self._mangleType(p.type))
         yield '\tJOINT_METHOD_CALL("{}.{}", Joint_InvokeMethod(_obj, {}, {}, {}, _ret_val_type, &_ret_val));'.format(ifc.fullname, m.name, m.index, 'params' if m.params else 'nullptr', len(m.params), m.retType.index)
         if m.retType.needRelease:
             yield '\t::joint::detail::RetValueGuard _rvg(_ret_val_type, _ret_val);'.format(m.retType.index)
         if m.retType.name != 'void':
-            yield self._wrapRetValue(m.retType)
+            ret_val = self._fromJointRetValue(m.retType, '_ret_val.result.value')
+            for l in ret_val.initialization:
+                yield '\t{}'.format(l)
+            yield '\treturn {};'.format(ret_val.code)
         yield '}'
         yield ''
-
-    def _toCppParamInitializer(self, p):
-        if isinstance(p.type, BuiltinType) or isinstance(p.type, Interface):
-            return 'params[{i}].value.{v}'.format(i=p.index, v=p.type.variantName)
-        elif isinstance(p.type, Enum):
-            return '{e}(params[{i}].value.{v})'.format(e='{}::_Value'.format(self._mangleType(p.type)), i=p.index, v=p.type.variantName)
-        else:
-            raise RuntimeError('Not implemented (type: {})!'.format(p.type))
 
     def _generateAccessorInvokeMethodCase(self, ifc, m):
         yield 'case {}:'.format(m.index)
@@ -170,28 +217,20 @@ class CppGenerator:
             yield '\t\tif (retType.payload.interfaceChecksum != {}::_GetInterfaceChecksum())'.format(self._mangleType(m.retType))
             yield '\t\t\treturn JOINT_ERROR_INVALID_INTERFACE_CHECKSUM;'
         for p in m.params:
-            if isinstance(p.type, Interface):
-                yield '\t\tif (params[{}].type.payload.interfaceChecksum != {}::_GetInterfaceChecksum())'.format(p.index, self._mangleType(p.type))
-                yield '\t\t\treturn JOINT_ERROR_INVALID_INTERFACE_CHECKSUM;'
+            for l in self._validateJointParam(p.type, 'params[{}].type'.format(p.index)):
+                yield '\t\t{}'.format(l)
         for p in m.params:
-            if isinstance(p.type, Interface):
-                yield '\t\tJOINT_CALL(Joint_IncRefObject(params[{i}].value.{v}));'.format(i=p.index, v=p.type.variantName)
-                yield '\t\t{t} p{i}({w}(params[{i}].value.{v}));'.format(t=self._toCppType(p.type), w=self._mangleType(p.type), i=p.index, v=p.type.variantName)
-            else:
-                yield '\t\t{t} p{i}({v});'.format(t=self._toCppType(p.type), i=p.index, v=self._toCppParamInitializer(p))
+            param_val = self._fromJointParam(p.type, 'params[{}].value'.format(p.index))
+            for l in param_val.initialization:
+                yield '\t\t{}'.format(l)
+            yield '\t\t{} p{}({});'.format(self._toCppType(p.type), p.index, param_val.code)
         method_call = 'componentImpl->{}({})'.format(m.name, ', '.join('p{}'.format(p.index) for p in m.params))
         if m.retType.name != 'void':
             yield '\t\t{} result({});'.format(self._toCppType(m.retType), method_call)
-            if isinstance(m.retType, Interface):
-                yield '\t\tJoint_Error ret = Joint_IncRefObject(result->_GetObjectHandle());'
-                yield '\t\tif (ret != JOINT_ERROR_NONE)'
-                yield '\t\t\treturn ret;'
-            if m.retType.name != 'string':
-                yield '\t\toutRetValue->result.value.{} = {};'.format(m.retType.variantName, self._toCppValue('result', m.retType))
-            else:
-                yield '\t\tchar* result_c_str = new char[result.size() + 1];'
-                yield '\t\tstrcpy(result_c_str, result.c_str());'
-                yield '\t\toutRetValue->result.value.{} = result_c_str;'.format(m.retType.variantName)
+            ret_val = self._toJointRetValue(m.retType, 'result')
+            for l in ret_val.initialization:
+                yield '\t\t{}'.format(l)
+            yield '\t\toutRetValue->result.value.{} = {};'.format(m.retType.variantName, ret_val.code)
         else:
             yield '\t\t{};'.format(method_call)
         yield '\t}'
@@ -226,34 +265,8 @@ class CppGenerator:
         yield '\treturn JOINT_ERROR_NONE;'
         yield '}'
 
-    def _toCppValue(self, varName, type):
-        if isinstance(type, BuiltinType):
-            if type.category == BuiltinTypeCategory.string:
-                return '{}.c_str()'.format(varName)
-            else:
-                return varName
-        elif isinstance(type, Interface):
-            return '{}->_GetObjectHandle()'.format(varName)
-        elif isinstance(type, Enum):
-            return '{}._RawValue()'.format(varName)
-        else:
-            raise RuntimeError('Not implemented (type: {})!'.format(type))
-
-    def _toCppParamGetter(self, p):
-        return self._toCppValue(p.name, p.type)
-
-    def _wrapRetValue(self, type):
-        if isinstance(type, BuiltinType):
-            if type.name != 'bool':
-                return '\treturn {}(_ret_val.result.value.{});'.format(self._toCppType(type), type.variantName)
-            else:
-                return '\treturn _ret_val.result.value.{} != 0;'.format(type.variantName)
-        elif isinstance(type, Interface):
-            return '\treturn {}({}(_ret_val.result.value.{}));'.format(self._toCppType(type), self._mangleType(type), type.variantName)
-        elif isinstance(type, Enum):
-            return '\treturn {}::_Value(_ret_val.result.value.{});'.format(self._toCppType(type), type.variantName)
-        else:
-            raise RuntimeError('Not implemented (type: {})!'.format(type))
+    def _isHeavyType(self, type):
+        return isinstance(type, Struct) or isinstance(type, Interface) or (isinstance(type, BuiltinType) and type.category == BuiltinTypeCategory.string)
 
     def _toCppType(self, type):
         if isinstance(type, BuiltinType):
@@ -270,14 +283,137 @@ class CppGenerator:
                     return 'double'
                 raise RuntimeError('Unsupported floatint point type (bits: {})'.format(type.bits))
             if type.category == BuiltinTypeCategory.string:
-                return 'std::string'
+                return '::std::string'
             raise RuntimeError('Unknown type: {}'.format(type))
         elif isinstance(type, Interface):
             return '{}_Ptr'.format(self._mangleType(type));
-        elif isinstance(type, Enum):
+        elif isinstance(type, Enum) or isinstance(type, Struct):
             return '{}'.format(self._mangleType(type));
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 
     def _mangleType(self, ifc):
-        return '::{}::{}'.format('::'.join(ifc.packageNameList), ifc.name)
+        return '::{}'.format('::'.join(ifc.packageNameList + [ ifc.name ]))
+
+    def _toCppParamDecl(self, p):
+        param_type = self._toCppType(p.type)
+        if self._isHeavyType(p.type):
+            param_type = 'const {}&'.format(param_type)
+        return '{} {}'.format(param_type, p.name)
+
+    def _moveParam(self, p):
+        return 'std::move({})'.format(p.name) if self._isHeavyType(p.type) else p.name
+
+    def _toJointParam(self, type, cppValue):
+        if isinstance(type, BuiltinType):
+            if type.category == BuiltinTypeCategory.string:
+                return CodeWithInitialization('{}.c_str()'.format(cppValue))
+            else:
+                return CodeWithInitialization(cppValue)
+        elif isinstance(type, Interface):
+            return CodeWithInitialization('{}->_GetObjectHandle()'.format(cppValue))
+        elif isinstance(type, Enum):
+            return CodeWithInitialization('{}._RawValue()'.format(cppValue))
+        elif isinstance(type, Struct):
+            mangled_value = cppValue.replace('.', '_')
+            initialization = []
+            member_values = []
+            for m in type.members:
+                member_val = self._toJointParam(m.type, '{}.{}'.format(cppValue, m.name))
+                initialization += member_val.initialization
+                member_values.append(member_val.code);
+            initialization.append('Joint_Value {}_members[{}];'.format(mangled_value, len(type.members)))
+            for i,m in enumerate(member_values):
+                initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, type.members[i].type.variantName, m))
+            return CodeWithInitialization('{}_members'.format(mangled_value), initialization)
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
+
+    def _toJointRetValue(self, type, cppValue):
+        if isinstance(type, BuiltinType):
+            if type.category == BuiltinTypeCategory.string:
+                mangled_value = cppValue.replace('.', '_')
+                initialization = [
+                    'char* _{}_c_str = new char[{}.size() + 1];'.format(mangled_value, cppValue),
+                    'strcpy(_{}_c_str, {}.c_str());'.format(mangled_value, cppValue)
+                ]
+                return CodeWithInitialization('_{}_c_str'.format(mangled_value), initialization)
+            else:
+                return CodeWithInitialization(cppValue)
+        elif isinstance(type, Interface):
+            initialization = [
+                'Joint_Error ret = Joint_IncRefObject({}->_GetObjectHandle());'.format(cppValue),
+                'if (ret != JOINT_ERROR_NONE)',
+                '\treturn ret;'
+            ]
+            return CodeWithInitialization('{}->_GetObjectHandle()'.format(cppValue), initialization)
+        elif isinstance(type, Enum):
+            return CodeWithInitialization('{}._RawValue()'.format(cppValue))
+        elif isinstance(type, Struct):
+            mangled_value = cppValue.replace('.', '_')
+            initialization = []
+            member_values = []
+            for m in type.members:
+                member_val = self._toJointRetValue(m.type, '{}.{}'.format(cppValue, m.name))
+                initialization += member_val.initialization
+                member_values.append(member_val.code);
+            initialization.append('Joint_Value* {}_members = new Joint_Value[{}];'.format(mangled_value, len(type.members)))
+            for i,m in enumerate(member_values):
+                initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, type.members[i].type.variantName, m))
+            return CodeWithInitialization('{}_members'.format(mangled_value), initialization)
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
+
+    def _validateJointParam(self, type, jointType):
+        if isinstance(type, BuiltinType) or isinstance(type, Enum):
+            return
+        elif isinstance(type, Interface):
+            yield 'if ({}.payload.interfaceChecksum != {}::_GetInterfaceChecksum())'.format(jointType, self._mangleType(type))
+            yield '\treturn JOINT_ERROR_INVALID_INTERFACE_CHECKSUM;'
+        elif isinstance(type, Struct):
+            for i,m in enumerate(type.members):
+                for l in self._validateJointParam(m.type, '{}.memberTypes[{}]'.format(jointType, i)):
+                    yield l
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
+
+    def _fromJointParam(self, type, jointValue):
+        if isinstance(type, BuiltinType):
+            return CodeWithInitialization('{}.{}'.format(jointValue, type.variantName))
+        elif isinstance(type, Enum):
+            return CodeWithInitialization('{}({}.{})'.format('{}::_Value'.format(self._mangleType(type)), jointValue, type.variantName))
+        elif isinstance(type, Struct):
+            initialization = []
+            member_values = []
+            for i,m in enumerate(type.members):
+                member_code = self._fromJointParam(m.type, '{}.members[{}]'.format(jointValue, i))
+                initialization += member_code.initialization
+                member_values.append('{}({})'.format(self._toCppType(m.type), member_code.code))
+            return CodeWithInitialization(', '.join(member_values), initialization)
+        elif isinstance(type, Interface):
+            initialization = [
+                'JOINT_CALL(Joint_IncRefObject({}.{}));'.format(jointValue, type.variantName)
+            ]
+            return CodeWithInitialization('{}({}.{})'.format(self._toCppType(type), jointValue, type.variantName), initialization)
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
+
+    def _fromJointRetValue(self, type, jointValue):
+        if isinstance(type, BuiltinType):
+            if type.category == BuiltinTypeCategory.bool:
+                return CodeWithInitialization('{}.{} != 0'.format(jointValue, type.variantName))
+            else:
+                return CodeWithInitialization('{}({}.{})'.format(self._toCppType(type), jointValue, type.variantName))
+        elif isinstance(type, Interface):
+            return CodeWithInitialization('{}({}.{})'.format(self._toCppType(type), jointValue, type.variantName))
+        elif isinstance(type, Enum):
+            return CodeWithInitialization('{}::_Value({}.{})'.format(self._toCppType(type), jointValue, type.variantName))
+        else:
+            initialization = []
+            member_values = []
+            for i,m in enumerate(type.members):
+                member_code = self._fromJointRetValue(m.type, '{}.members[{}]'.format(jointValue, i))
+                initialization += member_code.initialization
+                member_values.append(member_code.code)
+            return CodeWithInitialization('{}({})'.format(self._toCppType(type), ', '.join(member_values)), initialization)
+
