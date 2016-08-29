@@ -7,13 +7,14 @@
 
 Joint_Error JointC_ReleaseRetValue(Joint_Type type, Joint_Value value)
 {
+	int32_t i;
 	switch (type.id)
 	{
 	case JOINT_TYPE_UTF8:
 		free((void*)value.utf8);
 		return JOINT_ERROR_NONE;
 	case JOINT_TYPE_STRUCT:
-		for (int32_t i = 0; i < type.payload.structDescriptor->membersCount; ++i)
+		for (i = 0; i < type.payload.structDescriptor->membersCount; ++i)
 			JointC_ReleaseRetValue(type.payload.structDescriptor->memberTypes[i], value.members[i]);
 		free(value.members);
 		return JOINT_ERROR_NONE;
