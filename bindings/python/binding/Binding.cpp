@@ -84,6 +84,78 @@ namespace binding
 	}
 
 
+	void Binding::FromPyValue(const Joint_Type& type, PyObject* pyObj, Joint_Value& outValue)
+	{
+		switch (type.id)
+		{
+		case JOINT_TYPE_BOOL: outValue.b = AsBool(pyObj); break;
+		case JOINT_TYPE_U8: outValue.u8 = FromPyLong<uint8_t>(pyObj); break;
+		case JOINT_TYPE_I8: outValue.i8 = FromPyLong<int8_t>(pyObj); break;
+		case JOINT_TYPE_U16: outValue.u16 = FromPyLong<uint16_t>(pyObj); break;
+		case JOINT_TYPE_I16: outValue.i16 = FromPyLong<int16_t>(pyObj); break;
+		case JOINT_TYPE_U32: outValue.u32 = FromPyLong<uint32_t>(pyObj); break;
+		case JOINT_TYPE_I32: outValue.i32 = FromPyLong<int32_t>(pyObj); break;
+		case JOINT_TYPE_U64: outValue.u64 = FromPyLong<uint64_t>(pyObj); break;
+		case JOINT_TYPE_I64: outValue.i64 = FromPyLong<int64_t>(pyObj); break;
+		case JOINT_TYPE_F32: outValue.f32 = FromPyFloat<float>(pyObj); break;
+		case JOINT_TYPE_F64: outValue.f64 = FromPyFloat<double>(pyObj); break;
+		case JOINT_TYPE_ENUM: outValue.e = FromPyLong<int32_t>(pyObj); break;
+		case JOINT_TYPE_UTF8:
+			{
+				auto str_data = Utf8FromPyUnicode(pyObj);
+				std::unique_ptr<char[]> result_str(new char[strlen(str_data.GetContent()) + 1]);
+#ifdef _MSC_VER
+#	pragma warning(push)
+#	pragma warning(disable: 4996)
+#endif
+				strcpy(result_str.get(), str_data.GetContent());
+#ifdef _MSC_VER
+#	pragma warning(pop)
+#endif
+				outValue.utf8 = result_str.release();
+			}
+			break;
+		case JOINT_TYPE_STRUCT:
+			{
+				if (!PyTuple_Check(pyObj))
+				{
+					std::string py_type = "<unknown type>";
+					PyObjectToStringNoExcept(pyObj, py_type);
+					JOINT_THROW(joint::devkit::StringBuilder() % "Expected tuple type, got " % py_type);
+				}
+
+				const auto& sd = *type.payload.structDescriptor;
+				outValue.members = new Joint_Value[sd.membersCount];
+				for (int32_t i = 0; i < sd.membersCount; ++i)
+				{
+					PyObject* py_member = PY_OBJ_CHECK(PyTuple_GetItem(pyObj, i));
+					FromPyValue(sd.memberTypes[i], py_member, outValue.members[i]);
+				}
+			}
+			break;
+		case JOINT_TYPE_OBJ:
+			{
+				if (pyObj != Py_None)
+				{
+					PyObjectHolder py_proxy_type(PY_OBJ_CHECK(PyObject_Type(pyObj)));
+					PyObjectHolder py_checksum(PY_OBJ_CHECK(PyObject_GetAttrString(py_proxy_type, "interfaceChecksum")));
+					if (FromPyLong<Joint_InterfaceChecksum>(py_checksum) != type.payload.interfaceChecksum)
+						JOINT_THROW(JOINT_ERROR_INVALID_INTERFACE_CHECKSUM);
+
+					PyObjectHolder py_joint_obj(PY_OBJ_CHECK(PyObject_GetAttrString(pyObj, "obj")));
+					outValue.obj = CastPyObject<pyjoint::Object>(py_joint_obj, &pyjoint::Object_type)->handle;
+					Joint_Error ret = Joint_IncRefObject(outValue.obj);
+					JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+				}
+				else
+					outValue.obj = JOINT_NULL_HANDLE;
+			}
+			break;
+		default:
+			JOINT_THROW(std::runtime_error("Unknown type"));
+		}
+	}
+
 	Joint_Error Binding::InvokeMethod(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
 	{
 		JOINT_CPP_WRAP_BEGIN
@@ -145,64 +217,8 @@ namespace binding
 			return JOINT_ERROR_EXCEPTION;
 		}
 
-		switch (retType.id)
-		{
-		case JOINT_TYPE_VOID:
-			break;
-
-		case JOINT_TYPE_BOOL: outRetValue->result.value.b = AsBool(py_res); break;
-
-		case JOINT_TYPE_U8: outRetValue->result.value.u8 = FromPyLong<uint8_t>(py_res); break;
-		case JOINT_TYPE_I8: outRetValue->result.value.i8 = FromPyLong<int8_t>(py_res); break;
-		case JOINT_TYPE_U16: outRetValue->result.value.u16 = FromPyLong<uint16_t>(py_res); break;
-		case JOINT_TYPE_I16: outRetValue->result.value.i16 = FromPyLong<int16_t>(py_res); break;
-		case JOINT_TYPE_U32: outRetValue->result.value.u32 = FromPyLong<uint32_t>(py_res); break;
-		case JOINT_TYPE_I32: outRetValue->result.value.i32 = FromPyLong<int32_t>(py_res); break;
-		case JOINT_TYPE_U64: outRetValue->result.value.u64 = FromPyLong<uint64_t>(py_res); break;
-		case JOINT_TYPE_I64: outRetValue->result.value.i64 = FromPyLong<int64_t>(py_res); break;
-
-		case JOINT_TYPE_F32: outRetValue->result.value.f32 = FromPyFloat<float>(py_res); break;
-		case JOINT_TYPE_F64: outRetValue->result.value.f64 = FromPyFloat<double>(py_res); break;
-
-		case JOINT_TYPE_ENUM: outRetValue->result.value.e = FromPyLong<int32_t>(py_res); break;
-
-		case JOINT_TYPE_UTF8:
-			{
-				auto str_data = Utf8FromPyUnicode(py_res);
-				std::unique_ptr<char[]> result_str(new char[strlen(str_data.GetContent()) + 1]);
-#ifdef _MSC_VER
-#	pragma warning(push)
-#	pragma warning(disable: 4996)
-#endif
-				strcpy(result_str.get(), str_data.GetContent());
-#ifdef _MSC_VER
-#	pragma warning(pop)
-#endif
-				outRetValue->result.value.utf8 = result_str.release();
-			}
-			break;
-		case JOINT_TYPE_OBJ:
-			{
-				if (py_res.Get() != Py_None)
-				{
-					PyObjectHolder py_proxy_type(PY_OBJ_CHECK(PyObject_Type(py_res)));
-					PyObjectHolder py_checksum(PY_OBJ_CHECK(PyObject_GetAttrString(py_proxy_type, "interfaceChecksum")));
-					if (FromPyLong<Joint_InterfaceChecksum>(py_checksum) != retType.payload.interfaceChecksum)
-						JOINT_THROW(JOINT_ERROR_INVALID_INTERFACE_CHECKSUM);
-
-					PyObjectHolder py_joint_obj(PY_OBJ_CHECK(PyObject_GetAttrString(py_res, "obj")));
-					outRetValue->result.value.obj = CastPyObject<pyjoint::Object>(py_joint_obj, &pyjoint::Object_type)->handle;
-					Joint_Error ret = Joint_IncRefObject(outRetValue->result.value.obj);
-					JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
-				}
-				else
-					outRetValue->result.value.obj = JOINT_NULL_HANDLE;
-			}
-			break;
-		default:
-			JOINT_THROW(std::runtime_error("Unknown type"));
-		}
-
+		if (retType.id != JOINT_TYPE_VOID)
+			FromPyValue(retType, py_res, outRetValue->result.value);
 		outRetValue->releaseValue = &Binding::ReleaseRetValue;
 
 		JOINT_CPP_WRAP_END
@@ -286,10 +302,12 @@ namespace binding
 		case JOINT_TYPE_UTF8:
 			delete[] value.utf8;
 			break;
-		case JOINT_TYPE_OBJ:
+		case JOINT_TYPE_STRUCT:
+			for (int32_t i = 0; i < type.payload.structDescriptor->membersCount; ++i)
+				ReleaseRetValue(type.payload.structDescriptor->memberTypes[i], value.members[i]);
+			delete[] value.members;
 			break;
 		default:
-			JOINT_THROW(JOINT_ERROR_GENERIC);
 			break;
 		}
 		JOINT_CPP_WRAP_END

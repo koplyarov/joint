@@ -16,16 +16,18 @@ namespace devkit
 		{
 		private:
 			Func_   _func;
-			bool    _moved;
+			bool    _valid;
 
 		public:
-			ScopeGuard(Func_ func) : _func(std::move(func)), _moved(false) { }
-			~ScopeGuard() { if (!_moved) _func(); }
+			ScopeGuard(Func_ func) : _func(std::move(func)), _valid(true) { }
+			~ScopeGuard() { if (_valid) _func(); }
 
-			ScopeGuard(ScopeGuard&& other) : _func(std::move(other._func)), _moved(false) { other._moved = true; }
+			ScopeGuard(ScopeGuard&& other) : _func(std::move(other._func)), _valid(other._valid) { other._valid = false; }
 
 			ScopeGuard(const ScopeGuard&) = delete;
 			ScopeGuard& operator = (const ScopeGuard&) = delete;
+
+			void Cancel() noexcept { _valid = false; }
 		};
 	}
 

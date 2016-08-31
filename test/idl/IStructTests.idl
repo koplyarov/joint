@@ -7,11 +7,22 @@ package test
 		string s;
 	}
 
+	interface IStructTestsCallback
+	{
+		S1 MakeS1(i32 i, string s);
+		string GetS(S1 s);
+		i32 GetI(S1 s);
+	}
+
 	interface IStructTests
 	{
 		S1 MakeS1(i32 i, string s);
 		string GetS(S1 s);
 		i32 GetI(S1 s);
+
+		S1 CallbackMakeS1(IStructTestsCallback cb, i32 i, string s);
+		string CallbackGetS(IStructTestsCallback cb, S1 s);
+		i32 CallbackGetI(IStructTestsCallback cb, S1 s);
 	}
 
 }

@@ -380,6 +380,15 @@ Joint_Error Tests_GetI(Tests* self, test_S1 s, int32_t* result, Joint_ExceptionH
 	return JOINT_ERROR_NONE;
 }
 
+Joint_Error Tests_CallbackMakeS1(Tests* self, test_IStructTestsCallback cb, int32_t i, const char* s, test_S1* result, Joint_ExceptionHandle* ex)
+{ return test_IStructTestsCallback_MakeS1(cb, i, s, result, ex); }
+
+Joint_Error Tests_CallbackGetS(Tests* self, test_IStructTestsCallback cb, test_S1 s, const char** result, Joint_ExceptionHandle* ex)
+{ return test_IStructTestsCallback_GetS(cb, s, result, ex); }
+
+Joint_Error Tests_CallbackGetI(Tests* self, test_IStructTestsCallback cb, test_S1 s, int32_t* result, Joint_ExceptionHandle* ex)
+{ return test_IStructTestsCallback_GetI(cb, s, result, ex); }
+
 
 JOINT_C_COMPONENT(Tests, test_IBasicTests, test_IEnumTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests, test_IInterfaceChecksumTests, test_IStructTests);
 

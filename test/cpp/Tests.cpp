@@ -206,6 +206,10 @@ public:
 	S1 MakeS1(int32_t i, const std::string& s) { return S1(i, s); }
 	std::string GetS(S1 s) { return s.s; }
 	int32_t GetI(S1 s) { return s.i; }
+
+	S1 CallbackMakeS1(IStructTestsCallback_Ptr cb, int32_t i, const std::string& s) { return cb->MakeS1(i, s); }
+	std::string CallbackGetS(IStructTestsCallback_Ptr cb, S1 s) { return cb->GetS(s); }
+	int32_t CallbackGetI(IStructTestsCallback_Ptr cb, S1 s) { return cb->GetI(s); }
 };
 
 extern "C"

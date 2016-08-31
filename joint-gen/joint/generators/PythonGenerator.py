@@ -1,4 +1,5 @@
-from ..SemanticGraph import Interface, Enum, BuiltinType
+from ..SemanticGraph import Interface, Enum, BuiltinType, BuiltinTypeCategory, Struct
+from ..GeneratorHelpers import CodeWithInitialization
 
 class Common:
     def __init__(self):
@@ -66,6 +67,9 @@ class PythonGenerator:
                 for l in self._generateEnumPy2(e):
                     yield '\t{}'.format(l)
                 yield ''
+        for s in p.structs:
+            for l in self._generateStruct(s):
+                yield '{}'.format(l)
         for ifc in p.interfaces:
             yield ''
             for l in self._generateInterfaceAccessor(ifc):
@@ -93,87 +97,95 @@ class PythonGenerator:
             yield '\t\tcls.__values_to_names__[{v}] = \'{n}\''.format(n=v.name, v=v.value)
             yield '\t\tcls.{n} = cls({v})'.format(n=v.name, v=v.value)
 
+    def _generateStruct(self, s):
+        yield 'class {}(object):'.format(self._mangleType(s))
+        yield '\t__slots__ = [{}]'.format(', '.join('\'{}\''.format(m.name) for m in s.members))
+        yield '\tdef __init__(self{}):'.format(''.join(', {} = {}'.format(m.name, self._defaultMemberValue(m.type)) for m in s.members))
+        if not s.members:
+            yield '\t\tpass'
+        for m in s.members:
+            yield '\t\tself.{m} = {m}'.format(m=m.name)
+        yield ''
+
+    def _defaultMemberValue(self, type):
+        if isinstance(type, BuiltinType):
+            if type.category == BuiltinTypeCategory.string:
+                return '\'\''
+            if type.category == BuiltinTypeCategory.bool:
+                return 'False'
+            return '0'
+        elif isinstance(type, Enum):
+            return '{}()'.format(self._mangleType(type))
+        elif isinstance(type, Interface):
+            return 'None'
+        elif isinstance(type, Struct):
+            return '{}()'.format(self._mangleType(type))
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
+
     def _generateInterfaceAccessor(self, ifc):
-        yield 'class {}_accessor:'.format(self._mangleType(ifc))
+        yield 'class {}_accessor(object):'.format(self._mangleType(ifc))
         yield '\t__slots__ = [\'obj\', \'methods\']'
         yield '\tdef __init__(self, obj):'
         yield '\t\tself.obj = obj'
-        yield '\t\tself.methods = {}'.format(self._tuple([ ('self._{}_wrapper' if self._methodNeedsWrapper(m) else 'obj.{}').format(m.name) for m in ifc.methods ]))
+        yield '\t\tself.methods = {}'.format(self._tuple([ ('self._{}_wrapper' if self._methodNeedsAccessorWrapper(m) else 'obj.{}').format(m.name) for m in ifc.methods ]))
         for m in ifc.methods:
-            if not self._methodNeedsWrapper(m):
+            if not self._methodNeedsAccessorWrapper(m):
                 continue
             yield '\tdef _{}_wrapper(self{}):'.format(m.name, ''.join(', {}'.format(p.name) for p in m.params))
-            method_invokation = 'self.obj.{}({})'.format(m.name, ', '.join('{}'.format(self._wrapParameter(p)) for p in m.params))
-            yield '\t\t{}'.format(self._unwrapRetValue(m.retType, method_invokation))
-
-    def _wrapParameter(self, p):
-        if isinstance(p.type, BuiltinType):
-            return p.name
-        elif isinstance(p.type, Interface):
-            return 'None if {n} is None else {t}_proxy({n})'.format(t=self._mangleType(p.type), n=p.name)
-        elif isinstance(p.type, Enum):
-            return '{}({})'.format(self._mangleType(p.type), p.name)
-        else:
-            raise RuntimeError('Not implemented (type: {})!'.format(p.type))
-
-    def _unwrapRetValue(self, type, methodInvokation):
-        if isinstance(type, BuiltinType) or isinstance(type, Interface):
-            return 'return {}'.format(methodInvokation)
-        elif isinstance(type, Enum):
-            return 'return {}.value'.format(methodInvokation)
-        else:
-            raise RuntimeError('Not implemented (type: {})!'.format(type))
-
-    def _unwrapParameter(self, p):
-        if isinstance(p.type, BuiltinType):
-            return p.name
-        if isinstance(p.type, Interface):
-            return 'None if {n} is None else {n}.obj'.format(t=self._mangleType(p.type), n=p.name)
-        if isinstance(p.type, Enum):
-            return '{}.value'.format(p.name)
-        else:
-            raise RuntimeError('Not implemented (type: {})!'.format(p.type))
-
-    def _wrapRetValue(self, type, methodInvokation):
-        if isinstance(type, BuiltinType):
-            if type.name == 'void':
-                yield '{}'.format(methodInvokation)
-            else:
-                yield 'return {}'.format(methodInvokation)
-        elif isinstance(type, Interface):
-            yield '_raw_res = {}'.format(methodInvokation)
-            yield 'return None if _raw_res is None else {}_proxy(_raw_res)'.format(self._mangleType(type))
-        elif isinstance(type, Enum):
-            yield 'return {}({})'.format(self._mangleType(type), methodInvokation)
-        else:
-            raise RuntimeError('Not implemented (type: {})!'.format(type))
+            params_list = []
+            for p in m.params:
+                param_val = self._fromJointParam(p.type, p.name)
+                for l in param_val.initialization:
+                    yield '\t\t{}'.format(l)
+                params_list.append(param_val.code)
+            method_invokation = 'self.obj.{}({})'.format(m.name, ', '.join(params_list))
+            ret_val = self._toJointRetValue(m.retType, method_invokation)
+            for l in ret_val.initialization:
+                yield '\t\t{}'.format(l)
+            yield '\t\treturn {}'.format(ret_val.code)
 
     def _generateInterfaceProxy(self, ifc):
-        yield 'class {}_proxy:'.format(self._mangleType(ifc))
-        yield '\t__slots__ = [\'obj\'{}]'.format(''.join(', \'{}\''.format(m.name) for m in ifc.methods if not self._methodNeedsProxy(m)))
+        yield 'class {}_proxy(object):'.format(self._mangleType(ifc))
+        yield '\t__slots__ = [\'obj\'{}]'.format(''.join(', \'{}\''.format(m.name) for m in ifc.methods if not self._methodNeedsProxyWrapper(m)))
         yield '\tinterfaceChecksum = {}'.format(hex(ifc.checksum))
         yield '\tdef __init__(self, obj):'
         yield '\t\tif obj.checksum != {}_proxy.interfaceChecksum:'.format(self._mangleType(ifc))
         yield '\t\t\traise pyjoint.InvalidInterfaceChecksumException()'
         yield '\t\tself.obj = obj'
         for m in ifc.methods:
-            if self._methodNeedsProxy(m):
+            if self._methodNeedsProxyWrapper(m):
                 continue
             yield '\t\tself.{} = partial(self.obj, {}, {})'.format(m.name, m.index, self._typeTuple(m.retType))
         for m in ifc.methods:
-            if not self._methodNeedsProxy(m):
+            if not self._methodNeedsProxyWrapper(m):
                 continue
             yield ''
             yield '\tdef {}(self{}):'.format(m.name, ''.join(', {}'.format(p.name) for p in m.params))
-            method_invokation = 'self.obj({}, {}{})'.format( m.index, self._typeTuple(m.retType), ''.join([ ', ({}, {})'.format(self._typeTuple(p.type), self._unwrapParameter(p)) for p in m.params]))
-            for l in self._wrapRetValue(m.retType, method_invokation):
-                yield '\t\t{}'.format(l)
+            params_list = []
+            for p in m.params:
+                param_val = self._toJointParam(p.type, p.name)
+                for l in param_val.initialization:
+                    yield '\t\t{}'.format(l)
+                params_list.append('({}, {})'.format(self._typeTuple(p.type), param_val.code))
+            method_invokation = 'self.obj({}, {}{})'.format( m.index, self._typeTuple(m.retType), ''.join(', {}'.format(p) for p in params_list))
+            if m.retType.fullname == 'void':
+                yield '\t\t{}'.format(method_invokation)
+            else:
+                ret_val = self._fromJointRetValue(m.retType, method_invokation)
+                for l in ret_val.initialization:
+                    yield '\t\t{}'.format(l)
+                yield '\t\treturn {}'.format(ret_val.code)
+                #for l in self._fromJointRetValue(m.retType, method_invokation):
+                    #yield '\t\t{}'.format(l)
 
     def _typeTuple(self, type):
         if isinstance(type, BuiltinType) or isinstance(type, Enum):
             return self._tuple([str(type.index)])
         elif isinstance(type, Interface):
             return self._tuple([str(type.index), hex(type.checksum)])
+        elif isinstance(type, Struct):
+            return self._tuple([str(type.index), self._tuple([self._typeTuple(m.type) for m in type.members])])
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 
@@ -190,12 +202,13 @@ class PythonGenerator:
         yield '\taccessor = {}_accessor'.format(mangled_name)
         yield '\tproxy = {}_proxy'.format(mangled_name)
 
-    def _methodNeedsProxy(self, m):
-        return m.params or isinstance(m.retType, Interface)
+    def _methodNeedsProxyWrapper(self, m):
+        return m.params or not isinstance(m.retType, BuiltinType)
 
-    def _methodNeedsWrapper(self, m):
+    def _methodNeedsAccessorWrapper(self, m):
+        return m.params or not (isinstance(m.retType, BuiltinType) or isinstance(m.retType, Interface))
         for p in m.params:
-            if isinstance(p.type, Interface) or isinstance(p.type, Enum):
+            if not isinstance(p.type, BuiltinType):
                 return True
         return False
 
@@ -206,4 +219,79 @@ class PythonGenerator:
         if not values:
             return 'tuple()'
         else:
-            return '({}{})'.format(', '.join(values), ', ' if len(values) == 1 else '')
+            return '({}{})'.format(', '.join(values), ',' if len(values) == 1 else '')
+
+    def _fromJointParam(self, type, name):
+        if isinstance(type, BuiltinType):
+            return CodeWithInitialization(name)
+        elif isinstance(type, Interface):
+            return CodeWithInitialization('None if {n} is None else {t}_proxy({n})'.format(t=self._mangleType(type), n=name))
+        elif isinstance(type, Enum):
+            return CodeWithInitialization('{}({})'.format(self._mangleType(type), name))
+        elif isinstance(type, Struct):
+            return self._fromJointRetValue(type, name, '_param', True)
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
+
+    def _toJointRetValue(self, type, methodInvokation, suffix='_res', isVariable=False):
+        if isinstance(type, BuiltinType) or isinstance(type, Interface):
+            return CodeWithInitialization(methodInvokation)
+        elif isinstance(type, Enum):
+            return CodeWithInitialization('{}.value'.format(methodInvokation))
+        elif isinstance(type, Struct):
+            if isVariable:
+                res = methodInvokation
+                initialization = []
+            else:
+                res = '_py{}'.format(suffix)
+                initialization = [ '{} = {}'.format(res, methodInvokation) ]
+            member_values = []
+            for i,m in enumerate(type.members):
+                member_code = self._toJointRetValue(m.type, '{}.{}'.format(res, m.name), '{}_{}'.format(suffix, m.name), True)
+                initialization += member_code.initialization
+                member_values.append(member_code.code)
+            return CodeWithInitialization(self._tuple(member_values), initialization)
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
+
+    def _toJointParam(self, type, name):
+        if isinstance(type, BuiltinType):
+            return CodeWithInitialization(name)
+        if isinstance(type, Interface):
+            return CodeWithInitialization('None if {n} is None else {n}.obj'.format(t=self._mangleType(type), n=name))
+        if isinstance(type, Enum):
+            return CodeWithInitialization('{}.value'.format(name))
+        elif isinstance(type, Struct):
+            return self._toJointRetValue(type, name, '_param', True)
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
+
+    def _fromJointRetValue(self, type, methodInvokation, suffix='_res', isVariable=False):
+        if isinstance(type, BuiltinType):
+            return CodeWithInitialization(methodInvokation)
+        elif isinstance(type, Interface):
+            if isVariable:
+                res = methodInvokation
+                initialization = [ ]
+            else:
+                res = '_raw{}'.format(suffix)
+                initialization = [ '{} = {}'.format(res, methodInvokation) ]
+            return CodeWithInitialization('None if {r} is None else {t}_proxy({r})'.format(r=res, t=self._mangleType(type)), initialization)
+        elif isinstance(type, Enum):
+            return CodeWithInitialization('{}({})'.format(self._mangleType(type), methodInvokation))
+        elif isinstance(type, Struct):
+            if isVariable:
+                res = methodInvokation
+                initialization = []
+            else:
+                res = '_raw{}'.format(suffix)
+                initialization = [ '{} = {}'.format(res, methodInvokation) ]
+            member_values = []
+            for i,m in enumerate(type.members):
+                member_code = self._fromJointRetValue(m.type, '{}[{}]'.format(res, i), '{}_{}'.format(suffix, m.name), True)
+                initialization += member_code.initialization
+                member_values.append(member_code.code)
+            return CodeWithInitialization('{}({})'.format(self._mangleType(type), ', '.join(m for m in member_values)), initialization)
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
+

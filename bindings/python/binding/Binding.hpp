@@ -35,6 +35,7 @@ namespace binding
 
 	private:
 		static PyObjectHolder FindBaseById(PyObject* type, const char* interfaceId);
+		static void FromPyValue(const Joint_Type& type, PyObject* pyObj, Joint_Value& outValue);
 	};
 
 }}

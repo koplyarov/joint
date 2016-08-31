@@ -174,6 +174,8 @@ class CGenerator:
         yield '\t_ret_val_type.id = (Joint_TypeId){};'.format(m.retType.index)
         if isinstance(m.retType, Interface):
             yield '\t_ret_val_type.payload.interfaceChecksum = {}__checksum;'.format(self._mangleType(m.retType))
+        elif isinstance(m.retType, Struct):
+            yield '\t_ret_val_type.payload.structDescriptor = {}__GetStructDescriptor();'.format(self._mangleType(m.retType))
         if m.params:
             yield '\tJoint_Parameter params[{}];'.format(len(m.params))
             for p in m.params:
@@ -184,6 +186,8 @@ class CGenerator:
                 yield '\tparams[{}].type.id = (Joint_TypeId){};'.format(p.index, p.type.index)
                 if isinstance(p.type, Interface):
                     yield '\tparams[{}].type.payload.interfaceChecksum = {}__checksum;'.format(p.index, self._mangleType(p.type))
+                elif isinstance(p.type, Struct):
+                    yield '\tparams[{}].type.payload.structDescriptor = {}__GetStructDescriptor();'.format(p.index, self._mangleType(p.type))
         yield '\tJoint_Error _ret = Joint_InvokeMethod((Joint_ObjectHandle)_obj, {}, {}, {}, _ret_val_type, &_ret_val);'.format(m.index, 'params' if m.params else 'NULL', len(m.params))
         yield '\tif (_ret != JOINT_ERROR_NONE)'
         yield '\t{'

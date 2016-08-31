@@ -39,7 +39,7 @@ class InterfaceChecksumComponent2(test_IInterfaceCS2):
 class InterfaceChecksumComponent12(test_IInterfaceCS1, test_IInterfaceCS2):
     pass
 
-class Tests(test_IBasicTests, test_IObjectTests, test_IEnumTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests, test_IInterfaceChecksumTests):
+class Tests(test_IBasicTests, test_IObjectTests, test_IEnumTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests, test_IInterfaceChecksumTests, test_IStructTests):
     def __init__(self, jointModule):
         super(Tests, self).__init__()
         self.jointModule = jointModule
@@ -119,6 +119,13 @@ class Tests(test_IBasicTests, test_IObjectTests, test_IEnumTests, test_ILifetime
     def AcceptCS1(self, obj): pass
     def AcceptCS2(self, obj): pass
     def CastToCS2(self, obj): pyjoint.Cast(obj, test_IInterfaceCS2)
+
+    def MakeS1(self, i, s): return test_S1(i, s)
+    def GetS(self, s): return s.s
+    def GetI(self, s): return s.i
+    def CallbackMakeS1(self, cb, i, s): return cb.MakeS1(i, s)
+    def CallbackGetS(self, cb, s): return cb.GetS(s)
+    def CallbackGetI(self, cb, s): return cb.GetI(s)
 
 
 def GetTests(jointModule):

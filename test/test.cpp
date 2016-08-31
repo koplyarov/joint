@@ -13,8 +13,7 @@
 #include <test/tests/CastTests.hpp>
 #include <test/tests/ExceptionTests.hpp>
 #include <test/tests/InterfaceChecksumTests.hpp>
-//#include <test/tests/StructTests.hpp>
-
+#include <test/tests/StructTests.hpp>
 
 
 int main(int argc, const char* argv[])

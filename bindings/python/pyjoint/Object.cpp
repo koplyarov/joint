@@ -2,8 +2,11 @@
 
 #include <joint/devkit/Logger.hpp>
 #include <joint/devkit/ScopeExit.hpp>
+#include <joint/devkit/StackStorage.hpp>
 
 #include <algorithm>
+#include <array>
+#include <cstddef>
 #include <vector>
 
 #include <utils/PythonUtils.hpp>
@@ -12,6 +15,8 @@
 namespace joint_python {
 namespace pyjoint
 {
+
+	using namespace joint::devkit;
 
 	JOINT_DEVKIT_LOGGER("Joint.Python.PyJoint.Object")
 
@@ -115,6 +120,150 @@ namespace pyjoint
 	}
 
 
+	static PyObjectHolder ToPyRetValue(const Joint_Type& type, const Joint_Value& value)
+	{
+		switch (type.id)
+		{
+		case JOINT_TYPE_BOOL: return PyObjectHolder(PyBool_FromLong(value.b)); break;
+		case JOINT_TYPE_I8: return PyObjectHolder(PyLong_FromLong(value.i8)); break;
+		case JOINT_TYPE_U8: return PyObjectHolder(PyLong_FromLong(value.u8)); break;
+		case JOINT_TYPE_I16: return PyObjectHolder(PyLong_FromLong(value.i16)); break;
+		case JOINT_TYPE_U16: return PyObjectHolder(PyLong_FromLong(value.u16)); break;
+		case JOINT_TYPE_I32: return PyObjectHolder(PyLong_FromLong(value.i32)); break;
+		case JOINT_TYPE_U32: return PyObjectHolder(PyLong_FromLong(value.u32)); break;
+		case JOINT_TYPE_I64: return PyObjectHolder(PyLong_FromLong(value.i64)); break;
+		case JOINT_TYPE_U64: return PyObjectHolder(PyLong_FromLong(value.u64)); break;
+		case JOINT_TYPE_F32: return PyObjectHolder(PyFloat_FromDouble(value.f32)); break;
+		case JOINT_TYPE_F64: return PyObjectHolder(PyFloat_FromDouble(value.f64)); break;
+		case JOINT_TYPE_UTF8: return PyObjectHolder(PyUnicode_FromString(value.utf8)); break;
+		case JOINT_TYPE_ENUM: return PyObjectHolder(PyLong_FromLong(value.e)); break;
+		case JOINT_TYPE_STRUCT:
+			{
+				const auto& sd = *type.payload.structDescriptor;
+				PyObjectHolder res(PY_OBJ_CHECK(PyTuple_New(sd.membersCount)));
+				for (int32_t i = 0; i < sd.membersCount; ++i)
+					PYTHON_CHECK(PyTuple_SetItem(res, i, ToPyRetValue(sd.memberTypes[i], value.members[i]).Release()) == 0, "PyTuple_SetItem failed!");
+				return res;
+			}
+			break;
+		case JOINT_TYPE_OBJ:
+			if (value.obj != JOINT_NULL_HANDLE)
+			{
+				PyObjectHolder res(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&Object_type, NULL)));
+				reinterpret_cast<Object*>(res.Get())->handle = value.obj;
+				reinterpret_cast<Object*>(res.Get())->checksum = type.payload.interfaceChecksum;
+				return res;
+			}
+			else
+			{
+				Py_INCREF(Py_None);
+				return PyObjectHolder(Py_None);
+			}
+			break;
+		default:
+			NATIVE_THROW("Unknown return type: " + std::to_string(type.id));
+		}
+	}
+
+
+	class JointFrameData
+	{
+	private:
+		StackStorage<Joint_StructDescriptor, 64>  _structDescriptors;
+		StackStorage<Joint_Type, 256>             _memberTypes;
+		StackStorage<Joint_Value, 64>             _members;
+		StackStorage<PyBytesHolder, 64>           _strParams;
+
+	public:
+		Joint_Type MakeJointType(PyObject* pyRetType)
+		{
+			if (!PyTuple_Check(pyRetType))
+			{
+				std::string py_type = "<unknown type>";
+				PyObjectToStringNoExcept(pyRetType, py_type);
+				JOINT_THROW(StringBuilder() % "Expected tuple type, got " % py_type);
+			}
+
+			Joint_Type res;
+			res.id = FromPyLong<Joint_TypeId>(PY_OBJ_CHECK(PyTuple_GetItem(pyRetType, 0)));
+			switch (res.id)
+			{
+			case JOINT_TYPE_OBJ:
+				res.payload.interfaceChecksum = FromPyLong<Joint_InterfaceChecksum>(PY_OBJ_CHECK(PyTuple_GetItem(pyRetType, 1)));
+				break;
+			case JOINT_TYPE_STRUCT:
+				{
+					PyObject* py_members = PY_OBJ_CHECK(PyTuple_GetItem(pyRetType, 1));
+					auto& sd = *_structDescriptors.Make(1);
+
+					auto tuple_size = PyTuple_Size(py_members);
+					sd.membersCount = tuple_size;
+
+					auto mt = _memberTypes.Make(tuple_size);
+					sd.memberTypes = mt;
+
+					for (int32_t i = 0; i < tuple_size; ++i)
+						mt[i] = MakeJointType(PY_OBJ_CHECK(PyTuple_GetItem(py_members, i)));
+
+					res.payload.structDescriptor = &sd;
+				}
+				break;
+			default:
+				break;
+			}
+			return res;
+		}
+
+		Joint_Value MakeJointValue(const Joint_Type& type, PyObject* pyParam)
+		{
+			Joint_Value res = { };
+			switch (type.id)
+			{
+			case JOINT_TYPE_BOOL: res.b = AsBool(pyParam); break;
+			case JOINT_TYPE_U8: res.u8 = FromPyLong<uint8_t>(pyParam); break;
+			case JOINT_TYPE_I8: res.i8 = FromPyLong<int8_t>(pyParam); break;
+			case JOINT_TYPE_U16: res.u16 = FromPyLong<uint16_t>(pyParam); break;
+			case JOINT_TYPE_I16: res.i16 = FromPyLong<int16_t>(pyParam); break;
+			case JOINT_TYPE_U32: res.u32 = FromPyLong<uint32_t>(pyParam); break;
+			case JOINT_TYPE_I32: res.i32 = FromPyLong<int32_t>(pyParam); break;
+			case JOINT_TYPE_U64: res.u64 = FromPyLong<uint64_t>(pyParam); break;
+			case JOINT_TYPE_I64: res.i64 = FromPyLong<int64_t>(pyParam); break;
+			case JOINT_TYPE_F32: res.f32 = FromPyFloat<float>(pyParam); break;
+			case JOINT_TYPE_F64: res.f64 = FromPyFloat<double>(pyParam); break;
+			case JOINT_TYPE_ENUM: res.e = FromPyLong<int32_t>(pyParam); break;
+			case JOINT_TYPE_UTF8:
+				res.utf8 = _strParams.MakeSingle(Utf8FromPyUnicode(pyParam)).GetContent();
+				break;
+			case JOINT_TYPE_STRUCT:
+				{
+					if (!PyTuple_Check(pyParam))
+					{
+						std::string py_type = "<unknown type>";
+						PyObjectToStringNoExcept(pyParam, py_type);
+						JOINT_THROW(StringBuilder() % "Expected tuple type, got " % py_type);
+					}
+
+					const auto& sd = *type.payload.structDescriptor;
+					res.members = _members.Make(sd.membersCount);
+					for (auto i = 0; i < sd.membersCount; ++i)
+					{
+						PyObject* py_member = PY_OBJ_CHECK(PyTuple_GetItem(pyParam, i));
+						res.members[i] = MakeJointValue(sd.memberTypes[i], py_member);
+					}
+				}
+				break;
+			case JOINT_TYPE_OBJ:
+				res.obj = (pyParam != Py_None) ? CastPyObject<Object>(pyParam, &Object_type)->handle : JOINT_NULL_HANDLE;
+				break;
+			default:
+				JOINT_THROW(std::runtime_error("Unknown type"));
+			}
+
+			return res;
+		}
+	};
+
+
 	static PyObject* Object_InvokeMethod(PyObject* self, PyObject* args, PyObject* kwds)
 	{
 		PYJOINT_CPP_WRAP_BEGIN
@@ -128,109 +277,50 @@ namespace pyjoint
 		auto method_id = FromPyLong<int>(PY_OBJ_CHECK(PyTuple_GetItem(args, 0)));
 		PyObject* py_ret_type = PY_OBJ_CHECK(PyTuple_GetItem(args, 1));
 
-		Joint_Type ret_type;
-		ret_type.id = FromPyLong<Joint_TypeId>(PY_OBJ_CHECK(PyTuple_GetItem(py_ret_type, 0)));
-		if (ret_type.id == JOINT_TYPE_OBJ)
-			ret_type.payload.interfaceChecksum = FromPyLong<Joint_InterfaceChecksum>(PY_OBJ_CHECK(PyTuple_GetItem(py_ret_type, 1)));
+		JointFrameData fd;
 
-		// TODO: use stack allocations for smaller tuples
-		std::vector<Joint_Parameter> params;
-		params.reserve(tuple_size - 2);
+		Joint_Type ret_type = fd.MakeJointType(py_ret_type);
+		StackStorage<Joint_Parameter, 64> params_storage;
 
-		std::vector<PyBytesHolder> str_params;
+		auto params_count = tuple_size - 2;
+		auto params = params_storage.Make(params_count);
 
-		for (int i = 2; i < tuple_size; ++i)
+		for (auto i = 0; i < params_count; ++i)
 		{
-			PyObject* py_param_tuple = PY_OBJ_CHECK(PyTuple_GetItem(args, i));
-
-			Joint_Parameter v = { };
+			PyObject* py_param_tuple = PY_OBJ_CHECK(PyTuple_GetItem(args, i + 2));
 			PyObject* py_param_type = PY_OBJ_CHECK(PyTuple_GetItem(py_param_tuple, 0));
-			v.type.id = FromPyLong<Joint_TypeId>(PyTuple_GetItem(py_param_type, 0));
-			if (v.type.id == JOINT_TYPE_OBJ)
-				v.type.payload.interfaceChecksum = FromPyLong<Joint_InterfaceChecksum>(PyTuple_GetItem(py_param_type, 1));
-
 			PyObject* py_param = PyTuple_GetItem(py_param_tuple, 1);
-			switch (v.type.id)
-			{
-			case JOINT_TYPE_BOOL: v.value.b = PyObject_IsTrue(py_param); break;
-			case JOINT_TYPE_I8: v.value.i8 = FromPyLong<int8_t>(py_param); break;
-			case JOINT_TYPE_U8: v.value.u8 = FromPyLong<uint8_t>(py_param); break;
-			case JOINT_TYPE_I16: v.value.i16 = FromPyLong<int16_t>(py_param); break;
-			case JOINT_TYPE_U16: v.value.u16 = FromPyLong<uint16_t>(py_param); break;
-			case JOINT_TYPE_I32: v.value.i32 = FromPyLong<int32_t>(py_param); break;
-			case JOINT_TYPE_U32: v.value.u32 = FromPyLong<uint32_t>(py_param); break;
-			case JOINT_TYPE_I64: v.value.i64 = FromPyLong<int64_t>(py_param); break;
-			case JOINT_TYPE_U64: v.value.u64 = FromPyLong<uint64_t>(py_param); break;
-			case JOINT_TYPE_F32: v.value.f32 = FromPyFloat<float>(py_param); break;
-			case JOINT_TYPE_F64: v.value.f64 = FromPyFloat<double>(py_param); break;
-			case JOINT_TYPE_UTF8:
-				str_params.push_back(Utf8FromPyUnicode(py_param));
-				v.value.utf8 = str_params.back().GetContent();
-				break;
-			case JOINT_TYPE_ENUM: v.value.e = FromPyLong<int32_t>(py_param); break;
-			case JOINT_TYPE_OBJ:
-				v.value.obj = (py_param != Py_None) ? CastPyObject<Object>(py_param, &Object_type)->handle : JOINT_NULL_HANDLE;
-				break;
-			default:
-				NATIVE_THROW("Unknown parameter type: " + std::to_string(v.type.id));
-			}
 
-			params.push_back(v);
+			Joint_Type t = fd.MakeJointType(py_param_type);
+			Joint_Value v = fd.MakeJointValue(t, py_param);
+			params[i] = Joint_Parameter{v, t};
 		}
 
 		Joint_RetValue ret_value;
-		Joint_Error ret = Joint_InvokeMethod(o->handle, method_id, params.data(), params.size(), ret_type, &ret_value);
+		Joint_Error ret = Joint_InvokeMethod(o->handle, method_id, params, params_count, ret_type, &ret_value);
 		NATIVE_CHECK(ret == JOINT_ERROR_NONE || ret == JOINT_ERROR_EXCEPTION, (std::string("Joint_InvokeMethod failed: ") + Joint_ErrorToString(ret)).c_str());
 
 		PyObjectHolder result;
 
 		if (ret == JOINT_ERROR_NONE)
 		{
-			auto sg(joint::devkit::ScopeExit([&]{
+			auto sg(ScopeExit([&]{
 				Joint_Error ret = ret_value.releaseValue(ret_type, ret_value.result.value);
 				if (ret != JOINT_ERROR_NONE)
 					GetLogger().Error() << "Joint_RetValue::releaseValue failed: " << ret;
 			}));
 
-			switch (ret_type.id)
-			{
-			case JOINT_TYPE_VOID: Py_RETURN_NONE; break;
-			case JOINT_TYPE_BOOL: result.Reset(PyBool_FromLong(ret_value.result.value.b)); break;
-			case JOINT_TYPE_I8: result.Reset(PyLong_FromLong(ret_value.result.value.i8)); break;
-			case JOINT_TYPE_U8: result.Reset(PyLong_FromLong(ret_value.result.value.u8)); break;
-			case JOINT_TYPE_I16: result.Reset(PyLong_FromLong(ret_value.result.value.i16)); break;
-			case JOINT_TYPE_U16: result.Reset(PyLong_FromLong(ret_value.result.value.u16)); break;
-			case JOINT_TYPE_I32: result.Reset(PyLong_FromLong(ret_value.result.value.i32)); break;
-			case JOINT_TYPE_U32: result.Reset(PyLong_FromLong(ret_value.result.value.u32)); break;
-			case JOINT_TYPE_I64: result.Reset(PyLong_FromLong(ret_value.result.value.i64)); break;
-			case JOINT_TYPE_U64: result.Reset(PyLong_FromLong(ret_value.result.value.u64)); break;
-			case JOINT_TYPE_F32: result.Reset(PyFloat_FromDouble(ret_value.result.value.f32)); break;
-			case JOINT_TYPE_F64: result.Reset(PyFloat_FromDouble(ret_value.result.value.f64)); break;
-			case JOINT_TYPE_UTF8: result.Reset(PyUnicode_FromString(ret_value.result.value.utf8)); break;
-			case JOINT_TYPE_ENUM: result.Reset(PyLong_FromLong(ret_value.result.value.e)); break;
-			case JOINT_TYPE_OBJ:
-				if (ret_value.result.value.obj != JOINT_NULL_HANDLE)
-				{
-					result.Reset(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&Object_type, NULL)));
-					reinterpret_cast<Object*>(result.Get())->handle = ret_value.result.value.obj;
-					reinterpret_cast<Object*>(result.Get())->checksum = ret_type.payload.interfaceChecksum;
-				}
-				else
-				{
-					Py_INCREF(Py_None);
-					result.Reset(Py_None);
-				}
-				break;
-			default:
-				NATIVE_THROW("Unknown return type: " + std::to_string(ret_type.id));
-			}
+			if (ret_type.id == JOINT_TYPE_VOID)
+			{ Py_RETURN_NONE; }
+
+			result = ToPyRetValue(ret_type, ret_value.result.value);
 		}
 		else if (ret == JOINT_ERROR_EXCEPTION)
 		{
-			auto sg(joint::devkit::ScopeExit([&]{ Joint_ReleaseException(ret_value.result.ex); }));
+			auto sg(ScopeExit([&]{ Joint_ReleaseException(ret_value.result.ex); }));
 
 			Joint_SizeT buf_size = 0;
-			std::vector<char> buf;
+			StackStorage<char, 256> buf_storage;
 
 			auto ex = ret_value.result.ex;
 
@@ -241,9 +331,8 @@ namespace pyjoint
 				throw std::runtime_error("Could not obtain joint exception message!");
 			}
 
-			buf.resize(buf_size);
-
-			ret = Joint_GetExceptionMessage(ex, buf.data(), buf.size());
+			char* buf = buf_storage.Make(buf_size);
+			ret = Joint_GetExceptionMessage(ex, buf, buf_size);
 			if (ret != JOINT_ERROR_NONE)
 			{
 				Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.Python", "Joint_GetExceptionMessage failed: %s", Joint_ErrorToString(ret));
@@ -251,7 +340,7 @@ namespace pyjoint
 			}
 
 			PyObjectHolder py_ex(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&JointException_type, NULL)));
-			reinterpret_cast<JointException*>(py_ex.Get())->jointMessage = new std::string(buf.data());
+			reinterpret_cast<JointException*>(py_ex.Get())->jointMessage = new std::string(buf);
 
 			Joint_SizeT bt_size = 0;
 			ret = Joint_GetExceptionBacktraceSize(ex, &bt_size);
@@ -262,7 +351,7 @@ namespace pyjoint
 				return NULL;
 			}
 
-			std::vector<joint::devkit::StackFrameData> bt;
+			std::vector<StackFrameData> bt;
 			bt.reserve(bt_size);
 			std::vector<PyObjectHolder> py_frames;
 
@@ -276,10 +365,10 @@ namespace pyjoint
 					continue;
 				}
 
-				bt.emplace_back(joint::devkit::StackFrameData(sf.module, sf.filename, sf.line, sf.code, sf.function));
+				bt.emplace_back(StackFrameData(sf.module, sf.filename, sf.line, sf.code, sf.function));
 			}
 
-			reinterpret_cast<JointException*>(py_ex.Get())->backtrace = new std::vector<joint::devkit::StackFrameData>(bt);
+			reinterpret_cast<JointException*>(py_ex.Get())->backtrace = new std::vector<StackFrameData>(bt);
 			PyErr_SetObject((PyObject*)&JointException_type, py_ex);
 
 			return NULL;
