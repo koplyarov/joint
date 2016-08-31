@@ -75,11 +75,11 @@ namespace devkit
 
 		template < typename... Args_ >
 		T_& MakeSingle(Args_&&... args)
-		{ return *AllocateAndConstruct(1, [&](T_* p) { new(p) T_(std::forward<Args_>(args)...); }); }
+		{ return *AllocateAndConstruct(1, [&](T_* p, Args_&&... a) { new(p) T_(std::forward<Args_>(a)...); }, std::forward<Args_>(args)...); }
 
 	private:
-		template < typename ConstructFunc_ >
-		T_* AllocateAndConstruct(size_t count, ConstructFunc_&& constructFunc)
+		template < typename ConstructFunc_, typename... Args_ >
+		T_* AllocateAndConstruct(size_t count, ConstructFunc_&& constructFunc, Args_&&... args)
 		{
 			T_* result;
 			if (_buf.size() >= _freeOfs + count)
@@ -89,7 +89,7 @@ namespace devkit
 
 				auto sg(ScopeExit([&]{ _freeOfs -= count; }));
 				result = reinterpret_cast<T_*>(ptr);
-				constructFunc(result);
+				constructFunc(result, std::forward<Args_>(args)...);
 				sg.Cancel();
 			}
 			else
@@ -100,7 +100,7 @@ namespace devkit
 
 				auto sg(ScopeExit([&]{ _fallbackBlocks.pop_back(); delete[] ptr; }));
 				result = reinterpret_cast<T_*>(ptr);
-				constructFunc(result);
+				constructFunc(result, std::forward<Args_>(args)...);
 				sg.Cancel();
 			}
 
