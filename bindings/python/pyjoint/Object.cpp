@@ -108,9 +108,7 @@ namespace pyjoint
 		auto m = reinterpret_cast<Object*>(self);
 		if (m && m->handle)
 		{
-			Joint_Error ret = Joint_DecRefObject(m->handle);
-			if (ret != JOINT_ERROR_NONE)
-				GetLogger().Error() << "Joint_DecRefObject failed: " << ret;
+			Joint_DecRefObject(m->handle);
 			m->handle = JOINT_NULL_HANDLE;
 		}
 

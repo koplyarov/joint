@@ -203,8 +203,8 @@ extern "C" {
 
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetRootObject(Joint_ModuleHandle module, const char* getterName, Joint_ObjectHandle* outObject);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
-	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_IncRefObject(Joint_ObjectHandle handle);
-	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_DecRefObject(Joint_ObjectHandle handle);
+	JOINT_API void Joint_IncRefObject(Joint_ObjectHandle handle);
+	JOINT_API void Joint_DecRefObject(Joint_ObjectHandle handle);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, Joint_ObjectHandle* outHandle);
 
 	typedef struct

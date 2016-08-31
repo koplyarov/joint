@@ -42,16 +42,14 @@ Joint_Error LifetimeListenable_Deinit(LifetimeListenable* self)
 	{
 		Joint_ExceptionHandle ex;
 		test_ILifetimeListener_OnDestroyed(self->listener, &ex);
-		return Joint_DecRefObject((Joint_ObjectHandle)self->listener);
+		Joint_DecRefObject((Joint_ObjectHandle)self->listener);
 	}
 	return JOINT_ERROR_NONE;
 }
 
 Joint_Error LifetimeListenable_SetListener(LifetimeListenable* self, test_ILifetimeListener l, Joint_ExceptionHandle* ex)
 {
-	Joint_Error ret = Joint_IncRefObject((Joint_ObjectHandle)l);
-	if (ret != JOINT_ERROR_NONE)
-		return ret;
+	Joint_IncRefObject((Joint_ObjectHandle)l);
 	self->listener = l;
 	return JOINT_ERROR_NONE;
 }
@@ -251,9 +249,7 @@ Joint_Error Tests_ReturnNewObject(Tests* self, test_ISomeObject* result, Joint_E
 
 Joint_Error Tests_ReturnSameObject(Tests* self, test_ISomeObject o, test_ISomeObject* result, Joint_ExceptionHandle* ex)
 {
-	Joint_Error ret = Joint_IncRefObject((Joint_ObjectHandle)o);
-	if (ret != JOINT_ERROR_NONE)
-		return ret;
+	Joint_IncRefObject((Joint_ObjectHandle)o);
 	*result = o;
 	return JOINT_ERROR_NONE;
 }

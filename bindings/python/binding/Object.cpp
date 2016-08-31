@@ -44,7 +44,7 @@ namespace binding
 			if (value.obj != JOINT_NULL_HANDLE)
 			{
 				PyObjectHolder res(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&pyjoint::Object_type, NULL)));
-				PYTHON_CHECK(Joint_IncRefObject(value.obj) == JOINT_ERROR_NONE, "Joint_IncRefObject failed!");
+				Joint_IncRefObject(value.obj);
 				reinterpret_cast<pyjoint::Object*>(res.Get())->handle = value.obj;
 				reinterpret_cast<pyjoint::Object*>(res.Get())->checksum = type.payload.interfaceChecksum;
 				return res;

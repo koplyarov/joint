@@ -78,8 +78,7 @@ namespace binding
 		PyObjectHolder py_proxy = PY_OBJ_CHECK_MSG(m->InvokeFunction(getterName, pyjoint_module), joint::devkit::StringBuilder() % "Root object getter '" % getterName % "' failed");
 		PyObjectHolder py_joint_obj(PY_OBJ_CHECK(PyObject_GetAttrString(py_proxy, "obj")));
 		*outObject = CastPyObject<pyjoint::Object>(py_joint_obj, &pyjoint::Object_type)->handle;
-		ret = Joint_IncRefObject(*outObject);
-		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+		Joint_IncRefObject(*outObject);
 		JOINT_CPP_WRAP_END
 	}
 
@@ -144,8 +143,7 @@ namespace binding
 
 					PyObjectHolder py_joint_obj(PY_OBJ_CHECK(PyObject_GetAttrString(pyObj, "obj")));
 					outValue.obj = CastPyObject<pyjoint::Object>(py_joint_obj, &pyjoint::Object_type)->handle;
-					Joint_Error ret = Joint_IncRefObject(outValue.obj);
-					JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+					Joint_IncRefObject(outValue.obj);
 				}
 				else
 					outValue.obj = JOINT_NULL_HANDLE;

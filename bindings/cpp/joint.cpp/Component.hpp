@@ -302,7 +302,7 @@ namespace joint
 	Joint_ObjectHandle Export(const Ptr<Interface_>& p)
 	{
 		Joint_ObjectHandle handle = p.Get()->_GetObjectHandle();
-		JOINT_CALL(Joint_IncRefObject(handle));
+		Joint_IncRefObject(handle);
 		return handle;
 	}
 

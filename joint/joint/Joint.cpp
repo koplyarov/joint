@@ -342,40 +342,37 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_IncRefObject(Joint_ObjectHandle handle)
+	void Joint_IncRefObject(Joint_ObjectHandle handle)
 	{
-		JOINT_CPP_WRAP_BEGIN
-
 		if (handle == JOINT_NULL_HANDLE)
-			return JOINT_ERROR_NONE;
+			return;
 
-		JOINT_CHECK(handle->refCount.load(std::memory_order_relaxed) > 0, JOINT_ERROR_INVALID_PARAMETER);
-		++handle->refCount;
-
-		JOINT_CPP_WRAP_END
+		if (++handle->refCount <= 1)
+			JOINT_TERMINATE("Joint.Core", "Inconsistent reference counter!");
 	}
 
 
-	Joint_Error Joint_DecRefObject(Joint_ObjectHandle handle)
+	void Joint_DecRefObject(Joint_ObjectHandle handle)
 	{
-		JOINT_CPP_WRAP_BEGIN
-
 		if (handle == JOINT_NULL_HANDLE)
-			return JOINT_ERROR_NONE;
+			return;
 
-		JOINT_CHECK(handle->refCount.load(std::memory_order_relaxed) > 0, JOINT_ERROR_INVALID_PARAMETER);
 		auto refs = --handle->refCount;
+		if (refs < 0)
+			JOINT_TERMINATE("Joint.Core", "Inconsistent reference counter!");
+
 		if (refs == 0)
 		{
+			JOINT_CPP_WRAP_BEGIN
+
 			GetLogger().Debug() << "ReleaseObject(obj: " << handle << " (internal: " << (handle ? handle->internal : NULL) << "))";
 			Joint_Error ret = handle->module->binding->desc.releaseObject(handle->module->binding->userData, handle->module->internal, handle->internal);
 			if (ret != JOINT_ERROR_NONE)
 				GetLogger().Error() << "releaseObject failed: " << ret;
 			delete handle;
-		}
-		JOINT_CHECK(refs >= 0, JOINT_ERROR_INVALID_PARAMETER);
 
-		JOINT_CPP_WRAP_END
+			JOINT_CPP_WRAP_END_VOID
+		}
 	}
 
 

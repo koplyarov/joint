@@ -342,9 +342,7 @@ class CppGenerator:
                 return CodeWithInitialization(cppValue)
         elif isinstance(type, Interface):
             initialization = [
-                'Joint_Error ret = Joint_IncRefObject({}->_GetObjectHandle());'.format(cppValue),
-                'if (ret != JOINT_ERROR_NONE)',
-                '\treturn ret;'
+                'Joint_IncRefObject({}->_GetObjectHandle());'.format(cppValue),
             ]
             return CodeWithInitialization('{}->_GetObjectHandle()'.format(cppValue), initialization)
         elif isinstance(type, Enum):
@@ -392,7 +390,7 @@ class CppGenerator:
             return CodeWithInitialization(', '.join(member_values), initialization)
         elif isinstance(type, Interface):
             initialization = [
-                'JOINT_CALL(Joint_IncRefObject({}.{}));'.format(jointValue, type.variantName)
+                'Joint_IncRefObject({}.{});'.format(jointValue, type.variantName)
             ]
             return CodeWithInitialization('{}({}.{})'.format(self._toCppType(type), jointValue, type.variantName), initialization)
         else:

@@ -23,6 +23,8 @@ namespace joint
 #define JOINT_CHECK(Expr_, ...) do { if (!(Expr_)) { GetLogger().Error() << "JOINT_CHECK failed: " #Expr_ " in function " << __func__ << " at " << JOINT_SOURCE_LOCATION; JOINT_THROW(__VA_ARGS__); } } while (false)
 #define JOINT_CHECK_NOTHROW(Expr_, ...) do { if (!(Expr_)) { GetLogger().Error() << "JOINT_CHECK failed: " #Expr_ " in function " << __func__ << " at " << JOINT_SOURCE_LOCATION << ", returning " << (__VA_ARGS__); return (__VA_ARGS__); } } while (false)
 
+#define JOINT_TERMINATE(LoggerName_, Msg_) do { Joint_Log(JOINT_LOGLEVEL_ERROR, LoggerName_, "JOINT_TERMINATE: %s", #Msg_); std::terminate(); } while (false)
+
 	class JointException : public std::exception
 	{
 	private:

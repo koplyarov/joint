@@ -27,11 +27,7 @@ namespace detail
 		{ }
 
 		virtual ~ProxyBase()
-		{
-			Joint_Error ret = Joint_DecRefObject(_obj);
-			if (ret != JOINT_ERROR_NONE)
-				Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C++", "Joint_DecRefObject failed: %s", Joint_ErrorToString(ret));
-		}
+		{ Joint_DecRefObject(_obj); }
 
 		Joint_ObjectHandle _GetObjectHandle() const
 		{ return _obj; }
