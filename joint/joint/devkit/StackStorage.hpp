@@ -66,7 +66,7 @@ namespace devkit
 		{
 			return AllocateAndConstruct(count, [&](T_* p) {
 				size_t i = 0;
-				auto sg(ScopeExit([&]() { while (i--) p[i].~T_(); }));
+				auto sg(ScopeExit([&]{ while (i--) p[i].~T_(); }));
 				for (; i < count; ++i)
 					new(p + i) T_;
 				sg.Cancel();
