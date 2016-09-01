@@ -119,7 +119,7 @@ namespace joint
 			static void SetArrayElement(Joint_ArrayHandle handle, Joint_SizeT index, const Array<T_>& value)
 			{
 				Joint_Value jv;
-				jv.array = value._handle;
+				jv.array = value._GetArrayHandle();
 				JOINT_CALL(Joint_ArraySet(handle, index, jv));
 			}
 		};
@@ -152,9 +152,6 @@ namespace joint
 	template < typename T_ >
 	class Array
 	{
-		template < typename, typename >
-		friend class detail::ArrayHelper;
-
 		using Helper = detail::ArrayHelper<T_>;
 
 	private:
@@ -172,6 +169,9 @@ namespace joint
 			JOINT_CALL(Joint_MakeArray(types_storage[0], size, &_handle));
 		}
 
+		explicit operator bool() const
+		{ return _handle; }
+
 		Array(const Array& other)
 			: _handle(other._handle)
 		{ Joint_IncRefArray(_handle); }
@@ -185,6 +185,16 @@ namespace joint
 			Array tmp(other);
 			Swap(tmp);
 			return *this;
+		}
+
+		Joint_ArrayHandle _GetArrayHandle() const
+		{ return _handle; }
+
+		size_t GetSize() const
+		{
+			Joint_SizeT result;
+			JOINT_CALL( Joint_ArrayGetSize(_handle, &result) );
+			return result;
 		}
 
 		void Swap(Array& other)
@@ -201,6 +211,16 @@ namespace joint
 		void Set(size_t index, const T_& value)
 		{ Helper::SetArrayElement(_handle, index, value); }
 	};
+
+
+	template < typename T_ >
+	std::ostream& operator << (std::ostream& s, const Array<T_>& a)
+	{
+		if (a)
+			return s << "Array { size: " << a.GetSize() << " }";
+		else
+			return s << "null";
+	}
 
 }
 
