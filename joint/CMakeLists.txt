@@ -6,9 +6,11 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 if (MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
+	set(PLATFORM_LIBS "")
 else()
 	add_definitions(-Wall)
 	add_definitions(-std=c++11)
+	set(PLATFORM_LIBS dl)
 endif()
 
 ################################################################################
@@ -28,7 +30,7 @@ set(JOINT_SRC
 )
 
 add_library(joint-loader SHARED ${JOINT_SRC})
-target_link_libraries(joint-loader joint joint-python joint-cpp ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(joint-loader joint joint-python joint-cpp ${CMAKE_THREAD_LIBS_INIT} ${PLATFORM_LIBS})
 
 ################################################################################
 
