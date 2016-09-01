@@ -84,6 +84,44 @@ class CppGenerator:
             yield '\t{}'
             yield '\t#endif'
         yield ''
+        yield '\tstd::string ToString() const;'
+        yield ''
+
+        yield '\tstatic {} _FromJointMembers(Joint_Value* members)'.format(s.name)
+        yield '\t{'
+        for m in s.members:
+            if isinstance(m.type, Interface):
+                yield '\t\tJoint_IncRefObject(members[2].obj);'
+            #elif isinstance(m.type, Array)
+                #yield '\t\tJoint_IncRefArray(members[2].array);'
+        yield '\t\treturn {}({});'.format(s.name, ', '.join('members[{}].{}'.format(i, m.type.variantName) for i,m in enumerate(s.members)))
+        yield '\t}'
+        yield ''
+        yield '\tstatic const size_t _MembersCount = {};'.format(len(s.members))
+        yield '\tstatic const size_t _RecursiveMembersCount = _MembersCount{};'.format(''.join(' + {}::_RecursiveMembersCount'.format(m.type.name) for m in s.members if isinstance(m.type, Struct)))
+        yield ''
+        yield '\tvoid _FillMembers(Joint_Value* members) const'
+        yield '\t{'
+        substruct_offset = ' + _MembersCount'
+        for i,m in enumerate(s.members):
+            member_code = self._toJointParam(m.type, m.name)
+            if isinstance(m.type, BuiltinType):
+                val = '{}.c_str()'.format(m.name) if m.type.fullname == 'string' else m.name
+            elif isinstance(m.type, Enum):
+                val = '{}._RawValue()'.format(m.name)
+            elif isinstance(m.type, Interface):
+                val = '{}._GetObjectHandle()'.format(m.name)
+            elif isinstance(m.type, Struct):
+                val = 'members{}'.format(substruct_offset)
+                substruct_offset += ' + {}::_RecursiveMembersCount'.format(self._mangleType(m.type))
+            else:
+                raise RuntimeError('Not implemented (type: {})!'.format(m.type))
+            yield '\t\tmembers[{}].{} = {};'.format(i, m.type.variantName, val);
+        for i,m in enumerate(s.members):
+            if isinstance(m.type, Struct):
+                yield '\t\t{}._FillMembers(members[{}].members);'.format(m.name, i)
+        yield '\t}'
+        yield ''
         yield '\tstatic Joint_StructDescriptor* _GetStructDescriptor()'
         yield '\t{'
         yield '\t\tstatic Joint_Type member_types[] = {'
@@ -102,6 +140,12 @@ class CppGenerator:
         yield '\t\treturn &desc;'
         yield '\t}'
         yield '};'
+        yield ''
+        yield 'std::ostream& operator << (std::ostream& s, const {}& st)'.format(self._mangleType(s))
+        yield '{{ return s << "{{{} }}"; }}'.format(','.join(' {q}" << st.{m} << "{q}'.format(m=m.name, q=('\'' if m.type.fullname == 'string' else '')) for m in s.members))
+        yield ''
+        yield 'std::string {}::ToString() const'.format(s.name)
+        yield '{ std::stringstream s; s << *this; return s.str(); }'
         yield ''
 
     def _generateEnumMethods(self, e):
