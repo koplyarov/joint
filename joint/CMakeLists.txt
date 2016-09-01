@@ -15,6 +15,7 @@ endif()
 
 set(JOINT_CORE_SRC
 	joint/Joint.cpp
+	joint/core/Joint_Array.cpp
 )
 
 add_library(joint SHARED ${JOINT_CORE_SRC})

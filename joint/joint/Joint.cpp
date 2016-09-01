@@ -493,6 +493,72 @@ extern "C"
 	}
 
 
+	Joint_Error Joint_MakeArray(Joint_Type elementType, Joint_SizeT size, Joint_ArrayHandle* outHandle)
+	{
+		JOINT_CPP_WRAP_BEGIN
+		*outHandle = new Joint_Array(elementType, size);
+		JOINT_CPP_WRAP_END
+	}
+
+
+	void Joint_IncRefArray(Joint_ArrayHandle handle)
+	{
+		if (handle == JOINT_NULL_HANDLE)
+			return;
+
+		if (++handle->refCount <= 1)
+			JOINT_TERMINATE("Joint.Core", "Inconsistent reference counter!");
+	}
+
+
+	void Joint_DecRefArray(Joint_ArrayHandle handle)
+	{
+		if (handle == JOINT_NULL_HANDLE)
+			return;
+
+		auto refs = --handle->refCount;
+		if (refs < 0)
+			JOINT_TERMINATE("Joint.Core", "Inconsistent reference counter!");
+
+		if (refs == 0)
+		{
+			JOINT_CPP_WRAP_BEGIN
+			delete handle;
+			JOINT_CPP_WRAP_END_VOID
+		}
+	}
+
+
+	Joint_Error Joint_ArrayGetSize(Joint_ArrayHandle handle, Joint_SizeT* outSize)
+	{
+		JOINT_CPP_WRAP_BEGIN
+		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outSize, JOINT_ERROR_INVALID_PARAMETER);
+		*outSize = handle->elements.size();
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_ArraySet(Joint_ArrayHandle handle, Joint_SizeT index, Joint_Value value)
+	{
+		JOINT_CPP_WRAP_BEGIN
+		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(index < handle->elements.size(), JOINT_ERROR_INVALID_PARAMETER);
+		handle->Set(index, value);
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_ArrayGet(Joint_ArrayHandle handle, Joint_SizeT index, Joint_Value* outValue)
+	{
+		JOINT_CPP_WRAP_BEGIN
+		JOINT_CHECK(handle != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(index < handle->elements.size(), JOINT_ERROR_INVALID_PARAMETER);
+		*outValue = handle->Get(index);
+		JOINT_CPP_WRAP_END
+	}
+
+
 #ifdef JOINT_PLATFORM_POSIX
 	const char* JointAux_GetModuleName(Joint_FunctionPtr symbol)
 	{

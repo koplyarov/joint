@@ -3,6 +3,7 @@
 
 
 #include <joint/Joint.h>
+#include <joint/core/Joint_Array.hpp>
 
 #include <atomic>
 #include <string>
@@ -21,7 +22,7 @@ extern "C"
 	{
 		void*                       userData;
 		Joint_BindingDesc           desc;
-		std::atomic<int>			refCount;
+		std::atomic<int>            refCount;
 
 		Joint_Binding(void* userData, const Joint_BindingDesc& desc)
 			: userData(userData), desc(desc), refCount(1)
@@ -32,8 +33,8 @@ extern "C"
 	struct Joint_Module
 	{
 		Joint_ModuleHandleInternal  internal;
-		Joint_Binding*        	    binding;
-		std::atomic<int>			refCount;
+		Joint_Binding*              binding;
+		std::atomic<int>            refCount;
 
 		Joint_Module(Joint_ModuleHandleInternal internal, Joint_Binding* binding)
 			: internal(internal), binding(binding), refCount(1)
@@ -45,7 +46,7 @@ extern "C"
 	{
 		Joint_ObjectHandleInternal  internal;
 		Joint_Module*               module;
-		std::atomic<int>			refCount;
+		std::atomic<int>            refCount;
 
 		Joint_Object(Joint_ObjectHandleInternal internal, Joint_Module* module)
 			: internal(internal), module(module), refCount(1)

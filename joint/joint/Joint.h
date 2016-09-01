@@ -39,6 +39,9 @@ extern "C" {
 	struct Joint_Exception;
 	typedef struct Joint_Exception* Joint_ExceptionHandle;
 
+	struct Joint_Array;
+	typedef struct Joint_Array* Joint_ArrayHandle;
+
 
 	typedef uint32_t Joint_SizeT;
 
@@ -100,6 +103,7 @@ extern "C" {
 		JOINT_TYPE_ENUM       = 14,
 		JOINT_TYPE_STRUCT     = 15,
 		JOINT_TYPE_OBJ        = 16,
+		JOINT_TYPE_ARRAY      = 17
 	} Joint_TypeId;
 
 
@@ -141,6 +145,7 @@ extern "C" {
 		int32_t                 e;
 		union _Joint_Value_t*   members;
 		Joint_ObjectHandle      obj;
+		Joint_ArrayHandle       array;
 	} Joint_Value;
 
 
@@ -222,6 +227,13 @@ extern "C" {
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetExceptionMessage(Joint_ExceptionHandle handle, char* buf, Joint_SizeT bufSize);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetExceptionBacktraceSize(Joint_ExceptionHandle handle, Joint_SizeT* outSize);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetExceptionBacktraceEntry(Joint_ExceptionHandle handle, Joint_SizeT index, Joint_StackFrame* outStackFrame);
+
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_MakeArray(Joint_Type elementType, Joint_SizeT size, Joint_ArrayHandle* outHandle);
+	JOINT_API void Joint_IncRefArray(Joint_ArrayHandle handle);
+	JOINT_API void Joint_DecRefArray(Joint_ArrayHandle handle);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_ArrayGetSize(Joint_ArrayHandle handle, Joint_SizeT* outSize);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_ArraySet(Joint_ArrayHandle handle, Joint_SizeT index, Joint_Value value);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_ArrayGet(Joint_ArrayHandle handle, Joint_SizeT index, Joint_Value* outValue);
 
 	typedef void (*Joint_FunctionPtr)();
 	JOINT_API const char* JointAux_GetModuleName(Joint_FunctionPtr symbol);
