@@ -1,4 +1,4 @@
-from ..SemanticGraph import BuiltinType, BuiltinTypeCategory, Interface, Enum, Struct
+from ..SemanticGraph import BuiltinType, BuiltinTypeCategory, Interface, Enum, Struct, Array
 from ..GeneratorHelpers import CodeWithInitialization
 
 
@@ -333,6 +333,8 @@ class CppGenerator:
             return '{}_Ptr'.format(self._mangleType(type));
         elif isinstance(type, Enum) or isinstance(type, Struct):
             return '{}'.format(self._mangleType(type));
+        elif isinstance(type, Array):
+            return '::joint::Array<{}>'.format(self._toCppType(type.elementType))
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 
@@ -370,6 +372,8 @@ class CppGenerator:
             for i,m in enumerate(member_values):
                 initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, type.members[i].type.variantName, m))
             return CodeWithInitialization('{}_members'.format(mangled_value), initialization)
+        elif isinstance(type, Array):
+            return CodeWithInitialization('{}._GetArrayHandle()'.format(cppValue))
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 
@@ -385,9 +389,7 @@ class CppGenerator:
             else:
                 return CodeWithInitialization(cppValue)
         elif isinstance(type, Interface):
-            initialization = [
-                'Joint_IncRefObject({}->_GetObjectHandle());'.format(cppValue),
-            ]
+            initialization = [ 'Joint_IncRefObject({}->_GetObjectHandle());'.format(cppValue), ]
             return CodeWithInitialization('{}->_GetObjectHandle()'.format(cppValue), initialization)
         elif isinstance(type, Enum):
             return CodeWithInitialization('{}._RawValue()'.format(cppValue))
@@ -403,11 +405,14 @@ class CppGenerator:
             for i,m in enumerate(member_values):
                 initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, type.members[i].type.variantName, m))
             return CodeWithInitialization('{}_members'.format(mangled_value), initialization)
+        elif isinstance(type, Array):
+            initialization = [ 'Joint_IncRefArray({}._GetArrayHandle());'.format(cppValue), ]
+            return CodeWithInitialization('{}._GetArrayHandle()'.format(cppValue), initialization)
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 
     def _validateJointParam(self, type, jointType):
-        if isinstance(type, BuiltinType) or isinstance(type, Enum):
+        if isinstance(type, BuiltinType) or isinstance(type, Enum) or isinstance(type, Array):
             return
         elif isinstance(type, Interface):
             yield 'if ({}.payload.interfaceChecksum != {}::_GetInterfaceChecksum())'.format(jointType, self._mangleType(type))
@@ -433,9 +438,10 @@ class CppGenerator:
                 member_values.append('{}({})'.format(self._toCppType(m.type), member_code.code))
             return CodeWithInitialization(', '.join(member_values), initialization)
         elif isinstance(type, Interface):
-            initialization = [
-                'Joint_IncRefObject({}.{});'.format(jointValue, type.variantName)
-            ]
+            initialization = [ 'Joint_IncRefObject({}.{});'.format(jointValue, type.variantName) ]
+            return CodeWithInitialization('{}({}.{})'.format(self._toCppType(type), jointValue, type.variantName), initialization)
+        elif isinstance(type, Array):
+            initialization = [ 'Joint_IncRefArray({}.{});'.format(jointValue, type.variantName) ]
             return CodeWithInitialization('{}({}.{})'.format(self._toCppType(type), jointValue, type.variantName), initialization)
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
@@ -450,7 +456,7 @@ class CppGenerator:
             return CodeWithInitialization('{}({}.{})'.format(self._toCppType(type), jointValue, type.variantName))
         elif isinstance(type, Enum):
             return CodeWithInitialization('{}::_Value({}.{})'.format(self._toCppType(type), jointValue, type.variantName))
-        else:
+        elif isinstance(type, Struct):
             initialization = []
             member_values = []
             for i,m in enumerate(type.members):
@@ -458,4 +464,8 @@ class CppGenerator:
                 initialization += member_code.initialization
                 member_values.append(member_code.code)
             return CodeWithInitialization('{}({})'.format(self._toCppType(type), ', '.join(member_values)), initialization)
+        elif isinstance(type, Array):
+            return CodeWithInitialization('{}({}.{})'.format(self._toCppType(type), jointValue, type.variantName))
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
 

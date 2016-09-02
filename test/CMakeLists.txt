@@ -45,6 +45,7 @@ joint_generate_adapters(c++ Tests_adapters.hpp
 	idl/IEnumTests.idl
 	idl/IStructTests.idl
 	IInterfaceChecksumTests.idl
+	idl/IArrayTests.idl
 )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

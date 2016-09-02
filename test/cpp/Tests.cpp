@@ -77,7 +77,8 @@ public:
 			ICastTests,
 			IExceptionTests,
 			IInterfaceChecksumTests,
-			IStructTests
+			IStructTests,
+			IArrayTests
 		> JointInterfaces;
 
 private:
@@ -210,6 +211,9 @@ public:
 	S1 CallbackMakeS1(IStructTestsCallback_Ptr cb, int32_t i, const std::string& s) { return cb->MakeS1(i, s); }
 	std::string CallbackGetS(IStructTestsCallback_Ptr cb, S1 s) { return cb->GetS(s); }
 	int32_t CallbackGetI(IStructTestsCallback_Ptr cb, S1 s) { return cb->GetI(s); }
+
+	Array<int32_t> MakeI32Array(int32_t len) { return Array<int32_t>(len); }
+	int32_t GetI32Element(const Array<int32_t>& array, int32_t index) { return array.Get(index); }
 };
 
 extern "C"

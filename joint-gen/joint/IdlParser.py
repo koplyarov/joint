@@ -13,14 +13,13 @@ class IdlParser:
         import_entry = Group(Suppress(Keyword('import')) - self.locator + SkipTo(LineEnd())('path'))
         imports = ZeroOrMore(import_entry)('imports')
 
-        type = Group(self.locator + (Word(alphas, alphanums) + ZeroOrMore(Suppress('.') - Word(alphas, alphanums)))('name'))
+        array = Group(Suppress('[') + Suppress(']'))
+        type = Group(self.locator + (Word(alphas, alphanums) + ZeroOrMore(Suppress('.') - Word(alphas, alphanums)))('name') - ZeroOrMore(array)('array'))
         identifier = Word(alphas, alphanums)
-
-        generic = Suppress('<') + (type + ZeroOrMore(Suppress(',') + type))('params') + Suppress('>')
 
         param = Group(self.locator + type('type') + identifier('name'))
         paramsList = Group(Optional(param + ZeroOrMore(Suppress(',') + param)))
-        method = Group(self.locator + type('retType') + identifier('name') + Optional(generic)('generic') + Suppress('(') + paramsList('params') + Suppress(');'))
+        method = Group(self.locator + type('retType') + identifier('name') + Suppress('(') + paramsList('params') + Suppress(');'))
         methodList = Group(ZeroOrMore(method))
 
         package = Group(identifier + ZeroOrMore(Suppress('.') + identifier))

@@ -187,6 +187,9 @@ namespace joint
 			return *this;
 		}
 
+		T_ operator[] (size_t index) const
+		{ return Get(index); }
+
 		Joint_ArrayHandle _GetArrayHandle() const
 		{ return _handle; }
 

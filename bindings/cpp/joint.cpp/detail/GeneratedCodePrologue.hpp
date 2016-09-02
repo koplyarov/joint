@@ -12,6 +12,7 @@
 
 #include <stdint.h>
 
+#include <joint.cpp/Array.hpp>
 #include <joint.cpp/Ptr.hpp>
 #include <joint.cpp/TypeList.hpp>
 #include <joint.cpp/detail/JointCall.hpp>

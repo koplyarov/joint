@@ -47,6 +47,11 @@ class Struct(TypeBase):
         self.members = []
 
 
+class Array(TypeBase):
+    def __init__(self, elementType):
+        super(Array, self).__init__('{}[]'.format(elementType.name), elementType.packageNameList, elementType.location, variantName='array', index=17, needRelease=True)
+        self.elementType = elementType
+
 class Parameter:
     def __init__(self, index, name, type, location):
         self.index = index
@@ -95,6 +100,8 @@ class Interface(TypeBase):
             return '{}{{{}}}'.format(t.fullname, ','.join('{}:{}'.format(v.name, v.value) for v in t.values))
         elif isinstance(t, Struct):
             return '{}{{{}}}'.format(t.fullname, ','.join('{} {}'.format(self._typeStr(m.type), m.name) for m in t.members))
+        elif isinstance(t, Array):
+            return '{}[]'.format(self._typeStr(t.elementType))
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(t))
 
@@ -175,6 +182,13 @@ class SemanticGraph:
         return self.findPackage(packageNameList).findType(interfaceName)
 
     def makeType(self, currentPackage, typeEntry):
+        result = self._makeDecayedType(currentPackage, typeEntry)
+        if 'array' in typeEntry:
+            for a in typeEntry['array']:
+                result = Array(result)
+        return result
+
+    def _makeDecayedType(self, currentPackage, typeEntry):
         typeList = typeEntry['name']
         try:
             return self.builtInTypes['.'.join(typeList)]
