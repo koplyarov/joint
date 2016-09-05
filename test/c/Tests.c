@@ -386,7 +386,14 @@ Joint_Error Tests_CallbackGetI(Tests* self, test_IStructTestsCallback cb, test_S
 { return test_IStructTestsCallback_GetI(cb, s, result, ex); }
 
 
-JOINT_C_COMPONENT(Tests, test_IBasicTests, test_IEnumTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests, test_IInterfaceChecksumTests, test_IStructTests);
+Joint_Error Tests_MakeI32Array(Tests* self, int32_t len, i32__Array* result, Joint_ExceptionHandle* ex)
+{ return i32__Array_Create(len, result, ex); }
+
+Joint_Error Tests_GetI32Element(Tests* self, i32__Array array, int32_t index, int32_t* result, Joint_ExceptionHandle* ex)
+{ return i32__Array_Get(array, index, result, ex); }
+
+
+JOINT_C_COMPONENT(Tests, test_IBasicTests, test_IEnumTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests, test_IInterfaceChecksumTests, test_IStructTests, test_IArrayTests);
 
 ////////////////////////////////////////////////////////////////////////////////
 

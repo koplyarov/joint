@@ -20,6 +20,7 @@ joint_generate_adapters(c Tests_adapters.h
 	../idl/IExceptionTests.idl
 	../idl/IInterfaceChecksumTests.idl
 	../idl/IStructTests.idl
+	../idl/IArrayTests.idl
 )
 
 add_library(tests-c SHARED Tests.c Tests_adapters.h)

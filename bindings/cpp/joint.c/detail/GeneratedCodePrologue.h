@@ -1,8 +1,10 @@
 #ifndef JOINT_C_DETAIL_GENERATEDCODEPROLOGUE_H
 #define JOINT_C_DETAIL_GENERATEDCODEPROLOGUE_H
 
-#include <joint/Joint.h>
+#include <joint.c/Array.h>
 #include <joint.c/Component.h>
+#include <joint.c/detail/Exception.h>
+#include <joint/Joint.h>
 #include <string.h>
 
 Joint_Error JointC_ReleaseRetValue(Joint_Type type, Joint_Value value)
@@ -21,17 +23,6 @@ Joint_Error JointC_ReleaseRetValue(Joint_Type type, Joint_Value value)
 	default:
 		return JOINT_ERROR_NONE;
 	}
-}
-
-#define JOINT_C_THROW(Msg_, Ex_) JointC_ThrowException(Msg_, __FILE__, __LINE__, __func__, Ex_)
-
-Joint_Error JointC_ThrowException(const char* msg, const char* file, int line, const char* function, Joint_ExceptionHandle* ex)
-{
-	Joint_StackFrame bt[] = { { JointAux_GetModuleName((void*)&JointC_ReleaseRetValue), file, line, "", function } };
-	Joint_Error ret = Joint_MakeException(msg, bt, 1, ex);
-	if (ret != JOINT_ERROR_NONE)
-		Joint_Log(JOINT_LOGLEVEL_WARNING, "Joint.C", "Joint_MakeException failed: %s", Joint_ErrorToString(ret));
-	return JOINT_ERROR_EXCEPTION;
 }
 
 #define DETAIL_JOINT_C_SET_RET_VALUE(MethodName_, RetCode_, ...) \

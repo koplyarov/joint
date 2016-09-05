@@ -1,4 +1,4 @@
-from ..SemanticGraph import BuiltinType, BuiltinTypeCategory, Interface, Enum, Struct
+from ..SemanticGraph import BuiltinType, BuiltinTypeCategory, Interface, Enum, Struct, Array
 from ..GeneratorHelpers import CodeWithInitialization
 
 class CGenerator:
@@ -270,17 +270,16 @@ class CGenerator:
             if type.category == BuiltinTypeCategory.string:
                 return 'const char*'
             raise RuntimeError('Unknown type: {}'.format(type))
-        elif isinstance(type, Interface):
-            return '{}'.format(self._mangleType(type));
-        elif isinstance(type, Enum):
-            return '{}'.format(self._mangleType(type));
-        elif isinstance(type, Struct):
-            return '{}'.format(self._mangleType(type));
+        elif isinstance(type, (Interface, Enum, Struct, Array)):
+            return '{}'.format(self._mangleType(type))
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 
-    def _mangleType(self, ifc):
-        return '{}'.format('_'.join(ifc.packageNameList + [ ifc.name ]))
+    def _mangleType(self, type):
+        if isinstance(type, Array):
+            return '{}__Array'.format(self._mangleType(type.elementType))
+        else:
+            return '{}'.format('_'.join(type.packageNameList + [ type.name ]))
 
     def _toJointParam(self, type, cValue):
         if isinstance(type, BuiltinType):
@@ -296,11 +295,13 @@ class CGenerator:
             for m in type.members:
                 member_val = self._toJointParam(m.type, '{}.{}'.format(cValue, m.name))
                 initialization += member_val.initialization
-                member_values.append(member_val.code);
+                member_values.append(member_val.code)
             initialization.append('Joint_Value {}_members[{}];'.format(mangled_value, len(type.members)))
             for i,m in enumerate(member_values):
                 initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, type.members[i].type.variantName, m))
             return CodeWithInitialization('{}_members'.format(mangled_value), initialization)
+        elif isinstance(type, Array):
+            return CodeWithInitialization('{}.handle'.format(cValue))
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 
@@ -318,16 +319,18 @@ class CGenerator:
             for m in type.members:
                 member_val = self._toJointRetValue(m.type, '{}.{}'.format(cValue, m.name))
                 initialization += member_val.initialization
-                member_values.append(member_val.code);
+                member_values.append(member_val.code)
             initialization.append('Joint_Value* {}_members = (Joint_Value*)malloc(sizeof(Joint_Value) * {});'.format(mangled_value, len(type.members)))
             for i,m in enumerate(member_values):
                 initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, type.members[i].type.variantName, m))
             return CodeWithInitialization('{}_members'.format(mangled_value), initialization)
+        elif isinstance(type, Array):
+            return CodeWithInitialization('{}.handle'.format(cValue))
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 
     def _validateJointParam(self, type, jointType):
-        if isinstance(type, BuiltinType) or isinstance(type, Enum):
+        if isinstance(type, (BuiltinType, Enum, Array)):
             return
         elif isinstance(type, Interface):
             yield 'if ({}.payload.interfaceChecksum != {}__checksum)'.format(jointType, self._mangleType(type))
@@ -352,6 +355,8 @@ class CGenerator:
                 initialization += member_code.initialization
                 member_values.append(member_code.code)
             return CodeWithInitialization('{{ {} }}'.format(', '.join(member_values)), initialization)
+        elif isinstance(type, Array):
+            return CodeWithInitialization('{{ {}.{} }}'.format(jointValue, type.variantName))
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 
@@ -379,6 +384,10 @@ class CGenerator:
                 initialization += member_code.initialization
                 member_values.append(member_code.code)
             initialization.append('{} {}_tmp = {{ {} }};'.format(self._toCType(type), mangled_value, ', '.join(member_values)))
+            return CodeWithInitialization('{}_tmp'.format(mangled_value), initialization)
+        elif isinstance(type, Array):
+            mangled_value = jointValue.replace('.', '_').replace('[', '_').replace(']', '_')
+            initialization = [ '{} {}_tmp = {{ {}.{} }};'.format(self._toCType(type), mangled_value, jointValue, type.variantName) ]
             return CodeWithInitialization('{}_tmp'.format(mangled_value), initialization)
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
