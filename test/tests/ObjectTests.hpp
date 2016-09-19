@@ -5,10 +5,10 @@
 class SomeObject
 {
 private:
-	int					_counter{0};
+	int _counter{0};
 
 public:
-	typedef joint::TypeList<test::ISomeObject>	JointInterfaces;
+	using JointInterfaces = joint::TypeList<test::ISomeObject>;
 
 	void Method() { ++_counter; }
 	int32_t GetInvokationsCount() { return _counter; }
@@ -17,7 +17,7 @@ public:
 class ObjectTestsCallback
 {
 private:
-	test::ISomeObject_Ptr	_obj;
+	test::ISomeObject_Ptr _obj;
 
 public:
 	typedef joint::TypeList<

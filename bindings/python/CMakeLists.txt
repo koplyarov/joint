@@ -19,11 +19,14 @@ add_library(joint-python-core SHARED
 	binding/Binding.cpp
 	binding/Module.cpp
 	binding/Object.cpp
+	pyjoint/Array.cpp
 	pyjoint/Common.cpp
 	pyjoint/Globals.cpp
+	pyjoint/InterfaceDescriptor.cpp
 	pyjoint/JointException.cpp
 	pyjoint/Module.cpp
 	pyjoint/Object.cpp
+	pyjoint/ProxyBase.cpp
 	utils/PythonUtils.cpp
 )
 target_link_libraries(joint-python-core joint ${PYTHON_LIBRARIES})

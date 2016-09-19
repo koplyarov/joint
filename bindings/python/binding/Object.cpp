@@ -1,5 +1,13 @@
 #include <binding/Object.hpp>
 
+#include <joint/devkit/ValueMarshaller.hpp>
+#include <joint/utils/CppWrappers.hpp>
+
+#include <algorithm>
+
+#include <common/Marshaller.hpp>
+#include <pyjoint/Globals.hpp>
+#include <pyjoint/InterfaceDescriptor.hpp>
 #include <pyjoint/Object.hpp>
 
 
@@ -7,62 +15,23 @@ namespace joint_python {
 namespace binding
 {
 
+	using namespace joint::devkit;
+
+
 	Object::Object(PyObjectHolder obj)
 		: _obj(std::move(obj))
 	{
 		_methods.Reset(PY_OBJ_CHECK(PyObject_GetAttrString(_obj, "methods")));
+		_interfaceDesc.Reset(PY_OBJ_CHECK(PyObject_GetAttrString(_obj, "descriptor")));
 	}
 
 
-	static PyObjectHolder ToPyValue(const Joint_Type& type, const Joint_Value& value)
-	{
-		switch (type.id)
-		{
-		case JOINT_TYPE_BOOL: return PyObjectHolder(PyBool_FromLong(value.b));
-		case JOINT_TYPE_U8: return PyObjectHolder(PyLong_FromLong(value.u8));
-		case JOINT_TYPE_I8: return PyObjectHolder(PyLong_FromLong(value.i8));
-		case JOINT_TYPE_U16: return PyObjectHolder(PyLong_FromLong(value.u16));
-		case JOINT_TYPE_I16: return PyObjectHolder(PyLong_FromLong(value.i16));
-		case JOINT_TYPE_U32: return PyObjectHolder(PyLong_FromLong(value.u32));
-		case JOINT_TYPE_I32: return PyObjectHolder(PyLong_FromLong(value.i32));
-		case JOINT_TYPE_U64: return PyObjectHolder(PyLong_FromLongLong(value.u64));
-		case JOINT_TYPE_I64: return PyObjectHolder(PyLong_FromLongLong(value.i64));
-		case JOINT_TYPE_F32: return PyObjectHolder(PyFloat_FromDouble(value.f32));
-		case JOINT_TYPE_F64: return PyObjectHolder(PyFloat_FromDouble(value.f64));
-		case JOINT_TYPE_UTF8: return PyObjectHolder(PyUnicode_FromString(value.utf8));
-		case JOINT_TYPE_ENUM: return PyObjectHolder(PyLong_FromLong(value.e));
-		case JOINT_TYPE_STRUCT:
-			{
-				const auto& sd = *type.payload.structDescriptor;
-				PyObjectHolder res(PY_OBJ_CHECK(PyTuple_New(sd.membersCount)));
-				for (int32_t i = 0; i < sd.membersCount; ++i)
-					PYTHON_CHECK(PyTuple_SetItem(res, i, ToPyValue(sd.memberTypes[i], value.members[i]).Release()) == 0, "PyTuple_SetItem failed!");
-				return res;
-			}
-			break;
-		case JOINT_TYPE_OBJ:
-			if (value.obj != JOINT_NULL_HANDLE)
-			{
-				PyObjectHolder res(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&pyjoint::Object_type, NULL)));
-				Joint_IncRefObject(value.obj);
-				reinterpret_cast<pyjoint::Object*>(res.Get())->handle = value.obj;
-				reinterpret_cast<pyjoint::Object*>(res.Get())->checksum = type.payload.interfaceChecksum;
-				return res;
-			}
-			else
-			{
-				Py_INCREF(Py_None);
-				return PyObjectHolder(Py_None);
-			}
-			break;
-		default:
-			throw std::runtime_error("Unknown parameter type");
-		}
-	}
-
-	PyObjectHolder Object::InvokeMethod(size_t index, joint::ArrayView<const Joint_Parameter> params)
+	Joint_Error Object::InvokeMethod(size_t index, joint::ArrayView<const Joint_Parameter> params, Joint_Type retType, Joint_RetValue* outRetValue)
 	{
 		PyObject* py_function = PY_OBJ_CHECK_MSG((PyTuple_GetItem(_methods, index)), "Could not find method with id " + std::to_string(index));
+		auto ifc_desc = CastPyObject<pyjoint::InterfaceDescriptor>(_interfaceDesc, &pyjoint::InterfaceDescriptor_type);
+		NATIVE_CHECK(ifc_desc, "Invalid InterfaceDescriptor object");
+		const auto& m_desc = ifc_desc->GetDescriptor().GetMethod(index);
 
 		PyObjectHolder py_args;
 		if (!params.empty())
@@ -71,14 +40,94 @@ namespace binding
 
 			for (size_t i = 0; i < params.size(); ++i)
 			{
-				auto p = params[i];
-
-				if (PyTuple_SetItem(py_args, i, ToPyValue(p.type, p.value).Release())) // TODO: Use PyTuple_SET_ITEM?
+				auto py_p = ValueMarshaller::FromJoint<PyObjectHolder>(ValueDirection::Parameter, m_desc.GetParamType(i), params[i].value, PythonMarshaller());
+				if (PyTuple_SetItem(py_args, i, py_p.Release()))
 					PYTHON_THROW("Could not set tuple item");
 			}
 		}
 
-		return PyObjectHolder(PyObject_CallObject(py_function, py_args));
+		PyObjectHolder py_res(PyObject_CallObject(py_function, py_args));
+
+		if (!py_res)
+		{
+			PyObjectHolder type, value, traceback;
+			PyErr_Fetch(&type, &value, &traceback);
+			pyjoint::JointException* ex = nullptr;
+
+			std::string msg = "<No message>";
+
+			do
+			{
+				if (PyErr_GivenExceptionMatches(type, (PyObject*)&pyjoint::JointException_type))
+				{
+					PyErr_NormalizeException(&type, &value, &traceback);
+					if (PyObject_Type(value) == (PyObject*)&pyjoint::JointException_type)
+					{
+						ex = reinterpret_cast<pyjoint::JointException*>(value.Get());
+						if (ex->jointMessage)
+							msg = *ex->jointMessage;
+						break;
+					}
+					else
+						GetLogger().Warning() << "Exception that matches JointException_type has value of a different type!";
+				}
+				else if (PyErr_GivenExceptionMatches(type, pyjoint::InvalidInterfaceChecksumException))
+					GetLogger().Error() << "Invalid interface checksum!";
+				std::string type_str;
+				GetPythonErrorMessage(value, msg);
+				if (PyObjectToStringNoExcept(type, type_str))
+					msg = type_str + " " + msg;
+			} while (false);
+
+
+			std::vector<joint::devkit::StackFrameData> bt;
+			GetPythonErrorBacktrace(traceback, bt);
+
+			std::vector<Joint_StackFrame> c_bt;
+			c_bt.reserve(bt.size() + (ex && ex->backtrace ? ex->backtrace->size() : 0));
+
+			auto tr_f = [](const joint::devkit::StackFrameData& sf) {
+					return Joint_StackFrame{sf.GetModule().c_str(), sf.GetFilename().c_str(), sf.GetLine(), sf.GetCode().c_str(), sf.GetFunction().c_str()};
+				};
+
+			if (ex && ex->backtrace)
+				std::transform(ex->backtrace->begin(), ex->backtrace->end(), std::back_inserter(c_bt), tr_f);
+			std::transform(bt.rbegin(), bt.rend(), std::back_inserter(c_bt), tr_f);
+
+			Joint_ExceptionHandle joint_ex;
+			Joint_Error ret = Joint_MakeException(msg.c_str(), c_bt.data(), c_bt.size(), &joint_ex);
+			JOINT_CHECK(ret == JOINT_ERROR_NONE, std::string("Joint_MakeException failed: ") + Joint_ErrorToString(ret));
+			outRetValue->releaseValue = &Object::ReleaseRetValue;
+			outRetValue->result.ex = joint_ex;
+
+			return JOINT_ERROR_EXCEPTION;
+		}
+
+		RetValueAllocator alloc;
+		if (retType.id != JOINT_TYPE_VOID)
+			outRetValue->result.value = ValueMarshaller::ToJoint(ValueDirection::Return, m_desc.GetRetType(), py_res, PythonMarshaller(), alloc);
+		outRetValue->releaseValue = &Object::ReleaseRetValue;
+		return JOINT_ERROR_NONE;
+	}
+
+
+	Joint_Error Object::ReleaseRetValue(Joint_Type type, Joint_Value value)
+	{
+		JOINT_CPP_WRAP_BEGIN
+		switch(type.id)
+		{
+		case JOINT_TYPE_UTF8:
+			delete[] value.utf8;
+			break;
+		case JOINT_TYPE_STRUCT:
+			for (int32_t i = 0; i < type.payload.structDescriptor->membersCount; ++i)
+				ReleaseRetValue(type.payload.structDescriptor->memberTypes[i], value.members[i]);
+			delete[] value.members;
+			break;
+		default:
+			break;
+		}
+		JOINT_CPP_WRAP_END
 	}
 
 }}

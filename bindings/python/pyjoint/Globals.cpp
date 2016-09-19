@@ -1,7 +1,9 @@
+#include <pyjoint/Globals.hpp>
+
 #include <joint/devkit/Logger.hpp>
 
-#include <pyjoint/Globals.hpp>
 #include <pyjoint/Object.hpp>
+#include <pyjoint/ProxyBase.hpp>
 #include <utils/PyObjectHolder.hpp>
 #include <utils/PythonUtils.hpp>
 
@@ -28,8 +30,9 @@ namespace pyjoint
 			return Py_None;
 		}
 
-		PyObjectHolder py_obj(PY_OBJ_CHECK(PyObject_GetAttrString(arg, "obj")));
-		auto obj = CastPyObject<Object>(py_obj, &Object_type);
+		auto proxy = CastPyObject<ProxyBase>(arg, &pyjoint::ProxyBase_type);
+		NATIVE_CHECK(proxy->obj, "Invalid root object");
+		auto obj = CastPyObject<Object>(proxy->obj, &Object_type);
 
 		PyObject* py_interface = PyTuple_GetItem(args, 1);
 #if PY_VERSION_HEX >= 0x03000000

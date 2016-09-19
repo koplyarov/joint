@@ -12,7 +12,7 @@ namespace pyjoint
 	struct Module
 	{
 		PyObject_HEAD
-		Joint_ModuleHandle		handle;
+		Joint_ModuleHandle     handle;
 	};
 
 

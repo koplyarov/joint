@@ -13,12 +13,12 @@ namespace joint_python
 	class PyObjectHolder
 	{
 	private:
-		PyObject*	_obj;
+		PyObject*   _obj;
 
 	public:
 		PyObjectHolder() : _obj(nullptr) { }
 		explicit PyObjectHolder(PyObject* obj) : _obj(obj) { }
-		PyObjectHolder(const PyObjectHolder& other) : _obj(other._obj) { if (_obj) Py_INCREF(_obj); }
+		PyObjectHolder(const PyObjectHolder& other) : _obj(other._obj) { Py_XINCREF(_obj); }
 		PyObjectHolder(PyObjectHolder&& other) : _obj(other._obj) { other._obj = nullptr; }
 
 		~PyObjectHolder() { Reset(); }
@@ -45,11 +45,12 @@ namespace joint_python
 			if (_obj == obj)
 				return;
 
-			if (_obj)
-				Py_DECREF(_obj);
-
+			Py_XDECREF(_obj);
 			_obj = obj;
 		}
+
+		void ResetWithBorrowed(PyObject* obj)
+		{ *this = FromBorrowed(obj); }
 
 		PyObject* Release()
 		{
@@ -62,6 +63,12 @@ namespace joint_python
 		PyObject* Get() const { return _obj; }
 
 		PyObject** operator&() { return &_obj; }
+
+		static PyObjectHolder FromBorrowed(PyObject* obj)
+		{
+			Py_XINCREF(obj);
+			return PyObjectHolder(obj);
+		}
 	};
 
 }

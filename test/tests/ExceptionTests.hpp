@@ -24,11 +24,6 @@ TEST_DEFINE_TEST(TestCtx, ExceptionTests)
 		return;
 	}
 
-	//try
-	//{ t->ThrowNative(); }
-	//catch (const std::exception& ex)
-	//{ Joint_Log(JOINT_LOGLEVEL_WARNING, "Test", "%s", ex.what()); }
-
 	TEST_THROWS(joint::detail::JointCppException, t->ThrowNative());
 
 	auto throw_f = [] { throw std::runtime_error("Test exception"); };

@@ -16,6 +16,7 @@
 #include <pyjoint/Common.hpp>
 #include <pyjoint/Globals.hpp>
 #include <pyjoint/Object.hpp>
+#include <pyjoint/ProxyBase.hpp>
 #include <utils/PythonUtils.hpp>
 
 
@@ -76,149 +77,19 @@ namespace binding
 
 		auto m = reinterpret_cast<Module*>(moduleInt);
 		PyObjectHolder py_proxy = PY_OBJ_CHECK_MSG(m->InvokeFunction(getterName, pyjoint_module), joint::devkit::StringBuilder() % "Root object getter '" % getterName % "' failed");
-		PyObjectHolder py_joint_obj(PY_OBJ_CHECK(PyObject_GetAttrString(py_proxy, "obj")));
-		*outObject = CastPyObject<pyjoint::Object>(py_joint_obj, &pyjoint::Object_type)->handle;
+		auto proxy = CastPyObject<pyjoint::ProxyBase>(py_proxy, &pyjoint::ProxyBase_type);
+		NATIVE_CHECK(proxy->obj, "Invalid root object");
+		*outObject = CastPyObject<pyjoint::Object>(proxy->obj, &pyjoint::Object_type)->handle;
 		Joint_IncRefObject(*outObject);
 		JOINT_CPP_WRAP_END
 	}
 
 
-	void Binding::FromPyValue(const Joint_Type& type, PyObject* pyObj, Joint_Value& outValue)
-	{
-		switch (type.id)
-		{
-		case JOINT_TYPE_BOOL: outValue.b = AsBool(pyObj); break;
-		case JOINT_TYPE_U8: outValue.u8 = FromPyLong<uint8_t>(pyObj); break;
-		case JOINT_TYPE_I8: outValue.i8 = FromPyLong<int8_t>(pyObj); break;
-		case JOINT_TYPE_U16: outValue.u16 = FromPyLong<uint16_t>(pyObj); break;
-		case JOINT_TYPE_I16: outValue.i16 = FromPyLong<int16_t>(pyObj); break;
-		case JOINT_TYPE_U32: outValue.u32 = FromPyLong<uint32_t>(pyObj); break;
-		case JOINT_TYPE_I32: outValue.i32 = FromPyLong<int32_t>(pyObj); break;
-		case JOINT_TYPE_U64: outValue.u64 = FromPyLong<uint64_t>(pyObj); break;
-		case JOINT_TYPE_I64: outValue.i64 = FromPyLong<int64_t>(pyObj); break;
-		case JOINT_TYPE_F32: outValue.f32 = FromPyFloat<float>(pyObj); break;
-		case JOINT_TYPE_F64: outValue.f64 = FromPyFloat<double>(pyObj); break;
-		case JOINT_TYPE_ENUM: outValue.e = FromPyLong<int32_t>(pyObj); break;
-		case JOINT_TYPE_UTF8:
-			{
-				auto str_data = Utf8FromPyUnicode(pyObj);
-				std::unique_ptr<char[]> result_str(new char[strlen(str_data.GetContent()) + 1]);
-#ifdef _MSC_VER
-#	pragma warning(push)
-#	pragma warning(disable: 4996)
-#endif
-				strcpy(result_str.get(), str_data.GetContent());
-#ifdef _MSC_VER
-#	pragma warning(pop)
-#endif
-				outValue.utf8 = result_str.release();
-			}
-			break;
-		case JOINT_TYPE_STRUCT:
-			{
-				if (!PyTuple_Check(pyObj))
-				{
-					std::string py_type = "<unknown type>";
-					PyObjectToStringNoExcept(pyObj, py_type);
-					JOINT_THROW(joint::devkit::StringBuilder() % "Expected tuple type, got " % py_type);
-				}
-
-				const auto& sd = *type.payload.structDescriptor;
-				outValue.members = new Joint_Value[sd.membersCount];
-				for (int32_t i = 0; i < sd.membersCount; ++i)
-				{
-					PyObject* py_member = PY_OBJ_CHECK(PyTuple_GetItem(pyObj, i));
-					FromPyValue(sd.memberTypes[i], py_member, outValue.members[i]);
-				}
-			}
-			break;
-		case JOINT_TYPE_OBJ:
-			{
-				if (pyObj != Py_None)
-				{
-					PyObjectHolder py_proxy_type(PY_OBJ_CHECK(PyObject_Type(pyObj)));
-					PyObjectHolder py_checksum(PY_OBJ_CHECK(PyObject_GetAttrString(py_proxy_type, "interfaceChecksum")));
-					if (FromPyLong<Joint_InterfaceChecksum>(py_checksum) != type.payload.interfaceChecksum)
-						JOINT_THROW(JOINT_ERROR_INVALID_INTERFACE_CHECKSUM);
-
-					PyObjectHolder py_joint_obj(PY_OBJ_CHECK(PyObject_GetAttrString(pyObj, "obj")));
-					outValue.obj = CastPyObject<pyjoint::Object>(py_joint_obj, &pyjoint::Object_type)->handle;
-					Joint_IncRefObject(outValue.obj);
-				}
-				else
-					outValue.obj = JOINT_NULL_HANDLE;
-			}
-			break;
-		default:
-			JOINT_THROW(std::runtime_error("Unknown type"));
-		}
-	}
-
 	Joint_Error Binding::InvokeMethod(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
 	{
 		JOINT_CPP_WRAP_BEGIN
 		auto o = reinterpret_cast<Object*>(obj);
-		PyObjectHolder py_res(o->InvokeMethod(methodId, joint::ArrayView<const Joint_Parameter>(params, paramsCount)));
-		if (!py_res)
-		{
-			PyObjectHolder type, value, traceback;
-			PyErr_Fetch(&type, &value, &traceback);
-			//auto sg(joint::devkit::ScopeExit([&]{ PyErr_Restore(type, value, traceback); PyErr_Clear(); }));
-			pyjoint::JointException* ex = nullptr;
-
-			std::string msg = "<No message>";
-
-			do
-			{
-				if (PyErr_GivenExceptionMatches(type, (PyObject*)&pyjoint::JointException_type))
-				{
-					PyErr_NormalizeException(&type, &value, &traceback);
-					if (PyObject_Type(value) == (PyObject*)&pyjoint::JointException_type)
-					{
-						ex = reinterpret_cast<pyjoint::JointException*>(value.Get());
-						if (ex->jointMessage)
-							msg = *ex->jointMessage;
-						break;
-					}
-					else
-						GetLogger().Warning() << "Exception that matches JointException_type has value of a different type!";
-				}
-				else if (PyErr_GivenExceptionMatches(type, pyjoint::InvalidInterfaceChecksumException))
-					GetLogger().Error() << "Invalid interface checksum!";
-				std::string type_str;
-				GetPythonErrorMessage(value, msg);
-				if (PyObjectToStringNoExcept(type, type_str))
-					msg = type_str + " " + msg;
-			} while (false);
-
-
-			std::vector<joint::devkit::StackFrameData> bt;
-			GetPythonErrorBacktrace(traceback, bt);
-
-			std::vector<Joint_StackFrame> c_bt;
-			c_bt.reserve(bt.size() + (ex && ex->backtrace ? ex->backtrace->size() : 0));
-
-			auto tr_f = [](const joint::devkit::StackFrameData& sf) {
-					return Joint_StackFrame{sf.GetModule().c_str(), sf.GetFilename().c_str(), sf.GetLine(), sf.GetCode().c_str(), sf.GetFunction().c_str()};
-				};
-
-			if (ex && ex->backtrace)
-				std::transform(ex->backtrace->begin(), ex->backtrace->end(), std::back_inserter(c_bt), tr_f);
-			std::transform(bt.rbegin(), bt.rend(), std::back_inserter(c_bt), tr_f);
-
-			Joint_ExceptionHandle joint_ex;
-			Joint_Error ret = Joint_MakeException(msg.c_str(), c_bt.data(), c_bt.size(), &joint_ex);
-			JOINT_CHECK(ret == JOINT_ERROR_NONE, std::string("Joint_MakeException failed: ") + Joint_ErrorToString(ret));
-			outRetValue->releaseValue = &Binding::ReleaseRetValue;
-			outRetValue->result.ex = joint_ex;
-
-			return JOINT_ERROR_EXCEPTION;
-		}
-
-		if (retType.id != JOINT_TYPE_VOID)
-			FromPyValue(retType, py_res, outRetValue->result.value);
-		outRetValue->releaseValue = &Binding::ReleaseRetValue;
-
+		return o->InvokeMethod(methodId, joint::ArrayView<const Joint_Parameter>(params, paramsCount), retType, outRetValue);
 		JOINT_CPP_WRAP_END
 	}
 
@@ -288,26 +159,6 @@ namespace binding
 		PyObjectHolder new_accessor(PY_OBJ_CHECK(PyObject_CallObject(base_accessor_type, py_params)));
 		*outRetValue = new Object(new_accessor);
 
-		JOINT_CPP_WRAP_END
-	}
-
-
-	Joint_Error Binding::ReleaseRetValue(Joint_Type type, Joint_Value value)
-	{
-		JOINT_CPP_WRAP_BEGIN
-		switch(type.id)
-		{
-		case JOINT_TYPE_UTF8:
-			delete[] value.utf8;
-			break;
-		case JOINT_TYPE_STRUCT:
-			for (int32_t i = 0; i < type.payload.structDescriptor->membersCount; ++i)
-				ReleaseRetValue(type.payload.structDescriptor->memberTypes[i], value.members[i]);
-			delete[] value.members;
-			break;
-		default:
-			break;
-		}
 		JOINT_CPP_WRAP_END
 	}
 

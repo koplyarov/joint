@@ -3,6 +3,7 @@
 
 
 #include <joint/devkit/Holder.hpp>
+#include <joint/devkit/ScopeExit.hpp>
 
 #include <array>
 

@@ -170,7 +170,8 @@ namespace joint_python
 	T_* CastPyObject(PyObject* pyObj, PyTypeObject* pyType)
 	{
 		PYTHON_CHECK(pyObj && pyType, "Invalid arguments to CastPyObject");
-		PYTHON_CHECK(PyObject_TypeCheck(pyObj, pyType), std::string("Could not cast object to ") + pyType->tp_name);
+		std::string s;
+		PYTHON_CHECK(PyObject_TypeCheck(pyObj, pyType), std::string("Could not cast ") + (PyObjectToStringNoExcept(pyObj, s) ? s : s) + " object to " + pyType->tp_name);
 		return reinterpret_cast<T_*>(pyObj);
 	}
 

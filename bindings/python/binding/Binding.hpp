@@ -18,7 +18,7 @@ namespace binding
 		JOINT_DEVKIT_LOGGER("Joint.Python.Binding")
 
 	private:
-		PythonContext	_pyCtx;
+		PythonContext    _pyCtx;
 
 	public:
 		Binding();
@@ -31,7 +31,6 @@ namespace binding
 		static Joint_Error InvokeMethod(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
 		static Joint_Error ReleaseObject(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj);
 		static Joint_Error CastObject(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, Joint_ObjectHandleInternal* outRetValue);
-		static Joint_Error ReleaseRetValue(Joint_Type type, Joint_Value value);
 
 	private:
 		static PyObjectHolder FindBaseById(PyObject* type, const char* interfaceId);
