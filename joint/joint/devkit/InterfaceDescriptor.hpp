@@ -2,6 +2,7 @@
 #define JOINT_DEVKIT_INTERFACEDESCRIPTOR_HPP
 
 
+#include <joint/devkit/ArrayHolder.hpp>
 #include <joint/utils/JointException.hpp>
 
 #include <memory>
@@ -18,7 +19,7 @@ namespace devkit
 
 		using UserData = typename BindingInfo_::UserData;
 		using MemberId = typename BindingInfo_::MemberId;
-		using MembersArray = std::unique_ptr<MemberInfo[]>;
+		using MembersArray = ArrayHolder<MemberInfo>;
 
 	private:
 		MembersArray           _members;
@@ -53,7 +54,7 @@ namespace devkit
 					_membersCount = members.GetCount();
 					sd->membersCount = _membersCount;
 					sd->memberTypes = new Joint_Type[_membersCount];
-					_members.reset(new MemberInfo[_membersCount]);
+					_members.Reset(new MemberInfo[_membersCount]);
 
 					for (size_t i = 0; i < _membersCount; ++i)
 					{
@@ -77,7 +78,7 @@ namespace devkit
 				delete sd;
 			}
 
-			_members.reset();
+			_members.Reset();
 		}
 
 		TypeDescriptor(const TypeDescriptor&) = delete;
@@ -122,7 +123,7 @@ namespace devkit
 	class MethodDescriptor
 	{
 		using TypeDescriptor = joint::devkit::TypeDescriptor<BindingInfo_>;
-		using TypeDescriptorArray = std::unique_ptr<TypeDescriptor[]>;
+		using TypeDescriptorArray = ArrayHolder<TypeDescriptor>;
 
 	private:
 		TypeDescriptor        _retType;
@@ -138,7 +139,7 @@ namespace devkit
 			auto params_obtainer = dataObtainer.GetParamsNodes(node);
 			_paramsCount = params_obtainer.GetCount();
 
-			_paramTypes.reset(new TypeDescriptor[_paramsCount]);
+			_paramTypes.Reset(new TypeDescriptor[_paramsCount]);
 			for (size_t i = 0; i < _paramsCount; ++i)
 				_paramTypes[i].Init(params_obtainer.Get(i), dataObtainer);
 		}
@@ -159,7 +160,7 @@ namespace devkit
 	class InterfaceDescriptor
 	{
 		using MethodDescriptor = joint::devkit::MethodDescriptor<BindingInfo_>;
-		using MethodArray = std::unique_ptr<MethodDescriptor[]>;
+		using MethodArray = ArrayHolder<MethodDescriptor>;
 
 	private:
 		MethodArray   _methods;
@@ -172,7 +173,7 @@ namespace devkit
 			auto methods_obtainer = dataObtainer.GetMethodsNodes(node);
 			_methodsCount = methods_obtainer.GetCount();
 
-			_methods.reset(new MethodDescriptor[_methodsCount]);
+			_methods.Reset(new MethodDescriptor[_methodsCount]);
 			for (size_t i = 0; i < _methodsCount; ++i)
 				_methods[i].Init(methods_obtainer.Get(i), dataObtainer);
 		}
