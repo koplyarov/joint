@@ -6,14 +6,14 @@
 #include <string.h>
 
 
-inline const char* JointC_CopyString(const char* str)
+static inline const char* JointC_CopyString(const char* str)
 {
 	char* tmp = malloc(strlen(str) + 1);
 	strcpy(tmp, str);
 	return tmp;
 }
 
-inline void JointC_ReleaseString(const char* str)
+static inline void JointC_ReleaseString(const char* str)
 { free((void*)str); }
 
 
