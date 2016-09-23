@@ -2,7 +2,8 @@
 #define PYJOINT_PROXYBASE_HPP
 
 
-#include <pyjoint/Object.hpp>
+#include <pyjoint/Common.hpp>
+#include <pyjoint/JointException.hpp>
 
 
 namespace joint_python {
@@ -12,7 +13,8 @@ namespace pyjoint
 	struct ProxyBase
 	{
 		PyObject_HEAD
-		PyObject* obj;
+		Joint_ObjectHandle obj;
+		Joint_InterfaceChecksum checksum;
 		PyObject* ifcDesc;
 	};
 

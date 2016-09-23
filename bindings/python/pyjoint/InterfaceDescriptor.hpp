@@ -6,7 +6,7 @@
 #include <joint/utils/JointException.hpp>
 
 #include <common/PythonBindingInfo.hpp>
-#include <pyjoint/Object.hpp>
+#include <pyjoint/Common.hpp>
 #include <utils/PyObjectHolder.hpp>
 #include <utils/PythonUtils.hpp>
 

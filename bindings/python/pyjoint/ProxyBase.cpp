@@ -71,16 +71,12 @@ namespace pyjoint
 	{
 		PYJOINT_CPP_WRAP_BEGIN
 
-		PyObject* py_obj;
 		PyObject* py_ifc_desc;
-		PYTHON_CHECK(PyArg_ParseTuple(args, "OO", &py_obj, &py_ifc_desc), "Could not parse arguments");
+		PYTHON_CHECK(PyArg_ParseTuple(args, "O", &py_ifc_desc), "Could not parse arguments");
 
-		CastPyObject<Object>(py_obj, &Object_type);
 		CastPyObject<InterfaceDescriptor>(py_ifc_desc, &InterfaceDescriptor_type);
 
-		Py_XINCREF(py_obj);
 		Py_XINCREF(py_ifc_desc);
-		self->obj = py_obj;
 		self->ifcDesc = py_ifc_desc;
 
 		PYJOINT_CPP_WRAP_END(0, -1, Py_DECREF(self);)
@@ -91,7 +87,7 @@ namespace pyjoint
 	{
 		PYJOINT_CPP_WRAP_BEGIN
 
-		Py_XDECREF(self->obj);
+		Joint_DecRefObject(self->obj);
 		Py_XDECREF(self->ifcDesc);
 		Py_TYPE(self)->tp_free((PyObject*)self);
 
@@ -128,11 +124,9 @@ namespace pyjoint
 			params[i] = Joint_Parameter{v, t.GetJointType()};
 		}
 
-		auto o = reinterpret_cast<Object*>(self->obj);
-
 		Joint_Type ret_type = method_desc.GetRetType().GetJointType();
 		Joint_RetValue ret_value;
-		Joint_Error ret = Joint_InvokeMethod(o->handle, method_id, params, params_count, ret_type, &ret_value);
+		Joint_Error ret = Joint_InvokeMethod(self->obj, method_id, params, params_count, ret_type, &ret_value);
 		NATIVE_CHECK(ret == JOINT_ERROR_NONE || ret == JOINT_ERROR_EXCEPTION, (std::string("Joint_InvokeMethod failed: ") + Joint_ErrorToString(ret)).c_str());
 
 		PyObjectHolder result;

@@ -15,7 +15,6 @@
 #include <binding/Object.hpp>
 #include <pyjoint/Common.hpp>
 #include <pyjoint/Globals.hpp>
-#include <pyjoint/Object.hpp>
 #include <pyjoint/ProxyBase.hpp>
 #include <utils/PythonUtils.hpp>
 
@@ -78,8 +77,7 @@ namespace binding
 		auto m = reinterpret_cast<Module*>(moduleInt);
 		PyObjectHolder py_proxy = PY_OBJ_CHECK_MSG(m->InvokeFunction(getterName, pyjoint_module), joint::devkit::StringBuilder() % "Root object getter '" % getterName % "' failed");
 		auto proxy = CastPyObject<pyjoint::ProxyBase>(py_proxy, &pyjoint::ProxyBase_type);
-		NATIVE_CHECK(proxy->obj, "Invalid root object");
-		*outObject = CastPyObject<pyjoint::Object>(proxy->obj, &pyjoint::Object_type)->handle;
+		*outObject = proxy->obj;
 		Joint_IncRefObject(*outObject);
 		JOINT_CPP_WRAP_END
 	}

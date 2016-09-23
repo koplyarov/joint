@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include <pyjoint/Object.hpp>
 #include <pyjoint/ProxyBase.hpp>
 #include <utils/PythonUtils.hpp>
 
@@ -87,12 +86,9 @@ namespace joint_python
 					Joint_DecRefObject(val);
 			}));
 
-			PyObjectHolder o(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&pyjoint::Object_type, NULL)));
-			reinterpret_cast<pyjoint::Object*>(o.Get())->handle = val;
-			reinterpret_cast<pyjoint::Object*>(o.Get())->checksum = checksum;
-
-			PyObjectHolder proxy_params(PY_OBJ_CHECK(Py_BuildValue("(O)", o.Get())));
-			PyObjectHolder result(PY_OBJ_CHECK(PyObject_CallObject(proxyType, proxy_params)));
+			PyObjectHolder result(PY_OBJ_CHECK(PyObject_CallObject(proxyType, nullptr)));
+			reinterpret_cast<pyjoint::ProxyBase*>(result.Get())->obj = val;
+			reinterpret_cast<pyjoint::ProxyBase*>(result.Get())->checksum = checksum;
 
 			sg.Cancel();
 			return result;
@@ -147,7 +143,7 @@ namespace joint_python
 
 			auto proxy = CastPyObject<pyjoint::ProxyBase>(val, &pyjoint::ProxyBase_type);
 			NATIVE_CHECK(proxy, "Invalid proxy");
-			auto handle = CastPyObject<pyjoint::Object>(proxy->obj, &pyjoint::Object_type)->handle;
+			auto handle = proxy->obj;
 
 			if (dir == ValueDirection::Return)
 				Joint_IncRefObject(handle);

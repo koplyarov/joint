@@ -162,10 +162,8 @@ class PythonGenerator:
         yield 'class {}_proxy(pyjoint.ProxyBase):'.format(self._mangleType(ifc))
         yield '\t__slots__ = []'
         yield '\tinterfaceChecksum = {}'.format(hex(ifc.checksum))
-        yield '\tdef __init__(self, obj):'
-        yield '\t\tsuper({i}_proxy, self).__init__(obj, {i}.descriptor)'.format(i=self._mangleType(ifc))
-        yield '\t\tif obj.checksum != {}_proxy.interfaceChecksum:'.format(self._mangleType(ifc))
-        yield '\t\t\traise pyjoint.InvalidInterfaceChecksumException()'
+        yield '\tdef __init__(self):'
+        yield '\t\tsuper({i}_proxy, self).__init__({i}.descriptor)'.format(i=self._mangleType(ifc))
         for m in ifc.methods:
             yield ''
             yield '\tdef {}(self{}):'.format(m.name, ''.join(', {}'.format(p.name) for p in m.params))

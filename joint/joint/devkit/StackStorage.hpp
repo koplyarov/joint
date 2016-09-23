@@ -6,6 +6,7 @@
 #include <joint/devkit/ScopeExit.hpp>
 
 #include <array>
+#include <vector>
 
 
 namespace joint {

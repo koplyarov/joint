@@ -25,7 +25,6 @@ add_library(joint-python-core SHARED
 	pyjoint/InterfaceDescriptor.cpp
 	pyjoint/JointException.cpp
 	pyjoint/Module.cpp
-	pyjoint/Object.cpp
 	pyjoint/ProxyBase.cpp
 	utils/PythonUtils.cpp
 )

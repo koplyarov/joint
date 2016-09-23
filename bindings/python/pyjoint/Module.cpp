@@ -2,8 +2,9 @@
 
 #include <joint/devkit/Logger.hpp>
 
-#include <utils/PythonUtils.hpp>
 #include <binding/Object.hpp>
+#include <pyjoint/ProxyBase.hpp>
+#include <utils/PythonUtils.hpp>
 
 
 namespace joint_python {
@@ -124,9 +125,11 @@ namespace pyjoint
 		Joint_Error ret = Joint_GetRootObject(m->handle, getter_name, &obj);
 		NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_GetRootObject failed: ") + Joint_ErrorToString(ret)).c_str());
 
-		PyObjectHolder py_obj(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&Object_type, NULL)));
+		NATIVE_THROW("Not implemented!");
+		PyObjectHolder py_obj;
+		//PyObjectHolder py_obj(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&Object_type, NULL)));
 
-		reinterpret_cast<Object*>(py_obj.Get())->handle = obj;
+		//reinterpret_cast<Object*>(py_obj.Get())->handle = obj;
 
 		PYJOINT_CPP_WRAP_END(py_obj.Release(), Py_None, Py_INCREF(Py_None);)
 	}
@@ -171,13 +174,10 @@ namespace pyjoint
 		Joint_Error ret = Joint_CreateObject(m->handle, obj_internal, &obj);
 		NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_CreateObject failed: ") + Joint_ErrorToString(ret)).c_str());
 
-		PyObjectHolder py_obj(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&Object_type, NULL)));
-		reinterpret_cast<Object*>(py_obj.Get())->handle = obj;
-		reinterpret_cast<Object*>(py_obj.Get())->checksum = checksum;
-
 		PyObjectHolder proxy_type(PY_OBJ_CHECK(PyObject_GetAttrString(interface, "proxy")));
-		PyObjectHolder proxy_ctor_args(PY_OBJ_CHECK(Py_BuildValue("(O)", (PyObject*)py_obj)));
-		PyObjectHolder proxy(PY_OBJ_CHECK(PyObject_CallObject(proxy_type, proxy_ctor_args)));
+		PyObjectHolder proxy(PY_OBJ_CHECK(PyObject_CallObject(proxy_type, nullptr)));
+		reinterpret_cast<ProxyBase*>(proxy.Get())->obj = obj;
+		reinterpret_cast<ProxyBase*>(proxy.Get())->checksum = checksum;
 
 		PYJOINT_CPP_WRAP_END(proxy.Release(), Py_None, Py_INCREF(Py_None);)
 	}

@@ -2,7 +2,7 @@
 #define PYJOINT_ARRAY_HPP
 
 
-#include <pyjoint/Object.hpp>
+#include <pyjoint/ProxyBase.hpp>
 
 
 namespace joint_python {

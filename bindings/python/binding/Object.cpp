@@ -8,7 +8,7 @@
 #include <common/Marshaller.hpp>
 #include <pyjoint/Globals.hpp>
 #include <pyjoint/InterfaceDescriptor.hpp>
-#include <pyjoint/Object.hpp>
+#include <pyjoint/ProxyBase.hpp>
 
 
 namespace joint_python {

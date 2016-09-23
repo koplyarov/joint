@@ -2,7 +2,7 @@
 #define BINDINGS_PYTHON_PYJOINT_MODULE_H
 
 
-#include <pyjoint/Object.hpp>
+#include <pyjoint/ProxyBase.hpp>
 
 
 namespace joint_python {
