@@ -300,7 +300,7 @@ namespace pyjoint
 		if (handle == JOINT_NULL_HANDLE)
 			return NULL;
 
-		if (self->index < 0 || self->index >= self->size)
+		if (self->index >= self->size)
 		{
 			Joint_DecRefArray(self->handle);
 			self->handle = JOINT_NULL_HANDLE;
