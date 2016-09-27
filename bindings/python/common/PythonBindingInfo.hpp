@@ -21,27 +21,18 @@ namespace joint_python
 		std::vector<PyObject*>&   _objects;
 
 	public:
-		PythonBindingInfo(std::vector<PyObject*>& objects)
-			: _objects(objects)
-		{ }
+		PythonBindingInfo(std::vector<PyObject*>& objects);
 
-		Joint_TypeId GetJointTypeId(PyObject* typeNode) const
-		{ return FromPyLong<Joint_TypeId>(PY_OBJ_CHECK(PyTuple_GetItem(typeNode, 0))); }
+		Joint_TypeId GetJointTypeId(PyObject* typeNode) const;
+		Joint_InterfaceChecksum GetInterfaceChecksum(PyObject* typeNode) const;
 
-		Joint_InterfaceChecksum GetInterfaceChecksum(PyObject* typeNode) const
-		{ return FromPyLong<Joint_InterfaceChecksum>(PY_OBJ_CHECK(PyTuple_GetItem(typeNode, 2))); }
+		PyObjectHolder GetArrayUserData(PyObject* typeNode) const;
+		PyObjectHolder GetObjectUserData(PyObject* typeNode) const;
+		PyObjectHolder GetEnumUserData(PyObject* typeNode) const;
+		PyObjectHolder GetStructUserData(PyObject* typeNode) const;
 
-		PyObjectHolder GetObjectUserData(PyObject* typeNode) const
-		{ return RegisterObject(PyObjectHolder::FromBorrowed(PY_OBJ_CHECK(PyTuple_GetItem(typeNode, 1)))); }
-
-		PyObjectHolder GetEnumUserData(PyObject* typeNode) const
-		{ return RegisterObject(PyObjectHolder::FromBorrowed(PY_OBJ_CHECK(PyTuple_GetItem(typeNode, 1)))); }
-
-		PyObjectHolder GetStructUserData(PyObject* typeNode) const
-		{ return RegisterObject(PyObjectHolder::FromBorrowed(PY_OBJ_CHECK(PyTuple_GetItem(typeNode, 1)))); }
-
-		PyObject* GetRetTypeNode(PyObject* methodNode) const
-		{ return PY_OBJ_CHECK(PyTuple_GetItem(methodNode, 0)); }
+		PyObject* GetRetTypeNode(PyObject* methodNode) const;
+		PyObject* GetArrayElementTypeNode(PyObject* typeNode) const;
 
 
 		class Sequence
@@ -56,29 +47,14 @@ namespace joint_python
 			PyObject* Get(size_t index) const { return PY_OBJ_CHECK(PySequence_Fast_GET_ITEM(_seq.Get(), index)); }
 		};
 
-		Sequence GetParamsNodes(PyObject* methodNode) const
-		{ return Sequence(PY_OBJ_CHECK(PyTuple_GetItem(methodNode, 1))); }
-
-		Sequence GetMethodsNodes(PyObject* ifcNode) const
-		{ return Sequence(ifcNode); }
-
-		Sequence GetMembersNodes(PyObject* typeNode) const
-		{ return Sequence(PY_OBJ_CHECK(PyTuple_GetItem(typeNode, 2))); }
-
-		PyObjectHolder GetMemberId(PyObject* memberNode) const
-		{ return RegisterObject(PyObjectHolder(PY_OBJ_CHECK(PyTuple_GetItem(memberNode, 0)))); }
-
-		PyObject* GetMemberType(PyObject* memberNode) const
-		{ return PY_OBJ_CHECK(PyTuple_GetItem(memberNode, 1)); }
+		Sequence GetParamsNodes(PyObject* methodNode) const;
+		Sequence GetMethodsNodes(PyObject* ifcNode) const;
+		Sequence GetMembersNodes(PyObject* typeNode) const;
+		PyObjectHolder GetMemberId(PyObject* memberNode) const;
+		PyObject* GetMemberType(PyObject* memberNode) const;
 
 	private:
-		PyObjectHolder RegisterObject(PyObjectHolder obj) const
-		{
-			if (obj)
-				_objects.push_back(obj);
-
-			return obj;
-		}
+		PyObjectHolder RegisterObject(PyObjectHolder obj) const;
 	};
 
 }

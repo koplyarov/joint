@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include <pyjoint/Array.hpp>
 #include <pyjoint/ProxyBase.hpp>
 #include <utils/PythonUtils.hpp>
 
@@ -94,6 +95,32 @@ namespace joint_python
 			return result;
 		}
 
+		PyObjectHolder FromJointArray(joint::devkit::ValueDirection dir, Joint_ArrayHandle val, PyObject* elementTypeDesc) const
+		{
+			using namespace joint::devkit;
+
+			if (val == JOINT_NULL_HANDLE)
+			{
+				Py_INCREF(Py_None);
+				return PyObjectHolder(Py_None);
+			}
+
+			if (dir == ValueDirection::Parameter)
+				Joint_IncRefArray(val);
+
+			auto sg(ScopeExit([&]{
+				if (dir == ValueDirection::Parameter)
+					Joint_DecRefArray(val);
+			}));
+
+			PyObjectHolder py_array_handle(PY_OBJ_CHECK(PyCapsule_New(val, "Joint.Array", NULL)));
+			PyObjectHolder py_params(PY_OBJ_CHECK(Py_BuildValue("(OO)", elementTypeDesc, py_array_handle.Get())));
+			PyObjectHolder result(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&pyjoint::Array_type, py_params)));
+
+			sg.Cancel();
+			return result;
+		}
+
 		class ParamsArray
 		{
 		private:
@@ -147,6 +174,22 @@ namespace joint_python
 
 			if (dir == ValueDirection::Return)
 				Joint_IncRefObject(handle);
+			return handle;
+		}
+
+		Joint_ArrayHandle ToJointArray(joint::devkit::ValueDirection dir, PyObject* val, const PyObjectHolder& objType) const
+		{
+			using namespace joint::devkit;
+
+			if (val == Py_None)
+				return JOINT_NULL_HANDLE;
+
+			auto arr = CastPyObject<pyjoint::Array>(val, &pyjoint::Array_type);
+			NATIVE_CHECK(arr, "Invalid array object");
+			auto handle = arr->handle;
+
+			if (dir == ValueDirection::Return)
+				Joint_IncRefArray(handle);
 			return handle;
 		}
 

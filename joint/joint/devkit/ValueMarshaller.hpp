@@ -51,6 +51,8 @@ namespace devkit
 				break;
 			case JOINT_TYPE_OBJ:
 				return wrapper.FromJointObj(dir, value.obj, type.GetUserData(), type.GetJointType().payload.interfaceChecksum);
+			case JOINT_TYPE_ARRAY:
+				return wrapper.FromJointArray(dir, value.array, type.GetUserData());
 			default:
 				throw std::runtime_error("Unknown parameter type");
 			}
@@ -89,6 +91,9 @@ namespace devkit
 				break;
 			case JOINT_TYPE_OBJ:
 				res.obj = unwrapper.ToJointObj(dir, value, type.GetUserData());
+				break;
+			case JOINT_TYPE_ARRAY:
+				res.array = unwrapper.ToJointArray(dir, value, type.GetUserData());
 				break;
 			default:
 				JOINT_THROW(std::runtime_error("Unknown type"));

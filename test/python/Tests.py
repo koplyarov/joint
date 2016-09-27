@@ -39,7 +39,16 @@ class InterfaceChecksumComponent2(test_IInterfaceCS2):
 class InterfaceChecksumComponent12(test_IInterfaceCS1, test_IInterfaceCS2):
     pass
 
-class Tests(test_IBasicTests, test_IObjectTests, test_IEnumTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests, test_IInterfaceChecksumTests, test_IStructTests):
+class Tests(test_IBasicTests,
+            test_IObjectTests,
+            test_IEnumTests,
+            test_ILifetimeTests,
+            test_ICastTests,
+            test_IExceptionTests,
+            test_IInterfaceChecksumTests,
+            test_IStructTests,
+            test_IArrayTests):
+
     def __init__(self, jointModule):
         super(Tests, self).__init__()
         self.jointModule = jointModule
@@ -126,6 +135,9 @@ class Tests(test_IBasicTests, test_IObjectTests, test_IEnumTests, test_ILifetime
     def CallbackMakeS1(self, cb, i, s): return cb.MakeS1(i, s)
     def CallbackGetS(self, cb, s): return cb.GetS(s)
     def CallbackGetI(self, cb, s): return cb.GetI(s)
+
+    def MakeI32Array(self, len): return pyjoint.Array(pyjoint.TypeDescriptor((7,)), len)
+    def GetI32Element(self, array, index): return array[index]
 
 
 def GetTests(jointModule):

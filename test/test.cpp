@@ -15,7 +15,7 @@
 #include <test/tests/LifetimeTests.hpp>
 #include <test/tests/ObjectTests.hpp>
 #include <test/tests/StructTests.hpp>
-//#include <test/tests/ArrayTests.hpp>
+#include <test/tests/ArrayTests.hpp>
 
 
 int main(int argc, const char* argv[])

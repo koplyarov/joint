@@ -9,6 +9,7 @@
 #include <pyjoint/InterfaceDescriptor.hpp>
 #include <pyjoint/Module.hpp>
 #include <pyjoint/ProxyBase.hpp>
+#include <pyjoint/TypeDescriptor.hpp>
 #include <utils/PyObjectHolder.hpp>
 
 
@@ -118,6 +119,7 @@ PyMODINIT_FUNC JointPythonCore_InitModule_py2(void)
 	ADD_TYPE_TO_PYTHON_MODULE(JointException);
 	ADD_TYPE_TO_PYTHON_MODULE(Module);
 	ADD_TYPE_TO_PYTHON_MODULE(ProxyBase);
+	ADD_TYPE_TO_PYTHON_MODULE(TypeDescriptor);
 
     InvalidInterfaceChecksumException = PyErr_NewException("pyjoint.InvalidInterfaceChecksumException", NULL, NULL);
     Py_INCREF(InvalidInterfaceChecksumException);

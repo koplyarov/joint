@@ -12,7 +12,8 @@ namespace pyjoint
 	struct Array
 	{
 		PyObject_HEAD
-		Joint_ArrayHandle      handle;
+		PyObject*             elementTypeDesc;
+		Joint_ArrayHandle     handle;
 	};
 
 

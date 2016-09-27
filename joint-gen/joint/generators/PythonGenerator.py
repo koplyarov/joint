@@ -99,6 +99,8 @@ class PythonGenerator:
             return self._tuple([str(type.index), '{}_proxy'.format(self._mangleType(type)), hex(type.checksum)])
         elif isinstance(type, Struct):
             return self._tuple([str(type.index), self._mangleType(type), self._tuple([self._tuple(['\'{}\''.format(m.name), self._typeDescriptor(m.type)]) for m in type.members])])
+        elif isinstance(type, Array):
+            return self._tuple([str(type.index), self._typeDescriptor(type.elementType)])
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 

@@ -23,6 +23,7 @@ namespace devkit
 
 	private:
 		MembersArray           _members;
+		std::unique_ptr<TypeDescriptor> _arrayElementType;
 		Joint_Type             _jointType;
 		size_t                 _membersCount = 0;
 		UserData               _userData;
@@ -32,15 +33,18 @@ namespace devkit
 		{ _jointType.id = JOINT_TYPE_VOID; }
 
 		template < typename NodeType_, typename DataObtainer_ >
+		TypeDescriptor(const NodeType_& node, const DataObtainer_& dataObtainer)
+		{
+			_jointType.id = JOINT_TYPE_VOID;
+			Init(node, dataObtainer);
+		}
+
+		template < typename NodeType_, typename DataObtainer_ >
 		void Init(const NodeType_& node, const DataObtainer_& dataObtainer)
 		{
 			_jointType.id = dataObtainer.GetJointTypeId(node);
 			switch (_jointType.id)
 			{
-			case JOINT_TYPE_OBJ:
-				_userData = dataObtainer.GetObjectUserData(node);
-				_jointType.payload.interfaceChecksum = dataObtainer.GetInterfaceChecksum(node);
-				break;
 			case JOINT_TYPE_ENUM:
 				_userData = dataObtainer.GetEnumUserData(node);
 				break;
@@ -64,6 +68,16 @@ namespace devkit
 					}
 				}
 				break;
+			case JOINT_TYPE_OBJ:
+				_userData = dataObtainer.GetObjectUserData(node);
+				_jointType.payload.interfaceChecksum = dataObtainer.GetInterfaceChecksum(node);
+				break;
+			case JOINT_TYPE_ARRAY:
+				_arrayElementType.reset(new TypeDescriptor);
+				_arrayElementType->Init(dataObtainer.GetArrayElementTypeNode(node), dataObtainer);
+				_userData = dataObtainer.GetArrayUserData(node);
+				_jointType.payload.arrayElementType = &_arrayElementType->GetJointType();
+				break;
 			default:
 				break;
 			}
@@ -84,13 +98,21 @@ namespace devkit
 		TypeDescriptor(const TypeDescriptor&) = delete;
 		TypeDescriptor& operator = (const TypeDescriptor&) = delete;
 
-		Joint_Type GetJointType() const { return _jointType; }
+		Joint_Type& GetJointType() { return _jointType; }
+		const Joint_Type& GetJointType() const { return _jointType; }
 		const MemberInfo& GetMemberInfo(size_t index) const
 		{
 			if (index >= _membersCount)
 				JOINT_THROW("Member index out of range");
 
 			return _members[index];
+		}
+
+		const TypeDescriptor& GetArrayElementType() const
+		{
+			if (!_arrayElementType)
+				JOINT_THROW("Array element type is not initialized");
+			return *_arrayElementType;
 		}
 
 		const UserData& GetUserData() const { return _userData; }

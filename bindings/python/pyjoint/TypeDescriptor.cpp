@@ -1,4 +1,4 @@
-#include <pyjoint/InterfaceDescriptor.hpp>
+#include <pyjoint/TypeDescriptor.hpp>
 
 #include <joint/devkit/Logger.hpp>
 
@@ -12,18 +12,18 @@ namespace pyjoint
 
 	using namespace joint::devkit;
 
-	JOINT_DEVKIT_LOGGER("Joint.Python.PyJoint.InterfaceDescriptor")
+	JOINT_DEVKIT_LOGGER("Joint.Python.PyJoint.TypeDescriptor")
 
-	static int InterfaceDescriptor_init(InterfaceDescriptor* self, PyObject* args, PyObject* kwds);
-	static void InterfaceDescriptor_del(InterfaceDescriptor* self);
-	static int InterfaceDescriptor_traverse(InterfaceDescriptor* self, visitproc visit, void* arg);
+	static int TypeDescriptor_init(TypeDescriptor* self, PyObject* args, PyObject* kwds);
+	static void TypeDescriptor_del(TypeDescriptor* self);
+	static int TypeDescriptor_traverse(TypeDescriptor* self, visitproc visit, void* arg);
 
-	PyTypeObject InterfaceDescriptor_type = {
+	PyTypeObject TypeDescriptor_type = {
 		PyVarObject_HEAD_INIT(NULL, 0)
-		"pyjoint.InterfaceDescriptor",               // tp_name
-		sizeof(InterfaceDescriptor),                 // tp_basicsize
+		"pyjoint.TypeDescriptor",               // tp_name
+		sizeof(TypeDescriptor),                 // tp_basicsize
 		0,                                           // tp_itemsize
-		(destructor)InterfaceDescriptor_del,         // tp_dealloc
+		(destructor)TypeDescriptor_del,         // tp_dealloc
 		0,                                           // tp_print
 		0,                                           // tp_getattr
 		0,                                           // tp_setattr
@@ -40,7 +40,7 @@ namespace pyjoint
 		0,                                           // tp_as_buffer
 		Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC,     // tp_flags
 		"joint module object",                       // tp_doc
-		(traverseproc)InterfaceDescriptor_traverse,  // tp_traverse
+		(traverseproc)TypeDescriptor_traverse,       // tp_traverse
 		0,                                           // tp_clear
 		0,                                           // tp_richcompare
 		0,                                           // tp_weaklistoffset
@@ -54,13 +54,13 @@ namespace pyjoint
 		0,                                           // tp_descr_get
 		0,                                           // tp_descr_set
 		0,                                           // tp_dictoffset
-		(initproc)InterfaceDescriptor_init,          // tp_init
+		(initproc)TypeDescriptor_init,               // tp_init
 		PyType_GenericAlloc,                         // tp_alloc
 		PyType_GenericNew                            // tp_new
 	};
 
 
-	static int InterfaceDescriptor_init(InterfaceDescriptor* self, PyObject* args, PyObject* kwds)
+	static int TypeDescriptor_init(TypeDescriptor* self, PyObject* args, PyObject* kwds)
 	{
 		PYJOINT_CPP_WRAP_BEGIN
 
@@ -68,13 +68,13 @@ namespace pyjoint
 		PYTHON_CHECK(PyArg_ParseTuple(args, "O", &py_desc), "Could not parse arguments");
 
 		self->objects = new std::vector<PyObject*>();
-		self->descriptor = new InterfaceDescriptorValue(py_desc, PythonBindingInfo(*self->objects));
+		self->descriptor = new TypeDescriptorValue(py_desc, PythonBindingInfo(*self->objects));
 
 		PYJOINT_CPP_WRAP_END(0, -1, Py_DECREF(self);)
 	}
 
 
-	static void InterfaceDescriptor_del(InterfaceDescriptor* self)
+	static void TypeDescriptor_del(TypeDescriptor* self)
 	{
 		PYJOINT_CPP_WRAP_BEGIN
 
@@ -89,7 +89,7 @@ namespace pyjoint
 	}
 
 
-	static int InterfaceDescriptor_traverse(InterfaceDescriptor* self, visitproc visit, void* arg)
+	static int TypeDescriptor_traverse(TypeDescriptor* self, visitproc visit, void* arg)
 	{
 		if (self->objects)
 			for (auto o : *self->objects)

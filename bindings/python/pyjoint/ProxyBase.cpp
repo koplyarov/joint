@@ -20,6 +20,7 @@ namespace pyjoint
 	static int ProxyBase_init(ProxyBase* self, PyObject* args, PyObject* kwds);
 	static void ProxyBase_del(ProxyBase* self);
 	static PyObject* ProxyBase_call(ProxyBase* self, PyObject* args, PyObject* kwds);
+	static int ProxyBase_traverse(ProxyBase* self, visitproc visit, void* arg);
 
 	static PyMethodDef ProxyBase_methods[] = {
 		{NULL}  /* Sentinel */
@@ -45,9 +46,9 @@ namespace pyjoint
 		0,                                        // tp_getattro
 		0,                                        // tp_setattro
 		0,                                        // tp_as_buffer
-		Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, // tp_flags
+		Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_GC, // tp_flags
 		"joint proxy base object",                // tp_doc
-		0,                                        // tp_traverse
+		(traverseproc)ProxyBase_traverse,         // tp_traverse
 		0,                                        // tp_clear
 		0,                                        // tp_richcompare
 		0,                                        // tp_weaklistoffset
@@ -206,6 +207,15 @@ namespace pyjoint
 			NATIVE_THROW((std::string("Joint_InvokeMethod failed: ") + Joint_ErrorToString(ret)).c_str());
 
 		PYJOINT_CPP_WRAP_END(result.Release(), NULL)
+	}
+
+
+	static int ProxyBase_traverse(ProxyBase* self, visitproc visit, void* arg)
+	{
+		if (self->ifcDesc)
+			Py_VISIT(self->ifcDesc);
+
+		return 0;
 	}
 
 }}

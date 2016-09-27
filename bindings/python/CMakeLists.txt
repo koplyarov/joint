@@ -26,7 +26,9 @@ add_library(joint-python-core SHARED
 	pyjoint/JointException.cpp
 	pyjoint/Module.cpp
 	pyjoint/ProxyBase.cpp
+	pyjoint/TypeDescriptor.cpp
 	utils/PythonUtils.cpp
+	common/PythonBindingInfo.cpp
 )
 target_link_libraries(joint-python-core joint ${PYTHON_LIBRARIES})
 
