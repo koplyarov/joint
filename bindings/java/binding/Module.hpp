@@ -2,6 +2,7 @@
 #define BINDINGS_JAVA_BINDING_MODULE_HPP
 
 
+#include <joint/devkit/Holder.hpp>
 #include <joint/devkit/Logger.hpp>
 
 #include <string>
@@ -17,9 +18,11 @@ namespace binding
 	{
 		JOINT_DEVKIT_LOGGER("Joint.Java.Module")
 
+		using JavaVMHolder = joint::devkit::Holder<JavaVM*>;
+
 	private:
-		JavaVM*           _jvm;
-		JGlobalClassPtr   _cls;
+		JavaVMHolder        _jvm;
+		JGlobalClassPtr     _cls;
 
 	public:
 		Module(const std::string& jarPath, const std::string& className);

@@ -32,6 +32,15 @@ namespace devkit
 		Holder(const Holder&) = delete;
 		Holder& operator = (const Holder&) = delete;
 
+		Holder& operator = (Holder&& other)
+		{
+			static_cast<DeleterFunc_&>(*this) = std::move(other.GetDeleterFunc());
+			_obj = std::move(other._obj);
+			_initialized = other._initialized;
+			other._initialized = false;
+			return *this;
+		}
+
 		~Holder()
 		{
 			if (_initialized)

@@ -10,10 +10,15 @@ class Tests {
 
 	static class IBasicTests1
 	{
+		private JointObject obj;
+
+		IBasicTests1(JointObject obj)
+		{ this.obj = obj; }
+
 		byte AddU8(byte l, byte r)
 		{
 			System.out.println("JAVA: AddU8");
-			return (byte)(l + r);
+			return (byte)obj.invokeMethod(0, l, r);
 		}
 	}
 
@@ -45,9 +50,9 @@ class Tests {
 	///////////////////////////////////////////////////////////////
 
 
-	static class Component2 extends AccessorsContainer implements IBasicTests1_impl
+	static class Component extends AccessorsContainer implements IBasicTests1_impl
 	{
-		Component2()
+		Component()
 		{ super(new IBasicTests1_accessor()); }
 
 		public byte AddU8(byte l, byte r)
@@ -57,9 +62,19 @@ class Tests {
 		}
 	}
 
-	public static String GetTests()
+	public static JointObject GetTests(ModuleContext module)
 	{
-        System.out.println("JAVA: GetTests");
-		return "";
+		try
+		{
+			System.out.println("JAVA: GetTests");
+
+			Component c = new Component();
+			return module.register(c.cast(new InterfaceId("IBasicTests1")));
+		}
+		catch (Throwable t)
+		{
+			t.printStackTrace();
+			return null;
+		}
 	}
 }

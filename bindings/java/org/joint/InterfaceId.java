@@ -3,5 +3,11 @@ package org.joint;
 
 public class InterfaceId
 {
-	public String getId() { return ""; }
+	private String id;
+
+	public InterfaceId(String id)
+	{ this.id = id; }
+
+	public String getId()
+	{ return id; }
 }

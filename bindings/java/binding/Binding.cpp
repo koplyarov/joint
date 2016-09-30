@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 #include <binding/Module.hpp>
+#include <binding/Object.hpp>
 #include <jni.h>
 
 
@@ -69,14 +70,24 @@ namespace binding
 
 		const auto& cls = m->GetClass();
 		auto env = cls.GetEnv();
-		jmethodID get_methods_desc = env->GetStaticMethodID(cls, getterName, "()Ljava/lang/String;");
-		JOINT_CHECK(get_methods_desc, StringBuilder() % "Method " % getterName % " not found");
-		env->CallStaticObjectMethodA(cls, get_methods_desc, nullptr);
+		auto jvm = cls.GetJvm();
 
-		JOINT_THROW("Not implemented");
-		//auto getter = dl->GetFunction<Joint_ObjectHandle(Joint_ModuleHandle)>(getterName);
-		//JOINT_CHECK(getter, JOINT_ERROR_NO_SUCH_MODULE);
-		//*outObject = getter(module);
+		JLocalClassPtr module_cls(jvm, env->FindClass("org/joint/ModuleContext"));
+		JOINT_CHECK(module_cls, StringBuilder() % "Class org/joint/ModuleContext not found");
+		jmethodID module_ctx_ctor_id = env->GetMethodID(module_cls, "<init>", "(J)V");
+		JLocalObjPtr module_ctx(jvm, env->NewObject(module_cls, module_ctx_ctor_id, (jlong)module));
+
+		jmethodID root_obj_getter_id = env->GetStaticMethodID(cls, getterName, "(Lorg/joint/ModuleContext;)Lorg/joint/JointObject;");
+		JOINT_CHECK(root_obj_getter_id, StringBuilder() % "Method " % getterName % " not found");
+		JLocalObjPtr obj(jvm, env->CallStaticObjectMethod(cls, root_obj_getter_id, module_ctx.Get()));
+
+		JLocalClassPtr obj_cls(jvm, env->FindClass("org/joint/JointObject"));
+		JOINT_CHECK(obj_cls, StringBuilder() % "Class org/joint/JointObject not found");
+		jfieldID handle_id = env->GetFieldID(obj_cls, "handle", "J");
+		jlong handle_long = env->GetLongField(obj.Get(), handle_id);
+
+		*outObject = (Joint_ObjectHandle)handle_long;
+		Joint_IncRefObject(*outObject);
 
 		JOINT_CPP_WRAP_END
 	}
@@ -95,9 +106,7 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		JOINT_THROW("Not implemented");
-		//auto accessor = reinterpret_cast<JointC_Accessor*>(obj);
-		//return accessor->VTable->Release(accessor->Component);
+		delete reinterpret_cast<Object*>(obj);
 
 		JOINT_CPP_WRAP_END
 	}

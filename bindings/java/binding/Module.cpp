@@ -15,8 +15,14 @@ namespace binding
 	Module::Module(const std::string& jarPath, const std::string& className)
 		: _jvm(), _cls()
 	{
-		std::string jar_path_opt = "-Djava.class.path=" + jarPath;
-		JavaVMOption opt[] = { { const_cast<char*>(jar_path_opt.c_str()), nullptr } };
+		GetLogger().Warning() << "Module ctor";
+
+		std::string class_path_opt = "-Djava.class.path=" + jarPath + ":/home/koplyarov/work/joint/build/bin/joint.jar";
+		std::string lib_path_opt = "-Djava.library.path=/home/koplyarov/work/joint/build/bin";
+		JavaVMOption opt[] = {
+			{ const_cast<char*>(class_path_opt.c_str()), nullptr },
+			{ const_cast<char*>(lib_path_opt.c_str()), nullptr }
+		};
 
 		JavaVMInitArgs vm_args = { };
 		vm_args.version = 0x00010001;
@@ -24,12 +30,16 @@ namespace binding
 		vm_args.options = opt;
 		vm_args.nOptions = sizeof(opt) / sizeof(opt[0]);
 
-		JNIEnv* env;
-		jint ret = JNI_CreateJavaVM(&_jvm, reinterpret_cast<void**>(&env), &vm_args);
+		JNIEnv* env = NULL;
+		JavaVM* jvm = NULL;
+		jint ret = JNI_CreateJavaVM(&jvm, reinterpret_cast<void**>(&env), &vm_args);
 		JOINT_CHECK(ret == 0, StringBuilder() % "JNI_CreateJavaVM failed: " % JniErrorToString(ret));
-		JOINT_CHECK(_jvm, "JNI_CreateJavaVM failed!");
+		JOINT_CHECK(jvm, "JNI_CreateJavaVM failed!");
 
-		_cls = JGlobalClassPtr(_jvm, env->FindClass(className.c_str()));
+		// TODO: DestroyJavaVM does not collect the garbage (and its native parts!). Fix it.
+		_jvm = JavaVMHolder(jvm, [](JavaVM* jvm) { jvm->DestroyJavaVM(); });
+
+		_cls = JGlobalClassPtr(_jvm.Get(), env->FindClass(className.c_str()));
 		JOINT_CHECK(_cls, StringBuilder() % "Class " % className % " not found");
 	}
 
@@ -37,8 +47,6 @@ namespace binding
 	Module::~Module()
 	{
 		GetLogger().Warning() << "Module dtor";
-		_cls.Reset();
-		_jvm->DestroyJavaVM();
 	}
 
 }}

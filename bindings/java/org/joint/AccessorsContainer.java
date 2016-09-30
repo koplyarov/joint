@@ -8,7 +8,7 @@ public class AccessorsContainer implements Component
 	public AccessorsContainer(Accessor... accessors)
 	{ this.accessors = accessors; }
 
-	public Accessor Cast(InterfaceId interfaceId)
+	public Accessor cast(InterfaceId interfaceId)
 	{
 		for (Accessor a : accessors)
 			if (a.implementsInterface(interfaceId))

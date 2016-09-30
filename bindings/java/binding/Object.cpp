@@ -43,14 +43,10 @@ namespace binding
 
 
 
-	Object::Object(const JGlobalClassPtr& clazz)
-		: _class(clazz)
+	Object::Object(const JGlobalObjPtr& obj)
+		: _obj(obj)
 	{
-		auto env = _class.GetEnv();
-		jmethodID get_methods_desc = env->GetStaticMethodID(clazz, "getMethodsDesc", "()[[Ljava/lang/String;");
-		JOINT_CHECK(get_methods_desc, "Method getMethodsDesc not found");
-		env->CallStaticObjectMethodA(clazz, get_methods_desc, nullptr);
-		//_id = GetJavaEnv(_jvm)->GetMethodID(clazz.get(), name.c_str(), method_str.c_str());
+		GetLogger().Warning() << "Object ctor";
 	}
 
 

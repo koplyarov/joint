@@ -10,6 +10,8 @@ add_jar(tests
     OUTPUT_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
 
+add_dependencies(tests joint-java)
+
 #joint_generate_adapters(python ${CMAKE_CURRENT_SOURCE_DIR}/Tests_adapters.py
 	#../idl/IBasicTests.idl
 	#../idl/IObjectTests.idl

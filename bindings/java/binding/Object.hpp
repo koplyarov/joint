@@ -17,14 +17,11 @@ namespace binding
 	{
 		JOINT_DEVKIT_LOGGER("Joint.Java.Object")
 
-		using MethodIdsVec = std::vector<jmethodID>;
-
 	private:
-		JGlobalClassPtr  _class;
-		MethodIdsVec     _methodIds;
+		JGlobalObjPtr     _obj;
 
 	public:
-		Object(const JGlobalClassPtr& clazz);
+		Object(const JGlobalObjPtr& obj);
 		~Object();
 	};
 
