@@ -8,8 +8,9 @@
 #include <memory>
 #include <mutex>
 
-#include <../bindings/python/JointPython.h>
 #include <../bindings/cpp/JointCppCore.h>
+#include <../bindings/java/JointJava.h>
+#include <../bindings/python/JointPython.h>
 
 
 JOINT_DEVKIT_LOGGER("Joint")
@@ -67,6 +68,11 @@ extern "C"
 				ret = JointCppCore_MakeBinding(&cpp_binding);
 				JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 				g_bindings.AddBinding("cpp", Holder<Joint_BindingHandle>(cpp_binding, release_binding));
+
+				static Joint_BindingHandle java_binding;
+				ret = JointJava_MakeBinding(&java_binding);
+				JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+				g_bindings.AddBinding("java", Holder<Joint_BindingHandle>(java_binding, release_binding));
 			});
 
 		JOINT_CPP_WRAP_END

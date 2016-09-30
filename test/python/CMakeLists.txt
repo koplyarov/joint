@@ -1,4 +1,4 @@
-project(test-c)
+project(test-python)
 
 joint_generate_adapters(python ${CMAKE_CURRENT_SOURCE_DIR}/Tests_adapters.py
 	../idl/IBasicTests.idl
