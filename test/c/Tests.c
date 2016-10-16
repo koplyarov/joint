@@ -58,7 +58,7 @@ JOINT_C_COMPONENT(LifetimeListenable, test_ILifetimeListenable);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef struct { } CastComponent017;
+typedef struct { int dummy; } CastComponent017;
 
 Joint_Error CastComponent017_Init(CastComponent017* self)
 { return JOINT_ERROR_NONE; }
@@ -89,17 +89,17 @@ JOINT_C_COMPONENT(CastComponent017, test_IInterface0, test_IInterface1, test_IIn
 
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef struct { } InterfaceChecksumComponent1;
+typedef struct { int dummy; } InterfaceChecksumComponent1;
 Joint_Error InterfaceChecksumComponent1_Init(InterfaceChecksumComponent1* self) { return JOINT_ERROR_NONE; }
 Joint_Error InterfaceChecksumComponent1_Deinit(InterfaceChecksumComponent1* self) { return JOINT_ERROR_NONE; }
 JOINT_C_COMPONENT(InterfaceChecksumComponent1, test_IInterfaceCS1);
 
-typedef struct { } InterfaceChecksumComponent2;
+typedef struct { int dummy; } InterfaceChecksumComponent2;
 Joint_Error InterfaceChecksumComponent2_Init(InterfaceChecksumComponent2* self) { return JOINT_ERROR_NONE; }
 Joint_Error InterfaceChecksumComponent2_Deinit(InterfaceChecksumComponent2* self) { return JOINT_ERROR_NONE; }
 JOINT_C_COMPONENT(InterfaceChecksumComponent2, test_IInterfaceCS2);
 
-typedef struct { } InterfaceChecksumComponent12;
+typedef struct { int dummy; } InterfaceChecksumComponent12;
 Joint_Error InterfaceChecksumComponent12_Init(InterfaceChecksumComponent12* self) { return JOINT_ERROR_NONE; }
 Joint_Error InterfaceChecksumComponent12_Deinit(InterfaceChecksumComponent12* self) { return JOINT_ERROR_NONE; }
 JOINT_C_COMPONENT(InterfaceChecksumComponent12, test_IInterfaceCS1, test_IInterfaceCS2);

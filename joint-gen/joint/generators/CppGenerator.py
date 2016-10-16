@@ -180,7 +180,7 @@ class CppGenerator:
         yield '\t{}(Joint_ObjectHandle obj) : _obj(obj) {{ }}'.format(ifc.name);
         yield ''
         yield '\tJoint_ObjectHandle _GetObjectHandle() const { return _obj; }'
-        yield '\tstatic Joint_InterfaceChecksum _GetInterfaceChecksum() {{ return {}UL; }}'.format(hex(ifc.checksum))
+        yield '\tstatic Joint_InterfaceChecksum _GetInterfaceChecksum() {{ return {}; }}'.format(hex(ifc.checksum))
         yield '\tstatic const char* _GetInterfaceId() {{ return "{}"; }}'.format(ifc.fullname)
         yield ''
         for m in ifc.methods:
@@ -297,13 +297,15 @@ class CppGenerator:
         yield '\t}'
         yield '\tcatch (const ::joint::detail::JointCppException& ex)'
         yield '\t{'
-        yield '\t\tconst char* method_names[] = {{ {} }};'.format(', '.join('"{}.{}"'.format(ifc.fullname, m.name) for m in ifc.methods))
-        yield '\t\treturn ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, method_names[methodId]);'
+        if ifc.methods:
+            yield '\t\tconst char* method_names[] = {{ {} }};'.format(', '.join('"{}.{}"'.format(ifc.fullname, m.name) for m in ifc.methods))
+        yield '\t\treturn ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, {});'.format('method_names[methodId]' if ifc.methods else '""')
         yield '\t}'
         yield '\tcatch (const std::exception& ex)'
         yield '\t{'
-        yield '\t\tconst char* method_names[] = {{ {} }};'.format(', '.join('"{}.{}"'.format(ifc.fullname, m.name) for m in ifc.methods))
-        yield '\t\treturn ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, method_names[methodId]);'
+        if ifc.methods:
+            yield '\t\tconst char* method_names[] = {{ {} }};'.format(', '.join('"{}.{}"'.format(ifc.fullname, m.name) for m in ifc.methods))
+        yield '\t\treturn ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, {});'.format('method_names[methodId]' if ifc.methods else '""')
         yield '\t}'
         yield '\toutRetValue->releaseValue = &::joint::detail::_ReleaseRetValue;'
         yield '\treturn JOINT_ERROR_NONE;'

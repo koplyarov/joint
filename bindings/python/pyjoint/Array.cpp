@@ -265,7 +265,7 @@ namespace pyjoint
 		it->elementTypeDesc = self->elementTypeDesc;
 		Py_XINCREF(it->elementTypeDesc);
 
-		_PyObject_GC_TRACK(it);
+		PyObject_GC_Track(it);
 
 		PYJOINT_CPP_WRAP_END(result.Release(), NULL);
 	}
@@ -275,7 +275,7 @@ namespace pyjoint
 	{
 		PYJOINT_CPP_WRAP_BEGIN
 
-		_PyObject_GC_UNTRACK(self);
+		PyObject_GC_UnTrack(self);
 		Py_XDECREF(self->elementTypeDesc);
 		Joint_DecRefArray(self->handle);
 		self->handle = JOINT_NULL_HANDLE;

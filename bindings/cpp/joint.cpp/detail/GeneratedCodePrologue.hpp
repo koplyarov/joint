@@ -5,6 +5,7 @@
 #include <joint/devkit/ScopeExit.hpp>
 
 #include <algorithm>
+#include <iterator>
 #include <sstream>
 #include <string.h>
 #include <string>

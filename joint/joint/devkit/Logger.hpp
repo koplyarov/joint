@@ -9,9 +9,6 @@
 #include <string>
 #include <utility>
 
-#define DETAIL_JOINT_LIKELY(Expr_)        __builtin_expect(!!(Expr_), 1)
-#define DETAIL_JOINT_UNLIKELY(Expr_)      __builtin_expect((Expr_), 0)
-
 
 namespace joint {
 namespace devkit
@@ -67,27 +64,27 @@ namespace devkit
 			Stream(const char* name, Joint_LogLevel logLevel)
 				: _nop(logLevel < Joint_GetLogLevel())
 			{
-				if (DETAIL_JOINT_UNLIKELY(!_nop))
+				if (JOINT_UNLIKELY(!_nop))
 					_impl.Construct(name, logLevel);
 			}
 
 			Stream(Stream&& other)
 				: _nop(other._nop)
 			{
-				if (DETAIL_JOINT_UNLIKELY(!_nop))
+				if (JOINT_UNLIKELY(!_nop))
 					_impl.Construct(std::move(*other._impl));
 			}
 
 			~Stream()
 			{
-				if (DETAIL_JOINT_UNLIKELY(!_nop))
+				if (JOINT_UNLIKELY(!_nop))
 					_impl.Destruct();
 			}
 
 			template < typename T_ >
 			Stream& operator << (T_&& val)
 			{
-				if (DETAIL_JOINT_UNLIKELY(!_nop))
+				if (JOINT_UNLIKELY(!_nop))
 					_impl->Write(std::forward<T_>(val));
 				return *this;
 			}

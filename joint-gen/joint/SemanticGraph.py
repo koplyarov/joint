@@ -82,7 +82,7 @@ class Interface(TypeBase):
 
     def calculateChecksum(self):
         ifc_str = self._ifcStr()
-        self.checksum = binascii.crc32(ifc_str) % (1 << 32)
+        self.checksum = int(binascii.crc32(ifc_str)) % (1 << 32)
 
     def _ifcStr(self):
         return'{}({}){{{}}}'.format(self.fullname, ','.join('{}'.format(b._ifcStr()) for b in self.bases), ','.join(self._methodStr(m) for m in self.methods))
