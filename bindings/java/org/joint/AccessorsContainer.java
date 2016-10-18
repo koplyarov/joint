@@ -18,7 +18,6 @@ public class AccessorsContainer implements Component
 
 	public Accessor cast(InterfaceId interfaceId)
 	{
-		System.out.println("JAVA: AccessorsContainer.cast");
 		for (Accessor a : accessors)
 			if (a.implementsInterface(interfaceId))
 				return a;

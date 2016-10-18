@@ -3,6 +3,7 @@
 #include <joint/utils/JointException.hpp>
 
 #include <utils/JniError.hpp>
+#include <utils/Utils.hpp>
 
 
 namespace joint_java {
@@ -40,7 +41,7 @@ namespace binding
 		// TODO: DestroyJavaVM does not collect the garbage (and its native parts!). Fix it.
 		_jvm = JavaVMHolder(jvm, [](JavaVM* jvm) { jvm->DestroyJavaVM(); });
 
-		_cls = JGlobalClassPtr(_jvm.Get(), env->FindClass(className.c_str()));
+		_cls = JGlobalClassPtr(_jvm.Get(), JAVA_CALL_EX(_jvm.Get(), env->FindClass(className.c_str())));
 		JOINT_CHECK(_cls, StringBuilder() % "Class " % className % " not found");
 	}
 

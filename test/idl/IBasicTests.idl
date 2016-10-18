@@ -13,11 +13,6 @@ package test
 	interface IBasicTestsCallbackBool { bool And(bool l, bool r); }
 	interface IBasicTestsCallbackString { string Concat(string l, string r); }
 
-	interface IBasicTests1
-	{
-		u8 AddU8(u8 l, u8 r);
-	}
-
 	interface IBasicTests
 	{
 		u8 AddU8(u8 l, u8 r);

@@ -38,6 +38,7 @@ target_link_libraries(test-core ${CMAKE_THREAD_LIBS_INIT})
 ################################################################################
 
 joint_generate_adapters(c++ Tests_adapters.hpp
+	idl/IStarterTests.idl
 	idl/IBasicTests.idl
 	idl/IObjectTests.idl
 	idl/ILifetimeTests.idl

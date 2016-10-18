@@ -8,17 +8,17 @@ class Tests {
 	{
 	}
 
-	static class IBasicTests1
+	static class IStarterTests
 	{
 		private JointObject obj;
 
-		IBasicTests1(JointObject obj)
+		IStarterTests(JointObject obj)
 		{ this.obj = obj; }
 
-		byte AddU8(byte l, byte r)
+		int Increment(int value)
 		{
-			System.out.println("JAVA: AddU8");
-			return (byte)obj.invokeMethod(0, l, r);
+			System.out.println("JAVA PROXY: Increment");
+			return (int)obj.invokeMethod(0, value);
 		}
 	}
 
@@ -26,48 +26,35 @@ class Tests {
 	{
 	}
 
-	static interface IBasicTests1_impl extends IObject_impl
+	static interface IStarterTests_impl extends IObject_impl
 	{
-		byte AddU8(byte l, byte r);
+		int Increment(int value);
 	}
 
-	static class IBasicTests1_accessor implements Accessor
+	static class IStarterTests_accessor implements Accessor
 	{
 		private Object obj;
 		private AccessorsContainer accessorsContainer;
 
-		public IBasicTests1_accessor(Object obj, AccessorsContainer accessorsContainer)
+		public IStarterTests_accessor(Object obj, AccessorsContainer accessorsContainer)
 		{
 			this.obj = obj;
 			this.accessorsContainer = accessorsContainer;
-			System.out.println("JAVA: IBasicTests1_accessor(" + obj + ", " + accessorsContainer + ")");
 		}
 
 		public boolean implementsInterface(InterfaceId id)
-		{ return id.getId() == "IObject" || id.getId() == "IBasicTests1"; }
+		{ return "joint.IObject".equals(id.getId()) || "test.IStarterTests".equals(id.getId()); }
 
 		public Accessor cast(InterfaceId id)
-		{
-			try 
-			{
-				System.out.println("JAVA: IBasicTests1_accessor.cast(...)");
-				System.out.println("JAVA: id is " + id.toString());
-				System.out.println("JAVA: accessorsContainer is " + accessorsContainer);
-				return accessorsContainer.cast(id);
-			}
-			catch (Throwable t)
-			{
-				t.printStackTrace();
-				return null;
-			}
-		}
+		{ return accessorsContainer.cast(id); }
 
 		public Object invokeMethod(int methodId, Object[] params)
 		{
-			IBasicTests1_impl impl = (IBasicTests1_impl)obj;
+			System.out.println("JAVA: invokeMethod(" + methodId + ", <" + params.length + " params>)");
+			IStarterTests_impl impl = (IStarterTests_impl)obj;
 			switch (methodId)
 			{
-			case 0: return (Byte)impl.AddU8((Byte)params[0], (Byte)params[1]);
+			case 0: return (Integer)impl.Increment((Integer)params[0]);
 			}
 			return null;
 		}
@@ -76,36 +63,28 @@ class Tests {
 	///////////////////////////////////////////////////////////////
 
 
-	static class Component implements IBasicTests1_impl
+	static class Component implements IStarterTests_impl
 	{
 		public AccessorsContainer accessorsContainer;
 
 		Component()
 		{
 			accessorsContainer = new AccessorsContainer();
-			accessorsContainer.addAccessor(new IBasicTests1_accessor(this, accessorsContainer));
+			accessorsContainer.addAccessor(new IStarterTests_accessor(this, accessorsContainer));
 		}
 
-		public byte AddU8(byte l, byte r)
+		public int Increment(int value)
 		{
-			System.out.println("JAVA: AddU8");
-			return (byte)(l + r);
+			System.out.println("JAVA COMPONENT: Increment");
+			return value + 1;
 		}
 	}
 
 	public static JointObject GetTests(ModuleContext module)
 	{
-		try
-		{
-			System.out.println("JAVA: GetTests");
+		System.out.println("JAVA: GetTests");
 
-			Component c = new Component();
-			return module.register(c.accessorsContainer.cast(new InterfaceId("IBasicTests1")));
-		}
-		catch (Throwable t)
-		{
-			t.printStackTrace();
-			return null;
-		}
+		Component c = new Component();
+		return module.register(c.accessorsContainer.cast(new InterfaceId("test.IStarterTests")));
 	}
 }

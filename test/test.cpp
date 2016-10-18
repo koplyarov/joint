@@ -7,6 +7,7 @@
 #include <Tests_adapters.hpp>
 #include <test/core/Tests.hpp>
 #include <test/tests/TestCtx.hpp>
+#include <test/tests/StarterTests.hpp>
 #include <test/tests/BasicTests.hpp>
 #include <test/tests/CastTests.hpp>
 #include <test/tests/EnumTests.hpp>
