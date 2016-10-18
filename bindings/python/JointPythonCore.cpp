@@ -121,7 +121,7 @@ PyMODINIT_FUNC JointPythonCore_InitModule_py2(void)
 	ADD_TYPE_TO_PYTHON_MODULE(ProxyBase);
 	ADD_TYPE_TO_PYTHON_MODULE(TypeDescriptor);
 
-    InvalidInterfaceChecksumException = PyErr_NewException("pyjoint.InvalidInterfaceChecksumException", NULL, NULL);
+    InvalidInterfaceChecksumException = PyErr_NewException((STR_LITERAL_TYPE)"pyjoint.InvalidInterfaceChecksumException", NULL, NULL);
     Py_INCREF(InvalidInterfaceChecksumException);
     PyModule_AddObject(m, "InvalidInterfaceChecksumException", InvalidInterfaceChecksumException);
 
