@@ -18,11 +18,13 @@ namespace binding
 		JOINT_DEVKIT_LOGGER("Joint.Java.Object")
 
 	private:
-		JGlobalObjPtr     _obj;
+		JGlobalObjPtr     _accessor;
 
 	public:
-		Object(const JGlobalObjPtr& obj);
+		Object(const JGlobalObjPtr& accessor);
 		~Object();
+
+		JGlobalObjPtr GetAccessor() const { return _accessor; }
 	};
 
 }}

@@ -43,8 +43,8 @@ namespace binding
 
 
 
-	Object::Object(const JGlobalObjPtr& obj)
-		: _obj(obj)
+	Object::Object(const JGlobalObjPtr& accessor)
+		: _accessor(accessor)
 	{
 		GetLogger().Warning() << "Object ctor";
 	}

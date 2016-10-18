@@ -10,4 +10,8 @@ public class InterfaceId
 
 	public String getId()
 	{ return id; }
+
+	@Override
+	public String toString()
+	{ return (id != null) ? id : "<null id>"; }
 }

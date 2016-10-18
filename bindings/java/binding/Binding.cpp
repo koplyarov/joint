@@ -116,6 +116,24 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 
+		auto o = reinterpret_cast<Object*>(obj);
+		auto env = o->GetAccessor().GetEnv();
+		auto jvm = o->GetAccessor().GetJvm();
+
+		JLocalClassPtr iid_cls(jvm, env->FindClass("org/joint/InterfaceId"));
+		JOINT_CHECK(iid_cls, StringBuilder() % "Class org/joint/InterfaceId not found");
+		jmethodID iid_ctor_id = env->GetMethodID(iid_cls, "<init>", "(Ljava/lang/String;)V");
+		JOINT_CHECK(iid_ctor_id, "org.joint.InterfaceId constructor not found!");
+		JLocalObjPtr iid(jvm, env->NewObject(iid_cls, iid_ctor_id, env->NewStringUTF(interfaceId)));
+		JOINT_CHECK(iid, "Could not create org.joint.InterfaceId object!");
+
+		JLocalClassPtr accessor_cls(jvm, env->FindClass("org/joint/Accessor"));
+		JOINT_CHECK(accessor_cls, StringBuilder() % "Class org/joint/Accessor not found");
+		jmethodID cast_id = env->GetMethodID(accessor_cls, "cast", "(Lorg/joint/InterfaceId;)Lorg/joint/Accessor;");
+		JOINT_CHECK(cast_id, "org.joint.Accessor.cast method not found!");
+		JLocalObjPtr new_accessor(jvm, env->CallObjectMethod(o->GetAccessor().Get(), cast_id, iid.Get()));
+		JOINT_CHECK(new_accessor, "org.joint.Accessor.cast method failed!");
+
 		JOINT_THROW("Not implemented");
 		//auto accessor = reinterpret_cast<JointC_Accessor*>(obj);
 		//const JointC_Accessor* result = nullptr;

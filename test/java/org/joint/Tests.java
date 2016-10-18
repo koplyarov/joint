@@ -33,10 +33,36 @@ class Tests {
 
 	static class IBasicTests1_accessor implements Accessor
 	{
+		private Object obj;
+		private AccessorsContainer accessorsContainer;
+
+		public IBasicTests1_accessor(Object obj, AccessorsContainer accessorsContainer)
+		{
+			this.obj = obj;
+			this.accessorsContainer = accessorsContainer;
+			System.out.println("JAVA: IBasicTests1_accessor(" + obj + ", " + accessorsContainer + ")");
+		}
+
 		public boolean implementsInterface(InterfaceId id)
 		{ return id.getId() == "IObject" || id.getId() == "IBasicTests1"; }
 
-		public Object invokeMethod(Object obj, int methodId, Object[] params)
+		public Accessor cast(InterfaceId id)
+		{
+			try 
+			{
+				System.out.println("JAVA: IBasicTests1_accessor.cast(...)");
+				System.out.println("JAVA: id is " + id.toString());
+				System.out.println("JAVA: accessorsContainer is " + accessorsContainer);
+				return accessorsContainer.cast(id);
+			}
+			catch (Throwable t)
+			{
+				t.printStackTrace();
+				return null;
+			}
+		}
+
+		public Object invokeMethod(int methodId, Object[] params)
 		{
 			IBasicTests1_impl impl = (IBasicTests1_impl)obj;
 			switch (methodId)
@@ -50,10 +76,15 @@ class Tests {
 	///////////////////////////////////////////////////////////////
 
 
-	static class Component extends AccessorsContainer implements IBasicTests1_impl
+	static class Component implements IBasicTests1_impl
 	{
+		public AccessorsContainer accessorsContainer;
+
 		Component()
-		{ super(new IBasicTests1_accessor()); }
+		{
+			accessorsContainer = new AccessorsContainer();
+			accessorsContainer.addAccessor(new IBasicTests1_accessor(this, accessorsContainer));
+		}
 
 		public byte AddU8(byte l, byte r)
 		{
@@ -69,7 +100,7 @@ class Tests {
 			System.out.println("JAVA: GetTests");
 
 			Component c = new Component();
-			return module.register(c.cast(new InterfaceId("IBasicTests1")));
+			return module.register(c.accessorsContainer.cast(new InterfaceId("IBasicTests1")));
 		}
 		catch (Throwable t)
 		{
