@@ -45,17 +45,25 @@ namespace joint_java
 	public:
 		template < template < typename > class RefPolicy >
 		StringDataHolder(const BasicJPtr<jstring, RefPolicy>& str)
-			: _env(str.GetEnv()), _strObj(str.Get())
-		{
-			jboolean is_copy = false;
-			_data = _env->GetStringUTFChars(_strObj, &is_copy);
-		}
+		{ Init(str.GetEnv(), str.Get()); }
+
+		StringDataHolder(JNIEnv* env, jstring str)
+		{ Init(env, str); }
 
 		~StringDataHolder()
 		{ _env->ReleaseStringUTFChars(_strObj, _data); }
 
 		const char* GetData() const
 		{ return _data; }
+
+	private:
+		void Init(JNIEnv* env, jstring str)
+		{
+			_env = env;
+			_strObj = str;
+			jboolean is_copy = false;
+			_data = _env->GetStringUTFChars(_strObj, &is_copy);
+		}
 	};
 
 

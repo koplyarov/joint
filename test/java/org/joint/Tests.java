@@ -4,13 +4,29 @@ import org.joint.*;
 
 
 class Tests {
+	static class Types
+	{
+		public static TypeDescriptor i32 = new TypeDescriptor(7, "I");
+	}
+
+
 	static class IObject
 	{
+		public static InterfaceId id = new InterfaceId("joint.IObject");
+		public static InterfaceDescriptor desc = new InterfaceDescriptor();
 	}
 
 	static class IStarterTests
 	{
-		private JointObject obj;
+		public static InterfaceId id = new InterfaceId("test.IStarterTests");
+		public static InterfaceDescriptor desc = new InterfaceDescriptor(
+			new MethodDescriptor(IStarterTests.class, "Increment", Types.i32, new TypeDescriptor[]{ Types.i32 })
+		);
+
+		public static IStarterTests makeComponent(ModuleContext module, AccessorsContainer accessorsContainer)
+		{ return new IStarterTests(module.register(accessorsContainer.cast(id))); }
+
+		public JointObject obj;
 
 		IStarterTests(JointObject obj)
 		{ this.obj = obj; }
@@ -18,7 +34,9 @@ class Tests {
 		int Increment(int value)
 		{
 			System.out.println("JAVA PROXY: Increment");
-			return (int)obj.invokeMethod(0, value);
+			Object r = obj.invokeMethod(0, value);
+			System.out.println("PROXY RETURN " + r);
+			return (int)r;
 		}
 	}
 
@@ -33,44 +51,49 @@ class Tests {
 
 	static class IStarterTests_accessor implements Accessor
 	{
-		private Object obj;
+		private IStarterTests_impl obj;
 		private AccessorsContainer accessorsContainer;
 
-		public IStarterTests_accessor(Object obj, AccessorsContainer accessorsContainer)
+		public <T extends AccessorsContainer & IStarterTests_impl> IStarterTests_accessor(T component)
+		{
+			this.obj = component;
+			this.accessorsContainer = component;
+		}
+
+		public IStarterTests_accessor(IStarterTests_impl obj, AccessorsContainer accessorsContainer)
 		{
 			this.obj = obj;
 			this.accessorsContainer = accessorsContainer;
 		}
 
 		public boolean implementsInterface(InterfaceId id)
-		{ return "joint.IObject".equals(id.getId()) || "test.IStarterTests".equals(id.getId()); }
+		{ return IStarterTests.id.equals(id) || IObject.id.equals(id); }
 
 		public Accessor cast(InterfaceId id)
 		{ return accessorsContainer.cast(id); }
 
 		public Object invokeMethod(int methodId, Object[] params)
 		{
-			System.out.println("JAVA: invokeMethod(" + methodId + ", <" + params.length + " params>)");
-			IStarterTests_impl impl = (IStarterTests_impl)obj;
 			switch (methodId)
 			{
-			case 0: return (Integer)impl.Increment((Integer)params[0]);
+			//case 0: return (Integer)obj.Increment((Integer)params[0]);
+			case 0:
+				Object r = obj.Increment((Integer)params[0]);
+				System.out.println("COMPONENT RETURN " + r);
+				return (Integer)r;
+			default: return null;
 			}
-			return null;
 		}
 	}
 
 	///////////////////////////////////////////////////////////////
 
 
-	static class Component implements IStarterTests_impl
+	static class Component extends AccessorsContainer implements IStarterTests_impl
 	{
-		public AccessorsContainer accessorsContainer;
-
 		Component()
 		{
-			accessorsContainer = new AccessorsContainer();
-			accessorsContainer.addAccessor(new IStarterTests_accessor(this, accessorsContainer));
+			addAccessor(new IStarterTests_accessor(this));
 		}
 
 		public int Increment(int value)
@@ -85,6 +108,10 @@ class Tests {
 		System.out.println("JAVA: GetTests");
 
 		Component c = new Component();
-		return module.register(c.accessorsContainer.cast(new InterfaceId("test.IStarterTests")));
+		IStarterTests t = IStarterTests.makeComponent(module, c);
+		System.out.println("========================");
+		System.out.println(t.Increment(4));
+		System.out.println("========================");
+		return t.obj;
 	}
 }

@@ -15,7 +15,8 @@ namespace joint_python
 	{
 	public:
 		using MemberId = PyObjectHolder;
-		using UserData = PyObjectHolder;
+		using TypeUserData = PyObjectHolder;
+		struct MethodUserData { };
 
 	private:
 		std::vector<PyObject*>&   _objects;
@@ -30,6 +31,9 @@ namespace joint_python
 		PyObjectHolder GetObjectUserData(PyObject* typeNode) const;
 		PyObjectHolder GetEnumUserData(PyObject* typeNode) const;
 		PyObjectHolder GetStructUserData(PyObject* typeNode) const;
+
+		MethodUserData GetMethodUserData(PyObject* methodNode) const
+		{ return MethodUserData(); }
 
 		PyObject* GetRetTypeNode(PyObject* methodNode) const;
 		PyObject* GetArrayElementTypeNode(PyObject* typeNode) const;

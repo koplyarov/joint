@@ -17,7 +17,7 @@ namespace devkit
 	{
 		class MemberInfo;
 
-		using UserData = typename BindingInfo_::UserData;
+		using TypeUserData = typename BindingInfo_::TypeUserData;
 		using MemberId = typename BindingInfo_::MemberId;
 		using MembersArray = ArrayHolder<MemberInfo>;
 
@@ -26,7 +26,7 @@ namespace devkit
 		std::unique_ptr<TypeDescriptor> _arrayElementType;
 		Joint_Type             _jointType;
 		size_t                 _membersCount = 0;
-		UserData               _userData;
+		TypeUserData               _userData;
 
 	public:
 		TypeDescriptor()
@@ -115,7 +115,7 @@ namespace devkit
 			return *_arrayElementType;
 		}
 
-		const UserData& GetUserData() const { return _userData; }
+		const TypeUserData& GetUserData() const { return _userData; }
 	};
 
 
@@ -144,6 +144,7 @@ namespace devkit
 	template < typename BindingInfo_ >
 	class MethodDescriptor
 	{
+		using MethodUserData = typename BindingInfo_::MethodUserData;
 		using TypeDescriptor = joint::devkit::TypeDescriptor<BindingInfo_>;
 		using TypeDescriptorArray = ArrayHolder<TypeDescriptor>;
 
@@ -151,11 +152,13 @@ namespace devkit
 		TypeDescriptor        _retType;
 		TypeDescriptorArray   _paramTypes;
 		size_t                _paramsCount = 0;
+		MethodUserData        _userData;
 
 	public:
 		template < typename NodeType_, typename DataObtainer_ >
 		void Init(const NodeType_& node, const DataObtainer_& dataObtainer)
 		{
+			_userData = dataObtainer.GetMethodUserData(node);
 			_retType.Init(dataObtainer.GetRetTypeNode(node), dataObtainer);
 
 			auto params_obtainer = dataObtainer.GetParamsNodes(node);

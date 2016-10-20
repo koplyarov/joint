@@ -104,8 +104,6 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		printf("JBINDING: InvokeMethod\n");
-
 		auto o = reinterpret_cast<Object*>(obj);
 		auto env = o->GetAccessor().GetEnv();
 		auto jvm = o->GetAccessor().GetJvm();

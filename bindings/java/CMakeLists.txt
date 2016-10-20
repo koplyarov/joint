@@ -9,9 +9,12 @@ set(JAVA_SOURCES
 	org/joint/Accessor.java
 	org/joint/AccessorsContainer.java
 	org/joint/Component.java
+	org/joint/InterfaceDescriptor.java
 	org/joint/InterfaceId.java
 	org/joint/JointObject.java
+	org/joint/MethodDescriptor.java
 	org/joint/ModuleContext.java
+	org/joint/TypeDescriptor.java
 	org/joint/Utils.java
 )
 
@@ -31,6 +34,7 @@ add_custom_command(
 	-jni
 	-o "${CMAKE_CURRENT_BINARY_DIR}/JointJNI.h"
 	-classpath "${JOINT_JAR_CLASSDIR}"
+	org.joint.InterfaceDescriptor
 	org.joint.JointObject
 	org.joint.ModuleContext
 )
@@ -54,6 +58,7 @@ include_directories(${JNI_INCLUDE_DIRS})
 add_library(joint-java SHARED 
 	JointJava.cpp
 	binding/Binding.cpp
+	binding/JavaBindingInfo.cpp
 	binding/Module.cpp
 	binding/Object.cpp
 	jni/JointJNI.cpp

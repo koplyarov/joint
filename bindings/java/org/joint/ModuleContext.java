@@ -10,10 +10,5 @@ public class ModuleContext
 	ModuleContext(long handle)
 	{ this.handle = handle; }
 
-	//public <Interface> makeComponent(Accessor accessor)
-	//{
-		//JointObject o = register(accessor);
-	//}
-
 	public native JointObject register(Accessor accessor);
 }
