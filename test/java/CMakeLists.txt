@@ -6,7 +6,7 @@ include(UseJava)
 set(CMAKE_JAVA_INCLUDE_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/joint.jar)
 
 add_jar(tests
-	SOURCES org/joint/Tests.java
+	SOURCES Tests.java
     OUTPUT_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
 

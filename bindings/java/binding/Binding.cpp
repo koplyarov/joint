@@ -94,17 +94,21 @@ namespace binding
 	}
 
 
-	static Joint_Error ReleaseRetValue(Joint_Type type, Joint_Value value)
-	{
-		printf("ReleaseRetValue\n");
-		return JOINT_ERROR_NONE;
-	}
+	//static Joint_Error ReleaseRetValue(Joint_Type type, Joint_Value value)
+	//{
+		//printf("ReleaseRetValue\n");
+		//return JOINT_ERROR_NONE;
+	//}
 
 	Joint_Error Binding::InvokeMethod(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
 		auto o = reinterpret_cast<Object*>(obj);
+
+		return o->InvokeMethod(methodId, joint::ArrayView<const Joint_Parameter>(params, paramsCount), retType, outRetValue);
+
+#if 0
 		auto env = o->GetAccessor().GetEnv();
 		auto jvm = o->GetAccessor().GetJvm();
 
@@ -149,6 +153,7 @@ namespace binding
 		}
 
 		outRetValue->releaseValue = &ReleaseRetValue;
+#endif
 
 		JOINT_CPP_WRAP_END
 	}

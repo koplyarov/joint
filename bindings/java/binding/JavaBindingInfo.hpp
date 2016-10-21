@@ -4,6 +4,7 @@
 
 #include <joint/Joint.h>
 #include <joint/devkit/InterfaceDescriptor.hpp>
+#include <joint/devkit/Logger.hpp>
 
 #include <vector>
 
@@ -16,6 +17,8 @@ namespace joint_java
 
 	class JavaBindingInfo
 	{
+		JOINT_DEVKIT_LOGGER("Joint.Java.JavaBindingInfo")
+
 	public:
 		struct MemberId
 		{ };

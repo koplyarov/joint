@@ -4,7 +4,7 @@ import org.joint.*;
 
 
 class Tests {
-	static class Types
+	static class BuiltinTypes
 	{
 		public static TypeDescriptor i32 = new TypeDescriptor(7, "I");
 	}
@@ -20,7 +20,7 @@ class Tests {
 	{
 		public static InterfaceId id = new InterfaceId("test.IStarterTests");
 		public static InterfaceDescriptor desc = new InterfaceDescriptor(
-			new MethodDescriptor(IStarterTests.class, "Increment", Types.i32, new TypeDescriptor[]{ Types.i32 })
+			new MethodDescriptor(IStarterTests_impl.class, "Increment", BuiltinTypes.i32, new TypeDescriptor[]{ BuiltinTypes.i32 })
 		);
 
 		public static IStarterTests makeComponent(ModuleContext module, AccessorsContainer accessorsContainer)
@@ -33,7 +33,7 @@ class Tests {
 
 		int Increment(int value)
 		{
-			System.out.println("JAVA PROXY: Increment");
+			System.out.println("JAVA PROXY: Increment(" + value + ")");
 			Object r = obj.invokeMethod(0, value);
 			System.out.println("PROXY RETURN " + r);
 			return (int)r;
@@ -66,6 +66,9 @@ class Tests {
 			this.accessorsContainer = accessorsContainer;
 		}
 
+		public Object getObj()
+		{ return obj; }
+
 		public boolean implementsInterface(InterfaceId id)
 		{ return IStarterTests.id.equals(id) || IObject.id.equals(id); }
 
@@ -84,6 +87,9 @@ class Tests {
 			default: return null;
 			}
 		}
+
+		public InterfaceDescriptor getInterfaceDescriptor()
+		{ return IStarterTests.desc; }
 	}
 
 	///////////////////////////////////////////////////////////////
@@ -98,7 +104,7 @@ class Tests {
 
 		public int Increment(int value)
 		{
-			System.out.println("JAVA COMPONENT: Increment");
+			System.out.println("JAVA COMPONENT: Increment(" + value + ")");
 			return value + 1;
 		}
 	}

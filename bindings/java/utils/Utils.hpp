@@ -72,7 +72,7 @@ namespace joint_java
 	{
 		using namespace joint::devkit;
 
-		JNIEnv* env = GetJavaEnv(jvm);
+		JNIEnv* env = detail_JPtr::GetJavaEnv(jvm);
 		if (env->ExceptionCheck())
 		{
 			StringBuilder sb;

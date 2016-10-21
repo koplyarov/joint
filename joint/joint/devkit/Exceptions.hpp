@@ -17,7 +17,7 @@ namespace devkit
 	T_ RequireNotNull(T_&& arg, const char* msg)
 	{
 		if (!arg)
-			JOINT_THROW(msg);
+			DETAIL_JOINT_THROW_IMPL(msg);
 		return arg;
 	}
 

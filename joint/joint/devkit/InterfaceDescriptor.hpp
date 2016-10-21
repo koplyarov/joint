@@ -3,6 +3,7 @@
 
 
 #include <joint/devkit/ArrayHolder.hpp>
+#include <joint/devkit/Logger.hpp>
 #include <joint/utils/JointException.hpp>
 
 #include <memory>
@@ -20,6 +21,8 @@ namespace devkit
 		using TypeUserData = typename BindingInfo_::TypeUserData;
 		using MemberId = typename BindingInfo_::MemberId;
 		using MembersArray = ArrayHolder<MemberInfo>;
+
+		JOINT_DEVKIT_LOGGER("Joint.Devkit.TypeDescriptor")
 
 	private:
 		MembersArray           _members;
@@ -148,6 +151,8 @@ namespace devkit
 		using TypeDescriptor = joint::devkit::TypeDescriptor<BindingInfo_>;
 		using TypeDescriptorArray = ArrayHolder<TypeDescriptor>;
 
+		JOINT_DEVKIT_LOGGER("Joint.Devkit.MethodDescriptor")
+
 	private:
 		TypeDescriptor        _retType;
 		TypeDescriptorArray   _paramTypes;
@@ -169,6 +174,8 @@ namespace devkit
 				_paramTypes[i].Init(params_obtainer.Get(i), dataObtainer);
 		}
 
+		const MethodUserData& GetUserData() const { return _userData; }
+
 		const TypeDescriptor& GetRetType() const { return _retType; }
 
 		const TypeDescriptor& GetParamType(size_t index) const
@@ -186,6 +193,8 @@ namespace devkit
 	{
 		using MethodDescriptor = joint::devkit::MethodDescriptor<BindingInfo_>;
 		using MethodArray = ArrayHolder<MethodDescriptor>;
+
+		JOINT_DEVKIT_LOGGER("Joint.Devkit.InterfaceDescriptor")
 
 	private:
 		MethodArray   _methods;

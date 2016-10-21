@@ -19,6 +19,8 @@ namespace devkit
 
 	class ValueMarshaller
 	{
+		JOINT_DEVKIT_LOGGER("Joint.Devkit.ValueMarshaller")
+
 	public:
 		template < typename WrappedType_, typename ValueWrapper_, typename UserData_ >
 		static WrappedType_ FromJoint(ValueDirection dir, const TypeDescriptor<UserData_>& type, const Joint_Value& value, const ValueWrapper_& wrapper)

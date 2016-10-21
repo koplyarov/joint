@@ -19,8 +19,10 @@ namespace joint
 
 #define JOINT_SOURCE_LOCATION __FILE__ ":" JOINT_PP_STR(__LINE__)
 
-#define JOINT_THROW(...) do { throw ::joint::MakeException(__VA_ARGS__); } while (false)
-#define JOINT_CHECK(Expr_, ...) do { if (!(Expr_)) { GetLogger().Error() << "JOINT_CHECK failed: " #Expr_ " in function " << __func__ << " at " << JOINT_SOURCE_LOCATION; JOINT_THROW(__VA_ARGS__); } } while (false)
+#define DETAIL_JOINT_THROW_IMPL(...) do { throw ::joint::MakeException(__VA_ARGS__); } while (false)
+
+#define JOINT_THROW(...) do { GetLogger().Error() << "JOINT_THROW in function " << __func__ << " at " << JOINT_SOURCE_LOCATION; throw ::joint::MakeException(__VA_ARGS__); } while (false)
+#define JOINT_CHECK(Expr_, ...) do { if (!(Expr_)) { GetLogger().Error() << "JOINT_CHECK failed: " #Expr_ " in function " << __func__ << " at " << JOINT_SOURCE_LOCATION; DETAIL_JOINT_THROW_IMPL(__VA_ARGS__); } } while (false)
 #define JOINT_CHECK_NOTHROW(Expr_, ...) do { if (!(Expr_)) { GetLogger().Error() << "JOINT_CHECK failed: " #Expr_ " in function " << __func__ << " at " << JOINT_SOURCE_LOCATION << ", returning " << (__VA_ARGS__); return (__VA_ARGS__); } } while (false)
 
 #define JOINT_TERMINATE(LoggerName_, Msg_) do { Joint_Log(JOINT_LOGLEVEL_ERROR, LoggerName_, "JOINT_TERMINATE: %s at %s", #Msg_, JOINT_SOURCE_LOCATION); std::terminate(); } while (false)

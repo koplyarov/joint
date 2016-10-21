@@ -1,13 +1,8 @@
 #include <binding/JavaBindingInfo.hpp>
 
-#include <joint/devkit/Logger.hpp>
-
 
 namespace joint_java
 {
-
-	//JOINT_DEVKIT_LOGGER("Joint.Java.JavaBindingInfo")
-
 
 	Joint_TypeId JavaBindingInfo::GetJointTypeId(const JLocalObjPtr& typeNode) const
 	{
