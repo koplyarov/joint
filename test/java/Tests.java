@@ -8,6 +8,14 @@ class Tests {
 	{
 		public static InterfaceId id = new InterfaceId("joint.IObject");
 		public static InterfaceDescriptor desc = new InterfaceDescriptor();
+
+		public static IObject makeComponent(ModuleContext module, AccessorsContainer accessorsContainer)
+		{ return new IObject(module.register(accessorsContainer.cast(id))); }
+
+		public JointObject obj;
+
+		IObject(JointObject obj)
+		{ this.obj = obj; }
 	}
 
 	static class IStarterTests
@@ -29,6 +37,8 @@ class Tests {
 		{ return (int)obj.invokeMethod(desc.getNative(), 0, value); }
 	}
 
+	/////////
+
 	static interface IObject_impl
 	{
 	}
@@ -38,21 +48,42 @@ class Tests {
 		int Increment(int value);
 	}
 
-	static class IStarterTests_accessor implements Accessor
+	/////////
+
+	static class IObject_accessor extends AccessorBase implements Accessor
+	{
+		private IObject_impl obj;
+
+		public <T extends AccessorsContainer & IObject_impl> IObject_accessor(T component)
+		{ this(component, component); }
+
+		public IObject_accessor(IObject_impl obj, AccessorsContainer accessorsContainer)
+		{
+			super(accessorsContainer);
+			this.obj = obj;
+		}
+
+		public Object getObj()
+		{ return obj; }
+
+		public boolean implementsInterface(InterfaceId id)
+		{ return IObject.id.equals(id); }
+
+		public InterfaceDescriptor getInterfaceDescriptor()
+		{ return IObject.desc; }
+	}
+
+	static class IStarterTests_accessor extends AccessorBase implements Accessor
 	{
 		private IStarterTests_impl obj;
-		private AccessorsContainer accessorsContainer;
 
 		public <T extends AccessorsContainer & IStarterTests_impl> IStarterTests_accessor(T component)
-		{
-			this.obj = component;
-			this.accessorsContainer = component;
-		}
+		{ this(component, component); }
 
 		public IStarterTests_accessor(IStarterTests_impl obj, AccessorsContainer accessorsContainer)
 		{
+			super(accessorsContainer);
 			this.obj = obj;
-			this.accessorsContainer = accessorsContainer;
 		}
 
 		public Object getObj()
@@ -60,9 +91,6 @@ class Tests {
 
 		public boolean implementsInterface(InterfaceId id)
 		{ return IStarterTests.id.equals(id) || IObject.id.equals(id); }
-
-		public Accessor cast(InterfaceId id)
-		{ return accessorsContainer.cast(id); }
 
 		public InterfaceDescriptor getInterfaceDescriptor()
 		{ return IStarterTests.desc; }
@@ -89,8 +117,7 @@ class Tests {
 	{
 		System.out.println("JAVA: GetTests");
 
-		Component c = new Component();
-		IStarterTests t = IStarterTests.makeComponent(module, c);
+		IStarterTests t = IStarterTests.makeComponent(module, new Component());
 		System.out.println("========================");
 		System.out.println(t.Increment(4));
 		System.out.println("========================");

@@ -60,7 +60,7 @@ namespace binding
 			jparams = params_storage.Make(params.size());
 
 			for (size_t i = 0; i < params.size(); ++i)
-				jparams[i] = ValueMarshaller::FromJoint<jvalue>(ValueDirection::Parameter, m_desc.GetParamType(i), params[i].value, JavaMarshaller());
+				jparams[i] = ValueMarshaller::FromJoint<jvalue>(ValueDirection::Parameter, m_desc.GetParamType(i), params[i].value, JavaAccessorMarshaller());
 		}
 
 		jvalue j_res;
@@ -76,7 +76,7 @@ namespace binding
 		default:
 			JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
 		}
-		outRetValue->result.value = ValueMarshaller::ToJoint(ValueDirection::Return, m_desc.GetRetType(), j_res, JavaMarshaller(), alloc);
+		outRetValue->result.value = ValueMarshaller::ToJoint(ValueDirection::Return, m_desc.GetRetType(), j_res, JavaAccessorMarshaller(), alloc);
 
 		outRetValue->releaseValue = &Object::ReleaseRetValue;
 		return JOINT_ERROR_NONE;

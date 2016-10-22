@@ -47,9 +47,9 @@ namespace java
 	};
 
 
-	class JavaMarshaller
+	class JavaAccessorMarshaller
 	{
-		JOINT_DEVKIT_LOGGER("Joint.Java.JavaMarshaller")
+		JOINT_DEVKIT_LOGGER("Joint.Java.JavaAccessorMarshaller")
 
 	public:
 		using JavaVariant = jvalue;
@@ -117,6 +117,93 @@ namespace java
 
 		template < typename MemberInfo_ >
 		jvalue GetStructMember(jvalue val, size_t i, const MemberInfo_& memberInfo, const JavaBindingInfo::TypeUserData& structType) const
+		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+	};
+
+
+	class JavaProxyMarshaller
+	{
+		JOINT_DEVKIT_LOGGER("Joint.Java.JavaProxyMarshaller")
+
+	public:
+		using JavaVariant = jobject;
+
+	private:
+		JavaVM*    jvm;
+		JNIEnv*    env;
+
+	public:
+		JavaProxyMarshaller(JavaVM* jvm, JNIEnv* env)
+			: jvm(jvm), env(env)
+		{ }
+
+		JavaVariant FromJointUtf8(const char* val) const  { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+
+		JavaVariant FromJointEnum(int32_t val, const JavaBindingInfo::TypeUserData& enumType) const
+		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+
+		JavaVariant FromJointObj(devkit::ValueDirection dir, Joint_ObjectHandle val, const JavaBindingInfo::TypeUserData& proxyType, Joint_InterfaceChecksum checksum) const
+		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+
+		JavaVariant FromJointArray(devkit::ValueDirection dir, Joint_ArrayHandle val, const JavaBindingInfo::TypeUserData& elementTypeDesc) const
+		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+
+		class ParamsArray
+		{
+		public:
+			void Set(size_t index, JavaVariant param)
+			{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		};
+
+		ParamsArray MakeParamsArray(size_t size) const { return ParamsArray(); }
+
+		JavaVariant MakeStruct(const ParamsArray& params, const JavaBindingInfo::TypeUserData& structType) const
+		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+
+#define DETAIL_JOINT_JAVA_PROXY_SIMPLE_TYPE_MARSHALLING(TypeName_, CppType_, JType_, ClassName_, ValueGetterName_, MangledType_) \
+			CppType_ ToJoint##TypeName_(const JLocalObjPtr& val) const \
+			{ \
+				JLocalClassPtr cls(env, JAVA_CALL(env->FindClass(ClassName_))); \
+				jmethodID method_id = JAVA_CALL(env->GetMethodID(cls, ValueGetterName_, "()" MangledType_)); \
+				return static_cast<CppType_>(JAVA_CALL(env->CallIntMethod(val.Get(), method_id))); \
+			} \
+			JavaVariant FromJoint##TypeName_(CppType_ val) const \
+			{ \
+				JLocalClassPtr cls(env, JAVA_CALL(env->FindClass(ClassName_))); \
+				jmethodID ctor_id = JAVA_CALL(env->GetMethodID(cls, "<init>", "(" MangledType_ ")V")); \
+				return JAVA_CALL(env->NewObject(cls, ctor_id, (JType_)val)); \
+			}
+
+		DETAIL_JOINT_JAVA_PROXY_SIMPLE_TYPE_MARSHALLING(Bool, Joint_Bool, jboolean, "java/lang/Boolean", "booleanValue", "Z")
+		DETAIL_JOINT_JAVA_PROXY_SIMPLE_TYPE_MARSHALLING(U8,   uint8_t,    jbyte,    "java/lang/Byte",    "byteValue",    "B")
+		DETAIL_JOINT_JAVA_PROXY_SIMPLE_TYPE_MARSHALLING(I8,   int8_t,     jbyte,    "java/lang/Byte",    "byteValue",    "B")
+		DETAIL_JOINT_JAVA_PROXY_SIMPLE_TYPE_MARSHALLING(U16,  uint16_t,   jshort,   "java/lang/Short",   "shortValue",   "S")
+		DETAIL_JOINT_JAVA_PROXY_SIMPLE_TYPE_MARSHALLING(I16,  int16_t,    jshort,   "java/lang/Short",   "shortValue",   "S")
+		DETAIL_JOINT_JAVA_PROXY_SIMPLE_TYPE_MARSHALLING(U32,  uint32_t,   jint,     "java/lang/Integer", "intValue",     "I")
+		DETAIL_JOINT_JAVA_PROXY_SIMPLE_TYPE_MARSHALLING(I32,  int32_t,    jint,     "java/lang/Integer", "intValue",     "I")
+		DETAIL_JOINT_JAVA_PROXY_SIMPLE_TYPE_MARSHALLING(U64,  uint64_t,   jlong,    "java/lang/Long",    "longValue",    "J")
+		DETAIL_JOINT_JAVA_PROXY_SIMPLE_TYPE_MARSHALLING(I64,  int64_t,    jlong,    "java/lang/Long",    "longValue",    "J")
+		DETAIL_JOINT_JAVA_PROXY_SIMPLE_TYPE_MARSHALLING(F32,  float,      jfloat,   "java/lang/Float",   "floatValue",   "F")
+		DETAIL_JOINT_JAVA_PROXY_SIMPLE_TYPE_MARSHALLING(F64,  double,     jdouble,  "java/lang/Double",  "doubleValue",  "D")
+
+#undef DETAIL_JOINT_JAVA_PROXY_SIMPLE_TYPE_MARSHALLING
+
+		int32_t ToJointEnum(const JLocalObjPtr& val, const JavaBindingInfo::TypeUserData& enumType) const
+		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+
+		Joint_ObjectHandle ToJointObj(devkit::ValueDirection dir, const JLocalObjPtr& val, const JavaBindingInfo::TypeUserData& objType) const
+		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+
+		Joint_ArrayHandle ToJointArray(devkit::ValueDirection dir, const JLocalObjPtr& val, const JavaBindingInfo::TypeUserData& objType) const
+		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+
+		template < typename Allocator_ >
+		const char* ToJointUtf8(const JLocalObjPtr& val, Allocator_& alloc) const
+		//{ return alloc.AllocateUtf8(val); }
+		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+
+		template < typename MemberInfo_ >
+		const JLocalObjPtr& GetStructMember(const JLocalObjPtr& val, size_t i, const MemberInfo_& memberInfo, const JavaBindingInfo::TypeUserData& structType) const
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 	};
 

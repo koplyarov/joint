@@ -54,22 +54,8 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod(JNIEnv* env,
 	{
 		const auto& t = method_desc.GetParamType(i);
 
-		jvalue p;
-		switch (t.GetJointType().id)
-		{
-		case JOINT_TYPE_I32:
-			{
-				JLocalObjPtr p_obj(env, JAVA_CALL(env->GetObjectArrayElement(jparams, i)));
-				JLocalClassPtr int_cls(env, JAVA_CALL(env->FindClass("java/lang/Integer")));
-				jmethodID intValue_id = JAVA_CALL(env->GetMethodID(int_cls, "intValue", "()I"));
-				p.i = JAVA_CALL(env->CallIntMethod(p_obj.Get(), intValue_id));
-			}
-			break;
-		default:
-			JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
-		}
-
-		Joint_Value v = ValueMarshaller::ToJoint(ValueDirection::Parameter, t, p, JavaMarshaller(), alloc);
+		JLocalObjPtr p(env, JAVA_CALL(env->GetObjectArrayElement(jparams, i)));
+		Joint_Value v = ValueMarshaller::ToJoint(ValueDirection::Parameter, t, p, JavaProxyMarshaller(jvm, env), alloc);
 		params[i] = Joint_Parameter{v, t.GetJointType()};
 	}
 
@@ -91,19 +77,7 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod(JNIEnv* env,
 		if (ret_type.id == JOINT_TYPE_VOID)
 			return nullptr;
 
-		jvalue jret_value = ValueMarshaller::FromJoint<jvalue>(ValueDirection::Return, method_desc.GetRetType(), ret_value.result.value, JavaMarshaller());
-		switch (ret_type.id)
-		{
-		case JOINT_TYPE_I32:
-			{
-				JLocalClassPtr int_cls(env, JAVA_CALL(env->FindClass("java/lang/Integer")));
-				jmethodID int_ctor_id = JAVA_CALL(env->GetMethodID(int_cls, "<init>", "(I)V"));
-				result = JAVA_CALL(env->NewObject(int_cls, int_ctor_id, jret_value.i));
-			}
-			break;
-		default:
-			JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
-		}
+		result = ValueMarshaller::FromJoint<jobject>(ValueDirection::Return, method_desc.GetRetType(), ret_value.result.value, JavaProxyMarshaller(jvm, env));
 	}
 	else
 		JOINT_THROW((std::string("Joint_InvokeMethod failed: ") + Joint_ErrorToString(ret)).c_str());
