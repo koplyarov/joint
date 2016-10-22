@@ -16,7 +16,7 @@ namespace python {
 namespace pyjoint
 {
 
-	using TypeDescriptorValue = joint::devkit::TypeDescriptor<PythonBindingInfo>;
+	using TypeDescriptorValue = devkit::TypeDescriptor<PythonBindingInfo>;
 
 	struct TypeDescriptor
 	{

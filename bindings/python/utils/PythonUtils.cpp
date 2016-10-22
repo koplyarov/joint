@@ -21,7 +21,7 @@ namespace python
 	bool GetPythonErrorMessage(PyObject* value, std::string& msg)
 	{ return PyObjectToStringNoExcept(value, msg); }
 
-	bool GetPythonErrorBacktrace(PyObject* traceback, std::vector<joint::devkit::StackFrameData>& backtrace)
+	bool GetPythonErrorBacktrace(PyObject* traceback, std::vector<devkit::StackFrameData>& backtrace)
 	{
 		if (!traceback)
 			return false;
@@ -77,7 +77,7 @@ namespace python
 			std::string function;
 			PyObjectToStringNoExcept(py_function, function);
 
-			backtrace.push_back(joint::devkit::StackFrameData("", filename, line, text, function));
+			backtrace.push_back(devkit::StackFrameData("", filename, line, text, function));
 		}
 
 		return true;
@@ -92,7 +92,7 @@ namespace python
 		if (!GetPythonErrorMessage(value, msg))
 			msg = "<No message>";
 
-		std::vector<joint::devkit::StackFrameData> bt;
+		std::vector<devkit::StackFrameData> bt;
 		GetPythonErrorBacktrace(traceback, bt);
 
 		return PythonErrorInfo(type, msg, bt);

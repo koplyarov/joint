@@ -28,9 +28,9 @@ namespace java
 			if (retcode == JNI_EDETACHED)
 				JOINT_THROW("Java VM is not attached to the current thread!");
 			if (retcode == JNI_EVERSION)
-				JOINT_THROW(joint::devkit::StringBuilder() % "Java VM does not support version " % (version >> 16) % "." % ((version >> 8) & 0xFF) % "." % (version & 0xFF));
+				JOINT_THROW(devkit::StringBuilder() % "Java VM does not support version " % (version >> 16) % "." % ((version >> 8) & 0xFF) % "." % (version & 0xFF));
 			if (retcode != JNI_OK)
-				JOINT_THROW(joint::devkit::StringBuilder() % "Cannot get JNIEnv from Java VM, retcode: " % retcode);
+				JOINT_THROW(devkit::StringBuilder() % "Cannot get JNIEnv from Java VM, retcode: " % retcode);
 			return env;
 		}
 	}

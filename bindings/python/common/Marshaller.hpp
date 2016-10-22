@@ -19,8 +19,8 @@ namespace python
 	class ParamsAllocator
 	{
 	private:
-		joint::devkit::StackStorage<Joint_Value, 64>     _members;
-		joint::devkit::StackStorage<PyBytesHolder, 64>   _strParams;
+		devkit::StackStorage<Joint_Value, 64>     _members;
+		devkit::StackStorage<PyBytesHolder, 64>   _strParams;
 
 	public:
 		const char* AllocateUtf8(PyObject* value)
@@ -70,9 +70,9 @@ namespace python
 			return PyObjectHolder(PY_OBJ_CHECK(PyObject_CallObject(enumType, enum_params)));
 		}
 
-		PyObjectHolder FromJointObj(joint::devkit::ValueDirection dir, Joint_ObjectHandle val, PyObject* proxyType, Joint_InterfaceChecksum checksum) const
+		PyObjectHolder FromJointObj(devkit::ValueDirection dir, Joint_ObjectHandle val, PyObject* proxyType, Joint_InterfaceChecksum checksum) const
 		{
-			using namespace joint::devkit;
+			using namespace devkit;
 
 			if (val == JOINT_NULL_HANDLE)
 			{
@@ -96,9 +96,9 @@ namespace python
 			return result;
 		}
 
-		PyObjectHolder FromJointArray(joint::devkit::ValueDirection dir, Joint_ArrayHandle val, PyObject* elementTypeDesc) const
+		PyObjectHolder FromJointArray(devkit::ValueDirection dir, Joint_ArrayHandle val, PyObject* elementTypeDesc) const
 		{
-			using namespace joint::devkit;
+			using namespace devkit;
 
 			if (val == JOINT_NULL_HANDLE)
 			{
@@ -162,9 +162,9 @@ namespace python
 			return FromPyLong<int32_t>(int_value);
 		}
 
-		Joint_ObjectHandle ToJointObj(joint::devkit::ValueDirection dir, PyObject* val, const PyObjectHolder& objType) const
+		Joint_ObjectHandle ToJointObj(devkit::ValueDirection dir, PyObject* val, const PyObjectHolder& objType) const
 		{
-			using namespace joint::devkit;
+			using namespace devkit;
 
 			if (val == Py_None)
 				return JOINT_NULL_HANDLE;
@@ -178,9 +178,9 @@ namespace python
 			return handle;
 		}
 
-		Joint_ArrayHandle ToJointArray(joint::devkit::ValueDirection dir, PyObject* val, const PyObjectHolder& objType) const
+		Joint_ArrayHandle ToJointArray(devkit::ValueDirection dir, PyObject* val, const PyObjectHolder& objType) const
 		{
-			using namespace joint::devkit;
+			using namespace devkit;
 
 			if (val == Py_None)
 				return JOINT_NULL_HANDLE;

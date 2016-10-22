@@ -68,7 +68,7 @@ namespace binding
 
 		Joint_Error ret = Joint_IncRefModule(module);
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, std::string("Joint_IncRefModule failed: ") + Joint_ErrorToString(ret));
-		joint::devkit::Holder<Joint_ModuleHandle> module_holder(module,
+		devkit::Holder<Joint_ModuleHandle> module_holder(module,
 			[&](Joint_ModuleHandle h) { auto ret = Joint_DecRefModule(h); if(ret != JOINT_ERROR_NONE) GetLogger().Error() << "Joint_DecRefModule failed: " << ret; });
 
 		PyObjectHolder py_params(PY_OBJ_CHECK(Py_BuildValue("(O)", py_module_handle.Get())));
@@ -76,7 +76,7 @@ namespace binding
 		module_holder.Release();
 
 		auto m = reinterpret_cast<Module*>(moduleInt);
-		PyObjectHolder py_proxy = PY_OBJ_CHECK_MSG(m->InvokeFunction(getterName, pyjoint_module), joint::devkit::StringBuilder() % "Root object getter '" % getterName % "' failed");
+		PyObjectHolder py_proxy = PY_OBJ_CHECK_MSG(m->InvokeFunction(getterName, pyjoint_module), devkit::StringBuilder() % "Root object getter '" % getterName % "' failed");
 		auto proxy = CastPyObject<pyjoint::ProxyBase>(py_proxy, &pyjoint::ProxyBase_type);
 		*outObject = proxy->obj;
 		Joint_IncRefObject(*outObject);

@@ -16,7 +16,7 @@ namespace python {
 namespace pyjoint
 {
 
-	using InterfaceDescriptorValue = joint::devkit::InterfaceDescriptor<PythonBindingInfo>;
+	using InterfaceDescriptorValue = devkit::InterfaceDescriptor<PythonBindingInfo>;
 
 	struct InterfaceDescriptor
 	{

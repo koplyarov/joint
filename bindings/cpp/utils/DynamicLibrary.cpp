@@ -27,7 +27,7 @@ namespace cpp
 		{
 			// TODO: add unicode support
 			_handle = LoadLibraryA((name + ".dll").c_str());
-			JOINT_CHECK(_handle != nullptr, joint::devkit::StringBuilder() % "dlopen failed: " % GetWinErrorMessage(GetLastError()));
+			JOINT_CHECK(_handle != nullptr, devkit::StringBuilder() % "dlopen failed: " % GetWinErrorMessage(GetLastError()));
 		}
 
 		~Impl()
@@ -54,7 +54,7 @@ namespace cpp
 					NULL))
 			{ return "Windows error " + std::to_string(err); }
 
-			joint::devkit::Holder<char*> h(buf, [](char* b){ LocalFree(b); });
+			devkit::Holder<char*> h(buf, [](char* b){ LocalFree(b); });
 			return buf;
 		}
 	};
@@ -70,7 +70,7 @@ namespace cpp
 		Impl(const std::string& name)
 		{
 			_handle = dlopen(("lib" + name + ".so").c_str(), RTLD_NOW | RTLD_DEEPBIND);
-			JOINT_CHECK(_handle != nullptr, joint::devkit::StringBuilder() % "dlopen failed: " % dlerror());
+			JOINT_CHECK(_handle != nullptr, devkit::StringBuilder() % "dlopen failed: " % dlerror());
 		}
 
 		~Impl()

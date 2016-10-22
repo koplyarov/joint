@@ -71,7 +71,7 @@ namespace java
 	template < typename T_ >
 	T_ JavaCallImpl(JavaVM *jvm, T_ result, const char* location)
 	{
-		using namespace joint::devkit;
+		using namespace devkit;
 
 		JNIEnv* env = detail_JPtr::GetJavaEnv(jvm);
 		if (env->ExceptionCheck())

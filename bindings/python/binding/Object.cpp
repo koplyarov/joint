@@ -16,7 +16,7 @@ namespace python {
 namespace binding
 {
 
-	using namespace joint::devkit;
+	using namespace devkit;
 
 
 	Object::Object(PyObjectHolder obj)
@@ -81,13 +81,13 @@ namespace binding
 			} while (false);
 
 
-			std::vector<joint::devkit::StackFrameData> bt;
+			std::vector<devkit::StackFrameData> bt;
 			GetPythonErrorBacktrace(traceback, bt);
 
 			std::vector<Joint_StackFrame> c_bt;
 			c_bt.reserve(bt.size() + (ex && ex->backtrace ? ex->backtrace->size() : 0));
 
-			auto tr_f = [](const joint::devkit::StackFrameData& sf) {
+			auto tr_f = [](const devkit::StackFrameData& sf) {
 					return Joint_StackFrame{sf.GetModule().c_str(), sf.GetFilename().c_str(), sf.GetLine(), sf.GetCode().c_str(), sf.GetFunction().c_str()};
 				};
 

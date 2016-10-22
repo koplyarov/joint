@@ -67,18 +67,18 @@ namespace python
 	class PythonErrorInfo
 	{
 	private:
-		PyObjectHolder								_type;
-		std::string									_message;
-		std::vector<joint::devkit::StackFrameData>	_backtrace;
+		PyObjectHolder                        _type;
+		std::string                           _message;
+		std::vector<devkit::StackFrameData>   _backtrace;
 
 	public:
-		PythonErrorInfo(PyObjectHolder type, std::string message, std::vector<joint::devkit::StackFrameData> backtrace)
+		PythonErrorInfo(PyObjectHolder type, std::string message, std::vector<devkit::StackFrameData> backtrace)
 			: _type(std::move(type)), _message(std::move(message)), _backtrace(std::move(backtrace))
 		{ }
 
 		const PyObjectHolder& GetType() const { return _type; }
 		const std::string& GetMessage() const { return _message; }
-		const std::vector<joint::devkit::StackFrameData>& GetBacktrace() const { return _backtrace; }
+		const std::vector<devkit::StackFrameData>& GetBacktrace() const { return _backtrace; }
 
 		std::string ToString() const
 		{
@@ -95,7 +95,7 @@ namespace python
 	};
 
 	JOINT_PYTHON_CORE_API bool GetPythonErrorMessage(PyObject* value, std::string& msg);
-	JOINT_PYTHON_CORE_API bool GetPythonErrorBacktrace(PyObject* traceback, std::vector<joint::devkit::StackFrameData>& backtrace);
+	JOINT_PYTHON_CORE_API bool GetPythonErrorBacktrace(PyObject* traceback, std::vector<devkit::StackFrameData>& backtrace);
 	JOINT_PYTHON_CORE_API PythonErrorInfo GetPythonErrorInfo();
 
 
@@ -104,7 +104,7 @@ namespace python
 	{
 		if (pyObj)
 			return std::move(pyObj);
-		throw std::runtime_error(joint::devkit::StringBuilder() % msgGetter() % " at " % location % "\n" % GetPythonErrorInfo().ToString());
+		throw std::runtime_error(devkit::StringBuilder() % msgGetter() % " at " % location % "\n" % GetPythonErrorInfo().ToString());
 	}
 
 	inline bool AsBool(PyObject* obj)

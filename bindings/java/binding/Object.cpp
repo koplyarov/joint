@@ -15,7 +15,7 @@ namespace java {
 namespace binding
 {
 
-	using namespace joint::devkit;
+	using namespace devkit;
 
 	Object::Object(const JGlobalObjPtr& accessor)
 		: _accessor(accessor)

@@ -19,8 +19,8 @@ namespace java
 	class ParamsAllocator
 	{
 	private:
-		joint::devkit::StackStorage<Joint_Value, 64>        _members;
-		joint::devkit::StackStorage<StringDataHolder, 64>   _strParams;
+		devkit::StackStorage<Joint_Value, 64>        _members;
+		devkit::StackStorage<StringDataHolder, 64>   _strParams;
 
 	public:
 		const char* AllocateUtf8(const JLocalStringPtr& value)
@@ -71,10 +71,10 @@ namespace java
 		JavaVariant FromJointEnum(int32_t val, const JavaBindingInfo::TypeUserData& enumType) const
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
-		JavaVariant FromJointObj(joint::devkit::ValueDirection dir, Joint_ObjectHandle val, const JavaBindingInfo::TypeUserData& proxyType, Joint_InterfaceChecksum checksum) const
+		JavaVariant FromJointObj(devkit::ValueDirection dir, Joint_ObjectHandle val, const JavaBindingInfo::TypeUserData& proxyType, Joint_InterfaceChecksum checksum) const
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
-		JavaVariant FromJointArray(joint::devkit::ValueDirection dir, Joint_ArrayHandle val, const JavaBindingInfo::TypeUserData& elementTypeDesc) const
+		JavaVariant FromJointArray(devkit::ValueDirection dir, Joint_ArrayHandle val, const JavaBindingInfo::TypeUserData& elementTypeDesc) const
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
 		class ParamsArray
@@ -104,10 +104,10 @@ namespace java
 		int32_t ToJointEnum(jvalue val, const JavaBindingInfo::TypeUserData& enumType) const
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
-		Joint_ObjectHandle ToJointObj(joint::devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::TypeUserData& objType) const
+		Joint_ObjectHandle ToJointObj(devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::TypeUserData& objType) const
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
-		Joint_ArrayHandle ToJointArray(joint::devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::TypeUserData& objType) const
+		Joint_ArrayHandle ToJointArray(devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::TypeUserData& objType) const
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
 		template < typename Allocator_ >

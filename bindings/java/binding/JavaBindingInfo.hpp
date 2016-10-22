@@ -78,7 +78,7 @@ namespace java
 	};
 
 
-	using JavaInterfaceDescriptor = joint::devkit::InterfaceDescriptor<JavaBindingInfo>;
+	using JavaInterfaceDescriptor = devkit::InterfaceDescriptor<JavaBindingInfo>;
 
 }}
 

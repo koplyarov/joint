@@ -26,7 +26,7 @@ namespace pyjoint
 		PyObject* message;
 #endif
 		std::string* jointMessage;
-		std::vector<joint::devkit::StackFrameData>* backtrace;
+		std::vector<devkit::StackFrameData>* backtrace;
 	};
 
 

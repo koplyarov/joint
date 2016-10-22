@@ -14,7 +14,7 @@ namespace python {
 namespace pyjoint
 {
 
-	using namespace joint::devkit;
+	using namespace devkit;
 
 	JOINT_DEVKIT_LOGGER("Joint.Python.PyJoint.ProxyBase")
 

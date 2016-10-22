@@ -20,7 +20,7 @@ namespace java {
 namespace binding
 {
 
-	using namespace joint::devkit;
+	using namespace devkit;
 
 
 	Binding::Binding()

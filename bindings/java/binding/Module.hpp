@@ -19,7 +19,7 @@ namespace binding
 	{
 		JOINT_DEVKIT_LOGGER("Joint.Java.Module")
 
-		using JavaVMHolder = joint::devkit::Holder<JavaVM*>;
+		using JavaVMHolder = devkit::Holder<JavaVM*>;
 
 	private:
 		JavaVMHolder        _jvm;

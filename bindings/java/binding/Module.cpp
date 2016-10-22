@@ -11,7 +11,7 @@ namespace java {
 namespace binding
 {
 
-	using namespace joint::devkit;
+	using namespace devkit;
 
 
 	Module::Module(const std::string& jarPath, const std::string& className)
