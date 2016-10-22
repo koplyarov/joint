@@ -1,9 +1,11 @@
 #include <joint/devkit/ScopeExit.hpp>
+#include <joint/devkit/StackStorage.hpp>
 
 #include <vector>
 
 #include <JointJNI.h>
 #include <binding/JavaBindingInfo.hpp>
+#include <binding/Marshaller.hpp>
 #include <binding/Object.hpp>
 #include <utils/JPtr.hpp>
 #include <utils/Utils.hpp>
@@ -19,7 +21,7 @@ JNIEXPORT void JNICALL Java_org_joint_JointObject_finalize(JNIEnv* env, jobject 
 {
 	JNI_WRAP_CPP_BEGIN
 
-	JavaVM* jvm = NULL;
+	JavaVM* jvm = nullptr;
 	JNI_CALL( env->GetJavaVM(&jvm) );
 
 	printf("JNI FINALIZE\n");
@@ -33,42 +35,87 @@ JNIEXPORT void JNICALL Java_org_joint_JointObject_finalize(JNIEnv* env, jobject 
 	JNI_WRAP_CPP_END_VOID()
 }
 
-JNIEXPORT jobject JNICALL Java_org_joint_JointObject_invokeMethod(JNIEnv* env, jobject obj, jint methodId, jobjectArray params)
+JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod(JNIEnv* env, jclass cls, jlong handle, jlong nativeInterfaceDescriptor, jint methodId, jobjectArray jparams)
 {
 	JNI_WRAP_CPP_BEGIN
 
-	JavaVM* jvm = NULL;
+	JavaVM* jvm = nullptr;
 	JNI_CALL( env->GetJavaVM(&jvm) );
 
-	JLocalClassPtr cls(env, JAVA_CALL(env->GetObjectClass(obj)));
-	jfieldID handle_id = JAVA_CALL(env->GetFieldID(cls, "handle", "J"));
-	jlong handle_long = JAVA_CALL(env->GetLongField(obj, handle_id));
-	Joint_ObjectHandle handle = (Joint_ObjectHandle)handle_long;
+	auto obj = reinterpret_cast<Joint_ObjectHandle>(handle);
+	JOINT_CHECK(obj, "Invalid object");
 
-	printf("JNI invokeMethod, handle: %p, methodId: %d\n", handle, (int)methodId);
+	auto ifc_desc = reinterpret_cast<JavaInterfaceDescriptor*>(nativeInterfaceDescriptor);
+	JOINT_CHECK(ifc_desc, "Invalid object");
 
-	std::vector<Joint_Parameter> native_params;
-	native_params.resize(JAVA_CALL(env->GetArrayLength(params)));
-	for (size_t i = 0; i < native_params.size(); ++i)
+	const auto& method_desc = ifc_desc->GetMethod(methodId);
+
+	StackStorage<Joint_Parameter, 64> params_storage;
+
+	auto params_count = JAVA_CALL(env->GetArrayLength(jparams));
+	auto params = params_storage.Make(params_count);
+
+	ParamsAllocator alloc;
+
+	for (auto i = 0; i < params_count; ++i)
 	{
-		JLocalObjPtr p(env, JAVA_CALL(env->GetObjectArrayElement(params, i)));
-		JLocalClassPtr int_cls(env, JAVA_CALL(env->FindClass("java/lang/Integer")));
-		jmethodID intValue_id = JAVA_CALL(env->GetMethodID(int_cls, "intValue", "()I"));
-		native_params[i].value.i32 = JAVA_CALL(env->CallIntMethod(p.Get(), intValue_id));
-		native_params[i].type.id = JOINT_TYPE_I32;
+		const auto& t = method_desc.GetParamType(i);
+
+		jvalue p;
+		switch (t.GetJointType().id)
+		{
+		case JOINT_TYPE_I32:
+			{
+				JLocalObjPtr p_obj(env, JAVA_CALL(env->GetObjectArrayElement(jparams, i)));
+				JLocalClassPtr int_cls(env, JAVA_CALL(env->FindClass("java/lang/Integer")));
+				jmethodID intValue_id = JAVA_CALL(env->GetMethodID(int_cls, "intValue", "()I"));
+				p.i = JAVA_CALL(env->CallIntMethod(p_obj.Get(), intValue_id));
+			}
+			break;
+		default:
+			JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
+		}
+
+		Joint_Value v = ValueMarshaller::ToJoint(ValueDirection::Parameter, t, p, JavaMarshaller(), alloc);
+		params[i] = Joint_Parameter{v, t.GetJointType()};
 	}
 
-	Joint_Type ret_type;
-	ret_type.id = JOINT_TYPE_I32;
+	Joint_Type ret_type = method_desc.GetRetType().GetJointType();
 	Joint_RetValue ret_value;
-	Joint_Error ret = Joint_InvokeMethod(handle, methodId, native_params.data(), native_params.size(), ret_type, &ret_value);
-	JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+	Joint_Error ret = Joint_InvokeMethod(obj, methodId, params, params_count, ret_type, &ret_value);
+	JOINT_CHECK(ret == JOINT_ERROR_NONE || ret == JOINT_ERROR_EXCEPTION, (std::string("Joint_InvokeMethod failed: ") + Joint_ErrorToString(ret)).c_str());
 
-	JLocalClassPtr int_cls(env, JAVA_CALL(env->FindClass("java/lang/Integer")));
-	jmethodID int_ctor_id = JAVA_CALL(env->GetMethodID(int_cls, "<init>", "(I)V"));
-	jobject result = JAVA_CALL(env->NewObject(int_cls, int_ctor_id, ret_value.result.value.i32));
+	jobject result = nullptr;
 
-	JNI_WRAP_CPP_END(result, NULL)
+	if (ret == JOINT_ERROR_NONE)
+	{
+		auto sg(ScopeExit([&]{
+			Joint_Error ret = ret_value.releaseValue(ret_type, ret_value.result.value);
+			if (ret != JOINT_ERROR_NONE)
+				GetLogger().Error() << "Joint_RetValue::releaseValue failed: " << ret;
+		}));
+
+		if (ret_type.id == JOINT_TYPE_VOID)
+			return nullptr;
+
+		jvalue jret_value = ValueMarshaller::FromJoint<jvalue>(ValueDirection::Return, method_desc.GetRetType(), ret_value.result.value, JavaMarshaller());
+		switch (ret_type.id)
+		{
+		case JOINT_TYPE_I32:
+			{
+				JLocalClassPtr int_cls(env, JAVA_CALL(env->FindClass("java/lang/Integer")));
+				jmethodID int_ctor_id = JAVA_CALL(env->GetMethodID(int_cls, "<init>", "(I)V"));
+				result = JAVA_CALL(env->NewObject(int_cls, int_ctor_id, jret_value.i));
+			}
+			break;
+		default:
+			JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
+		}
+	}
+	else
+		JOINT_THROW((std::string("Joint_InvokeMethod failed: ") + Joint_ErrorToString(ret)).c_str());
+
+	JNI_WRAP_CPP_END(result, nullptr)
 }
 
 
@@ -76,7 +123,7 @@ JNIEXPORT jobject JNICALL Java_org_joint_ModuleContext_register(JNIEnv* env, job
 {
 	JNI_WRAP_CPP_BEGIN
 
-	JavaVM* jvm = NULL;
+	JavaVM* jvm = nullptr;
 	JNI_CALL( env->GetJavaVM(&jvm) );
 
 	JLocalClassPtr cls(env, JAVA_CALL(env->GetObjectClass(moduleContext)));
@@ -99,7 +146,7 @@ JNIEXPORT jobject JNICALL Java_org_joint_ModuleContext_register(JNIEnv* env, job
 	jobject obj = JAVA_CALL(env->NewObject(obj_cls, obj_ctor_id, (jlong)handle));
 	sg.Cancel();
 
-	JNI_WRAP_CPP_END(obj, NULL)
+	JNI_WRAP_CPP_END(obj, nullptr)
 }
 
 

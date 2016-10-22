@@ -8,6 +8,7 @@ include(UseJava)
 set(JAVA_SOURCES
 	org/joint/Accessor.java
 	org/joint/AccessorsContainer.java
+	org/joint/BuiltinTypes.java
 	org/joint/Component.java
 	org/joint/InterfaceDescriptor.java
 	org/joint/InterfaceId.java

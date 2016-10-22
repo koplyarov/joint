@@ -11,6 +11,9 @@ public class JointObject
 	JointObject(long handle)
 	{ this.handle = handle; }
 
-	public native Object invokeMethod(int methodId, Object... params);
+	public Object invokeMethod(long nativeInterfaceDescriptor, int methodId, Object... params)
+	{ return doInvokeMethod(handle, nativeInterfaceDescriptor, methodId, params); }
+
+	public static native Object doInvokeMethod(long handle, long nativeInterfaceDescriptor, int methodId, Object[] params);
 	public native void finalize();
 }

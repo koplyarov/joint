@@ -12,6 +12,9 @@ public class InterfaceDescriptor
 		nativeDescriptor = initNative();
 	}
 
+	public long getNative()
+	{ return nativeDescriptor; }
+
 	@Override
 	public void finalize()
 	{ deinitNative(nativeDescriptor); }
