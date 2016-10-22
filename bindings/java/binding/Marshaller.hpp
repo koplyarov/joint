@@ -88,46 +88,34 @@ namespace joint_java
 		JavaVariant MakeStruct(const ParamsArray& params, const JavaBindingInfo::TypeUserData& structType) const
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
-		Joint_Bool ToJointBool(const JLocalObjPtr& val) const  { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
-		uint8_t    ToJointU8(const JLocalObjPtr& val) const    { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
-		int8_t     ToJointI8(const JLocalObjPtr& val) const    { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
-		uint16_t   ToJointU16(const JLocalObjPtr& val) const   { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
-		int16_t    ToJointI16(const JLocalObjPtr& val) const   { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
-		uint32_t   ToJointU32(const JLocalObjPtr& val) const   { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		Joint_Bool ToJointBool(jvalue val) const  { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		uint8_t    ToJointU8(jvalue val) const    { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		int8_t     ToJointI8(jvalue val) const    { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		uint16_t   ToJointU16(jvalue val) const   { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		int16_t    ToJointI16(jvalue val) const   { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		uint32_t   ToJointU32(jvalue val) const   { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		int32_t    ToJointI32(jvalue val) const   { return val.i; }
+		uint64_t   ToJointU64(jvalue val) const   { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		int64_t    ToJointI64(jvalue val) const   { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		float      ToJointF32(jvalue val) const   { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		double     ToJointF64(jvalue val) const   { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
-		int32_t    ToJointI32(const JLocalObjPtr& val) const
-		{
-			auto jvm = val.GetJvm();
-			auto env = val.GetEnv();
-
-			JLocalClassPtr int_cls(env, JAVA_CALL(env->FindClass("java/lang/Integer")));
-			jmethodID intValue_id = JAVA_CALL(env->GetMethodID(int_cls, "intValue", "()I"));
-			int32_t result = JAVA_CALL(env->CallIntMethod(val.Get(), intValue_id));
-			printf("ToJointI32: %d\n", (int)result);
-			return result;
-		}
-
-		uint64_t   ToJointU64(const JLocalObjPtr& val) const   { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
-		int64_t    ToJointI64(const JLocalObjPtr& val) const   { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
-		float      ToJointF32(const JLocalObjPtr& val) const   { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
-		double     ToJointF64(const JLocalObjPtr& val) const   { JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
-
-		int32_t ToJointEnum(const JLocalObjPtr& val, const JavaBindingInfo::TypeUserData& enumType) const
+		int32_t ToJointEnum(jvalue val, const JavaBindingInfo::TypeUserData& enumType) const
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
-		Joint_ObjectHandle ToJointObj(joint::devkit::ValueDirection dir, const JLocalObjPtr& val, const JavaBindingInfo::TypeUserData& objType) const
+		Joint_ObjectHandle ToJointObj(joint::devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::TypeUserData& objType) const
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
-		Joint_ArrayHandle ToJointArray(joint::devkit::ValueDirection dir, const JLocalObjPtr& val, const JavaBindingInfo::TypeUserData& objType) const
+		Joint_ArrayHandle ToJointArray(joint::devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::TypeUserData& objType) const
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
 		template < typename Allocator_ >
-		const char* ToJointUtf8(const JLocalObjPtr& val, Allocator_& alloc) const
+		const char* ToJointUtf8(jvalue val, Allocator_& alloc) const
 		//{ return alloc.AllocateUtf8(val); }
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
 		template < typename MemberInfo_ >
-		JLocalObjPtr GetStructMember(const JLocalObjPtr& val, size_t i, const MemberInfo_& memberInfo, const JavaBindingInfo::TypeUserData& structType) const
+		jvalue GetStructMember(jvalue val, size_t i, const MemberInfo_& memberInfo, const JavaBindingInfo::TypeUserData& structType) const
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 	};
 

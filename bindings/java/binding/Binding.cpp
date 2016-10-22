@@ -94,66 +94,12 @@ namespace binding
 	}
 
 
-	//static Joint_Error ReleaseRetValue(Joint_Type type, Joint_Value value)
-	//{
-		//printf("ReleaseRetValue\n");
-		//return JOINT_ERROR_NONE;
-	//}
-
 	Joint_Error Binding::InvokeMethod(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
 		auto o = reinterpret_cast<Object*>(obj);
-
 		return o->InvokeMethod(methodId, joint::ArrayView<const Joint_Parameter>(params, paramsCount), retType, outRetValue);
-
-#if 0
-		auto env = o->GetAccessor().GetEnv();
-		auto jvm = o->GetAccessor().GetJvm();
-
-		JLocalClassPtr obj_cls(jvm, JAVA_CALL(env->FindClass("java/lang/Object")));
-		JLocalObjArrayPtr jparams(env, JAVA_CALL(env->NewObjectArray(paramsCount, obj_cls.Get(), nullptr)));
-		for (Joint_SizeT i = 0; i < paramsCount; ++i)
-		{
-			switch (params[i].type.id)
-			{
-			case JOINT_TYPE_I32:
-			case JOINT_TYPE_U32:
-				{
-					JLocalClassPtr int_cls(env, JAVA_CALL(env->FindClass("java/lang/Integer")));
-					jmethodID int_ctor_id = JAVA_CALL(env->GetMethodID(int_cls, "<init>", "(I)V"));
-					JLocalObjPtr boxed_int(env, env->NewObject(int_cls, int_ctor_id, params[i].value.i32));
-					JAVA_CALL_VOID(env->SetObjectArrayElement(jparams.Get(), i, boxed_int.Get()));
-				}
-				break;
-			default:
-				JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
-			}
-		}
-
-		JLocalClassPtr accessor_cls(jvm, JAVA_CALL(env->FindClass("org/joint/Accessor")));
-		JOINT_CHECK(accessor_cls, StringBuilder() % "Class org/joint/Accessor not found");
-		jmethodID invokeMethod_id = JAVA_CALL(env->GetMethodID(accessor_cls, "invokeMethod", "(I[Ljava/lang/Object;)Ljava/lang/Object;"));
-		JOINT_CHECK(invokeMethod_id, "org.joint.Accessor.invokeMethod method not found!");
-		JLocalObjPtr result(jvm, JAVA_CALL(env->CallObjectMethod(o->GetAccessor().Get(), invokeMethod_id, (jint)methodId, jparams.Get())));
-
-		switch (retType.id)
-		{
-		case JOINT_TYPE_I32:
-		case JOINT_TYPE_U32:
-			{
-				JLocalClassPtr int_cls(env, JAVA_CALL(env->FindClass("java/lang/Integer")));
-				jmethodID intValue_id = JAVA_CALL(env->GetMethodID(int_cls, "intValue", "()I"));
-				outRetValue->result.value.i32 = JAVA_CALL(env->CallIntMethod(result.Get(), intValue_id));
-			}
-			break;
-		default:
-			JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
-		}
-
-		outRetValue->releaseValue = &ReleaseRetValue;
-#endif
 
 		JOINT_CPP_WRAP_END
 	}

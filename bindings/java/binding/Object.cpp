@@ -62,12 +62,21 @@ namespace binding
 				jparams[i] = ValueMarshaller::FromJoint<jvalue>(ValueDirection::Parameter, m_desc.GetParamType(i), params[i].value, JavaMarshaller());
 		}
 
-		JLocalObjPtr j_res(env, JAVA_CALL(env->CallObjectMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams)));
-		printf("--- after CallObjectMethodA, _obj: %p, j_res: %p\n", _obj.Get(), j_res.Get());
-
+		jvalue j_res;
 		RetValueAllocator alloc;
-		if (retType.id != JOINT_TYPE_VOID)
-			outRetValue->result.value = ValueMarshaller::ToJoint(ValueDirection::Return, m_desc.GetRetType(), j_res, JavaMarshaller(), alloc);
+		switch (m_desc.GetRetType().GetJointType().id)
+		{
+		case JOINT_TYPE_VOID:
+			outRetValue->releaseValue = &Object::ReleaseRetValue;
+			return JOINT_ERROR_NONE;
+		case JOINT_TYPE_I32:
+			j_res.i = JAVA_CALL(env->CallIntMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
+			break;
+		default:
+			JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
+		}
+		outRetValue->result.value = ValueMarshaller::ToJoint(ValueDirection::Return, m_desc.GetRetType(), j_res, JavaMarshaller(), alloc);
+
 		outRetValue->releaseValue = &Object::ReleaseRetValue;
 		return JOINT_ERROR_NONE;
 	}
