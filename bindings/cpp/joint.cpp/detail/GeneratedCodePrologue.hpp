@@ -17,7 +17,6 @@
 #include <joint.cpp/Ptr.hpp>
 #include <joint.cpp/TypeList.hpp>
 #include <joint.cpp/detail/JointCall.hpp>
-#include <joint.cpp/detail/ProxyBase.hpp>
 #include <joint.cpp/detail/RetValueGuard.hpp>
 
 
