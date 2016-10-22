@@ -5,7 +5,8 @@
 #include <utils/PythonHeaders.h>
 
 
-namespace joint_python
+namespace joint {
+namespace python
 {
 
 	class PythonContext
@@ -31,6 +32,6 @@ namespace joint_python
 		PythonContext& operator = (const PythonContext&) = delete;
 	};
 
-}
+}}
 
 #endif

@@ -6,7 +6,8 @@
 #include <binding/Object.hpp>
 
 
-namespace joint_python {
+namespace joint {
+namespace python {
 namespace pyjoint
 {
 
@@ -112,4 +113,4 @@ namespace pyjoint
 		PYJOINT_CPP_WRAP_END_VOID()
 	}
 
-}}
+}}}

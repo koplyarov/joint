@@ -1,8 +1,8 @@
 #include <utils/DynamicLibrary.hpp>
 
 #include <joint/devkit/Holder.hpp>
+#include <joint/devkit/JointException.hpp>
 #include <joint/devkit/StringBuilder.hpp>
-#include <joint/utils/JointException.hpp>
 
 
 #ifdef _WIN32
@@ -11,7 +11,8 @@
 #	include <dlfcn.h>
 #endif
 
-namespace joint_cpp
+namespace joint {
+namespace cpp
 {
 
 #ifdef _WIN32
@@ -97,4 +98,4 @@ namespace joint_cpp
 	DynamicLibrary::FuncPtr DynamicLibrary::GetFunctionImpl(const std::string& name)
 	{ return _impl->GetFunction(name); }
 
-}
+}}

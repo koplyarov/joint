@@ -2,9 +2,9 @@
 #define UTILS_UTILS_HPP
 
 
+#include <joint/devkit/JointException.hpp>
 #include <joint/devkit/ScopeExit.hpp>
 #include <joint/devkit/StringBuilder.hpp>
-#include <joint/utils/JointException.hpp>
 
 #include <utils/JPtr.hpp>
 
@@ -26,13 +26,14 @@
 
 
 #define JAVA_CALL(...) JAVA_CALL_EX(jvm, __VA_ARGS__)
-#define JAVA_CALL_EX(Jvm_, ...) ::joint_java::JavaCallImpl(Jvm_, (__VA_ARGS__), JOINT_SOURCE_LOCATION)
+#define JAVA_CALL_EX(Jvm_, ...) ::joint::java::JavaCallImpl(Jvm_, (__VA_ARGS__), JOINT_SOURCE_LOCATION)
 
 #define JAVA_CALL_VOID(...) JAVA_CALL_VOID_EX(jvm, __VA_ARGS__)
-#define JAVA_CALL_VOID_EX(Jvm_, ...) do { __VA_ARGS__; ::joint_java::JavaCallImpl(Jvm_, 0, JOINT_SOURCE_LOCATION); } while (false)
+#define JAVA_CALL_VOID_EX(Jvm_, ...) do { __VA_ARGS__; ::joint::java::JavaCallImpl(Jvm_, 0, JOINT_SOURCE_LOCATION); } while (false)
 
 
-namespace joint_java
+namespace joint {
+namespace java
 {
 
 	class StringDataHolder
@@ -131,6 +132,6 @@ namespace joint_java
 		return result;
 	}
 
-}
+}}
 
 #endif

@@ -1,8 +1,8 @@
 #include <binding/Binding.hpp>
 
 #include <joint/Joint.h>
+#include <joint/devkit/CppWrappers.hpp>
 #include <joint/devkit/Holder.hpp>
-#include <joint/utils/CppWrappers.hpp>
 
 #include <memory>
 #include <string.h>
@@ -15,7 +15,8 @@
 #include <utils/Utils.hpp>
 
 
-namespace joint_java {
+namespace joint {
+namespace java {
 namespace binding
 {
 
@@ -143,4 +144,4 @@ namespace binding
 		JOINT_CPP_WRAP_END
 	}
 
-}}
+}}}

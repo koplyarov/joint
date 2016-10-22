@@ -3,8 +3,8 @@
 
 
 #include <joint/devkit/ArrayHolder.hpp>
+#include <joint/devkit/JointException.hpp>
 #include <joint/devkit/Logger.hpp>
-#include <joint/utils/JointException.hpp>
 
 #include <memory>
 

@@ -3,7 +3,7 @@
 
 
 #include <joint/devkit/Exceptions.hpp>
-#include <joint/utils/JointException.hpp>
+#include <joint/devkit/JointException.hpp>
 
 #include <algorithm>
 #include <memory>
@@ -13,7 +13,8 @@
 #include <utils/JniError.hpp>
 
 
-namespace joint_java
+namespace joint {
+namespace java
 {
 
 	namespace detail_JPtr
@@ -174,7 +175,7 @@ namespace joint_java
 
 #undef DETAIL_JOINT_JAVA_DECLARE_JPTR
 
-}
+}}
 
 
 #endif

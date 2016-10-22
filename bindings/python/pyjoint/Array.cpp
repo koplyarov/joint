@@ -9,7 +9,8 @@
 #include <utils/PythonUtils.hpp>
 
 
-namespace joint_python {
+namespace joint {
+namespace python {
 namespace pyjoint
 {
 
@@ -331,4 +332,4 @@ namespace pyjoint
 	}
 
 
-}}
+}}}

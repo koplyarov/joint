@@ -7,7 +7,8 @@
 #include <utils/PythonHeaders.h>
 
 
-namespace joint_python
+namespace joint {
+namespace python
 {
 
 	class PyObjectHolder
@@ -71,6 +72,6 @@ namespace joint_python
 		}
 	};
 
-}
+}}
 
 #endif

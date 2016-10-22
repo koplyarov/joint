@@ -1,9 +1,9 @@
 #include <joint/JointConfig.h>
 #include <joint/devkit/Logger.hpp>
-#include <joint/core/JointStructs.h>
-#include <joint/utils/CppWrappers.hpp>
-#include <joint/utils/JointException.hpp>
-#include <joint/utils/MakeUnique.hpp>
+#include <joint/private/JointStructs.h>
+#include <joint/devkit/CppWrappers.hpp>
+#include <joint/devkit/JointException.hpp>
+#include <joint/devkit/MakeUnique.hpp>
 
 #include <algorithm>
 #include <atomic>

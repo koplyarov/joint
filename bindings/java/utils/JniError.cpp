@@ -1,7 +1,8 @@
 #include <utils/JniError.hpp>
 
 
-namespace joint_java
+namespace joint {
+namespace java
 {
 
 	const char* JniErrorToString(jint err)
@@ -21,4 +22,4 @@ namespace joint_java
 #undef DETAIL_JNI_ERR_TO_STRING
 	}
 
-}
+}}

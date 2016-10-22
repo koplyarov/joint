@@ -3,8 +3,8 @@
 
 
 #include <joint/Joint.h>
+#include <joint/devkit/ArrayView.hpp>
 #include <joint/devkit/Logger.hpp>
-#include <joint/utils/ArrayView.hpp>
 
 #include <vector>
 
@@ -12,7 +12,8 @@
 #include <utils/JPtr.hpp>
 
 
-namespace joint_java {
+namespace joint {
+namespace java {
 namespace binding
 {
 
@@ -38,6 +39,6 @@ namespace binding
 		static Joint_Error ReleaseRetValue(Joint_Type type, Joint_Value value);
 	};
 
-}}
+}}}
 
 #endif

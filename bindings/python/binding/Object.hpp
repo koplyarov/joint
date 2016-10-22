@@ -3,14 +3,15 @@
 
 
 #include <joint/Joint.h>
+#include <joint/devkit/ArrayView.hpp>
 #include <joint/devkit/Logger.hpp>
-#include <joint/utils/ArrayView.hpp>
 
 #include <utils/PyObjectHolder.hpp>
 #include <utils/PythonUtils.hpp>
 
 
-namespace joint_python {
+namespace joint {
+namespace python {
 namespace binding
 {
 
@@ -35,6 +36,6 @@ namespace binding
 		static Joint_Error ReleaseRetValue(Joint_Type type, Joint_Value value);
 	};
 
-}}
+}}}
 
 #endif

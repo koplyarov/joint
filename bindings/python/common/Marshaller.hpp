@@ -12,7 +12,8 @@
 #include <utils/PythonUtils.hpp>
 
 
-namespace joint_python
+namespace joint {
+namespace python
 {
 
 	class ParamsAllocator
@@ -202,6 +203,6 @@ namespace joint_python
 		{ return PyObjectHolder(PY_OBJ_CHECK(PyObject_GetAttr(val, memberInfo.GetMemberId()))); }
 	};
 
-}
+}}
 
 #endif

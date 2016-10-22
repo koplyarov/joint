@@ -10,8 +10,8 @@
 
 
 using namespace joint::devkit;
-using namespace joint_java;
-using namespace joint_java::binding;
+using namespace joint::java;
+using namespace joint::java::binding;
 
 JOINT_DEVKIT_LOGGER("Joint.Java.JNI")
 

@@ -11,7 +11,8 @@
 #include <utils/PythonHeaders.h>
 
 
-namespace joint_python {
+namespace joint {
+namespace python {
 namespace pyjoint
 {
 
@@ -35,6 +36,6 @@ namespace pyjoint
 				__VA_ARGS__ \
 			}
 
-}}
+}}}
 
 #endif

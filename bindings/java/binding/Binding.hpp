@@ -6,7 +6,8 @@
 #include <joint/devkit/Logger.hpp>
 
 
-namespace joint_java {
+namespace joint {
+namespace java {
 namespace binding
 {
 
@@ -27,6 +28,6 @@ namespace binding
 		static Joint_Error CastObject(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, Joint_ObjectHandleInternal* outRetValue);
 	};
 
-}}
+}}}
 
 #endif

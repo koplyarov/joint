@@ -12,7 +12,8 @@
 #include <utils/Utils.hpp>
 
 
-namespace joint_java
+namespace joint {
+namespace java
 {
 
 	class JavaBindingInfo
@@ -79,6 +80,6 @@ namespace joint_java
 
 	using JavaInterfaceDescriptor = joint::devkit::InterfaceDescriptor<JavaBindingInfo>;
 
-}
+}}
 
 #endif

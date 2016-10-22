@@ -1,9 +1,9 @@
 #include <binding/Binding.hpp>
 
 #include <joint/Joint.h>
+#include <joint/devkit/CppWrappers.hpp>
 #include <joint/devkit/Holder.hpp>
 #include <joint/devkit/ScopeExit.hpp>
-#include <joint/utils/CppWrappers.hpp>
 
 #include <algorithm>
 #include <memory>
@@ -19,7 +19,8 @@
 #include <utils/PythonUtils.hpp>
 
 
-namespace joint_python {
+namespace joint {
+namespace python {
 namespace binding
 {
 
@@ -160,4 +161,4 @@ namespace binding
 		JOINT_CPP_WRAP_END
 	}
 
-}}
+}}}

@@ -11,7 +11,8 @@
 #include <utils/PythonUtils.hpp>
 
 
-namespace joint_python {
+namespace joint {
+namespace python {
 namespace binding
 {
 
@@ -30,6 +31,6 @@ namespace binding
 		PyObjectHolder InvokeFunction(const std::string& functionName, const PyObjectHolder& jointModule);
 	};
 
-}}
+}}}
 
 #endif

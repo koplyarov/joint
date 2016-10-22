@@ -10,7 +10,8 @@
 #include <pyjoint/Common.hpp>
 
 
-namespace joint_python {
+namespace joint {
+namespace python {
 namespace pyjoint
 {
 
@@ -31,7 +32,7 @@ namespace pyjoint
 
 	extern PyTypeObject JointException_type;
 
-}}
+}}}
 
 
 #endif

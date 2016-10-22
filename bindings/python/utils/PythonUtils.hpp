@@ -2,9 +2,9 @@
 #define JOINT_INTEROP_PYTHONUTILS_HPP
 
 
+#include <joint/devkit/JointException.hpp>
 #include <joint/devkit/StackFrameData.hpp>
 #include <joint/devkit/StringBuilder.hpp>
-#include <joint/utils/JointException.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -26,16 +26,17 @@
 #endif
 
 
-#define PYTHON_THROW(Message_) do { throw std::runtime_error(Message_ + std::string("\n") + ::joint_python::GetPythonErrorInfo().ToString()); } while (false)
+#define PYTHON_THROW(Message_) do { throw std::runtime_error(Message_ + std::string("\n") + ::joint::python::GetPythonErrorInfo().ToString()); } while (false)
 #define PYTHON_CHECK(Expr_, Message_) do { if (!(Expr_)) PYTHON_THROW(Message_); } while (false)
 
 #define NATIVE_THROW(Message_) do { throw std::runtime_error(Message_); } while (false)
 #define NATIVE_CHECK(Expr_, Message_) do { if (!(Expr_)) NATIVE_THROW(Message_); } while (false)
 
-#define PY_OBJ_CHECK(...) ::joint_python::CheckPyObject(__VA_ARGS__, []{ return #__VA_ARGS__ " failed"; }, JOINT_SOURCE_LOCATION)
-#define PY_OBJ_CHECK_MSG(Expr_, Msg_) ::joint_python::CheckPyObject(Expr_, [&]() -> std::string { return ::joint::devkit::StringBuilder() % (Msg_); }, JOINT_SOURCE_LOCATION)
+#define PY_OBJ_CHECK(...) ::joint::python::CheckPyObject(__VA_ARGS__, []{ return #__VA_ARGS__ " failed"; }, JOINT_SOURCE_LOCATION)
+#define PY_OBJ_CHECK_MSG(Expr_, Msg_) ::joint::python::CheckPyObject(Expr_, [&]() -> std::string { return ::joint::devkit::StringBuilder() % (Msg_); }, JOINT_SOURCE_LOCATION)
 
-namespace joint_python
+namespace joint {
+namespace python
 {
 
 	inline bool PyObjectToStringNoExcept(PyObject* obj, std::string& result)
@@ -175,6 +176,6 @@ namespace joint_python
 		return reinterpret_cast<T_*>(pyObj);
 	}
 
-}
+}}
 
 #endif

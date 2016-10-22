@@ -2,7 +2,7 @@
 
 #include <joint/Joint.h>
 #include <joint/devkit/Holder.hpp>
-#include <joint/utils/CppWrappers.hpp>
+#include <joint/devkit/CppWrappers.hpp>
 
 #include <memory>
 #include <string.h>
@@ -14,7 +14,8 @@
 #include <utils/DynamicLibrary.hpp>
 
 
-namespace joint_cpp {
+namespace joint {
+namespace cpp {
 namespace binding
 {
 
@@ -95,4 +96,4 @@ namespace binding
 		JOINT_CPP_WRAP_END
 	}
 
-}}
+}}}

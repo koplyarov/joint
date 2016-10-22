@@ -1,12 +1,13 @@
 #include <binding/Module.hpp>
 
-#include <joint/utils/JointException.hpp>
+#include <joint/devkit/JointException.hpp>
 
 #include <utils/JniError.hpp>
 #include <utils/Utils.hpp>
 
 
-namespace joint_java {
+namespace joint {
+namespace java {
 namespace binding
 {
 
@@ -51,4 +52,4 @@ namespace binding
 		GetLogger().Warning() << "Module dtor";
 	}
 
-}}
+}}}

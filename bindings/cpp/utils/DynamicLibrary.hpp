@@ -7,7 +7,8 @@
 #include <memory>
 
 
-namespace joint_cpp
+namespace joint {
+namespace cpp
 {
 
 	class DynamicLibrary
@@ -32,6 +33,6 @@ namespace joint_cpp
 		FuncPtr GetFunctionImpl(const std::string& name);
 	};
 
-}
+}}
 
 #endif

@@ -4,7 +4,8 @@
 #include <joint/devkit/Logger.hpp>
 
 
-namespace joint_python
+namespace joint {
+namespace python
 {
 
 	JOINT_DEVKIT_LOGGER("Joint.Python.Utils")
@@ -97,4 +98,4 @@ namespace joint_python
 		return PythonErrorInfo(type, msg, bt);
 	}
 
-}
+}}

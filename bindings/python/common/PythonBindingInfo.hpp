@@ -8,7 +8,8 @@
 #include <utils/PythonUtils.hpp>
 
 
-namespace joint_python
+namespace joint {
+namespace python
 {
 
 	class PythonBindingInfo
@@ -61,6 +62,6 @@ namespace joint_python
 		PyObjectHolder RegisterObject(PyObjectHolder obj) const;
 	};
 
-}
+}}
 
 #endif

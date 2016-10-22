@@ -2,7 +2,7 @@
 #define JOINT_UTILS_CPPWRAPPERS_HPP
 
 
-#include <joint/utils/JointException.hpp>
+#include <joint/devkit/JointException.hpp>
 
 
 #define JOINT_CPP_WRAP_BEGIN \

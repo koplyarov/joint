@@ -12,7 +12,8 @@
 #include <utils/Utils.hpp>
 
 
-namespace joint_java
+namespace joint {
+namespace java
 {
 
 	class ParamsAllocator
@@ -119,6 +120,6 @@ namespace joint_java
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 	};
 
-}
+}}
 
 #endif

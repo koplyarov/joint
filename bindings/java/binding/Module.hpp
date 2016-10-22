@@ -10,7 +10,8 @@
 #include <utils/JPtr.hpp>
 
 
-namespace joint_java {
+namespace joint {
+namespace java {
 namespace binding
 {
 
@@ -31,6 +32,6 @@ namespace binding
 		const JGlobalClassPtr& GetClass() const { return _cls; }
 	};
 
-}}
+}}}
 
 #endif

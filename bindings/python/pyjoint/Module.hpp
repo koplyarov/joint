@@ -5,7 +5,8 @@
 #include <pyjoint/ProxyBase.hpp>
 
 
-namespace joint_python {
+namespace joint {
+namespace python {
 namespace pyjoint
 {
 
@@ -18,7 +19,7 @@ namespace pyjoint
 
 	extern PyTypeObject Module_type;
 
-}}
+}}}
 
 
 #endif

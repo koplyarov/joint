@@ -1,7 +1,8 @@
 #include <binding/JavaBindingInfo.hpp>
 
 
-namespace joint_java
+namespace joint {
+namespace java
 {
 
 	Joint_TypeId JavaBindingInfo::GetJointTypeId(const JLocalObjPtr& typeNode) const
@@ -107,4 +108,4 @@ namespace joint_java
 	JLocalObjPtr JavaBindingInfo::GetMemberType(const JLocalObjPtr& memberNode) const
 	{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
-}
+}}

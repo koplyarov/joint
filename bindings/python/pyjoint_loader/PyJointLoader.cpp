@@ -12,7 +12,7 @@ extern "C"
 {
 
 static PyMethodDef g_methods[] = {
-	{"LoadModule", (PyCFunction)joint_python::pyjoint_loader::LoadModule, METH_VARARGS, "LoadModule" },
+	{"LoadModule", (PyCFunction)joint::python::pyjoint_loader::LoadModule, METH_VARARGS, "LoadModule" },
 	{NULL, NULL, 0, NULL}
 };
 
@@ -53,8 +53,8 @@ static struct PyModuleDef g_module = {
 			RETURN_ERROR;
 		}
 
-		using namespace joint_python;
-		using namespace joint_python::pyjoint_loader;
+		using namespace joint::python;
+		using namespace joint::python::pyjoint_loader;
 
 	#if PY_VERSION_HEX >= 0x03000000
 		PyObjectHolder m(PyModule_Create(&g_module));

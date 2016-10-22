@@ -7,7 +7,8 @@
 #include <utils/PythonUtils.hpp>
 
 
-namespace joint_python {
+namespace joint {
+namespace python {
 namespace pyjoint_loader
 {
 
@@ -37,4 +38,4 @@ namespace pyjoint_loader
 		PYJOINT_CPP_WRAP_END(py_joint_module.Release(), NULL)
 	}
 
-}}
+}}}

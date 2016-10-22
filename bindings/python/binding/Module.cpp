@@ -1,8 +1,8 @@
 #include "Module.hpp"
 
 #include <joint/Joint.h>
-#include <joint/utils/ArrayView.hpp>
-#include <joint/utils/MakeUnique.hpp>
+#include <joint/devkit/ArrayView.hpp>
+#include <joint/devkit/MakeUnique.hpp>
 
 #include <array>
 #include <iostream>
@@ -11,7 +11,8 @@
 #include <vector>
 
 
-namespace joint_python {
+namespace joint {
+namespace python {
 namespace binding
 {
 
@@ -49,4 +50,4 @@ namespace binding
 		return py_result;
 	}
 
-}}
+}}}

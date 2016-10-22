@@ -5,12 +5,13 @@
 #include <utils/PythonHeaders.h>
 
 
-namespace joint_python {
+namespace joint {
+namespace python {
 namespace pyjoint_loader
 {
 
 	PyObject* LoadModule(PyObject* self, PyObject* args, PyObject* kwds);
 
-}}
+}}}
 
 #endif

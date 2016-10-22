@@ -1,9 +1,9 @@
-#ifndef JOINT_CORE_JOINTSTRUCTS_H
-#define JOINT_CORE_JOINTSTRUCTS_H
+#ifndef JOINT_PRIVATE_JOINTSTRUCTS_H
+#define JOINT_PRIVATE_JOINTSTRUCTS_H
 
 
 #include <joint/Joint.h>
-#include <joint/core/Joint_Array.hpp>
+#include <joint/private/Joint_Array.hpp>
 
 #include <atomic>
 #include <string>

@@ -3,7 +3,8 @@
 #include <pyjoint/TypeDescriptor.hpp>
 
 
-namespace joint_python
+namespace joint {
+namespace python
 {
 
 	PythonBindingInfo::PythonBindingInfo(std::vector<PyObject*>& objects)
@@ -75,4 +76,4 @@ namespace joint_python
 		return obj;
 	}
 
-}
+}}

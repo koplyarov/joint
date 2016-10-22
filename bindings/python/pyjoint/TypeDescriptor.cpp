@@ -6,7 +6,8 @@
 #include <binding/Object.hpp>
 
 
-namespace joint_python {
+namespace joint {
+namespace python {
 namespace pyjoint
 {
 
@@ -98,4 +99,4 @@ namespace pyjoint
 		return 0;
 	}
 
-}}
+}}}

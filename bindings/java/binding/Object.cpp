@@ -1,16 +1,17 @@
 #include <binding/Object.hpp>
 
+#include <joint/devkit/JointException.hpp>
 #include <joint/devkit/StackStorage.hpp>
 #include <joint/devkit/StringBuilder.hpp>
 #include <joint/devkit/ValueMarshaller.hpp>
-#include <joint/utils/JointException.hpp>
 
 #include <binding/JavaBindingInfo.hpp>
 #include <binding/Marshaller.hpp>
 #include <utils/Utils.hpp>
 
 
-namespace joint_java {
+namespace joint {
+namespace java {
 namespace binding
 {
 
@@ -88,4 +89,4 @@ namespace binding
 		return JOINT_ERROR_NONE;
 	}
 
-}}
+}}}

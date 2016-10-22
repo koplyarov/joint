@@ -9,7 +9,8 @@
 #include <utils/PythonContext.hpp>
 
 
-namespace joint_python {
+namespace joint {
+namespace python {
 namespace binding
 {
 
@@ -37,6 +38,6 @@ namespace binding
 		static void FromPyValue(const Joint_Type& type, PyObject* pyObj, Joint_Value& outValue);
 	};
 
-}}
+}}}
 
 #endif

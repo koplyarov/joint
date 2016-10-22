@@ -1,7 +1,7 @@
 #include <binding/Object.hpp>
 
 #include <joint/devkit/ValueMarshaller.hpp>
-#include <joint/utils/CppWrappers.hpp>
+#include <joint/devkit/CppWrappers.hpp>
 
 #include <algorithm>
 
@@ -11,7 +11,8 @@
 #include <pyjoint/ProxyBase.hpp>
 
 
-namespace joint_python {
+namespace joint {
+namespace python {
 namespace binding
 {
 
@@ -130,4 +131,4 @@ namespace binding
 		JOINT_CPP_WRAP_END
 	}
 
-}}
+}}}

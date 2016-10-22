@@ -3,7 +3,7 @@
 
 
 #include <joint/devkit/InterfaceDescriptor.hpp>
-#include <joint/utils/JointException.hpp>
+#include <joint/devkit/JointException.hpp>
 
 #include <common/PythonBindingInfo.hpp>
 #include <pyjoint/Common.hpp>
@@ -11,7 +11,8 @@
 #include <utils/PythonUtils.hpp>
 
 
-namespace joint_python {
+namespace joint {
+namespace python {
 namespace pyjoint
 {
 
@@ -33,7 +34,7 @@ namespace pyjoint
 
 	extern PyTypeObject TypeDescriptor_type;
 
-}}
+}}}
 
 
 #endif

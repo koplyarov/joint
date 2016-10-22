@@ -13,7 +13,7 @@ extern "C"
 
 	Joint_Error JointJava_MakeBinding(Joint_BindingHandle* outBinding)
 	{
-		using namespace joint_java::binding;
+		using namespace joint::java::binding;
 
 		GetLogger().Info() << "MakeBinding";
 

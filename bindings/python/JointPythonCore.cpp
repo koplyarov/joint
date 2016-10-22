@@ -20,7 +20,7 @@ extern "C"
 
 	Joint_Error JointPythonCore_MakeBinding(Joint_BindingHandle* outBinding)
 	{
-		using namespace joint_python::binding;
+		using namespace joint::python::binding;
 
 		GetLogger().Info() << "MakeBinding";
 
@@ -49,7 +49,7 @@ extern "C"
 
 
 static PyMethodDef g_methods[] = {
-	{"Cast", (PyCFunction)joint_python::pyjoint::Cast, METH_VARARGS, "Cast" },
+	{"Cast", (PyCFunction)joint::python::pyjoint::Cast, METH_VARARGS, "Cast" },
 	{NULL, NULL, 0, NULL}
 };
 
@@ -100,8 +100,8 @@ PyMODINIT_FUNC JointPythonCore_InitModule_py3(void)
 PyMODINIT_FUNC JointPythonCore_InitModule_py2(void)
 #endif
 {
-	using namespace joint_python;
-	using namespace joint_python::pyjoint;
+	using namespace joint::python;
+	using namespace joint::python::pyjoint;
 
 #if PY_VERSION_HEX >= 0x03000000
 	PyObjectHolder m(PyModule_Create(&g_module));

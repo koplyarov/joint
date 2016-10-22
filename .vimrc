@@ -4,22 +4,28 @@ call g:cpp_plugin.indexer.builder.addCustomRegex('python', '/[ \t]*self\.([A-Za-
 
 call g:buildsystem.setAvailableBuildConfigs( { 'host': CMakeBuildConfig(4, './build/') } )
 
-set path+=joint
+set path+=core
+set path+=devkit
 set path+=bindings/python
 set path+=bindings/cpp
 set path+=bindings/java
 set path+=build/test
 set path+=build/benchmarks
-let g:include_directories = [ 'joint', 'bindings/cpp', 'bindings/java', 'bindings/python', 'build', 'benchmarks/core', 'benchmarks' ]
+let g:include_directories = [ 'core', 'devkit', 'bindings/cpp', 'bindings/java', 'bindings/python', 'build', 'benchmarks/core', 'benchmarks' ]
 
 function! GetCppNamespaceFromPath(path)
 	let res = []
-	if len(a:path) > 1 && a:path[0] == 'joint'
-		if len(a:path) > 2 && a:path[1] == 'joint'
-			call add(res, 'joint')
-			if len(a:path) > 3 && (a:path[2] == 'detail' || a:path[2] == 'devkit')
-				call add(res, a:path[2])
-			endif
+	if len(a:path) > 1 && a:path[0] == 'devkit'
+		call add(res, 'joint')
+		call add(res, 'devkit')
+		if len(a:path) > 3 && a:path[2] == 'detail'
+			call add(res, a:path[2])
+		endif
+	endif
+	if len(a:path) > 1 && a:path[0] == 'core'
+		call add(res, 'joint')
+		if len(a:path) > 3 && a:path[2] == 'detail'
+			call add(res, a:path[2])
 		endif
 	endif
 	if len(a:path) > 1 && a:path[0] == 'bindings'

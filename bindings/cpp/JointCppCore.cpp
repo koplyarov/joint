@@ -13,7 +13,7 @@ extern "C"
 
 	Joint_Error JointCppCore_MakeBinding(Joint_BindingHandle* outBinding)
 	{
-		using namespace joint_cpp::binding;
+		using namespace joint::cpp::binding;
 
 		GetLogger().Info() << "MakeBinding";
 
