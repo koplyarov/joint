@@ -8,7 +8,7 @@
 #include <memory>
 #include <mutex>
 
-#include <../bindings/cpp/JointCppCore.h>
+#include <../bindings/cpp/JointCpp.h>
 #include <../bindings/java/JointJava.h>
 #include <../bindings/python/JointPython.h>
 
@@ -65,7 +65,7 @@ extern "C"
 				g_bindings.AddBinding("python", Holder<Joint_BindingHandle>(python_binding, release_binding));
 
 				static Joint_BindingHandle cpp_binding;
-				ret = JointCppCore_MakeBinding(&cpp_binding);
+				ret = JointCpp_MakeBinding(&cpp_binding);
 				JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 				g_bindings.AddBinding("cpp", Holder<Joint_BindingHandle>(cpp_binding, release_binding));
 

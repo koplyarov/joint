@@ -1,5 +1,5 @@
-#ifndef BINDINGS_CPP_JOINTCPPCORE_H
-#define BINDINGS_CPP_JOINTCPPCORE_H
+#ifndef BINDINGS_CPP_JOINTCPP_H
+#define BINDINGS_CPP_JOINTCPP_H
 
 
 #include <joint/Joint.h>
@@ -18,7 +18,7 @@
 
 extern "C"
 {
-	JOINT_CPP_CORE_API Joint_Error JointCppCore_MakeBinding(Joint_BindingHandle* outBinding);
+	JOINT_CPP_CORE_API Joint_Error JointCpp_MakeBinding(Joint_BindingHandle* outBinding);
 }
 
 #endif

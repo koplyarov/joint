@@ -4,7 +4,7 @@
 
 #include <joint/JointLoader.h>
 
-#include <bindings/cpp/JointCppCore.h>
+#include <bindings/cpp/JointCpp.h>
 #include <joint.cpp/Component.hpp>
 #include <joint.cpp/Ptr.hpp>
 #include <joint.cpp/detail/Dummy.hpp>
@@ -17,7 +17,7 @@ namespace joint
 	class ModuleContext
 	{
 	private:
-		Joint_ModuleHandle		_module;
+		Joint_ModuleHandle    _module;
 
 	public:
 		ModuleContext(Joint_ModuleHandle module = JOINT_NULL_HANDLE) : _module(module) { }
@@ -62,7 +62,7 @@ namespace joint
 	class Module
 	{
 	private:
-		Joint_ModuleHandle		_module;
+		Joint_ModuleHandle     _module;
 
 	public:
 		Module(std::string bindingName, std::string moduleName)
@@ -110,7 +110,7 @@ namespace joint
 	class Binding
 	{
 	private:
-		Joint_BindingHandle		_binding;
+		Joint_BindingHandle    _binding;
 
 	public:
 		Binding(Joint_BindingHandle binding = JOINT_NULL_HANDLE) : _binding(binding) { }
@@ -150,14 +150,14 @@ namespace joint
 	class Context
 	{
 	private:
-		Binding				_binding;
-		ModuleContext		_mainModule;
+		Binding            _binding;
+		ModuleContext      _mainModule;
 
 	public:
 		Context()
 		{
 			Joint_BindingHandle binding_handle = JOINT_NULL_HANDLE;
-			JOINT_CALL( JointCppCore_MakeBinding(&binding_handle) );
+			JOINT_CALL( JointCpp_MakeBinding(&binding_handle) );
 			_binding = binding_handle;
 
 			Joint_ModuleHandle module_handle = JOINT_NULL_HANDLE;

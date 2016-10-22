@@ -1,4 +1,4 @@
-#include <JointCppCore.h>
+#include <JointCpp.h>
 
 #include <memory>
 #include <string>
@@ -11,7 +11,7 @@ JOINT_DEVKIT_LOGGER("Joint.C++.Core")
 extern "C"
 {
 
-	Joint_Error JointCppCore_MakeBinding(Joint_BindingHandle* outBinding)
+	Joint_Error JointCpp_MakeBinding(Joint_BindingHandle* outBinding)
 	{
 		using namespace joint::cpp::binding;
 

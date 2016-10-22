@@ -12,7 +12,7 @@ endif()
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(joint-cpp SHARED 
-	JointCppCore.cpp
+	JointCpp.cpp
 	binding/Binding.cpp
 	utils/DynamicLibrary.cpp
 )
