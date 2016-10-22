@@ -10,5 +10,19 @@ public class ModuleContext
 	ModuleContext(long handle)
 	{ this.handle = handle; }
 
-	public native JointObject register(Accessor accessor);
+	public JointObject register(Accessor accessor)
+	{
+		long objHandle = doRegister(handle, accessor);
+		try
+		{
+			return new JointObject(objHandle);
+		}
+		catch (Exception e)
+		{
+			JointObject.releaseObject(objHandle);
+			throw e;
+		}
+	}
+
+	private static native long doRegister(long moduleHandleLong, Accessor accessor);
 }
