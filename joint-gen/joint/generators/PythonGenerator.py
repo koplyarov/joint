@@ -1,18 +1,8 @@
 from ..SemanticGraph import Interface, Enum, BuiltinType, BuiltinTypeCategory, Struct, Array
 from ..GeneratorHelpers import CodeWithInitialization
 
-class Common:
-    def __init__(self):
-        self.__builtInTypes = { 'void': 1, 'bool': 2, 'i8': 3, 'u8': 4, 'i16': 5, 'u16': 6, 'i32': 7, 'u32': 8, 'i64': 9, 'u64': 10, 'f32': 11, 'f64': 12, 'string': 13 }
-
-    def GetBuiltInTypeIndex(self, typeName):
-        return self.__builtInTypes[typeName]
-
-
 class PythonGenerator:
     def __init__(self, semanticGraph):
-        self.__typesMapping = { 'void': 'void', 'u32': 'uint32_t', 'string': 'std::string' }
-        self.__common = Common()
         self.semanticGraph = semanticGraph
 
     def generate(self,):

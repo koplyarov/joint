@@ -6,24 +6,17 @@ include(UseJava)
 set(CMAKE_JAVA_INCLUDE_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/joint.jar)
 
 add_jar(tests
-	SOURCES Tests.java
-    OUTPUT_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+	SOURCES
+		Tests.java
+		Adapters.java
+    OUTPUT_DIR
+		${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
 
 add_dependencies(tests joint-java)
 
-#joint_generate_adapters(python ${CMAKE_CURRENT_SOURCE_DIR}/Tests_adapters.py
-	#../idl/IBasicTests.idl
-	#../idl/IObjectTests.idl
-	#../idl/IEnumTests.idl
-	#../idl/ILifetimeTests.idl
-	#../idl/ICastTests.idl
-	#../idl/IExceptionTests.idl
-	#../idl/IInterfaceChecksumTests.idl
-	#../idl/IStructTests.idl
-	#../idl/IArrayTests.idl
-#)
-
-#add_custom_target(test-adapters-py ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Tests_adapters.py)
+joint_generate_adapters(java ${CMAKE_CURRENT_SOURCE_DIR}/Adapters.java
+	../idl/IStarterTests.idl
+)
 
 

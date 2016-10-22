@@ -13,7 +13,8 @@ idl_parser = joint.IdlParser()
 generators = {
     'python': joint.generators.PythonGenerator,
     'c++': joint.generators.CppGenerator,
-    'c': joint.generators.CGenerator
+    'c': joint.generators.CGenerator,
+    'java': joint.generators.JavaGenerator
 }
 
 parser = argparse.ArgumentParser(description='Joint adapters generator')
