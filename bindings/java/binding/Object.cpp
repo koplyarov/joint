@@ -93,6 +93,7 @@ namespace binding
 			j_res.d = JAVA_CALL(env->CallDoubleMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
 			break;
 		case JOINT_TYPE_UTF8:
+		case JOINT_TYPE_OBJ:
 			j_res.l = JAVA_CALL(env->CallObjectMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
 			break;
 		default:

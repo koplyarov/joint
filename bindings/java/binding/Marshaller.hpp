@@ -87,12 +87,27 @@ namespace java
 
 		JavaVariant FromJointObj(devkit::ValueDirection dir, Joint_ObjectHandle val, const JavaBindingInfo::TypeUserData& proxyType, Joint_InterfaceChecksum checksum) const
 		{
+			jvalue result;
+			if (val == JOINT_NULL_HANDLE)
+			{
+				result.l = NULL;
+				return result;
+			}
+
+			if (dir == devkit::ValueDirection::Parameter)
+				Joint_IncRefObject(val);
+
+			auto sg(devkit::ScopeExit([&]{
+				if (dir == devkit::ValueDirection::Parameter)
+					Joint_DecRefObject(val);
+			}));
+
 			JLocalClassPtr cls(env, JAVA_CALL(env->FindClass("org/joint/JointObject")));
 			jmethodID ctor_id = JAVA_CALL(env->GetMethodID(cls, "<init>", "(J)V"));
 			JLocalObjPtr joint_obj(env, JAVA_CALL(env->NewObject(cls, ctor_id, reinterpret_cast<jlong>(val))));
 
-			jvalue result;
 			result.l = JAVA_CALL(env->NewObject(proxyType._proxyCls.Get(), proxyType._proxyCtorId, joint_obj.Get()));
+			sg.Cancel();
 			return result;
 		}
 
@@ -127,7 +142,22 @@ namespace java
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
 		Joint_ObjectHandle ToJointObj(devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::TypeUserData& objType) const
-		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		{
+			if (!val.l)
+				return JOINT_NULL_HANDLE;
+
+			JLocalClassPtr cls(env, JAVA_CALL(env->GetObjectClass(val.l)));
+			jfieldID obj_id = JAVA_CALL(env->GetFieldID(cls, "obj", "Lorg/joint/JointObject;"));
+			JLocalObjPtr joint_obj(env, JAVA_CALL(env->GetObjectField(val.l, obj_id)));
+
+			JLocalClassPtr JointObject_cls(env, JAVA_CALL(env->FindClass("org/joint/JointObject")));
+			jfieldID handle_id = JAVA_CALL(env->GetFieldID(JointObject_cls, "handle", "J"));
+
+			auto handle = reinterpret_cast<Joint_ObjectHandle>(JAVA_CALL(env->GetLongField(joint_obj.Get(), handle_id)));
+			if (dir == devkit::ValueDirection::Return)
+				Joint_IncRefObject(handle);
+			return handle;
+		}
 
 		Joint_ArrayHandle ToJointArray(devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::TypeUserData& objType) const
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
@@ -164,7 +194,26 @@ namespace java
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
 		JavaVariant FromJointObj(devkit::ValueDirection dir, Joint_ObjectHandle val, const JavaBindingInfo::TypeUserData& proxyType, Joint_InterfaceChecksum checksum) const
-		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		{
+			if (val == JOINT_NULL_HANDLE)
+				return NULL;
+
+			if (dir == devkit::ValueDirection::Parameter)
+				Joint_IncRefObject(val);
+
+			auto sg(devkit::ScopeExit([&]{
+				if (dir == devkit::ValueDirection::Parameter)
+					Joint_DecRefObject(val);
+			}));
+
+			JLocalClassPtr cls(env, JAVA_CALL(env->FindClass("org/joint/JointObject")));
+			jmethodID ctor_id = JAVA_CALL(env->GetMethodID(cls, "<init>", "(J)V"));
+			JLocalObjPtr joint_obj(env, JAVA_CALL(env->NewObject(cls, ctor_id, reinterpret_cast<jlong>(val))));
+
+			jobject result = JAVA_CALL(env->NewObject(proxyType._proxyCls.Get(), proxyType._proxyCtorId, joint_obj.Get()));
+			sg.Cancel();
+			return result;
+		}
 
 		JavaVariant FromJointArray(devkit::ValueDirection dir, Joint_ArrayHandle val, const JavaBindingInfo::TypeUserData& elementTypeDesc) const
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
@@ -213,7 +262,22 @@ namespace java
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
 		Joint_ObjectHandle ToJointObj(devkit::ValueDirection dir, const JLocalObjPtr& val, const JavaBindingInfo::TypeUserData& objType) const
-		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		{
+			if (!val)
+				return JOINT_NULL_HANDLE;
+
+			JLocalClassPtr cls(env, JAVA_CALL(env->GetObjectClass(val.Get())));
+			jfieldID obj_id = JAVA_CALL(env->GetFieldID(cls, "obj", "Lorg/joint/JointObject;"));
+			JLocalObjPtr joint_obj(env, JAVA_CALL(env->GetObjectField(val.Get(), obj_id)));
+
+			JLocalClassPtr JointObject_cls(env, JAVA_CALL(env->FindClass("org/joint/JointObject")));
+			jfieldID handle_id = JAVA_CALL(env->GetFieldID(JointObject_cls, "handle", "J"));
+
+			auto handle = reinterpret_cast<Joint_ObjectHandle>(JAVA_CALL(env->GetLongField(joint_obj.Get(), handle_id)));
+			if (dir == devkit::ValueDirection::Return)
+				Joint_IncRefObject(handle);
+			return handle;
+		}
 
 		Joint_ArrayHandle ToJointArray(devkit::ValueDirection dir, const JLocalObjPtr& val, const JavaBindingInfo::TypeUserData& objType) const
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }

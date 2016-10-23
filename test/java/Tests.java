@@ -7,11 +7,30 @@ import adapters.Adapters;
 class Tests
 {
 
-	static class Component extends AccessorsContainer implements Adapters.test_IBasicTests_impl
+	static class SomeObject extends AccessorsContainer implements Adapters.test_ISomeObject_impl
 	{
-		Component()
+		private int counter = 0;
+
+		SomeObject() { addAccessor(new Adapters.test_ISomeObject_accessor(this)); }
+
+		public void Method() { ++counter; }
+		public int GetInvokationsCount() { return counter; }
+	}
+
+	static class Component 
+		extends
+			AccessorsContainer
+		implements
+			Adapters.test_IBasicTests_impl, 
+			Adapters.test_IObjectTests_impl
+	{
+		private ModuleContext module;
+
+		Component(ModuleContext module)
 		{
 			addAccessor(new Adapters.test_IBasicTests_accessor(this));
+			addAccessor(new Adapters.test_IObjectTests_accessor(this));
+			this.module = module;
 		}
 
 		public byte AddU8(byte l, byte r) { return (byte)(l + r); }
@@ -38,8 +57,16 @@ class Tests
 		public double CallbackF64(Adapters.test_IBasicTestsCallbackF64 cb, double l, double r) { return cb.AddF64(l, r); }
 		public boolean CallbackBool(Adapters.test_IBasicTestsCallbackBool cb, boolean l, boolean r) { return cb.And(l, r); }
 		public String CallbackString(Adapters.test_IBasicTestsCallbackString cb, String l, String r) { return cb.Concat(l, r); }
+
+		public Adapters.test_ISomeObject ReturnNull() { return null; }
+		public boolean CheckNotNull(Adapters.test_ISomeObject o) { return o != null; }
+		public Adapters.test_ISomeObject CallbackReturn(Adapters.test_IObjectTestsCallbackReturn cb) { return cb.Return(); }
+		public boolean CallbackParam(Adapters.test_IObjectTestsCallbackParam cb, Adapters.test_ISomeObject o) { return cb.Method(o); }
+		public void InvokeObjectMethod(Adapters.test_ISomeObject o) { o.Method(); }
+		public Adapters.test_ISomeObject ReturnSameObject(Adapters.test_ISomeObject o) { return o; }
+		public Adapters.test_ISomeObject ReturnNewObject() { return Adapters.test_ISomeObject.makeComponent(module, new SomeObject()); }
 	}
 
 	public static JointObject GetTests(ModuleContext module)
-	{ return Adapters.test_IBasicTests.makeComponent(module, new Component()).obj; }
+	{ return Adapters.test_IBasicTests.makeComponent(module, new Component(module)).obj; }
 }

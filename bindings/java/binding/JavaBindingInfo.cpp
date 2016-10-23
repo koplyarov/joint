@@ -16,7 +16,13 @@ namespace java
 
 
 	Joint_InterfaceChecksum JavaBindingInfo::GetInterfaceChecksum(const JLocalObjPtr& typeNode) const
-	{ return Joint_InterfaceChecksum(); }
+	{
+		auto env = typeNode.GetEnv();
+
+		JLocalClassPtr TypeDescriptor_cls(env, JAVA_CALL(env->FindClass("org/joint/TypeDescriptor")));
+		jfieldID interfaceChecksum_id = JAVA_CALL(env->GetFieldID(TypeDescriptor_cls, "interfaceChecksum", "I"));
+		return static_cast<Joint_InterfaceChecksum>(JAVA_CALL(env->GetIntField(typeNode.Get(), interfaceChecksum_id)));
+	}
 
 
 	JavaBindingInfo::TypeUserData JavaBindingInfo::GetArrayUserData(const JLocalObjPtr& typeNode) const

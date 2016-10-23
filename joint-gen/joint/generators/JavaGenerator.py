@@ -73,7 +73,7 @@ class JavaGenerator:
         yield 'public static class {}'.format(self._mangleType(ifc))
         yield '{'
         yield '\tpublic static InterfaceId id = new InterfaceId("{}");'.format(ifc.fullname)
-        yield '\tpublic static TypeDescriptor typeDescriptor = new TypeDescriptor(16, "Ladapters/Adapters${n};", {n}.class);'.format(n=self._mangleType(ifc))
+        yield '\tpublic static TypeDescriptor typeDescriptor = new TypeDescriptor(16, "Ladapters/Adapters${n};", {n}.class, {cs});'.format(n=self._mangleType(ifc), cs=hex(ifc.checksum))
         yield '\tpublic static InterfaceDescriptor desc = new InterfaceDescriptor('
         impl_class = '{}_impl.class'.format(self._mangleType(ifc))
         for i,m in enumerate(ifc.methods):
@@ -90,7 +90,8 @@ class JavaGenerator:
         for m in ifc.methods:
             yield ''
             yield '\tpublic {} {}({})'.format(self._toJavaType(m.retType), m.name, ', '.join('{} {}'.format(self._toJavaType(p.type), p.name) for p in m.params))
-            yield '\t{{ return ({})obj.invokeMethod(desc.getNative(), {}{}); }}'.format(self._toJavaType(m.retType), m.index, ''.join(', {}'.format(p.name) for p in m.params))
+            method_invokation = 'obj.invokeMethod(desc.getNative(), {}{})'.format(m.index, ''.join(', {}'.format(p.name) for p in m.params))
+            yield '\t{{ {}{}; }}'.format('return ({})'.format(self._toJavaType(m.retType)) if m.retType.fullname != 'void' else '', method_invokation)
         yield '}'
 
     def _generateInterfaceImpl(self, ifc):
