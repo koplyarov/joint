@@ -7,7 +7,6 @@ namespace java
 
 	Joint_TypeId JavaBindingInfo::GetJointTypeId(const JLocalObjPtr& typeNode) const
 	{
-		auto jvm = typeNode.GetJvm();
 		auto env = typeNode.GetEnv();
 
 		JLocalClassPtr TypeDescriptor_cls(env, JAVA_CALL(env->FindClass("org/joint/TypeDescriptor")));
@@ -17,28 +16,36 @@ namespace java
 
 
 	Joint_InterfaceChecksum JavaBindingInfo::GetInterfaceChecksum(const JLocalObjPtr& typeNode) const
-	{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+	{ return Joint_InterfaceChecksum(); }
 
 
 	JavaBindingInfo::TypeUserData JavaBindingInfo::GetArrayUserData(const JLocalObjPtr& typeNode) const
-	{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+	{ return TypeUserData(); }
 
 
 	JavaBindingInfo::TypeUserData JavaBindingInfo::GetObjectUserData(const JLocalObjPtr& typeNode) const
-	{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+	{
+		auto env = typeNode.GetEnv();
+
+		JLocalClassPtr TypeDescriptor_cls(env, JAVA_CALL(env->FindClass("org/joint/TypeDescriptor")));
+		jfieldID proxyClass_id = JAVA_CALL(env->GetFieldID(TypeDescriptor_cls, "proxyClass", "Ljava/lang/Class;"));
+		JGlobalClassPtr proxy_class(env, static_cast<jclass>(JAVA_CALL(env->GetObjectField(typeNode.Get(), proxyClass_id))));
+		JOINT_CHECK(proxy_class, "Invalid TypeDescriptor for interface");
+		jmethodID proxy_ctor_id = JAVA_CALL(env->GetMethodID(proxy_class.Get(), "<init>", "(Lorg/joint/JointObject;)V"));
+		return TypeUserData{proxy_class, proxy_ctor_id};
+	}
 
 
 	JavaBindingInfo::TypeUserData JavaBindingInfo::GetEnumUserData(const JLocalObjPtr& typeNode) const
-	{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+	{ return TypeUserData(); }
 
 
 	JavaBindingInfo::TypeUserData JavaBindingInfo::GetStructUserData(const JLocalObjPtr& typeNode) const
-	{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+	{ return TypeUserData(); }
 
 
 	JavaBindingInfo::MethodUserData JavaBindingInfo::GetMethodUserData(const JLocalObjPtr& methodNode) const
 	{
-		auto jvm = methodNode.GetJvm();
 		auto env = methodNode.GetEnv();
 
 		JLocalClassPtr MethodDescriptor_cls(env, JAVA_CALL(env->FindClass("org/joint/MethodDescriptor")));
@@ -60,7 +67,6 @@ namespace java
 
 	JLocalObjPtr JavaBindingInfo::GetRetTypeNode(const JLocalObjPtr& methodNode) const
 	{
-		auto jvm = methodNode.GetJvm();
 		auto env = methodNode.GetEnv();
 
 		JLocalClassPtr MethodDescriptor_cls(env, JAVA_CALL(env->FindClass("org/joint/MethodDescriptor")));
@@ -75,7 +81,6 @@ namespace java
 
 	JavaBindingInfo::Sequence JavaBindingInfo::GetParamsNodes(const JLocalObjPtr& methodNode) const
 	{
-		auto jvm = methodNode.GetJvm();
 		auto env = methodNode.GetEnv();
 
 		JLocalClassPtr MethodDescriptor_cls(env, JAVA_CALL(env->FindClass("org/joint/MethodDescriptor")));
@@ -87,7 +92,6 @@ namespace java
 
 	JavaBindingInfo::Sequence JavaBindingInfo::GetMethodsNodes(const JLocalObjPtr& ifcNode) const
 	{
-		auto jvm = ifcNode.GetJvm();
 		auto env = ifcNode.GetEnv();
 
 		JLocalClassPtr InterfaceDescriptor_cls(env, JAVA_CALL(env->FindClass("org/joint/InterfaceDescriptor")));

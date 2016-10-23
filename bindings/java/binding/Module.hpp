@@ -22,7 +22,6 @@ namespace binding
 		using JavaVMHolder = devkit::Holder<JavaVM*>;
 
 	private:
-		JavaVMHolder        _jvm;
 		JGlobalClassPtr     _cls;
 
 	public:

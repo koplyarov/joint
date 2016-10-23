@@ -1,5 +1,6 @@
 #include <binding/Object.hpp>
 
+#include <joint/devkit/CppWrappers.hpp>
 #include <joint/devkit/JointException.hpp>
 #include <joint/devkit/StackStorage.hpp>
 #include <joint/devkit/StringBuilder.hpp>
@@ -20,10 +21,7 @@ namespace binding
 	Object::Object(const JGlobalObjPtr& accessor)
 		: _accessor(accessor)
 	{
-		GetLogger().Warning() << "Object ctor";
-
 		auto env = _accessor.GetEnv();
-		auto jvm = _accessor.GetJvm();
 
 		JLocalClassPtr Accessor_cls(env, JAVA_CALL(env->FindClass("org/joint/Accessor")));
 		jmethodID getObj_id = JAVA_CALL(env->GetMethodID(Accessor_cls, "getObj", "()Ljava/lang/Object;"));
@@ -40,9 +38,7 @@ namespace binding
 
 
 	Object::~Object()
-	{
-		GetLogger().Warning() << "Object dtor";
-	}
+	{ }
 
 
 	Joint_Error Object::InvokeMethod(size_t index, joint::ArrayView<const Joint_Parameter> params, Joint_Type retType, Joint_RetValue* outRetValue)
@@ -60,7 +56,7 @@ namespace binding
 			jparams = params_storage.Make(params.size());
 
 			for (size_t i = 0; i < params.size(); ++i)
-				jparams[i] = ValueMarshaller::FromJoint<jvalue>(ValueDirection::Parameter, m_desc.GetParamType(i), params[i].value, JavaAccessorMarshaller());
+				jparams[i] = ValueMarshaller::FromJoint<jvalue>(ValueDirection::Parameter, m_desc.GetParamType(i), params[i].value, JavaAccessorMarshaller(jvm, env));
 		}
 
 		jvalue j_res;
@@ -68,15 +64,41 @@ namespace binding
 		switch (m_desc.GetRetType().GetJointType().id)
 		{
 		case JOINT_TYPE_VOID:
+			JAVA_CALL_VOID(env->CallVoidMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
 			outRetValue->releaseValue = &Object::ReleaseRetValue;
 			return JOINT_ERROR_NONE;
+		case JOINT_TYPE_BOOL:
+			j_res.z = JAVA_CALL(env->CallBooleanMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
+			break;
+		case JOINT_TYPE_U8:
+		case JOINT_TYPE_I8:
+			j_res.b = JAVA_CALL(env->CallByteMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
+			break;
+		case JOINT_TYPE_U16:
+		case JOINT_TYPE_I16:
+			j_res.s = JAVA_CALL(env->CallShortMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
+			break;
+		case JOINT_TYPE_U32:
 		case JOINT_TYPE_I32:
 			j_res.i = JAVA_CALL(env->CallIntMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
+			break;
+		case JOINT_TYPE_U64:
+		case JOINT_TYPE_I64:
+			j_res.j = JAVA_CALL(env->CallLongMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
+			break;
+		case JOINT_TYPE_F32:
+			j_res.f = JAVA_CALL(env->CallFloatMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
+			break;
+		case JOINT_TYPE_F64:
+			j_res.d = JAVA_CALL(env->CallDoubleMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
+			break;
+		case JOINT_TYPE_UTF8:
+			j_res.l = JAVA_CALL(env->CallObjectMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
 			break;
 		default:
 			JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
 		}
-		outRetValue->result.value = ValueMarshaller::ToJoint(ValueDirection::Return, m_desc.GetRetType(), j_res, JavaAccessorMarshaller(), alloc);
+		outRetValue->result.value = ValueMarshaller::ToJoint(ValueDirection::Return, m_desc.GetRetType(), j_res, JavaAccessorMarshaller(jvm, env), alloc);
 
 		outRetValue->releaseValue = &Object::ReleaseRetValue;
 		return JOINT_ERROR_NONE;
@@ -85,8 +107,21 @@ namespace binding
 
 	Joint_Error Object::ReleaseRetValue(Joint_Type type, Joint_Value value)
 	{
-		printf("ReleaseRetValue\n");
-		return JOINT_ERROR_NONE;
+		JOINT_CPP_WRAP_BEGIN
+		switch(type.id)
+		{
+		case JOINT_TYPE_UTF8:
+			delete[] value.utf8;
+			break;
+		case JOINT_TYPE_STRUCT:
+			for (int32_t i = 0; i < type.payload.structDescriptor->membersCount; ++i)
+				ReleaseRetValue(type.payload.structDescriptor->memberTypes[i], value.members[i]);
+			delete[] value.members;
+			break;
+		default:
+			break;
+		}
+		JOINT_CPP_WRAP_END
 	}
 
 }}}

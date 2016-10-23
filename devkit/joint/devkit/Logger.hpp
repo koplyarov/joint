@@ -105,6 +105,7 @@ namespace devkit
 	};
 
 #define JOINT_DEVKIT_LOGGER(Name_) static ::joint::devkit::NamedLogger GetLogger() { return ::joint::devkit::NamedLogger(Name_); }
+#define JOINT_DEVKIT_FUNCTION_LOCAL_LOGGER(Name_) auto GetLogger = []() { return ::joint::devkit::NamedLogger(Name_); }
 
 }}
 

@@ -73,10 +73,11 @@ class JavaGenerator:
         yield 'public static class {}'.format(self._mangleType(ifc))
         yield '{'
         yield '\tpublic static InterfaceId id = new InterfaceId("{}");'.format(ifc.fullname)
+        yield '\tpublic static TypeDescriptor typeDescriptor = new TypeDescriptor(16, "Ladapters/Adapters${n};", {n}.class);'.format(n=self._mangleType(ifc))
         yield '\tpublic static InterfaceDescriptor desc = new InterfaceDescriptor('
         impl_class = '{}_impl.class'.format(self._mangleType(ifc))
-        for m in ifc.methods:
-            yield '\t\tnew MethodDescriptor({}, "{}", {}, new TypeDescriptor[]{{ {} }})'.format(impl_class, m.name, self._toTypeDescriptor(m.retType), ', '.join(self._toTypeDescriptor(p.type) for p in m.params))
+        for i,m in enumerate(ifc.methods):
+            yield '\t\tnew MethodDescriptor({}, "{}", {}, new TypeDescriptor[]{{ {} }}){}'.format(impl_class, m.name, self._toTypeDescriptor(m.retType), ', '.join(self._toTypeDescriptor(p.type) for p in m.params), ',' if i < len(ifc.methods) - 1 else '')
         yield '\t);'
         yield ''
         yield '\tpublic static {} makeComponent(ModuleContext module, AccessorsContainer accessorsContainer)'.format(self._mangleType(ifc))
@@ -126,7 +127,7 @@ class JavaGenerator:
 
     def _toTypeDescriptor(self, type):
         if isinstance(type, BuiltinType):
-            return 'BuiltinTypes.{}'.format(type.name)
+            return 'BuiltinTypes.{}'.format(type.name.capitalize())
         elif isinstance(type, (Interface, Enum, Struct)):
             return '{}.typeDescriptor'.format(self._mangleType(type));
         #elif isinstance(type, Array):

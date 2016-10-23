@@ -16,20 +16,22 @@
 		return (OkRetVal_); \
 	} catch (const std::exception& ex) { \
 		GetLogger().Error() << JOINT_SOURCE_LOCATION ": " << ex; \
+		::joint::java::ThrowJavaException(env, ex.what()); \
 		return (FailRetVal_); \
 	}
 
 #define JNI_WRAP_CPP_END_VOID() \
 	} catch (const std::exception& ex) { \
 		GetLogger().Error() << JOINT_SOURCE_LOCATION ": " << ex; \
+		::joint::java::ThrowJavaException(env, ex.what()); \
 	}
 
 
-#define JAVA_CALL(...) JAVA_CALL_EX(jvm, __VA_ARGS__)
-#define JAVA_CALL_EX(Jvm_, ...) ::joint::java::JavaCallImpl(Jvm_, (__VA_ARGS__), JOINT_SOURCE_LOCATION)
+#define JAVA_CALL(...) JAVA_CALL_EX(env, __VA_ARGS__)
+#define JAVA_CALL_EX(Env_, ...) ::joint::java::JavaCallImpl(Env_, (__VA_ARGS__), JOINT_SOURCE_LOCATION)
 
-#define JAVA_CALL_VOID(...) JAVA_CALL_VOID_EX(jvm, __VA_ARGS__)
-#define JAVA_CALL_VOID_EX(Jvm_, ...) do { __VA_ARGS__; ::joint::java::JavaCallImpl(Jvm_, 0, JOINT_SOURCE_LOCATION); } while (false)
+#define JAVA_CALL_VOID(...) JAVA_CALL_VOID_EX(env, __VA_ARGS__)
+#define JAVA_CALL_VOID_EX(Env_, ...) do { __VA_ARGS__; ::joint::java::JavaCallImpl(Env_, 0, JOINT_SOURCE_LOCATION); } while (false)
 
 
 namespace joint {
@@ -68,12 +70,30 @@ namespace java
 	};
 
 
+	inline void ThrowJavaException(JNIEnv* env, const std::string& msg)
+	{
+		JLocalStringPtr jmsg(env, env->NewStringUTF(msg.c_str()));
+		JLocalClassPtr RuntimeException_cls(env, env->FindClass("java/lang/RuntimeException"));
+		if (!RuntimeException_cls)
+			JOINT_TERMINATE("Joint.Java.Utils", "Could not find class java.lang.RuntimeException");
+
+		jmethodID RuntimeException_ctor_id = env->GetMethodID(RuntimeException_cls, "<init>", "(Ljava/lang/String;)V");
+		if (!RuntimeException_ctor_id)
+			JOINT_TERMINATE("Joint.Java.Utils", "Could not find java.lang.RuntimeException(java.lang.String) constructor");
+
+		JLocalThrowablePtr ex(env, reinterpret_cast<jthrowable>(env->NewObject(RuntimeException_cls, RuntimeException_ctor_id, jmsg.Get())));
+		if (!ex)
+			JOINT_TERMINATE("Joint.Java.Utils", "Could not create java.lang.RuntimeException object");
+
+		env->Throw(ex.Get());
+	}
+
+
 	template < typename T_ >
-	T_ JavaCallImpl(JavaVM *jvm, T_ result, const char* location)
+	T_ JavaCallImpl(JNIEnv *env, T_ result, const char* location)
 	{
 		using namespace devkit;
 
-		JNIEnv* env = detail_JPtr::GetJavaEnv(jvm);
 		if (env->ExceptionCheck())
 		{
 			StringBuilder sb;
@@ -81,7 +101,7 @@ namespace java
 
 			jthrowable raw_throwable = env->ExceptionOccurred();
 			env->ExceptionClear();
-			JGlobalThrowablePtr ex = JGlobalThrowablePtr(jvm, raw_throwable);
+			JGlobalThrowablePtr ex = JGlobalThrowablePtr(env, raw_throwable);
 			std::string msg("<cannot obtain java exception message>");
 			JLocalClassPtr throwable_class(env, env->FindClass("java/lang/Throwable"));
 			jmethodID toString_id = 0, getStackTrace_id = 0;

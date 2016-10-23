@@ -17,22 +17,19 @@ namespace joint {
 namespace java
 {
 
-	namespace detail_JPtr
+	inline JNIEnv* GetJavaEnv(JavaVM* jvm, int version = JNI_VERSION_1_6)
 	{
-		JOINT_DEVKIT_LOGGER("Joint.Java.JPtr")
+		JOINT_DEVKIT_FUNCTION_LOCAL_LOGGER("Joint.Java.Utils");
 
-		inline JNIEnv* GetJavaEnv(JavaVM* jvm, int version = JNI_VERSION_1_6)
-		{
-			JNIEnv* env = NULL;
-			int retcode = jvm->GetEnv((void **)&env, version);
-			if (retcode == JNI_EDETACHED)
-				JOINT_THROW("Java VM is not attached to the current thread!");
-			if (retcode == JNI_EVERSION)
-				JOINT_THROW(devkit::StringBuilder() % "Java VM does not support version " % (version >> 16) % "." % ((version >> 8) & 0xFF) % "." % (version & 0xFF));
-			if (retcode != JNI_OK)
-				JOINT_THROW(devkit::StringBuilder() % "Cannot get JNIEnv from Java VM, retcode: " % retcode);
-			return env;
-		}
+		JNIEnv* env = NULL;
+		int retcode = jvm->GetEnv((void **)&env, version);
+		if (retcode == JNI_EDETACHED)
+			JOINT_THROW("Java VM is not attached to the current thread!");
+		if (retcode == JNI_EVERSION)
+			JOINT_THROW(devkit::StringBuilder() % "Java VM does not support version " % (version >> 16) % "." % ((version >> 8) & 0xFF) % "." % (version & 0xFF));
+		if (retcode != JNI_OK)
+			JOINT_THROW(devkit::StringBuilder() % "Cannot get JNIEnv from Java VM, retcode: " % retcode);
+		return env;
 	}
 
 
@@ -43,10 +40,10 @@ namespace java
 		using SharedT = std::shared_ptr<PointedType>;
 
 		static SharedT InitRef(JavaVM* jvm, T_ obj)
-		{ return SharedT(obj, [jvm] (T_ obj) { detail_JPtr::GetJavaEnv(jvm)->DeleteLocalRef(obj); }); }
+		{ return SharedT(obj, [jvm] (T_ obj) { GetJavaEnv(jvm)->DeleteLocalRef(obj); }); }
 
 		static SharedT NewRef(JavaVM* jvm, T_ obj)
-		{ return SharedT((T_)detail_JPtr::GetJavaEnv(jvm)->NewLocalRef(obj), [jvm] (T_ obj) { detail_JPtr::GetJavaEnv(jvm)->DeleteLocalRef(obj); }); }
+		{ return SharedT((T_)GetJavaEnv(jvm)->NewLocalRef(obj), [jvm] (T_ obj) { GetJavaEnv(jvm)->DeleteLocalRef(obj); }); }
 	};
 
 
@@ -58,14 +55,14 @@ namespace java
 
 		static SharedT InitRef(JavaVM* jvm, T_ obj)
 		{
-			auto env = detail_JPtr::GetJavaEnv(jvm);
+			auto env = GetJavaEnv(jvm);
 			T_ global = (T_)env->NewGlobalRef(obj);
 			env->DeleteLocalRef(obj);
-			return SharedT(global, [jvm] (T_ obj) { detail_JPtr::GetJavaEnv(jvm)->DeleteGlobalRef(obj); });
+			return SharedT(global, [jvm] (T_ obj) { GetJavaEnv(jvm)->DeleteGlobalRef(obj); });
 		}
 
 		static SharedT NewRef(JavaVM* jvm, T_ obj)
-		{ return SharedT((T_)detail_JPtr::GetJavaEnv(jvm)->NewGlobalRef(obj), [jvm] (T_ obj) { detail_JPtr::GetJavaEnv(jvm)->DeleteGlobalRef(obj); }); }
+		{ return SharedT((T_)GetJavaEnv(jvm)->NewGlobalRef(obj), [jvm] (T_ obj) { GetJavaEnv(jvm)->DeleteGlobalRef(obj); }); }
 	};
 
 
@@ -155,7 +152,7 @@ namespace java
 		{ *this = BasicJPtr<T, RefPolicy>(); }
 
 		JNIEnv* GetEnv() const
-		{ return detail_JPtr::GetJavaEnv(GetJvm()); }
+		{ return GetJavaEnv(GetJvm()); }
 
 	private:
 		void CheckPtr() const

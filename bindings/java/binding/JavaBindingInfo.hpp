@@ -25,7 +25,10 @@ namespace java
 		{ };
 
 		struct TypeUserData
-		{ };
+		{
+			JGlobalClassPtr    _proxyCls;
+			jmethodID          _proxyCtorId;
+		};
 
 		struct MethodUserData
 		{
@@ -58,13 +61,12 @@ namespace java
 
 			size_t GetCount() const
 			{
-				auto jvm = _array.GetJvm();
+				auto env = _array.GetEnv();
 				return JAVA_CALL(_array.GetEnv()->GetArrayLength(_array.Get()));
 			}
 
 			JLocalObjPtr Get(size_t index) const
 			{
-				auto jvm = _array.GetJvm();
 				auto env = _array.GetEnv();
 				return JLocalObjPtr(env, JAVA_CALL(env->GetObjectArrayElement(_array.Get(), index)));
 			}
