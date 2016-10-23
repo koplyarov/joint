@@ -150,12 +150,11 @@ namespace java
 		using JavaVariant = jobject;
 
 	private:
-		JavaVM*    jvm;
 		JNIEnv*    env;
 
 	public:
-		JavaProxyMarshaller(JavaVM* jvm, JNIEnv* env)
-			: jvm(jvm), env(env)
+		JavaProxyMarshaller(JNIEnv* env)
+			: env(env)
 		{ }
 
 		JavaVariant FromJointUtf8(const char* val) const

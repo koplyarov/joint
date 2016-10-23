@@ -55,7 +55,7 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod(JNIEnv* env,
 		const auto& t = method_desc.GetParamType(i);
 
 		JLocalObjPtr p(env, JAVA_CALL(env->GetObjectArrayElement(jparams, i)));
-		Joint_Value v = ValueMarshaller::ToJoint(ValueDirection::Parameter, t, p, JavaProxyMarshaller(jvm, env), alloc);
+		Joint_Value v = ValueMarshaller::ToJoint(ValueDirection::Parameter, t, p, JavaProxyMarshaller(env), alloc);
 		params[i] = Joint_Parameter{v, t.GetJointType()};
 	}
 
@@ -77,7 +77,7 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod(JNIEnv* env,
 		if (ret_type.id == JOINT_TYPE_VOID)
 			return nullptr;
 
-		result = ValueMarshaller::FromJoint<jobject>(ValueDirection::Return, method_desc.GetRetType(), ret_value.result.value, JavaProxyMarshaller(jvm, env));
+		result = ValueMarshaller::FromJoint<jobject>(ValueDirection::Return, method_desc.GetRetType(), ret_value.result.value, JavaProxyMarshaller(env));
 	}
 	else
 		JOINT_THROW((std::string("Joint_InvokeMethod failed: ") + Joint_ErrorToString(ret)).c_str());
