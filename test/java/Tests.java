@@ -11,11 +11,35 @@ class Tests
 	{
 		private int counter = 0;
 
-		SomeObject() { addAccessor(new Adapters.test_ISomeObject_accessor(this)); }
+		SomeObject() { Adapters.test_ISomeObject.registerAccessors(this); }
 
 		public void Method() { ++counter; }
 		public int GetInvokationsCount() { return counter; }
 	}
+
+	static class CastComponent017
+		extends
+			AccessorsContainer
+		implements
+			Adapters.test_IInterface0_impl,
+			Adapters.test_IInterface1_impl,
+			Adapters.test_IInterface7_impl
+	{
+		CastComponent017()
+		{
+			Adapters.test_IInterface0.registerAccessors(this);
+			Adapters.test_IInterface1.registerAccessors(this);
+			Adapters.test_IInterface7.registerAccessors(this);
+		}
+
+		public byte  Method1(byte i)  { return i; }
+		public short Method3(short i) { return i; }
+		public short Method4(short i) { return i; }
+		public int   Method5(int i)   { return i; }
+		public int   Method6(int i)   { return i; }
+		public long  Method7(long i)  { return i; }
+	}
+
 
 	static class Component 
 		extends
@@ -23,15 +47,17 @@ class Tests
 		implements
 			Adapters.test_IBasicTests_impl, 
 			Adapters.test_IObjectTests_impl,
-			Adapters.test_IEnumTests_impl
+			Adapters.test_IEnumTests_impl,
+			Adapters.test_ICastTests_impl
 	{
 		private ModuleContext module;
 
 		Component(ModuleContext module)
 		{
-			addAccessor(new Adapters.test_IBasicTests_accessor(this));
-			addAccessor(new Adapters.test_IObjectTests_accessor(this));
-			addAccessor(new Adapters.test_IEnumTests_accessor(this));
+			Adapters.test_IBasicTests.registerAccessors(this);
+			Adapters.test_IObjectTests.registerAccessors(this);
+			Adapters.test_IEnumTests.registerAccessors(this);
+			Adapters.test_ICastTests.registerAccessors(this);
 			this.module = module;
 		}
 
@@ -81,8 +107,18 @@ class Tests
 			default:        return null;
 			}
 		}
+
+
+		public Adapters.test_IInterface1 CastTo1(Adapters.test_IInterface0 obj) { return Adapters.test_IInterface1.cast(obj); }
+		public Adapters.test_IInterface2 CastTo2(Adapters.test_IInterface0 obj) { return Adapters.test_IInterface2.cast(obj); }
+		public Adapters.test_IInterface3 CastTo3(Adapters.test_IInterface0 obj) { return Adapters.test_IInterface3.cast(obj); }
+		public Adapters.test_IInterface4 CastTo4(Adapters.test_IInterface0 obj) { return Adapters.test_IInterface4.cast(obj); }
+		public Adapters.test_IInterface5 CastTo5(Adapters.test_IInterface0 obj) { return Adapters.test_IInterface5.cast(obj); }
+		public Adapters.test_IInterface6 CastTo6(Adapters.test_IInterface0 obj) { return Adapters.test_IInterface6.cast(obj); }
+		public Adapters.test_IInterface7 CastTo7(Adapters.test_IInterface0 obj) { return Adapters.test_IInterface7.cast(obj); }
+		public Adapters.test_IInterface0 Create017() { return Adapters.test_IInterface0.makeComponent(module, new CastComponent017()); }
 	}
 
 	public static JointObject GetTests(ModuleContext module)
-	{ return Adapters.test_IBasicTests.makeComponent(module, new Component(module)).obj; }
+	{ return Adapters.test_IBasicTests.makeComponent(module, new Component(module)).getJointObject(); }
 }

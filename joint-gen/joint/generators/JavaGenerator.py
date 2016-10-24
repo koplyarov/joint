@@ -96,23 +96,40 @@ class JavaGenerator:
         yield '}'
 
     def _generateInterfaceProxy(self, ifc):
-        yield 'public static class {}'.format(self._mangleType(ifc))
+        yield 'public static class {} implements ComponentProxy'.format(self._mangleType(ifc))
         yield '{'
+        yield '\tpublic static <T extends AccessorsContainer & {n}_impl> void registerAccessors(T component)'.format(n=self._mangleType(ifc))
+        yield '\t{'
+        yield '\t\tcomponent.addAccessor(new {}_accessor(component));'.format(self._mangleType(ifc))
+        for b in ifc.bases:
+            yield '\t\t{}.registerAccessors(component);'.format(self._mangleType(b))
+        yield '\t}'
+        yield ''
         yield '\tpublic static {} makeComponent(ModuleContext module, AccessorsContainer accessorsContainer)'.format(self._mangleType(ifc))
         yield '\t{{ return new {}(module.register(accessorsContainer.cast(id))); }}'.format(self._mangleType(ifc))
         yield ''
-        yield '\tpublic JointObject obj;'
+        yield '\tpublic static {} cast(ComponentProxy component)'.format(self._mangleType(ifc))
+        yield '\t{'
+        yield '\t\tJointObject casted = (component != null) ? component.getJointObject().cast(id, checksum) : null;'
+        yield '\t\treturn (casted != null) ? new {}(casted) : null;'.format(self._mangleType(ifc))
+        yield '\t}'
+        yield ''
+        yield '\tprivate JointObject _obj;'
         yield '\t'
         yield '\t{}(JointObject obj)'.format(self._mangleType(ifc))
-        yield '\t{ this.obj = obj; }'
+        yield '\t{ this._obj = obj; }'
+        yield ''
+        yield '\tpublic JointObject getJointObject()'
+        yield '\t{ return _obj; }'
         for m in ifc.methods:
             yield ''
             yield '\tpublic {} {}({})'.format(self._toJavaType(m.retType), m.name, ', '.join('{} {}'.format(self._toJavaType(p.type), p.name) for p in m.params))
-            method_invokation = 'obj.invokeMethod(desc.getNative(), {}{})'.format(m.index, ''.join(', {}'.format(p.name) for p in m.params))
+            method_invokation = '_obj.invokeMethod(desc.getNative(), {}{})'.format(m.index, ''.join(', {}'.format(p.name) for p in m.params))
             yield '\t{{ {}{}; }}'.format('return ({})'.format(self._toJavaType(m.retType)) if m.retType.fullname != 'void' else '', method_invokation)
         yield ''
         yield '\tpublic static InterfaceId id = new InterfaceId("{}");'.format(ifc.fullname)
-        yield '\tpublic static TypeDescriptor typeDescriptor = TypeDescriptor.interfaceType("Ladapters/Adapters${n};", {n}.class, {cs});'.format(n=self._mangleType(ifc), cs=hex(ifc.checksum))
+        yield '\tpublic static int checksum = {};'.format(hex(ifc.checksum))
+        yield '\tpublic static TypeDescriptor typeDescriptor = TypeDescriptor.interfaceType("Ladapters/Adapters${n};", {n}.class, checksum);'.format(n=self._mangleType(ifc))
         yield '\tpublic static InterfaceDescriptor desc = new InterfaceDescriptor('
         impl_class = '{}_impl.class'.format(self._mangleType(ifc))
         for i,m in enumerate(ifc.methods):

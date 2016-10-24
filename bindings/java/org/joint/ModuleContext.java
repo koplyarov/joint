@@ -12,6 +12,9 @@ public class ModuleContext
 
 	public JointObject register(Accessor accessor)
 	{
+		if (accessor == null)
+			throw new NullPointerException("accessor");
+
 		long objHandle = doRegister(handle, accessor);
 		try
 		{

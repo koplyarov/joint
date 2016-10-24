@@ -139,7 +139,7 @@ namespace binding
 		if (!new_accessor)
 			return JOINT_ERROR_CAST_FAILED;
 
-		*outRetValue = new Object(JGlobalObjPtr(jvm, new_accessor));
+		*outRetValue = new Object(JGlobalObjPtr(new_accessor));
 
 		JOINT_CPP_WRAP_END
 	}

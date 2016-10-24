@@ -154,7 +154,7 @@ namespace java
 				return JOINT_NULL_HANDLE;
 
 			JLocalClassPtr cls(env, JAVA_CALL(env->GetObjectClass(val.l)));
-			jfieldID obj_id = JAVA_CALL(env->GetFieldID(cls, "obj", "Lorg/joint/JointObject;"));
+			jfieldID obj_id = JAVA_CALL(env->GetFieldID(cls, "_obj", "Lorg/joint/JointObject;"));
 			JLocalObjPtr joint_obj(env, JAVA_CALL(env->GetObjectField(val.l, obj_id)));
 
 			JLocalClassPtr JointObject_cls(env, JAVA_CALL(env->FindClass("org/joint/JointObject")));
@@ -274,7 +274,7 @@ namespace java
 				return JOINT_NULL_HANDLE;
 
 			JLocalClassPtr cls(env, JAVA_CALL(env->GetObjectClass(val.Get())));
-			jfieldID obj_id = JAVA_CALL(env->GetFieldID(cls, "obj", "Lorg/joint/JointObject;"));
+			jfieldID obj_id = JAVA_CALL(env->GetFieldID(cls, "_obj", "Lorg/joint/JointObject;"));
 			JLocalObjPtr joint_obj(env, JAVA_CALL(env->GetObjectField(val.Get(), obj_id)));
 
 			JLocalClassPtr JointObject_cls(env, JAVA_CALL(env->FindClass("org/joint/JointObject")));

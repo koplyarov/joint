@@ -28,6 +28,21 @@ JNIEXPORT void JNICALL Java_org_joint_JointObject_releaseObject(JNIEnv* env, jcl
 	JNI_WRAP_CPP_END_VOID()
 }
 
+
+JNIEXPORT jlong JNICALL Java_org_joint_JointObject_doCast(JNIEnv* env, jclass cls, jlong handleLong, jstring interfaceId, jint interfaceChecksum)
+{
+	JNI_WRAP_CPP_BEGIN
+
+	Joint_ObjectHandle handle = (Joint_ObjectHandle)handleLong;
+
+	Joint_ObjectHandle new_handle = JOINT_NULL_HANDLE;
+	Joint_Error ret = Joint_CastObject(handle, StringDataHolder(env, interfaceId).GetData(), interfaceChecksum, &new_handle);
+	JOINT_CHECK(ret == JOINT_ERROR_NONE || JOINT_ERROR_CAST_FAILED, ret);
+
+
+	JNI_WRAP_CPP_END(ret == JOINT_ERROR_NONE ? reinterpret_cast<jlong>(new_handle) : 0, 0)
+}
+
 JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod(JNIEnv* env, jclass cls, jlong handle, jlong nativeInterfaceDescriptor, jint methodId, jobjectArray jparams)
 {
 	JNI_WRAP_CPP_BEGIN

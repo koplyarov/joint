@@ -92,7 +92,7 @@ namespace java
 		{
 			static_assert(!std::is_same<BasicJPtr<T, RefPolicy>, BasicJPtr<T, OtherRefPolicy> >::value, "wtf");
 			if (other._obj)
-				_obj = RefPolicy<T>::NewRef(_jvm, other._obj);
+				_obj = RefPolicy<T>::NewRef(_jvm, other._obj.get());
 		}
 
 		template < typename U >
