@@ -22,7 +22,8 @@ class Tests
 			AccessorsContainer
 		implements
 			Adapters.test_IBasicTests_impl, 
-			Adapters.test_IObjectTests_impl
+			Adapters.test_IObjectTests_impl,
+			Adapters.test_IEnumTests_impl
 	{
 		private ModuleContext module;
 
@@ -30,6 +31,7 @@ class Tests
 		{
 			addAccessor(new Adapters.test_IBasicTests_accessor(this));
 			addAccessor(new Adapters.test_IObjectTests_accessor(this));
+			addAccessor(new Adapters.test_IEnumTests_accessor(this));
 			this.module = module;
 		}
 
@@ -65,6 +67,20 @@ class Tests
 		public void InvokeObjectMethod(Adapters.test_ISomeObject o) { o.Method(); }
 		public Adapters.test_ISomeObject ReturnSameObject(Adapters.test_ISomeObject o) { return o; }
 		public Adapters.test_ISomeObject ReturnNewObject() { return Adapters.test_ISomeObject.makeComponent(module, new SomeObject()); }
+
+
+		public String StringRepresentation(Adapters.test_Enum e) { return e.toString(); }
+		public Adapters.test_Enum GetNextValueInRing(Adapters.test_Enum e)
+		{
+			switch (e)
+			{
+			case Value1:    return Adapters.test_Enum.Value2;
+			case Value2:    return Adapters.test_Enum.Value3;
+			case Value3:    return Adapters.test_Enum.Value4;
+			case Value4:    return Adapters.test_Enum.Value1;
+			default:        return null;
+			}
+		}
 	}
 
 	public static JointObject GetTests(ModuleContext module)

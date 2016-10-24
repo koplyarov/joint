@@ -43,7 +43,20 @@ namespace java
 
 
 	JavaBindingInfo::TypeUserData JavaBindingInfo::GetEnumUserData(const JLocalObjPtr& typeNode) const
-	{ return TypeUserData(); }
+	{
+		auto env = typeNode.GetEnv();
+
+		JLocalClassPtr TypeDescriptor_cls(env, JAVA_CALL(env->FindClass("org/joint/TypeDescriptor")));
+
+		jfieldID mangledTypeName_id = JAVA_CALL(env->GetFieldID(TypeDescriptor_cls, "mangledTypeName", "Ljava/lang/String;"));
+		JLocalStringPtr mangledTypeName(env, reinterpret_cast<jstring>(JAVA_CALL(env->GetObjectField(typeNode.Get(), mangledTypeName_id))));
+
+		jfieldID proxyClass_id = JAVA_CALL(env->GetFieldID(TypeDescriptor_cls, "proxyClass", "Ljava/lang/Class;"));
+		JGlobalClassPtr enum_class(env, static_cast<jclass>(JAVA_CALL(env->GetObjectField(typeNode.Get(), proxyClass_id))));
+		JOINT_CHECK(enum_class, "Invalid TypeDescriptor for interface");
+		jmethodID enum_creator_id = JAVA_CALL(env->GetStaticMethodID(enum_class.Get(), "fromInt", (std::string("(I)") + StringDataHolder(mangledTypeName).GetData()).c_str()));
+		return TypeUserData{enum_class, enum_creator_id};
+	}
 
 
 	JavaBindingInfo::TypeUserData JavaBindingInfo::GetStructUserData(const JLocalObjPtr& typeNode) const

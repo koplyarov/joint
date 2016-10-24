@@ -83,7 +83,11 @@ namespace java
 		}
 
 		JavaVariant FromJointEnum(int32_t val, const JavaBindingInfo::TypeUserData& enumType) const
-		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		{
+			jvalue result;
+			result.l = JAVA_CALL(env->CallStaticObjectMethod(enumType._proxyCls.Get(), enumType._proxyCtorId, (jint)val));
+			return result;
+		}
 
 		JavaVariant FromJointObj(devkit::ValueDirection dir, Joint_ObjectHandle val, const JavaBindingInfo::TypeUserData& proxyType, Joint_InterfaceChecksum checksum) const
 		{
@@ -139,7 +143,10 @@ namespace java
 		double     ToJointF64(jvalue val) const   { return val.d; }
 
 		int32_t ToJointEnum(jvalue val, const JavaBindingInfo::TypeUserData& enumType) const
-		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		{
+			jfieldID value_id = JAVA_CALL(env->GetFieldID(enumType._proxyCls, "value", "I"));
+			return  JAVA_CALL(env->GetIntField(val.l, value_id));
+		}
 
 		Joint_ObjectHandle ToJointObj(devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::TypeUserData& objType) const
 		{

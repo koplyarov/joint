@@ -19,6 +19,10 @@ class JavaGenerator:
         yield '}'
 
     def _generatePackage(self, p):
+        for e in p.enums:
+            yield ''
+            for l in self._generateEnum(e):
+                yield l
         for ifc in p.interfaces:
             yield ''
             for l in self._generateInterfaceProxy(ifc):
@@ -52,6 +56,28 @@ class JavaGenerator:
             methods.append(self._tuple([ self._typeDescriptor(m.retType), self._tuple(params) ]))
         yield '{}.descriptor = pyjoint.InterfaceDescriptor({})'.format(self._mangleType(ifc), self._tuple(methods))
 
+    def _generateEnum(self, e):
+        yield 'public static enum {}'.format(self._mangleType(e))
+        yield '{'
+        for i,v in enumerate(e.values):
+            yield '\t{}({}){}'.format(v.name, v.value, ',' if i < len(e.values) - 1 else ';')
+        yield ''
+        yield '\tpublic final int value;'
+        yield '\t{}(int value) {{ this.value = value; }}'.format(self._mangleType(e))
+        yield ''
+        yield '\tpublic static {n} fromInt(int value)'.format(n=self._mangleType(e))
+        yield '\t{'
+        yield '\t\tswitch (value)'
+        yield '\t\t{'
+        for v in e.values:
+            yield '\t\tcase {}: return {};'.format(v.value, v.name)
+        yield '\t\tdefault: return null;'
+        yield '\t\t}'
+        yield '\t}'
+        yield ''
+        yield '\tpublic static TypeDescriptor typeDescriptor = TypeDescriptor.enumType("Ladapters/Adapters${n};", {n}.class);'.format(n=self._mangleType(e))
+        yield '}'
+
     def _generateInterfaceAccessor(self, ifc):
         yield 'public static class {}_accessor extends AccessorBase implements Accessor'.format(self._mangleType(ifc))
         yield '{'
@@ -72,14 +98,6 @@ class JavaGenerator:
     def _generateInterfaceProxy(self, ifc):
         yield 'public static class {}'.format(self._mangleType(ifc))
         yield '{'
-        yield '\tpublic static InterfaceId id = new InterfaceId("{}");'.format(ifc.fullname)
-        yield '\tpublic static TypeDescriptor typeDescriptor = new TypeDescriptor(16, "Ladapters/Adapters${n};", {n}.class, {cs});'.format(n=self._mangleType(ifc), cs=hex(ifc.checksum))
-        yield '\tpublic static InterfaceDescriptor desc = new InterfaceDescriptor('
-        impl_class = '{}_impl.class'.format(self._mangleType(ifc))
-        for i,m in enumerate(ifc.methods):
-            yield '\t\tnew MethodDescriptor({}, "{}", {}, new TypeDescriptor[]{{ {} }}){}'.format(impl_class, m.name, self._toTypeDescriptor(m.retType), ', '.join(self._toTypeDescriptor(p.type) for p in m.params), ',' if i < len(ifc.methods) - 1 else '')
-        yield '\t);'
-        yield ''
         yield '\tpublic static {} makeComponent(ModuleContext module, AccessorsContainer accessorsContainer)'.format(self._mangleType(ifc))
         yield '\t{{ return new {}(module.register(accessorsContainer.cast(id))); }}'.format(self._mangleType(ifc))
         yield ''
@@ -92,6 +110,14 @@ class JavaGenerator:
             yield '\tpublic {} {}({})'.format(self._toJavaType(m.retType), m.name, ', '.join('{} {}'.format(self._toJavaType(p.type), p.name) for p in m.params))
             method_invokation = 'obj.invokeMethod(desc.getNative(), {}{})'.format(m.index, ''.join(', {}'.format(p.name) for p in m.params))
             yield '\t{{ {}{}; }}'.format('return ({})'.format(self._toJavaType(m.retType)) if m.retType.fullname != 'void' else '', method_invokation)
+        yield ''
+        yield '\tpublic static InterfaceId id = new InterfaceId("{}");'.format(ifc.fullname)
+        yield '\tpublic static TypeDescriptor typeDescriptor = TypeDescriptor.interfaceType("Ladapters/Adapters${n};", {n}.class, {cs});'.format(n=self._mangleType(ifc), cs=hex(ifc.checksum))
+        yield '\tpublic static InterfaceDescriptor desc = new InterfaceDescriptor('
+        impl_class = '{}_impl.class'.format(self._mangleType(ifc))
+        for i,m in enumerate(ifc.methods):
+            yield '\t\tnew MethodDescriptor({}, "{}", {}, new TypeDescriptor[]{{ {} }}){}'.format(impl_class, m.name, self._toTypeDescriptor(m.retType), ', '.join(self._toTypeDescriptor(p.type) for p in m.params), ',' if i < len(ifc.methods) - 1 else '')
+        yield '\t);'
         yield '}'
 
     def _generateInterfaceImpl(self, ifc):
