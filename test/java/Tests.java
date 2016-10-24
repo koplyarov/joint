@@ -48,7 +48,8 @@ class Tests
 			Adapters.test_IBasicTests_impl, 
 			Adapters.test_IObjectTests_impl,
 			Adapters.test_IEnumTests_impl,
-			Adapters.test_ICastTests_impl
+			Adapters.test_ICastTests_impl,
+			Adapters.test_IExceptionTests_impl
 	{
 		private ModuleContext module;
 
@@ -58,6 +59,7 @@ class Tests
 			Adapters.test_IObjectTests.registerAccessors(this);
 			Adapters.test_IEnumTests.registerAccessors(this);
 			Adapters.test_ICastTests.registerAccessors(this);
+			Adapters.test_IExceptionTests.registerAccessors(this);
 			this.module = module;
 		}
 
@@ -86,6 +88,7 @@ class Tests
 		public boolean CallbackBool(Adapters.test_IBasicTestsCallbackBool cb, boolean l, boolean r) { return cb.And(l, r); }
 		public String CallbackString(Adapters.test_IBasicTestsCallbackString cb, String l, String r) { return cb.Concat(l, r); }
 
+
 		public Adapters.test_ISomeObject ReturnNull() { return null; }
 		public boolean CheckNotNull(Adapters.test_ISomeObject o) { return o != null; }
 		public Adapters.test_ISomeObject CallbackReturn(Adapters.test_IObjectTestsCallbackReturn cb) { return cb.Return(); }
@@ -96,6 +99,7 @@ class Tests
 
 
 		public String StringRepresentation(Adapters.test_Enum e) { return e.toString(); }
+
 		public Adapters.test_Enum GetNextValueInRing(Adapters.test_Enum e)
 		{
 			switch (e)
@@ -117,6 +121,23 @@ class Tests
 		public Adapters.test_IInterface6 CastTo6(Adapters.test_IInterface0 obj) { return Adapters.test_IInterface6.cast(obj); }
 		public Adapters.test_IInterface7 CastTo7(Adapters.test_IInterface0 obj) { return Adapters.test_IInterface7.cast(obj); }
 		public Adapters.test_IInterface0 Create017() { return Adapters.test_IInterface0.makeComponent(module, new CastComponent017()); }
+
+
+		public void ThrowNative() { throw new RuntimeException("Requested exception"); }
+
+		public boolean CatchAll(Adapters.test_IExceptionTestsCallback cb)
+		{
+			try
+			{
+				cb.Method();
+				return false;
+			}
+			catch (Exception ex)
+			{ return true; }
+		}
+
+		public void LetThrough(Adapters.test_IExceptionTestsCallback cb)
+		{ cb.Method(); }
 	}
 
 	public static JointObject GetTests(ModuleContext module)

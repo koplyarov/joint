@@ -1,3 +1,4 @@
+#include <joint/devkit/ExceptionInfo.hpp>
 #include <joint/devkit/ScopeExit.hpp>
 #include <joint/devkit/StackStorage.hpp>
 
@@ -94,6 +95,15 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod(JNIEnv* env,
 
 		result = ValueMarshaller::FromJoint<jobject>(ValueDirection::Return, method_desc.GetRetType(), ret_value.result.value, JavaProxyMarshaller(env));
 	}
+	else if (ret == JOINT_ERROR_EXCEPTION)
+	{
+		JLocalClassPtr JointException_cls(env, JAVA_CALL(env->FindClass("Lorg/joint/JointException;")));
+		jmethodID JointException_ctor_id = JAVA_CALL(env->GetMethodID(JointException_cls, "<init>", "(J)V"));
+		std::unique_ptr<ExceptionInfo> ex_info(new ExceptionInfo(ExceptionInfo::FromJointException(ret_value.result.ex)));
+		jthrowable ex = reinterpret_cast<jthrowable>(JAVA_CALL(env->NewObject(JointException_cls, JointException_ctor_id, ex_info.get())));
+		ex_info.release();
+		env->Throw(ex);
+	}
 	else
 		JOINT_THROW((std::string("Joint_InvokeMethod failed: ") + Joint_ErrorToString(ret)).c_str());
 
@@ -132,5 +142,13 @@ JNIEXPORT void JNICALL Java_org_joint_InterfaceDescriptor_deinitNative(JNIEnv* e
 {
 	JNI_WRAP_CPP_BEGIN
 	delete reinterpret_cast<JavaInterfaceDescriptor*>(native);
+	JNI_WRAP_CPP_END_VOID()
+}
+
+
+JNIEXPORT void JNICALL Java_org_joint_JointException_deinitNative(JNIEnv* env, jclass cls, jlong nativeData)
+{
+	JNI_WRAP_CPP_BEGIN
+	delete reinterpret_cast<ExceptionInfo*>(nativeData);
 	JNI_WRAP_CPP_END_VOID()
 }

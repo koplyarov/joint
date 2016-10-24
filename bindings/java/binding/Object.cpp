@@ -64,46 +64,55 @@ namespace binding
 		switch (m_desc.GetRetType().GetJointType().id)
 		{
 		case JOINT_TYPE_VOID:
-			JAVA_CALL_VOID(env->CallVoidMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
-			outRetValue->releaseValue = &Object::ReleaseRetValue;
-			return JOINT_ERROR_NONE;
+			env->CallVoidMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
+			break;
 		case JOINT_TYPE_BOOL:
-			j_res.z = JAVA_CALL(env->CallBooleanMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
+			j_res.z = env->CallBooleanMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
 			break;
 		case JOINT_TYPE_U8:
 		case JOINT_TYPE_I8:
-			j_res.b = JAVA_CALL(env->CallByteMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
+			j_res.b = env->CallByteMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
 			break;
 		case JOINT_TYPE_U16:
 		case JOINT_TYPE_I16:
-			j_res.s = JAVA_CALL(env->CallShortMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
+			j_res.s = env->CallShortMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
 			break;
 		case JOINT_TYPE_U32:
 		case JOINT_TYPE_I32:
-			j_res.i = JAVA_CALL(env->CallIntMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
+			j_res.i = env->CallIntMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
 			break;
 		case JOINT_TYPE_U64:
 		case JOINT_TYPE_I64:
-			j_res.j = JAVA_CALL(env->CallLongMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
+			j_res.j = env->CallLongMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
 			break;
 		case JOINT_TYPE_F32:
-			j_res.f = JAVA_CALL(env->CallFloatMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
+			j_res.f = env->CallFloatMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
 			break;
 		case JOINT_TYPE_F64:
-			j_res.d = JAVA_CALL(env->CallDoubleMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
+			j_res.d = env->CallDoubleMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
 			break;
 		case JOINT_TYPE_UTF8:
 		case JOINT_TYPE_ENUM:
 		case JOINT_TYPE_OBJ:
-			j_res.l = JAVA_CALL(env->CallObjectMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams));
+			j_res.l = env->CallObjectMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
 			break;
 		default:
 			JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
 		}
-		outRetValue->result.value = ValueMarshaller::ToJoint(ValueDirection::Return, m_desc.GetRetType(), j_res, JavaAccessorMarshaller(jvm, env), alloc);
 
 		outRetValue->releaseValue = &Object::ReleaseRetValue;
-		return JOINT_ERROR_NONE;
+		if (!env->ExceptionCheck())
+		{
+			if (m_desc.GetRetType().GetJointType().id != JOINT_TYPE_VOID)
+				outRetValue->result.value = ValueMarshaller::ToJoint(ValueDirection::Return, m_desc.GetRetType(), j_res, JavaAccessorMarshaller(jvm, env), alloc);
+
+			return JOINT_ERROR_NONE;
+		}
+		else
+		{
+			outRetValue->result.ex = GetJavaExceptionInfo(env).MakeJointException().Release();
+			return JOINT_ERROR_EXCEPTION;
+		}
 	}
 
 

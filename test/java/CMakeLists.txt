@@ -20,6 +20,7 @@ joint_generate_adapters(java ${CMAKE_CURRENT_BINARY_DIR}/Adapters.java
 	../idl/IObjectTests.idl
 	../idl/IEnumTests.idl
 	../idl/ICastTests.idl
+	../idl/IExceptionTests.idl
 )
 
 

@@ -2,6 +2,7 @@
 #define UTILS_UTILS_HPP
 
 
+#include <joint/devkit/ExceptionInfo.hpp>
 #include <joint/devkit/JointException.hpp>
 #include <joint/devkit/ScopeExit.hpp>
 #include <joint/devkit/StringBuilder.hpp>
@@ -85,69 +86,97 @@ namespace java
 		if (!ex)
 			JOINT_TERMINATE("Joint.Java.Utils", "Could not create java.lang.RuntimeException object");
 
-		env->Throw(ex.Get());
+		env->Throw(ex);
 	}
+
+
+#define DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION do { if (env->ExceptionCheck()) JOINT_TERMINATE("Joint.Java.Utils", "Got an exception from java while processing another one"); } while (false)
+
+	inline devkit::ExceptionInfo GetJavaExceptionInfo(JNIEnv *env)
+	{
+		using namespace devkit;
+
+		if (!env->ExceptionCheck())
+			JOINT_TERMINATE("Joint.Java.Utils", "GetJavaExceptionInfo failed: no active java exception");
+
+		jthrowable raw_throwable = env->ExceptionOccurred();
+		env->ExceptionClear();
+		JLocalThrowablePtr ex = JGlobalThrowablePtr(env, raw_throwable);
+
+		JLocalClassPtr throwable_class(env, env->FindClass("java/lang/Throwable"));
+		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+		jmethodID toString_id = env->GetMethodID(throwable_class, "toString", "()Ljava/lang/String;");
+		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+		jmethodID getStackTrace_id = env->GetMethodID(throwable_class, "getStackTrace", "()[Ljava/lang/StackTraceElement;");
+		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+		JLocalStringPtr jmsg = JLocalStringPtr(env, (jstring)env->CallObjectMethod(ex, toString_id));
+		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+
+		JLocalClassPtr ste_class(env, env->FindClass("java/lang/StackTraceElement"));
+		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+		jmethodID ste_getClassName_id = env->GetMethodID(ste_class, "getClassName", "()Ljava/lang/String;");
+		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+		jmethodID ste_getFileName_id = env->GetMethodID(ste_class, "getFileName", "()Ljava/lang/String;");
+		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+		jmethodID ste_getLineNumber_id = env->GetMethodID(ste_class, "getLineNumber", "()I");
+		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+		jmethodID ste_getMethodName_id = env->GetMethodID(ste_class, "getMethodName", "()Ljava/lang/String;");
+		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+		JLocalObjArrayPtr jst = JLocalObjArrayPtr(env, (jobjectArray)env->CallObjectMethod(ex, getStackTrace_id));
+		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+
+		auto st_len = env->GetArrayLength(jst);
+		ExceptionInfo::StackTrace st;
+
+		JLocalClassPtr JointException_cls(env, env->FindClass("org/joint/JointException"));
+		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+		if (env->IsInstanceOf(ex, JointException_cls))
+		{
+			jfieldID nativeData_id = env->GetFieldID(JointException_cls, "nativeData", "J");
+			DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+			auto ex_info = reinterpret_cast<const ExceptionInfo*>(env->GetLongField(ex, nativeData_id));
+			DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+			if (ex_info)
+			{
+				st.reserve(st_len + ex_info->GetStackTrace().size());
+				std::copy(ex_info->GetStackTrace().begin(), ex_info->GetStackTrace().end(), std::back_inserter(st));
+			}
+		}
+
+		st.reserve(st_len);
+
+		for (int i = 0; i < st_len; ++i)
+		{
+			JLocalObjPtr ste(env, env->GetObjectArrayElement(jst, i));
+			DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+			JLocalStringPtr class_name = JLocalStringPtr(env, (jstring)env->CallObjectMethod(ste, ste_getClassName_id));
+			DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+			JLocalStringPtr file_name = JLocalStringPtr(env, (jstring)env->CallObjectMethod(ste, ste_getFileName_id));
+			DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+			jint line_num = env->CallIntMethod(ste, ste_getLineNumber_id);
+			DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+			JLocalStringPtr method_name = JLocalStringPtr(env, (jstring)env->CallObjectMethod(ste, ste_getMethodName_id));
+			DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+			st.emplace_back(
+					"",
+					StringDataHolder(file_name).GetData(),
+					line_num,
+					"",
+					StringBuilder() % StringDataHolder(class_name).GetData() % "." % StringDataHolder(method_name).GetData()
+				);
+		}
+
+		return ExceptionInfo(StringDataHolder(jmsg).GetData(), st);
+	}
+
+#undef DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION
 
 
 	template < typename T_ >
 	T_ JavaCallImpl(JNIEnv *env, T_ result, const char* location)
 	{
-		using namespace devkit;
-
 		if (env->ExceptionCheck())
-		{
-			StringBuilder sb;
-			sb % "Java exception at " % location;
-
-			jthrowable raw_throwable = env->ExceptionOccurred();
-			env->ExceptionClear();
-			JGlobalThrowablePtr ex = JGlobalThrowablePtr(env, raw_throwable);
-			std::string msg("<cannot obtain java exception message>");
-			JLocalClassPtr throwable_class(env, env->FindClass("java/lang/Throwable"));
-			jmethodID toString_id = 0, getStackTrace_id = 0;
-			JLocalStringPtr jmsg;
-
-			if (throwable_class.Get())
-			{
-				toString_id = env->GetMethodID(throwable_class.Get(), "toString", "()Ljava/lang/String;");
-				getStackTrace_id = env->GetMethodID(throwable_class.Get(), "getStackTrace", "()[Ljava/lang/StackTraceElement;");
-			}
-
-			if (toString_id)
-				jmsg = JLocalStringPtr(env, (jstring)env->CallObjectMethod(ex.Get(), toString_id));
-			if (jmsg)
-				sb % ": " % StringDataHolder(jmsg).GetData();
-
-			if (getStackTrace_id)
-			{
-				JLocalClassPtr ste_class(env, env->FindClass("java/lang/StackTraceElement"));
-				jmethodID ste_toString_id = 0;
-				if (ste_class)
-					ste_toString_id = env->GetMethodID(ste_class.Get(), "toString", "()Ljava/lang/String;");
-
-				JLocalObjArrayPtr st;
-				if (ste_toString_id)
-					st = JLocalObjArrayPtr(env, (jobjectArray)env->CallObjectMethod(ex.Get(), getStackTrace_id));
-
-				if (st)
-				{
-					auto st_len = env->GetArrayLength(st.Get());
-					for (int i = 0; i < st_len; ++i)
-					{
-						JLocalObjPtr ste(env, env->GetObjectArrayElement(st.Get(), i));
-						JLocalStringPtr ste_string;
-						if (ste_toString_id)
-							ste_string = JLocalStringPtr(env, (jstring)env->CallObjectMethod(ste.Get(), ste_toString_id));
-						if (ste_string)
-							sb % "\n\tat " % StringDataHolder(ste_string).GetData();
-						else
-							sb % "\n\t???";
-					}
-				}
-			}
-
-			throw std::runtime_error(sb);
-		}
+			throw std::runtime_error(devkit::StringBuilder() % "Java exception at " % location % ": " % GetJavaExceptionInfo(env).ToString());
 
 		return result;
 	}

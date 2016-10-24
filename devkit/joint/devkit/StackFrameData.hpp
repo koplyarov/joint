@@ -35,24 +35,30 @@ namespace devkit
 		std::string ToString() const
 		{
 			std::stringstream ss;
-			if (!_module.empty())
-				ss << _module;
-
-			if (!_filename.empty())
-			{
-				if (!_module.empty())
-					ss << ", ";
-				ss << _filename << ":" << _line;
-			}
+			ss << "at ";
+			if (!_function.empty())
+				ss << _function;
 
 			if (!_module.empty() || !_filename.empty())
-				ss << ": ";
+			{
+				if (!_function.empty())
+					ss << "(";
+
+				if (!_module.empty())
+					ss << _module;
+				if (!_filename.empty())
+					ss << (_module.empty() ? "" : ", ") << _filename << ":" << _line;
+
+				if (!_function.empty())
+					ss << ")";
+			}
 
 			if (!_code.empty())
+			{
+				if (!_module.empty() || !_function.empty() || !_filename.empty())
+					ss << ": ";
 				ss << "'" << _code << "' ";
-
-			if (!_function.empty())
-				ss << "in " << _function;
+			}
 
 			return ss.str();
 		}

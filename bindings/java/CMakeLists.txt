@@ -14,11 +14,11 @@ set(JAVA_SOURCES
 	org/joint/ComponentProxy.java
 	org/joint/InterfaceDescriptor.java
 	org/joint/InterfaceId.java
+	org/joint/JointException.java
 	org/joint/JointObject.java
 	org/joint/MethodDescriptor.java
 	org/joint/ModuleContext.java
 	org/joint/TypeDescriptor.java
-	org/joint/Utils.java
 )
 
 set(CMAKE_JNI_TARGET TRUE)
@@ -38,6 +38,7 @@ add_custom_command(
 	-o "${CMAKE_CURRENT_BINARY_DIR}/JointJNI.h"
 	-classpath "${JOINT_JAR_CLASSDIR}"
 	org.joint.InterfaceDescriptor
+	org.joint.JointException
 	org.joint.JointObject
 	org.joint.ModuleContext
 )
