@@ -2,25 +2,42 @@ package org.joint;
 
 public class TypeDescriptor
 {
-	int typeId;
-	String mangledTypeName;
-	Class proxyClass;
-	int interfaceChecksum;
+    public static class MemberInfo
+    {
+        String name;
+        TypeDescriptor type;
 
-	private TypeDescriptor(int typeId, String mangledTypeName, Class proxyClass, int interfaceChecksum)
-	{
-		this.typeId = typeId;
-		this.mangledTypeName = mangledTypeName;
-		this.proxyClass = proxyClass;
-		this.interfaceChecksum = interfaceChecksum;
-	}
+        public MemberInfo(String name, TypeDescriptor type)
+        {
+            this.name = name;
+            this.type = type;
+        }
+    }
 
-	public static TypeDescriptor builtinType(int typeId, String mangledTypeName)
-	{ return new TypeDescriptor(typeId, mangledTypeName, null, 0); }
+    int typeId;
+    String mangledTypeName;
+    Class proxyClass;
+    int interfaceChecksum;
+    MemberInfo[] members;
 
-	public static TypeDescriptor interfaceType(String mangledTypeName, Class proxyClass, int interfaceChecksum)
-	{ return new TypeDescriptor(16, mangledTypeName, proxyClass, interfaceChecksum); }
+    private TypeDescriptor(int typeId, String mangledTypeName, Class proxyClass, int interfaceChecksum, MemberInfo[] members)
+    {
+        this.typeId = typeId;
+        this.mangledTypeName = mangledTypeName;
+        this.proxyClass = proxyClass;
+        this.interfaceChecksum = interfaceChecksum;
+        this.members = members;
+    }
 
-	public static TypeDescriptor enumType(String mangledTypeName, Class enumClass)
-	{ return new TypeDescriptor(14, mangledTypeName, enumClass, 0); }
+    public static TypeDescriptor builtinType(int typeId, String mangledTypeName)
+    { return new TypeDescriptor(typeId, mangledTypeName, null, 0, null); }
+
+    public static TypeDescriptor interfaceType(String mangledTypeName, Class proxyClass, int interfaceChecksum)
+    { return new TypeDescriptor(16, mangledTypeName, proxyClass, interfaceChecksum, null); }
+
+    public static TypeDescriptor enumType(String mangledTypeName, Class enumClass)
+    { return new TypeDescriptor(14, mangledTypeName, enumClass, 0, null); }
+
+    public static TypeDescriptor structType(String mangledTypeName, Class structClass, MemberInfo[] members)
+    { return new TypeDescriptor(15, mangledTypeName, structClass, 0, members); }
 }

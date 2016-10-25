@@ -23,6 +23,10 @@ class JavaGenerator:
             yield ''
             for l in self._generateEnum(e):
                 yield l
+        for s in p.structs:
+            yield ''
+            for l in self._generateStruct(s):
+                yield l
         for ifc in p.interfaces:
             yield ''
             for l in self._generateInterfaceProxy(ifc):
@@ -55,6 +59,29 @@ class JavaGenerator:
             params = [ self._typeDescriptor(p.type) for p in m.params ]
             methods.append(self._tuple([ self._typeDescriptor(m.retType), self._tuple(params) ]))
         yield '{}.descriptor = pyjoint.InterfaceDescriptor({})'.format(self._mangleType(ifc), self._tuple(methods))
+
+    def _generateStruct(self, s):
+        yield 'public static class {}'.format(self._mangleType(s))
+        yield '{'
+        for m in s.members:
+            yield '\tpublic {} {};'.format(self._toJavaType(m.type), m.name);
+        yield ''
+        yield '\tpublic {}()'.format(self._mangleType(s))
+        yield '\t{ }'
+        yield ''
+        yield '\tpublic {}({})'.format(self._mangleType(s), ', '.join('{} {}'.format(self._toJavaType(m.type), m.name) for m in s.members))
+        yield '\t{'
+        for m in s.members:
+            yield '\t\tthis.{n} = {n};'.format(n=m.name);
+        yield '\t}'
+        yield ''
+        yield '\tpublic static TypeDescriptor typeDescriptor = TypeDescriptor.structType("Ladapters/Adapters${n};", {n}.class,'.format(n=self._mangleType(s))
+        yield '\t\tnew TypeDescriptor.MemberInfo[] {'
+        for i,m in enumerate(s.members):
+            yield '\t\t\t new TypeDescriptor.MemberInfo("{}", {}){}'.format(m.name, self._toTypeDescriptor(m.type), ',' if i < len(s.members) - 1 else '');
+        yield '\t\t}'
+        yield '\t);'
+        yield '}'
 
     def _generateEnum(self, e):
         yield 'public static enum {}'.format(self._mangleType(e))
