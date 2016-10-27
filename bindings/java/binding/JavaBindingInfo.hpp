@@ -22,7 +22,9 @@ namespace java
 
 	public:
 		struct MemberId
-		{ };
+		{
+			jfieldID           _id;
+		};
 
 		struct TypeUserData
 		{
@@ -75,8 +77,8 @@ namespace java
 		Sequence GetParamsNodes(const JLocalObjPtr& methodNode) const;
 		Sequence GetMethodsNodes(const JLocalObjPtr& ifcNode) const;
 		Sequence GetMembersNodes(const JLocalObjPtr& typeNode) const;
-		MemberId GetMemberId(const JLocalObjPtr& memberNode) const;
-		JLocalObjPtr GetMemberType(const JLocalObjPtr& memberNode) const;
+		MemberId GetMemberId(const TypeUserData& structUserData, const JLocalObjPtr& memberNode) const;
+		JLocalObjPtr GetMemberType(const TypeUserData& structUserData, const JLocalObjPtr& memberNode) const;
 	};
 
 

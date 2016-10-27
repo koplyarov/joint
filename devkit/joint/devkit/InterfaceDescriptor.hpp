@@ -25,11 +25,11 @@ namespace devkit
 		JOINT_DEVKIT_LOGGER("Joint.Devkit.TypeDescriptor")
 
 	private:
-		MembersArray           _members;
-		std::unique_ptr<TypeDescriptor> _arrayElementType;
-		Joint_Type             _jointType;
-		size_t                 _membersCount = 0;
-		TypeUserData               _userData;
+		MembersArray                     _members;
+		std::unique_ptr<TypeDescriptor>  _arrayElementType;
+		Joint_Type                       _jointType;
+		size_t                           _membersCount = 0;
+		TypeUserData                     _userData;
 
 	public:
 		TypeDescriptor()
@@ -66,7 +66,7 @@ namespace devkit
 					for (size_t i = 0; i < _membersCount; ++i)
 					{
 						auto member_node = members.Get(i);
-						_members[i].Init(member_node, dataObtainer);
+						_members[i].Init(_userData, member_node, dataObtainer);
 						sd->memberTypes[i] = _members[i].GetType().GetJointType();
 					}
 				}
@@ -132,11 +132,11 @@ namespace devkit
 	public:
 		MemberInfo() : _memberId() { }
 
-		template < typename NodeType_, typename DataObtainer_ >
-		void Init(const NodeType_& node, const DataObtainer_& dataObtainer)
+		template < typename StructUserData_, typename NodeType_, typename DataObtainer_ >
+		void Init(const StructUserData_& structUserData, const NodeType_& node, const DataObtainer_& dataObtainer)
 		{
-			_memberId = dataObtainer.GetMemberId(node);
-			_memberType.Init(dataObtainer.GetMemberType(node), dataObtainer);
+			_memberId = dataObtainer.GetMemberId(structUserData, node);
+			_memberType.Init(dataObtainer.GetMemberType(structUserData, node), dataObtainer);
 		}
 
 		const TypeDescriptor& GetType() const { return _memberType; }

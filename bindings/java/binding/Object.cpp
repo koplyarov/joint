@@ -60,7 +60,6 @@ namespace binding
 		}
 
 		jvalue j_res;
-		RetValueAllocator alloc;
 		switch (m_desc.GetRetType().GetJointType().id)
 		{
 		case JOINT_TYPE_VOID:
@@ -94,6 +93,7 @@ namespace binding
 		case JOINT_TYPE_UTF8:
 		case JOINT_TYPE_ENUM:
 		case JOINT_TYPE_OBJ:
+		case JOINT_TYPE_STRUCT:
 			j_res.l = env->CallObjectMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
 			break;
 		default:
@@ -104,7 +104,10 @@ namespace binding
 		if (!env->ExceptionCheck())
 		{
 			if (m_desc.GetRetType().GetJointType().id != JOINT_TYPE_VOID)
+			{
+				RetValueAllocator alloc;
 				outRetValue->result.value = ValueMarshaller::ToJoint(ValueDirection::Return, m_desc.GetRetType(), j_res, JavaAccessorMarshaller(jvm, env), alloc);
+			}
 
 			return JOINT_ERROR_NONE;
 		}

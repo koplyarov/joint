@@ -63,8 +63,8 @@ namespace java
 	private:
 		void Init(JNIEnv* env, jstring str)
 		{
-			_env = env;
-			_strObj = str;
+			_env = JOINT_DEVKIT_REQUIRE_NOT_NULL(env);
+			_strObj = JOINT_DEVKIT_REQUIRE_NOT_NULL(str);
 			jboolean is_copy = false;
 			_data = _env->GetStringUTFChars(_strObj, &is_copy);
 		}

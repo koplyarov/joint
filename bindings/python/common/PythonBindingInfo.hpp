@@ -55,8 +55,8 @@ namespace python
 		Sequence GetParamsNodes(PyObject* methodNode) const;
 		Sequence GetMethodsNodes(PyObject* ifcNode) const;
 		Sequence GetMembersNodes(PyObject* typeNode) const;
-		PyObjectHolder GetMemberId(PyObject* memberNode) const;
-		PyObject* GetMemberType(PyObject* memberNode) const;
+		PyObjectHolder GetMemberId(const TypeUserData& structUserData, PyObject* memberNode) const;
+		PyObject* GetMemberType(const TypeUserData& structUserData, PyObject* memberNode) const;
 
 	private:
 		PyObjectHolder RegisterObject(PyObjectHolder obj) const;

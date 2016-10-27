@@ -120,15 +120,30 @@ namespace java
 
 		class ParamsArray
 		{
+		private:
+			std::vector<jvalue>    _params;
+
 		public:
+			ParamsArray(size_t count)
+				: _params(count)
+			{ }
+
 			void Set(size_t index, JavaVariant param)
-			{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+			{ _params[index] = param; }
+
+			const std::vector<jvalue>& GetVector() const { return _params; }
 		};
 
-		ParamsArray MakeParamsArray(size_t size) const { return ParamsArray(); }
+		ParamsArray MakeParamsArray(size_t size) const { return ParamsArray(size); }
 
 		JavaVariant MakeStruct(const ParamsArray& params, const JavaBindingInfo::TypeUserData& structType) const
-		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		{
+			auto env = structType._proxyCls.GetEnv();
+
+			jvalue result;
+			result.l = JAVA_CALL(env->NewObjectA(structType._proxyCls.Get(), structType._proxyCtorId, params.GetVector().data()));
+			return result;
+		}
 
 		Joint_Bool ToJointBool(jvalue val) const  { return val.z; }
 		uint8_t    ToJointU8(jvalue val) const    { return val.b; }
@@ -175,7 +190,49 @@ namespace java
 
 		template < typename MemberInfo_ >
 		jvalue GetStructMember(jvalue val, size_t i, const MemberInfo_& memberInfo, const JavaBindingInfo::TypeUserData& structType) const
-		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		{
+			jvalue res;
+			auto env = structType._proxyCls.GetEnv();
+
+			switch (memberInfo.GetType().GetJointType().id)
+			{
+			case JOINT_TYPE_BOOL:
+				res.z = env->GetBooleanField(val.l, memberInfo.GetMemberId()._id);
+				break;
+			case JOINT_TYPE_U8:
+			case JOINT_TYPE_I8:
+				res.b = env->GetByteField(val.l, memberInfo.GetMemberId()._id);
+				break;
+			case JOINT_TYPE_U16:
+			case JOINT_TYPE_I16:
+				res.s = env->GetShortField(val.l, memberInfo.GetMemberId()._id);
+				break;
+			case JOINT_TYPE_U32:
+			case JOINT_TYPE_I32:
+				res.i = env->GetIntField(val.l, memberInfo.GetMemberId()._id);
+				break;
+			case JOINT_TYPE_U64:
+			case JOINT_TYPE_I64:
+				res.j = env->GetLongField(val.l, memberInfo.GetMemberId()._id);
+				break;
+			case JOINT_TYPE_F32:
+				res.f = env->GetFloatField(val.l, memberInfo.GetMemberId()._id);
+				break;
+			case JOINT_TYPE_F64:
+				res.d = env->GetDoubleField(val.l, memberInfo.GetMemberId()._id);
+				break;
+			case JOINT_TYPE_UTF8:
+			case JOINT_TYPE_ENUM:
+			case JOINT_TYPE_OBJ:
+			case JOINT_TYPE_STRUCT:
+				res.l = env->GetObjectField(val.l, memberInfo.GetMemberId()._id);
+				break;
+			default:
+				JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
+			}
+
+			return res;
+		}
 	};
 
 
@@ -227,15 +284,27 @@ namespace java
 
 		class ParamsArray
 		{
+		private:
+			std::vector<jvalue>    _params;
+
 		public:
+			ParamsArray(size_t count)
+				: _params(count)
+			{ }
+
 			void Set(size_t index, JavaVariant param)
-			{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+			{ _params[index].l = param; }
+
+			const std::vector<jvalue>& GetVector() const { return _params; }
 		};
 
-		ParamsArray MakeParamsArray(size_t size) const { return ParamsArray(); }
+		ParamsArray MakeParamsArray(size_t size) const { return ParamsArray(size); }
 
 		JavaVariant MakeStruct(const ParamsArray& params, const JavaBindingInfo::TypeUserData& structType) const
-		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		{
+			auto env = structType._proxyCls.GetEnv();
+			return JAVA_CALL(env->NewObjectA(structType._proxyCls.Get(), structType._proxyCtorId, params.GetVector().data()));
+		}
 
 #define DETAIL_JOINT_JAVA_PROXY_SIMPLE_TYPE_MARSHALLING(TypeName_, CppType_, JniType_, CallMethod_, ClassName_, ValueGetterName_, MangledType_) \
 			CppType_ ToJoint##TypeName_(const JLocalObjPtr& val) const \
@@ -294,8 +363,50 @@ namespace java
 		{ return alloc.AllocateUtf8(val.GetJvm(), val.GetEnv(), reinterpret_cast<jstring>(val.Get())); }
 
 		template < typename MemberInfo_ >
-		const JLocalObjPtr& GetStructMember(const JLocalObjPtr& val, size_t i, const MemberInfo_& memberInfo, const JavaBindingInfo::TypeUserData& structType) const
-		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		JLocalObjPtr GetStructMember(const JLocalObjPtr& val, size_t i, const MemberInfo_& memberInfo, const JavaBindingInfo::TypeUserData& structType) const
+		{
+			jobject res;
+			auto env = structType._proxyCls.GetEnv();
+
+			switch (memberInfo.GetType().GetJointType().id)
+			{
+			case JOINT_TYPE_BOOL:
+				res = FromJointBool(env->GetBooleanField(val, memberInfo.GetMemberId()._id));
+				break;
+			case JOINT_TYPE_U8:
+			case JOINT_TYPE_I8:
+				res = FromJointI8(env->GetByteField(val, memberInfo.GetMemberId()._id));
+				break;
+			case JOINT_TYPE_U16:
+			case JOINT_TYPE_I16:
+				res = FromJointI16(env->GetShortField(val, memberInfo.GetMemberId()._id));
+				break;
+			case JOINT_TYPE_U32:
+			case JOINT_TYPE_I32:
+				res = FromJointI32(env->GetIntField(val, memberInfo.GetMemberId()._id));
+				break;
+			case JOINT_TYPE_U64:
+			case JOINT_TYPE_I64:
+				res = FromJointI64(env->GetLongField(val, memberInfo.GetMemberId()._id));
+				break;
+			case JOINT_TYPE_F32:
+				res = FromJointF32(env->GetFloatField(val, memberInfo.GetMemberId()._id));
+				break;
+			case JOINT_TYPE_F64:
+				res = FromJointF64(env->GetDoubleField(val, memberInfo.GetMemberId()._id));
+				break;
+			case JOINT_TYPE_UTF8:
+			case JOINT_TYPE_ENUM:
+			case JOINT_TYPE_OBJ:
+			case JOINT_TYPE_STRUCT:
+				res = env->GetObjectField(val, memberInfo.GetMemberId()._id);
+				break;
+			default:
+				JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
+			}
+
+			return JLocalObjPtr(env, res);
+		}
 	};
 
 }}

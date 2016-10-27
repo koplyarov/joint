@@ -1,5 +1,7 @@
 let g:cpp_plugin.indexer.builder.autoBuild = 1
 call g:cpp_plugin.indexer.builder.addCustomRegex('c++', '/[ \t]*using[ \t]*([A-Za-z0-9_]*)[ \t]*=/\1/t/')
+call g:cpp_plugin.indexer.builder.addCustomRegex('c++', '/[ \t]*DETAIL_JOINT_JAVA_DECLARE_JPTR[ \t]*\([^,]*,[ \t]*([A-Za-z0-9_]*)[ \t]*\)/JLocal\1Ptr/t/')
+call g:cpp_plugin.indexer.builder.addCustomRegex('c++', '/[ \t]*DETAIL_JOINT_JAVA_DECLARE_JPTR[ \t]*\([^,]*,[ \t]*([A-Za-z0-9_]*)[ \t]*\)/JGlobal\1Ptr/t/')
 call g:cpp_plugin.indexer.builder.addCustomRegex('python', '/[ \t]*self\.([A-Za-z0-9_]*)[ \t]*=/\1/v/')
 
 call g:buildsystem.setAvailableBuildConfigs( { 'host': CMakeBuildConfig(4, './build/') } )

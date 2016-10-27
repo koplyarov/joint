@@ -16,6 +16,7 @@ public class TypeDescriptor
 
     int typeId;
     String mangledTypeName;
+    String structCtorSignature;
     Class proxyClass;
     int interfaceChecksum;
     MemberInfo[] members;
@@ -27,6 +28,15 @@ public class TypeDescriptor
         this.proxyClass = proxyClass;
         this.interfaceChecksum = interfaceChecksum;
         this.members = members;
+		if (members != null)
+		{
+			StringBuilder structCtorSignatureSb = new StringBuilder();
+			structCtorSignatureSb.append("(");
+			for (MemberInfo m : members)
+				structCtorSignatureSb.append(m.type.mangledTypeName);
+			structCtorSignatureSb.append(")V");
+			structCtorSignature = structCtorSignatureSb.toString();
+		}
     }
 
     public static TypeDescriptor builtinType(int typeId, String mangledTypeName)
