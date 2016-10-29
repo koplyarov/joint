@@ -13,12 +13,20 @@ namespace joint {
 namespace devkit
 {
 
+	class ValueMarshaller;
+
+
 	template < typename BindingInfo_ >
 	class TypeDescriptor
 	{
+		friend class joint::devkit::ValueMarshaller;
+
 		class MemberInfo;
 
-		using TypeUserData = typename BindingInfo_::TypeUserData;
+		using ArrayUserData = typename BindingInfo_::ArrayUserData;
+		using ObjectUserData = typename BindingInfo_::ObjectUserData;
+		using EnumUserData = typename BindingInfo_::EnumUserData;
+		using StructUserData = typename BindingInfo_::StructUserData;
 		using MemberId = typename BindingInfo_::MemberId;
 		using MembersArray = ArrayHolder<MemberInfo>;
 
@@ -29,7 +37,10 @@ namespace devkit
 		std::unique_ptr<TypeDescriptor>  _arrayElementType;
 		Joint_Type                       _jointType;
 		size_t                           _membersCount = 0;
-		TypeUserData                     _userData;
+		std::unique_ptr<ArrayUserData>   _arrayUserData;
+		std::unique_ptr<ObjectUserData>  _objectUserData;
+		std::unique_ptr<EnumUserData>    _enumUserData;
+		std::unique_ptr<StructUserData>  _structUserData;
 
 	public:
 		TypeDescriptor()
@@ -49,11 +60,11 @@ namespace devkit
 			switch (_jointType.id)
 			{
 			case JOINT_TYPE_ENUM:
-				_userData = dataObtainer.GetEnumUserData(node);
+				_enumUserData.reset(new EnumUserData(dataObtainer.GetEnumUserData(node)));
 				break;
 			case JOINT_TYPE_STRUCT:
 				{
-					_userData = dataObtainer.GetStructUserData(node);
+					_structUserData.reset(new StructUserData(dataObtainer.GetStructUserData(node)));
 					auto members = dataObtainer.GetMembersNodes(node);
 					auto sd = new Joint_StructDescriptor;
 					_jointType.payload.structDescriptor = sd;
@@ -66,19 +77,19 @@ namespace devkit
 					for (size_t i = 0; i < _membersCount; ++i)
 					{
 						auto member_node = members.Get(i);
-						_members[i].Init(_userData, member_node, dataObtainer);
+						_members[i].Init(*_structUserData, member_node, dataObtainer);
 						sd->memberTypes[i] = _members[i].GetType().GetJointType();
 					}
 				}
 				break;
 			case JOINT_TYPE_OBJ:
-				_userData = dataObtainer.GetObjectUserData(node);
+				_objectUserData.reset(new ObjectUserData(dataObtainer.GetObjectUserData(node)));
 				_jointType.payload.interfaceChecksum = dataObtainer.GetInterfaceChecksum(node);
 				break;
 			case JOINT_TYPE_ARRAY:
 				_arrayElementType.reset(new TypeDescriptor);
 				_arrayElementType->Init(dataObtainer.GetArrayElementTypeNode(node), dataObtainer);
-				_userData = dataObtainer.GetArrayUserData(node);
+				_arrayUserData.reset(new ArrayUserData(dataObtainer.GetArrayUserData(node)));
 				_jointType.payload.arrayElementType = &_arrayElementType->GetJointType();
 				break;
 			default:
@@ -117,8 +128,6 @@ namespace devkit
 				JOINT_THROW("Array element type is not initialized");
 			return *_arrayElementType;
 		}
-
-		const TypeUserData& GetUserData() const { return _userData; }
 	};
 
 

@@ -23,29 +23,44 @@ namespace java
 	public:
 		struct MemberId
 		{
-			jfieldID           _id;
+			jfieldID           Id;
 		};
 
-		struct TypeUserData
+		struct ArrayUserData
 		{
-			JGlobalClassPtr    _proxyCls;
-			jmethodID          _proxyCtorId;
+		};
+
+		struct ObjectUserData
+		{
+			JGlobalClassPtr    Cls;
+			jmethodID          CtorId;
+		};
+
+		struct EnumUserData
+		{
+			JGlobalClassPtr    Cls;
+			jmethodID          FromIntId;
+		};
+
+		struct StructUserData
+		{
+			JGlobalClassPtr    Cls;
+			jmethodID          CtorId;
 		};
 
 		struct MethodUserData
 		{
-			JGlobalClassPtr    _cls;
-			jmethodID          _id;
+			jmethodID          Id;
 		};
 
 	public:
 		Joint_TypeId GetJointTypeId(const JLocalObjPtr& typeNode) const;
 		Joint_InterfaceChecksum GetInterfaceChecksum(const JLocalObjPtr& typeNode) const;
 
-		TypeUserData GetArrayUserData(const JLocalObjPtr& typeNode) const;
-		TypeUserData GetObjectUserData(const JLocalObjPtr& typeNode) const;
-		TypeUserData GetEnumUserData(const JLocalObjPtr& typeNode) const;
-		TypeUserData GetStructUserData(const JLocalObjPtr& typeNode) const;
+		ArrayUserData GetArrayUserData(const JLocalObjPtr& typeNode) const;
+		ObjectUserData GetObjectUserData(const JLocalObjPtr& typeNode) const;
+		EnumUserData GetEnumUserData(const JLocalObjPtr& typeNode) const;
+		StructUserData GetStructUserData(const JLocalObjPtr& typeNode) const;
 
 		MethodUserData GetMethodUserData(const JLocalObjPtr& methodNode) const;
 
@@ -77,8 +92,8 @@ namespace java
 		Sequence GetParamsNodes(const JLocalObjPtr& methodNode) const;
 		Sequence GetMethodsNodes(const JLocalObjPtr& ifcNode) const;
 		Sequence GetMembersNodes(const JLocalObjPtr& typeNode) const;
-		MemberId GetMemberId(const TypeUserData& structUserData, const JLocalObjPtr& memberNode) const;
-		JLocalObjPtr GetMemberType(const TypeUserData& structUserData, const JLocalObjPtr& memberNode) const;
+		MemberId GetMemberId(const StructUserData& structUserData, const JLocalObjPtr& memberNode) const;
+		JLocalObjPtr GetMemberType(const StructUserData& structUserData, const JLocalObjPtr& memberNode) const;
 	};
 
 

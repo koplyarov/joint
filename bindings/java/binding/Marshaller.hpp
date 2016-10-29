@@ -81,14 +81,14 @@ namespace java
 			return result;
 		}
 
-		JavaVariant FromJointEnum(int32_t val, const JavaBindingInfo::TypeUserData& enumType) const
+		JavaVariant FromJointEnum(int32_t val, const JavaBindingInfo::EnumUserData& enumType) const
 		{
 			jvalue result;
-			result.l = JAVA_CALL(env->CallStaticObjectMethod(enumType._proxyCls.Get(), enumType._proxyCtorId, (jint)val));
+			result.l = JAVA_CALL(env->CallStaticObjectMethod(enumType.Cls, enumType.FromIntId, (jint)val));
 			return result;
 		}
 
-		JavaVariant FromJointObj(devkit::ValueDirection dir, Joint_ObjectHandle val, const JavaBindingInfo::TypeUserData& proxyType, Joint_InterfaceChecksum checksum) const
+		JavaVariant FromJointObj(devkit::ValueDirection dir, Joint_ObjectHandle val, const JavaBindingInfo::ObjectUserData& proxyType, Joint_InterfaceChecksum checksum) const
 		{
 			jvalue result;
 			if (val == JOINT_NULL_HANDLE)
@@ -109,12 +109,12 @@ namespace java
 			jmethodID ctor_id = JAVA_CALL(env->GetMethodID(cls, "<init>", "(J)V"));
 			JLocalObjPtr joint_obj(env, JAVA_CALL(env->NewObject(cls, ctor_id, reinterpret_cast<jlong>(val))));
 
-			result.l = JAVA_CALL(env->NewObject(proxyType._proxyCls.Get(), proxyType._proxyCtorId, joint_obj.Get()));
+			result.l = JAVA_CALL(env->NewObject(proxyType.Cls, proxyType.CtorId, joint_obj.Get()));
 			sg.Cancel();
 			return result;
 		}
 
-		JavaVariant FromJointArray(devkit::ValueDirection dir, Joint_ArrayHandle val, const JavaBindingInfo::TypeUserData& elementTypeDesc) const
+		JavaVariant FromJointArray(devkit::ValueDirection dir, Joint_ArrayHandle val, const JavaBindingInfo::ArrayUserData& elementTypeDesc) const
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
 		class ParamsArray
@@ -135,12 +135,12 @@ namespace java
 
 		ParamsArray MakeParamsArray(size_t size) const { return ParamsArray(size); }
 
-		JavaVariant MakeStruct(const ParamsArray& params, const JavaBindingInfo::TypeUserData& structType) const
+		JavaVariant MakeStruct(const ParamsArray& params, const JavaBindingInfo::StructUserData& structType) const
 		{
-			auto env = structType._proxyCls.GetEnv();
+			auto env = structType.Cls.GetEnv();
 
 			jvalue result;
-			result.l = JAVA_CALL(env->NewObjectA(structType._proxyCls.Get(), structType._proxyCtorId, params.GetVector().data()));
+			result.l = JAVA_CALL(env->NewObjectA(structType.Cls, structType.CtorId, params.GetVector().data()));
 			return result;
 		}
 
@@ -156,13 +156,13 @@ namespace java
 		float      ToJointF32(jvalue val) const   { return val.f; }
 		double     ToJointF64(jvalue val) const   { return val.d; }
 
-		int32_t ToJointEnum(jvalue val, const JavaBindingInfo::TypeUserData& enumType) const
+		int32_t ToJointEnum(jvalue val, const JavaBindingInfo::EnumUserData& enumType) const
 		{
-			jfieldID value_id = JAVA_CALL(env->GetFieldID(enumType._proxyCls, "value", "I"));
+			jfieldID value_id = JAVA_CALL(env->GetFieldID(enumType.Cls, "value", "I"));
 			return  JAVA_CALL(env->GetIntField(val.l, value_id));
 		}
 
-		Joint_ObjectHandle ToJointObj(devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::TypeUserData& objType) const
+		Joint_ObjectHandle ToJointObj(devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::ObjectUserData& objType) const
 		{
 			if (!val.l)
 				return JOINT_NULL_HANDLE;
@@ -180,7 +180,7 @@ namespace java
 			return handle;
 		}
 
-		Joint_ArrayHandle ToJointArray(devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::TypeUserData& objType) const
+		Joint_ArrayHandle ToJointArray(devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::ArrayUserData& objType) const
 		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
 		template < typename Allocator_ >
@@ -188,43 +188,43 @@ namespace java
 		{ return alloc.AllocateUtf8(env, reinterpret_cast<jstring>(val.l)); }
 
 		template < typename MemberInfo_ >
-		jvalue GetStructMember(jvalue val, size_t i, const MemberInfo_& memberInfo, const JavaBindingInfo::TypeUserData& structType) const
+		jvalue GetStructMember(jvalue val, size_t i, const MemberInfo_& memberInfo, const JavaBindingInfo::StructUserData& structType) const
 		{
 			jvalue res;
-			auto env = structType._proxyCls.GetEnv();
+			auto env = structType.Cls.GetEnv();
 
 			switch (memberInfo.GetType().GetJointType().id)
 			{
 			case JOINT_TYPE_BOOL:
-				res.z = env->GetBooleanField(val.l, memberInfo.GetMemberId()._id);
+				res.z = env->GetBooleanField(val.l, memberInfo.GetMemberId().Id);
 				break;
 			case JOINT_TYPE_U8:
 			case JOINT_TYPE_I8:
-				res.b = env->GetByteField(val.l, memberInfo.GetMemberId()._id);
+				res.b = env->GetByteField(val.l, memberInfo.GetMemberId().Id);
 				break;
 			case JOINT_TYPE_U16:
 			case JOINT_TYPE_I16:
-				res.s = env->GetShortField(val.l, memberInfo.GetMemberId()._id);
+				res.s = env->GetShortField(val.l, memberInfo.GetMemberId().Id);
 				break;
 			case JOINT_TYPE_U32:
 			case JOINT_TYPE_I32:
-				res.i = env->GetIntField(val.l, memberInfo.GetMemberId()._id);
+				res.i = env->GetIntField(val.l, memberInfo.GetMemberId().Id);
 				break;
 			case JOINT_TYPE_U64:
 			case JOINT_TYPE_I64:
-				res.j = env->GetLongField(val.l, memberInfo.GetMemberId()._id);
+				res.j = env->GetLongField(val.l, memberInfo.GetMemberId().Id);
 				break;
 			case JOINT_TYPE_F32:
-				res.f = env->GetFloatField(val.l, memberInfo.GetMemberId()._id);
+				res.f = env->GetFloatField(val.l, memberInfo.GetMemberId().Id);
 				break;
 			case JOINT_TYPE_F64:
-				res.d = env->GetDoubleField(val.l, memberInfo.GetMemberId()._id);
+				res.d = env->GetDoubleField(val.l, memberInfo.GetMemberId().Id);
 				break;
 			case JOINT_TYPE_UTF8:
 			case JOINT_TYPE_ENUM:
 			case JOINT_TYPE_OBJ:
 			case JOINT_TYPE_STRUCT:
-				res.l = env->GetObjectField(val.l, memberInfo.GetMemberId()._id);
+				res.l = env->GetObjectField(val.l, memberInfo.GetMemberId().Id);
 				break;
 			default:
 				JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);

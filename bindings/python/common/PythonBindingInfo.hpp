@@ -16,7 +16,10 @@ namespace python
 	{
 	public:
 		using MemberId = PyObjectHolder;
-		using TypeUserData = PyObjectHolder;
+		using ArrayUserData = PyObjectHolder;
+		using ObjectUserData = PyObjectHolder;
+		using EnumUserData = PyObjectHolder;
+		using StructUserData = PyObjectHolder;
 		struct MethodUserData { };
 
 	private:
@@ -55,8 +58,8 @@ namespace python
 		Sequence GetParamsNodes(PyObject* methodNode) const;
 		Sequence GetMethodsNodes(PyObject* ifcNode) const;
 		Sequence GetMembersNodes(PyObject* typeNode) const;
-		PyObjectHolder GetMemberId(const TypeUserData& structUserData, PyObject* memberNode) const;
-		PyObject* GetMemberType(const TypeUserData& structUserData, PyObject* memberNode) const;
+		PyObjectHolder GetMemberId(const StructUserData& structUserData, PyObject* memberNode) const;
+		PyObject* GetMemberType(const StructUserData& structUserData, PyObject* memberNode) const;
 
 	private:
 		PyObjectHolder RegisterObject(PyObjectHolder obj) const;

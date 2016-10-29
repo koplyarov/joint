@@ -41,20 +41,20 @@ namespace devkit
 			case JOINT_TYPE_F32: return wrapper.FromJointF32(value.f32);
 			case JOINT_TYPE_F64: return wrapper.FromJointF64(value.f64);
 			case JOINT_TYPE_UTF8: return wrapper.FromJointUtf8(value.utf8);
-			case JOINT_TYPE_ENUM: return wrapper.FromJointEnum(value.e, type.GetUserData());
+			case JOINT_TYPE_ENUM: return wrapper.FromJointEnum(value.e, *type._enumUserData);
 			case JOINT_TYPE_STRUCT:
 				{
 					const auto& sd = *jtype.payload.structDescriptor;
 					auto struct_ctor_params(wrapper.MakeParamsArray(sd.membersCount));
 					for (int32_t i = 0; i < sd.membersCount; ++i)
 						struct_ctor_params.Set(i, FromJoint<WrappedType_>(dir, type.GetMemberInfo(i).GetType(), value.members[i], wrapper));
-					return wrapper.MakeStruct(struct_ctor_params, type.GetUserData());
+					return wrapper.MakeStruct(struct_ctor_params, *type._structUserData);
 				}
 				break;
 			case JOINT_TYPE_OBJ:
-				return wrapper.FromJointObj(dir, value.obj, type.GetUserData(), type.GetJointType().payload.interfaceChecksum);
+				return wrapper.FromJointObj(dir, value.obj, *type._objectUserData, type.GetJointType().payload.interfaceChecksum);
 			case JOINT_TYPE_ARRAY:
-				return wrapper.FromJointArray(dir, value.array, type.GetUserData());
+				return wrapper.FromJointArray(dir, value.array, *type._arrayUserData);
 			default:
 				throw std::runtime_error("Unknown parameter type");
 			}
@@ -79,7 +79,7 @@ namespace devkit
 			case JOINT_TYPE_I64: res.i64 = unwrapper.ToJointI64(value); break;
 			case JOINT_TYPE_F32: res.f32 = unwrapper.ToJointF32(value); break;
 			case JOINT_TYPE_F64: res.f64 = unwrapper.ToJointF64(value); break;
-			case JOINT_TYPE_ENUM: res.e = unwrapper.ToJointEnum(value, type.GetUserData()); break;
+			case JOINT_TYPE_ENUM: res.e = unwrapper.ToJointEnum(value, *type._enumUserData); break;
 			case JOINT_TYPE_UTF8:
 				res.utf8 = unwrapper.ToJointUtf8(value, alloc);
 				break;
@@ -88,14 +88,14 @@ namespace devkit
 					const auto& sd = *jtype.payload.structDescriptor;
 					res.members = alloc.AllocateMembers(sd.membersCount);
 					for (auto i = 0; i < sd.membersCount; ++i)
-						res.members[i] = ToJoint(dir, type.GetMemberInfo(i).GetType(), unwrapper.GetStructMember(value, i, type.GetMemberInfo(i), type.GetUserData()), unwrapper, alloc);
+						res.members[i] = ToJoint(dir, type.GetMemberInfo(i).GetType(), unwrapper.GetStructMember(value, i, type.GetMemberInfo(i), *type._structUserData), unwrapper, alloc);
 				}
 				break;
 			case JOINT_TYPE_OBJ:
-				res.obj = unwrapper.ToJointObj(dir, value, type.GetUserData());
+				res.obj = unwrapper.ToJointObj(dir, value, *type._objectUserData);
 				break;
 			case JOINT_TYPE_ARRAY:
-				res.array = unwrapper.ToJointArray(dir, value, type.GetUserData());
+				res.array = unwrapper.ToJointArray(dir, value, *type._arrayUserData);
 				break;
 			default:
 				JOINT_THROW(std::runtime_error("Unknown type"));

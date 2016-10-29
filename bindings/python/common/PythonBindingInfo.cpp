@@ -60,11 +60,11 @@ namespace python
 	{ return Sequence(PY_OBJ_CHECK(PyTuple_GetItem(typeNode, 2))); }
 
 
-	PyObjectHolder PythonBindingInfo::GetMemberId(const TypeUserData& structUserData, PyObject* memberNode) const
+	PyObjectHolder PythonBindingInfo::GetMemberId(const StructUserData& structUserData, PyObject* memberNode) const
 	{ return RegisterObject(PyObjectHolder(PY_OBJ_CHECK(PyTuple_GetItem(memberNode, 0)))); }
 
 
-	PyObject* PythonBindingInfo::GetMemberType(const TypeUserData& structUserData, PyObject* memberNode) const
+	PyObject* PythonBindingInfo::GetMemberType(const StructUserData& structUserData, PyObject* memberNode) const
 	{ return PY_OBJ_CHECK(PyTuple_GetItem(memberNode, 1)); }
 
 

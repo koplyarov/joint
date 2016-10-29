@@ -62,38 +62,38 @@ namespace binding
 		switch (m_desc.GetRetType().GetJointType().id)
 		{
 		case JOINT_TYPE_VOID:
-			env->CallVoidMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
+			env->CallVoidMethodA(_obj.Get(), m_desc.GetUserData().Id, jparams);
 			break;
 		case JOINT_TYPE_BOOL:
-			j_res.z = env->CallBooleanMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
+			j_res.z = env->CallBooleanMethodA(_obj.Get(), m_desc.GetUserData().Id, jparams);
 			break;
 		case JOINT_TYPE_U8:
 		case JOINT_TYPE_I8:
-			j_res.b = env->CallByteMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
+			j_res.b = env->CallByteMethodA(_obj.Get(), m_desc.GetUserData().Id, jparams);
 			break;
 		case JOINT_TYPE_U16:
 		case JOINT_TYPE_I16:
-			j_res.s = env->CallShortMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
+			j_res.s = env->CallShortMethodA(_obj.Get(), m_desc.GetUserData().Id, jparams);
 			break;
 		case JOINT_TYPE_U32:
 		case JOINT_TYPE_I32:
-			j_res.i = env->CallIntMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
+			j_res.i = env->CallIntMethodA(_obj.Get(), m_desc.GetUserData().Id, jparams);
 			break;
 		case JOINT_TYPE_U64:
 		case JOINT_TYPE_I64:
-			j_res.j = env->CallLongMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
+			j_res.j = env->CallLongMethodA(_obj.Get(), m_desc.GetUserData().Id, jparams);
 			break;
 		case JOINT_TYPE_F32:
-			j_res.f = env->CallFloatMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
+			j_res.f = env->CallFloatMethodA(_obj.Get(), m_desc.GetUserData().Id, jparams);
 			break;
 		case JOINT_TYPE_F64:
-			j_res.d = env->CallDoubleMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
+			j_res.d = env->CallDoubleMethodA(_obj.Get(), m_desc.GetUserData().Id, jparams);
 			break;
 		case JOINT_TYPE_UTF8:
 		case JOINT_TYPE_ENUM:
 		case JOINT_TYPE_OBJ:
 		case JOINT_TYPE_STRUCT:
-			j_res.l = env->CallObjectMethodA(_obj.Get(), m_desc.GetUserData()._id, jparams);
+			j_res.l = env->CallObjectMethodA(_obj.Get(), m_desc.GetUserData().Id, jparams);
 			break;
 		default:
 			JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);

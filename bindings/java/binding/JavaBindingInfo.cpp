@@ -25,11 +25,11 @@ namespace java
 	}
 
 
-	JavaBindingInfo::TypeUserData JavaBindingInfo::GetArrayUserData(const JLocalObjPtr& typeNode) const
-	{ return TypeUserData(); }
+	JavaBindingInfo::ArrayUserData JavaBindingInfo::GetArrayUserData(const JLocalObjPtr& typeNode) const
+	{ return ArrayUserData(); }
 
 
-	JavaBindingInfo::TypeUserData JavaBindingInfo::GetObjectUserData(const JLocalObjPtr& typeNode) const
+	JavaBindingInfo::ObjectUserData JavaBindingInfo::GetObjectUserData(const JLocalObjPtr& typeNode) const
 	{
 		auto env = typeNode.GetEnv();
 
@@ -38,11 +38,11 @@ namespace java
 		JGlobalClassPtr proxy_class(env, static_cast<jclass>(JAVA_CALL(env->GetObjectField(typeNode, proxyClass_id))));
 		JOINT_CHECK(proxy_class, "Invalid TypeDescriptor for interface");
 		jmethodID proxy_ctor_id = JAVA_CALL(env->GetMethodID(proxy_class, "<init>", "(Lorg/joint/JointObject;)V"));
-		return TypeUserData{proxy_class, proxy_ctor_id};
+		return ObjectUserData{proxy_class, proxy_ctor_id};
 	}
 
 
-	JavaBindingInfo::TypeUserData JavaBindingInfo::GetEnumUserData(const JLocalObjPtr& typeNode) const
+	JavaBindingInfo::EnumUserData JavaBindingInfo::GetEnumUserData(const JLocalObjPtr& typeNode) const
 	{
 		auto env = typeNode.GetEnv();
 
@@ -55,11 +55,11 @@ namespace java
 		JGlobalClassPtr enum_class(env, static_cast<jclass>(JAVA_CALL(env->GetObjectField(typeNode, proxyClass_id))));
 		JOINT_CHECK(enum_class, "Invalid TypeDescriptor for enum");
 		jmethodID enum_creator_id = JAVA_CALL(env->GetStaticMethodID(enum_class, "fromInt", (std::string("(I)") + StringDataHolder(mangledTypeName).GetData()).c_str()));
-		return TypeUserData{enum_class, enum_creator_id};
+		return EnumUserData{enum_class, enum_creator_id};
 	}
 
 
-	JavaBindingInfo::TypeUserData JavaBindingInfo::GetStructUserData(const JLocalObjPtr& typeNode) const
+	JavaBindingInfo::StructUserData JavaBindingInfo::GetStructUserData(const JLocalObjPtr& typeNode) const
 	{
 		auto env = typeNode.GetEnv();
 
@@ -73,7 +73,7 @@ namespace java
 		JOINT_CHECK(struct_class, "Invalid TypeDescriptor for struct");
 		jmethodID struct_ctor_id = JAVA_CALL(env->GetMethodID(struct_class, "<init>", StringDataHolder(structCtorSignature).GetData()));
 
-		return TypeUserData{struct_class, struct_ctor_id};
+		return StructUserData{struct_class, struct_ctor_id};
 	}
 
 
@@ -94,7 +94,7 @@ namespace java
 
 		jmethodID id = JAVA_CALL(env->GetMethodID(interfaceCls, StringDataHolder(name).GetData(), StringDataHolder(signature).GetData()));
 
-		return MethodUserData{interfaceCls, id};
+		return MethodUserData{id};
 	}
 
 
@@ -145,7 +145,7 @@ namespace java
 	}
 
 
-	JavaBindingInfo::MemberId JavaBindingInfo::GetMemberId(const TypeUserData& structUserData, const JLocalObjPtr& memberNode) const
+	JavaBindingInfo::MemberId JavaBindingInfo::GetMemberId(const StructUserData& structUserData, const JLocalObjPtr& memberNode) const
 	{
 		auto env = memberNode.GetEnv();
 
@@ -159,13 +159,13 @@ namespace java
 		jfieldID mangledTypeName_id = JAVA_CALL(env->GetFieldID(TypeDescriptor_cls, "mangledTypeName", "Ljava/lang/String;"));
 		JLocalStringPtr mangledTypeName(env, reinterpret_cast<jstring>(JAVA_CALL(env->GetObjectField(type, mangledTypeName_id))));
 
-		jfieldID id = JAVA_CALL(env->GetFieldID(structUserData._proxyCls, StringDataHolder(name).GetData(), StringDataHolder(mangledTypeName).GetData()));
+		jfieldID id = JAVA_CALL(env->GetFieldID(structUserData.Cls, StringDataHolder(name).GetData(), StringDataHolder(mangledTypeName).GetData()));
 
 		return MemberId{id};
 	}
 
 
-	JLocalObjPtr JavaBindingInfo::GetMemberType(const TypeUserData& structUserData, const JLocalObjPtr& memberNode) const
+	JLocalObjPtr JavaBindingInfo::GetMemberType(const StructUserData& structUserData, const JLocalObjPtr& memberNode) const
 	{
 		auto env = memberNode.GetEnv();
 
