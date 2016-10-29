@@ -47,7 +47,6 @@ namespace binding
 
 		StackStorage<jvalue, 1024> params_storage;
 
-		auto jvm = _accessor.GetJvm();
 		auto env = _accessor.GetEnv();
 
 		jvalue* jparams = nullptr;
@@ -56,7 +55,7 @@ namespace binding
 			jparams = params_storage.Make(params.size());
 
 			for (size_t i = 0; i < params.size(); ++i)
-				jparams[i] = ValueMarshaller::FromJoint<jvalue>(ValueDirection::Parameter, m_desc.GetParamType(i), params[i].value, JavaAccessorMarshaller(jvm, env));
+				jparams[i] = ValueMarshaller::FromJoint<jvalue>(ValueDirection::Parameter, m_desc.GetParamType(i), params[i].value, JavaMarshaller(env));
 		}
 
 		jvalue j_res;
@@ -106,7 +105,7 @@ namespace binding
 			if (m_desc.GetRetType().GetJointType().id != JOINT_TYPE_VOID)
 			{
 				RetValueAllocator alloc;
-				outRetValue->result.value = ValueMarshaller::ToJoint(ValueDirection::Return, m_desc.GetRetType(), j_res, JavaAccessorMarshaller(jvm, env), alloc);
+				outRetValue->result.value = ValueMarshaller::ToJoint(ValueDirection::Return, m_desc.GetRetType(), j_res, JavaMarshaller(env), alloc);
 			}
 
 			return JOINT_ERROR_NONE;

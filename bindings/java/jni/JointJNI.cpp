@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <JointJNI.h>
+#include <binding/Boxing.hpp>
 #include <binding/JavaBindingInfo.hpp>
 #include <binding/Marshaller.hpp>
 #include <binding/Object.hpp>
@@ -71,7 +72,7 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod(JNIEnv* env,
 		const auto& t = method_desc.GetParamType(i);
 
 		JLocalObjPtr p(env, JAVA_CALL(env->GetObjectArrayElement(jparams, i)));
-		Joint_Value v = ValueMarshaller::ToJoint(ValueDirection::Parameter, t, p, JavaProxyMarshaller(env), alloc);
+		Joint_Value v = ValueMarshaller::ToJoint(ValueDirection::Parameter, t, Boxing(env).Unbox(t.GetJointType(), p), JavaMarshaller(env), alloc);
 		params[i] = Joint_Parameter{v, t.GetJointType()};
 	}
 
@@ -93,7 +94,8 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod(JNIEnv* env,
 		if (ret_type.id == JOINT_TYPE_VOID)
 			return nullptr;
 
-		result = ValueMarshaller::FromJoint<jobject>(ValueDirection::Return, method_desc.GetRetType(), ret_value.result.value, JavaProxyMarshaller(env));
+		jvalue v = ValueMarshaller::FromJoint<jvalue>(ValueDirection::Return, method_desc.GetRetType(), ret_value.result.value, JavaMarshaller(env));
+		result = Boxing(env).Box(method_desc.GetRetType().GetJointType(), v);
 	}
 	else if (ret == JOINT_ERROR_EXCEPTION)
 	{
