@@ -66,6 +66,7 @@ add_library(joint-java SHARED
 	binding/Module.cpp
 	binding/Object.cpp
 	jni/JointJNI.cpp
+	utils/JavaVirtualMachine.cpp
 	utils/JniError.cpp
 )
 target_link_libraries(joint-java joint ${JNI_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})

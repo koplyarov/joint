@@ -2,6 +2,7 @@
 
 #include <joint/devkit/JointException.hpp>
 
+#include <utils/JavaVirtualMachine.hpp>
 #include <utils/JniError.hpp>
 #include <utils/Utils.hpp>
 
@@ -14,50 +15,10 @@ namespace binding
 	using namespace devkit;
 
 
-	class JavaVirtualMachine
-	{
-		JOINT_DEVKIT_LOGGER("Joint.Java.JavaVirtualMachine");
-
-	private:
-		JavaVM*     _jvm;
-
-	public:
-		JavaVirtualMachine()
-		{
-			std::string class_path_opt = "-Djava.class.path=/home/koplyarov/work/joint/build/bin/joint.jar";
-			std::string lib_path_opt = "-Djava.library.path=/home/koplyarov/work/joint/build/bin";
-			JavaVMOption opt[] = {
-				{ const_cast<char*>(class_path_opt.c_str()), nullptr },
-				{ const_cast<char*>(lib_path_opt.c_str()), nullptr }
-			};
-
-			JavaVMInitArgs vm_args = { };
-			vm_args.version = 0x00010006;
-			jint ret = JNI_GetDefaultJavaVMInitArgs(&vm_args);
-			JOINT_CHECK(ret == 0, StringBuilder() % "JNI_GetDefaultJavaVMInitArgs failed: " % JniErrorToString(ret));
-			vm_args.options = opt;
-			vm_args.nOptions = sizeof(opt) / sizeof(opt[0]);
-
-			JNIEnv* env = NULL;
-			ret = JNI_CreateJavaVM(&_jvm, reinterpret_cast<void**>(&env), &vm_args);
-			JOINT_CHECK(ret == 0, StringBuilder() % "JNI_CreateJavaVM failed: " % JniErrorToString(ret));
-			JOINT_CHECK(_jvm, "JNI_CreateJavaVM failed!");
-		}
-
-		~JavaVirtualMachine()
-		{
-			_jvm->DestroyJavaVM();
-		}
-
-		JavaVM* GetJvm() const { return _jvm; }
-	};
-
-
 	Module::Module(const std::string& jarPath, const std::string& className)
 		: _cls()
 	{
-		static JavaVirtualMachine java_virtual_machine;
-		auto jvm = java_virtual_machine.GetJvm();
+		auto jvm = JavaVirtualMachine::GetJvm();
 		auto env = GetJavaEnv(jvm);
 
 		JLocalStringPtr url_string(env, reinterpret_cast<jstring>(JAVA_CALL(env->NewStringUTF(jarPath.c_str()))));

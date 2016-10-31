@@ -19,8 +19,6 @@ namespace binding
 	{
 		JOINT_DEVKIT_LOGGER("Joint.Java.Module")
 
-		using JavaVMHolder = devkit::Holder<JavaVM*>;
-
 	private:
 		JGlobalClassPtr     _cls;
 
