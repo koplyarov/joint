@@ -63,6 +63,7 @@ add_library(joint-java SHARED
 	JointJava.cpp
 	binding/Binding.cpp
 	binding/JavaBindingInfo.cpp
+	binding/JointJavaContext.cpp
 	binding/Module.cpp
 	binding/Object.cpp
 	jni/JointJNI.cpp

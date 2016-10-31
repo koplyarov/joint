@@ -1,28 +1,18 @@
 #include <binding/JavaBindingInfo.hpp>
 
+#include <binding/JointJavaContext.hpp>
+
 
 namespace joint {
 namespace java
 {
 
 	Joint_TypeId JavaBindingInfo::GetJointTypeId(const JLocalObjPtr& typeNode) const
-	{
-		auto env = typeNode.GetEnv();
-
-		JLocalClassPtr TypeDescriptor_cls(env, JAVA_CALL(env->FindClass("org/joint/TypeDescriptor")));
-		jfieldID typeId_id = JAVA_CALL(env->GetFieldID(TypeDescriptor_cls, "typeId", "I"));
-		return static_cast<Joint_TypeId>(JAVA_CALL(env->GetIntField(typeNode, typeId_id)));
-	}
+	{ return JointJavaContext::TypeDescriptor(typeNode).GetId(); }
 
 
 	Joint_InterfaceChecksum JavaBindingInfo::GetInterfaceChecksum(const JLocalObjPtr& typeNode) const
-	{
-		auto env = typeNode.GetEnv();
-
-		JLocalClassPtr TypeDescriptor_cls(env, JAVA_CALL(env->FindClass("org/joint/TypeDescriptor")));
-		jfieldID interfaceChecksum_id = JAVA_CALL(env->GetFieldID(TypeDescriptor_cls, "interfaceChecksum", "I"));
-		return static_cast<Joint_InterfaceChecksum>(JAVA_CALL(env->GetIntField(typeNode, interfaceChecksum_id)));
-	}
+	{ return JointJavaContext::TypeDescriptor(typeNode).GetInterfaceChecksum(); }
 
 
 	JavaBindingInfo::ArrayUserData JavaBindingInfo::GetArrayUserData(const JLocalObjPtr& typeNode) const
