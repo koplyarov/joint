@@ -6,6 +6,7 @@
 #include <joint/devkit/Logger.hpp>
 #include <joint/devkit/Singleton.hpp>
 
+#include <binding/JavaBindingInfo.hpp>
 #include <utils/JPtr.hpp>
 
 
@@ -18,17 +19,92 @@ namespace java
 		JOINT_DEVKIT_SINGLETON_INTERNALS(JointJavaContext);
 		JOINT_DEVKIT_LOGGER("Joint.Java.JointJavaContext");
 
-	public:
-		class TypeDescriptor
+		class WrapperBase
 		{
-		private:
-			const JLocalObjPtr&  _obj;
+		protected:
+			JNIEnv*       env;
+			JLocalObjPtr  _obj;
+
+			~WrapperBase() { }
 
 		public:
-			TypeDescriptor(const JLocalObjPtr& obj) : _obj(obj) { }
+			WrapperBase(JLocalObjPtr obj) : env(obj.GetEnv()), _obj(obj) { }
+			JLocalObjPtr GetWrapped() const { return _obj; }
+		};
+
+	public:
+		struct InterfaceDescriptor : public WrapperBase
+		{
+			using WrapperBase::WrapperBase;
+
+			JLocalObjArrayPtr GetMethods() const;
+			JavaInterfaceDescriptor* GetNative() const;
+		};
+
+		struct MethodDescriptor : public WrapperBase
+		{
+			using WrapperBase::WrapperBase;
+
+			std::string GetName() const;
+			std::string GetSignature() const;
+			JLocalClassPtr GetInterfaceClass() const;
+			JLocalObjPtr GetRetType() const;
+			JLocalObjArrayPtr GetParamTypes() const;
+		};
+
+		struct TypeDescriptor : public WrapperBase
+		{
+			using WrapperBase::WrapperBase;
 
 			Joint_TypeId GetId() const;
 			Joint_InterfaceChecksum GetInterfaceChecksum() const;
+			JLocalClassPtr GetProxyClass() const;
+			std::string GetMangledTypeName() const;
+			std::string GetStructCtorSignature() const;
+			JLocalObjArrayPtr GetMembers() const;
+		};
+
+		struct MemberInfo : public WrapperBase
+		{
+			using WrapperBase::WrapperBase;
+
+			std::string GetName() const;
+			JLocalObjPtr GetType() const;
+		};
+
+		struct Accessor : public WrapperBase
+		{
+			using WrapperBase::WrapperBase;
+
+			JLocalObjPtr GetObj() const;
+			JLocalObjPtr GetInterfaceDescriptor() const;
+			JLocalObjPtr Cast(const JLocalObjPtr& iid) const;
+		};
+
+		struct JointObject : public WrapperBase
+		{
+			 using WrapperBase::WrapperBase;
+
+			 JointObject(JNIEnv* env, Joint_ObjectHandle handle);
+
+			 Joint_ObjectHandle GetHandle() const;
+		};
+
+		struct ModuleContext : public WrapperBase
+		{
+			 Joint_ObjectHandle GetHandle() const;
+
+			 ModuleContext(JNIEnv* env, Joint_ModuleHandle handle);
+		};
+
+		struct InterfaceId : public WrapperBase
+		{
+			 InterfaceId(const JLocalStringPtr& id);
+		};
+
+		struct JointException : public WrapperBase
+		{
+			 JointException(JNIEnv* env, Joint_ExceptionHandle handle);
 		};
 
 	private:
@@ -36,9 +112,43 @@ namespace java
 		JGlobalClassPtr MethodDescriptor_cls;
 		JGlobalClassPtr InterfaceDescriptor_cls;
 		JGlobalClassPtr MemberInfo_cls;
+		JGlobalClassPtr Accessor_cls;
+		JGlobalClassPtr JointObject_cls;
+		JGlobalClassPtr ModuleContext_cls;
+		JGlobalClassPtr InterfaceId_cls;
+		JGlobalClassPtr JointException_cls;
 
 		jfieldID TypeDescriptor_typeId;
 		jfieldID TypeDescriptor_interfaceChecksum;
+		jfieldID TypeDescriptor_proxyClass;
+		jfieldID TypeDescriptor_mangledTypeName;
+		jfieldID TypeDescriptor_structCtorSignature;
+		jfieldID TypeDescriptor_members;
+
+		jfieldID MethodDescriptor_name;
+		jfieldID MethodDescriptor_signature;
+		jfieldID MethodDescriptor_interfaceCls;
+		jfieldID MethodDescriptor_retType;
+		jfieldID MethodDescriptor_paramTypes;
+
+		jfieldID InterfaceDescriptor_methods;
+		jfieldID InterfaceDescriptor_nativeDescriptor;
+
+		jfieldID MemberInfo_name;
+		jfieldID MemberInfo_type;
+
+		jmethodID Accessor_getObj;
+		jmethodID Accessor_getInterfaceDescriptor;
+		jmethodID Accessor_cast;
+
+		jfieldID JointObject_handle;
+		jmethodID JointObject_long_ctor;
+
+		jmethodID ModuleContext_long_ctor;
+
+		jmethodID InterfaceId_String_ctor;
+
+		jmethodID JointException_long_ctor;
 
 	private:
 		JointJavaContext();

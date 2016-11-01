@@ -7,6 +7,7 @@
 #include <joint/devkit/ValueMarshaller.hpp>
 
 #include <binding/JavaBindingInfo.hpp>
+#include <binding/JointJavaContext.hpp>
 #include <binding/Marshaller.hpp>
 #include <utils/Utils.hpp>
 
@@ -21,19 +22,10 @@ namespace binding
 	Object::Object(const JGlobalObjPtr& accessor)
 		: _accessor(accessor)
 	{
-		auto env = _accessor.GetEnv();
-
-		JLocalClassPtr Accessor_cls(env, JAVA_CALL(env->FindClass("org/joint/Accessor")));
-		jmethodID getObj_id = JAVA_CALL(env->GetMethodID(Accessor_cls, "getObj", "()Ljava/lang/Object;"));
-		_obj = JGlobalObjPtr(env, JAVA_CALL(env->CallObjectMethod(_accessor.Get(), getObj_id)));
-		jmethodID getInterfaceDescriptor_id = JAVA_CALL(env->GetMethodID(Accessor_cls, "getInterfaceDescriptor", "()Lorg/joint/InterfaceDescriptor;"));
-		_interfaceDesc = JGlobalObjPtr(env, JAVA_CALL(env->CallObjectMethod(_accessor.Get(), getInterfaceDescriptor_id)));
-
-		JLocalClassPtr InterfaceDescriptor_cls(env, JAVA_CALL(env->FindClass("org/joint/InterfaceDescriptor")));
-		jfieldID nativeDescriptor_id = JAVA_CALL(env->GetFieldID(InterfaceDescriptor_cls, "nativeDescriptor", "J"));
-		jlong native_descriptor_long = JAVA_CALL(env->GetLongField(_interfaceDesc.Get(), nativeDescriptor_id));
-
-		_nativeInterfaceDesc = reinterpret_cast<JavaInterfaceDescriptor*>(native_descriptor_long);
+		JointJavaContext::Accessor a(_accessor);
+		_obj = a.GetObj();
+		_interfaceDesc = a.GetInterfaceDescriptor();
+		_nativeInterfaceDesc = JointJavaContext::InterfaceDescriptor(_interfaceDesc).GetNative();
 	}
 
 

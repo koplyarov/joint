@@ -9,6 +9,7 @@
 #include <memory>
 #include <string.h>
 
+#include <binding/JointJavaContext.hpp>
 #include <utils/Utils.hpp>
 
 
@@ -105,9 +106,7 @@ namespace java
 					Joint_DecRefObject(val);
 			}));
 
-			JLocalClassPtr cls(env, JAVA_CALL(env->FindClass("org/joint/JointObject")));
-			jmethodID ctor_id = JAVA_CALL(env->GetMethodID(cls, "<init>", "(J)V"));
-			JLocalObjPtr joint_obj(env, JAVA_CALL(env->NewObject(cls, ctor_id, reinterpret_cast<jlong>(val))));
+			JLocalObjPtr joint_obj = JointJavaContext::JointObject(env, val).GetWrapped();
 
 			result.l = JAVA_CALL(env->NewObject(proxyType.Cls, proxyType.CtorId, joint_obj.Get()));
 			sg.Cancel();
@@ -171,10 +170,7 @@ namespace java
 			jfieldID obj_id = JAVA_CALL(env->GetFieldID(cls, "_obj", "Lorg/joint/JointObject;"));
 			JLocalObjPtr joint_obj(env, JAVA_CALL(env->GetObjectField(val.l, obj_id)));
 
-			JLocalClassPtr JointObject_cls(env, JAVA_CALL(env->FindClass("org/joint/JointObject")));
-			jfieldID handle_id = JAVA_CALL(env->GetFieldID(JointObject_cls, "handle", "J"));
-
-			auto handle = reinterpret_cast<Joint_ObjectHandle>(JAVA_CALL(env->GetLongField(joint_obj.Get(), handle_id)));
+			auto handle = JointJavaContext::JointObject(joint_obj).GetHandle();
 			if (dir == devkit::ValueDirection::Return)
 				Joint_IncRefObject(handle);
 			return handle;
