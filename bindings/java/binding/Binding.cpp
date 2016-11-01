@@ -77,9 +77,8 @@ namespace binding
 		JointJavaContext::ModuleContext jm(env, module);
 
 		jmethodID root_obj_getter_id = JAVA_CALL(env->GetStaticMethodID(cls, getterName, "(Lorg/joint/ModuleContext;)Lorg/joint/JointObject;"));
-		JLocalObjPtr obj(env, JAVA_CALL(env->CallStaticObjectMethod(cls, root_obj_getter_id, jm.GetWrapped().Get())));
 
-		JointJavaContext::JointObject jo(obj);
+		JointJavaContext::JointObject jo(JObjLocalRef::StealLocal(env, JAVA_CALL(env->CallStaticObjectMethod(cls, root_obj_getter_id, jm.GetWrapped().Get()))));
 
 		*outObject = jo.GetHandle();
 		Joint_IncRefObject(*outObject);
@@ -116,7 +115,7 @@ namespace binding
 		auto o = reinterpret_cast<Object*>(obj);
 		auto env = o->GetAccessor().GetEnv();
 
-		JointJavaContext::InterfaceId iid(JLocalStringPtr(env, JAVA_CALL(env->NewStringUTF(interfaceId))));
+		JointJavaContext::InterfaceId iid(env, JStringLocalRef::StealLocal(env, JAVA_CALL(env->NewStringUTF(interfaceId))));
 
 		JLocalObjPtr new_accessor = JointJavaContext::Accessor(o->GetAccessor()).Cast(iid.GetWrapped());
 		if (!new_accessor)

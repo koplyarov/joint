@@ -106,7 +106,7 @@ namespace java
 					Joint_DecRefObject(val);
 			}));
 
-			JLocalObjPtr joint_obj = JointJavaContext::JointObject(env, val).GetWrapped();
+			JObjLocalRef joint_obj = JointJavaContext::JointObject(env, val).GetWrapped();
 
 			result.l = JAVA_CALL(env->NewObject(proxyType.Cls, proxyType.CtorId, joint_obj.Get()));
 			sg.Cancel();
@@ -166,11 +166,11 @@ namespace java
 			if (!val.l)
 				return JOINT_NULL_HANDLE;
 
-			JLocalClassPtr cls(env, JAVA_CALL(env->GetObjectClass(val.l)));
+			auto cls = JClassLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectClass(val.l)));
 			jfieldID obj_id = JAVA_CALL(env->GetFieldID(cls, "_obj", "Lorg/joint/JointObject;"));
-			JLocalObjPtr joint_obj(env, JAVA_CALL(env->GetObjectField(val.l, obj_id)));
+			JointJavaContext::JointObject joint_obj(JObjLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(val.l, obj_id))));
 
-			auto handle = JointJavaContext::JointObject(joint_obj).GetHandle();
+			auto handle = joint_obj.GetHandle();
 			if (dir == devkit::ValueDirection::Return)
 				Joint_IncRefObject(handle);
 			return handle;

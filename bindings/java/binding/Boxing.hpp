@@ -22,7 +22,7 @@ namespace java
 			: env(env)
 		{ }
 
-		jvalue Unbox(Joint_Type type, jobject boxed) const
+		jvalue Unbox(Joint_Type type, const JObjRef& boxed) const
 		{
 			jvalue result;
 
@@ -66,7 +66,7 @@ namespace java
 			return result;
 		}
 
-		jobject Box(Joint_Type type, jvalue unboxed) const
+		JObjLocalRef Box(Joint_Type type, jvalue unboxed) const
 		{
 			switch (type.id)
 			{
@@ -92,7 +92,7 @@ namespace java
 			case JOINT_TYPE_ENUM:
 			case JOINT_TYPE_OBJ:
 			case JOINT_TYPE_STRUCT:
-				return unboxed.l;
+				return JObjLocalRef::StealLocal(env, unboxed.l);
 			default:
 				JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
 			}
@@ -100,17 +100,17 @@ namespace java
 
 	private:
 #define DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(TypeName_, CppType_, JniType_, CallMethod_, ClassName_, ValueGetterName_, MangledType_) \
-			CppType_ Unbox##TypeName_(jobject val) const \
+			CppType_ Unbox##TypeName_(const JObjRef& val) const \
 			{ \
-				JLocalClassPtr cls(env, JAVA_CALL(env->FindClass(ClassName_))); \
+				auto cls = JClassLocalRef::StealLocal(env, JAVA_CALL(env->FindClass(ClassName_))); \
 				jmethodID method_id = JAVA_CALL(env->GetMethodID(cls, ValueGetterName_, "()" MangledType_)); \
 				return static_cast<CppType_>(JAVA_CALL(env->CallMethod_(val, method_id))); \
 			} \
-			jobject Box##TypeName_(CppType_ val) const \
+			JObjLocalRef Box##TypeName_(CppType_ val) const \
 			{ \
-				JLocalClassPtr cls(env, JAVA_CALL(env->FindClass(ClassName_))); \
+				auto cls = JClassLocalRef::StealLocal(env, JAVA_CALL(env->FindClass(ClassName_))); \
 				jmethodID ctor_id = JAVA_CALL(env->GetMethodID(cls, "<init>", "(" MangledType_ ")V")); \
-				return JAVA_CALL(env->NewObject(cls, ctor_id, (JniType_)val)); \
+				return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(cls, ctor_id, (JniType_)val))); \
 			}
 
 		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Bool,   Joint_Bool, jboolean, CallBooleanMethod, "java/lang/Boolean", "booleanValue", "Z")

@@ -32,6 +32,20 @@ namespace java
 			JLocalObjPtr GetWrapped() const { return _obj; }
 		};
 
+		class WrapperBaseNew
+		{
+		protected:
+			JNIEnv*       env;
+			JObjLocalRef  _obj;
+
+			~WrapperBaseNew() { }
+
+		public:
+			WrapperBaseNew(JObjLocalRef obj) : env(obj.GetEnv()), _obj(std::move(obj)) { }
+			const JObjLocalRef& GetWrapped() const & { return _obj; }
+			JObjLocalRef GetWrapped() && { return std::move(_obj); }
+		};
+
 	public:
 		struct InterfaceDescriptor : public WrapperBase
 		{
@@ -78,31 +92,31 @@ namespace java
 
 			JLocalObjPtr GetObj() const;
 			JLocalObjPtr GetInterfaceDescriptor() const;
-			JLocalObjPtr Cast(const JLocalObjPtr& iid) const;
+			JLocalObjPtr Cast(const JObjRef& iid) const;
 		};
 
-		struct JointObject : public WrapperBase
+		struct JointObject : public WrapperBaseNew
 		{
-			 using WrapperBase::WrapperBase;
+			 using WrapperBaseNew::WrapperBaseNew;
 
 			 JointObject(JNIEnv* env, Joint_ObjectHandle handle);
 
 			 Joint_ObjectHandle GetHandle() const;
 		};
 
-		struct ModuleContext : public WrapperBase
+		struct ModuleContext : public WrapperBaseNew
 		{
 			 Joint_ObjectHandle GetHandle() const;
 
 			 ModuleContext(JNIEnv* env, Joint_ModuleHandle handle);
 		};
 
-		struct InterfaceId : public WrapperBase
+		struct InterfaceId : public WrapperBaseNew
 		{
-			 InterfaceId(const JLocalStringPtr& id);
+			 InterfaceId(JNIEnv* env, const JStringRef& id);
 		};
 
-		struct JointException : public WrapperBase
+		struct JointException : public WrapperBaseNew
 		{
 			 JointException(JNIEnv* env, Joint_ExceptionHandle handle);
 		};

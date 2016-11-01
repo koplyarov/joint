@@ -112,12 +112,12 @@ namespace java
 	JLocalObjPtr JointJavaContext::Accessor::GetInterfaceDescriptor() const
 	{ return JLocalObjPtr(env, JAVA_CALL(env->CallObjectMethod(_obj, ConstInstance().Accessor_getInterfaceDescriptor))); }
 
-	JLocalObjPtr JointJavaContext::Accessor::Cast(const JLocalObjPtr& iid) const
+	JLocalObjPtr JointJavaContext::Accessor::Cast(const JObjRef& iid) const
 	{ return JLocalObjPtr(env, JAVA_CALL(env->CallObjectMethod(_obj, ConstInstance().Accessor_cast, iid.Get()))); }
 
 
 	JointJavaContext::JointObject::JointObject(JNIEnv* env, Joint_ObjectHandle handle)
-		: WrapperBase(JLocalObjPtr(env, JAVA_CALL(env->NewObject(ConstInstance().JointObject_cls, ConstInstance().JointObject_long_ctor, (jlong)handle))))
+		: WrapperBaseNew(JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().JointObject_cls, ConstInstance().JointObject_long_ctor, (jlong)handle))))
 	{ }
 
 	Joint_ObjectHandle JointJavaContext::JointObject::GetHandle() const
@@ -125,17 +125,17 @@ namespace java
 
 
 	JointJavaContext::ModuleContext::ModuleContext(JNIEnv* env, Joint_ModuleHandle handle)
-		: WrapperBase(JLocalObjPtr(env, JAVA_CALL(env->NewObject(ConstInstance().ModuleContext_cls, ConstInstance().ModuleContext_long_ctor, (jlong)handle))))
+		: WrapperBaseNew(JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().ModuleContext_cls, ConstInstance().ModuleContext_long_ctor, (jlong)handle))))
 	{ }
 
 
-	JointJavaContext::InterfaceId::InterfaceId(const JLocalStringPtr& id)
-		: WrapperBase(JLocalObjPtr(id.GetEnv(), JAVA_CALL_EX(id.GetEnv(), id.GetEnv()->NewObject(ConstInstance().InterfaceId_cls, ConstInstance().InterfaceId_String_ctor, id.Get()))))
+	JointJavaContext::InterfaceId::InterfaceId(JNIEnv* env, const JStringRef& id)
+		: WrapperBaseNew(JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().InterfaceId_cls, ConstInstance().InterfaceId_String_ctor, id.Get()))))
 	{ }
 
 
 	JointJavaContext::JointException::JointException(JNIEnv* env, Joint_ExceptionHandle handle)
-		: WrapperBase(JLocalObjPtr(env, JAVA_CALL(env->NewObject(ConstInstance().JointException_cls, ConstInstance().JointException_long_ctor, (jlong)handle))))
+		: WrapperBaseNew(JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().JointException_cls, ConstInstance().JointException_long_ctor, (jlong)handle))))
 	{ }
 
 }}

@@ -160,6 +160,91 @@ namespace java
 	};
 
 
+	template < typename T_ >
+	class JRef
+	{
+	protected:
+		T_            _obj;
+
+	public:
+		operator T_() const
+		{ return _obj; }
+
+		T_ Get() const
+		{ return _obj; }
+
+	protected:
+		JRef(T_ obj)
+			: _obj(obj)
+		{ }
+
+		~JRef()
+		{ }
+	};
+
+	template < typename T_ >
+	class JLocalRef : public JRef<T_>
+	{
+		using Base = JRef<T_>;
+
+	private:
+		JNIEnv*       _env;
+
+	public:
+		JLocalRef()
+			: Base(nullptr), _env(nullptr)
+		{ }
+
+		JLocalRef(JLocalRef&& other)
+			: Base(other._obj), _env(other._env)
+		{
+			other._env = nullptr;
+			other._obj = nullptr;
+		}
+
+		JLocalRef& operator = (JLocalRef&& other)
+		{
+			JLocalRef tmp(std::move(other));
+			Swap(tmp);
+			return *this;
+		}
+
+		~JLocalRef()
+		{
+			if (this->_obj)
+				_env->DeleteLocalRef(this->_obj);
+		}
+
+		void Swap(JLocalRef& other)
+		{
+			std::swap(_env, other._env);
+			std::swap(this->_obj, other._obj);
+		}
+
+		T_ Release()
+		{
+			T_ result = this->_obj;
+			this->_obj = nullptr;
+			return result;
+		}
+
+		JNIEnv* GetEnv() const
+		{ return _env; }
+
+		template < bool Enabled_ = !std::is_same<T_, jobject>::value >
+		static typename std::enable_if<Enabled_, JLocalRef>::type StealLocal(JNIEnv* env, jobject obj)
+		{ return JLocalRef(env, reinterpret_cast<T_>(obj)); }
+
+		static JLocalRef StealLocal(JNIEnv* env, T_ obj)
+		{ return JLocalRef(env, obj); }
+
+	private:
+		JLocalRef(JNIEnv* env, T_ obj)
+			: Base(obj), _env(env)
+		{ }
+	};
+
+
 #define DETAIL_JOINT_JAVA_DECLARE_JPTR(JType_, Name_) \
 	typedef BasicJPtr < JType_, GlobalRefPolicy >    JGlobal##Name_##Ptr; \
 	typedef BasicJPtr < JType_, LocalRefPolicy >     JLocal##Name_##Ptr
@@ -169,6 +254,16 @@ namespace java
 	DETAIL_JOINT_JAVA_DECLARE_JPTR( jobjectArray,  ObjArray );
 	DETAIL_JOINT_JAVA_DECLARE_JPTR( jstring,       String );
 	DETAIL_JOINT_JAVA_DECLARE_JPTR( jclass,        Class );
+
+#define DETAIL_JOINT_JAVA_DECLARE_JREFS(JType_, Name_) \
+	typedef JRef<JType_>     J##Name_##Ref; \
+	typedef JLocalRef<JType_>     J##Name_##LocalRef
+
+	DETAIL_JOINT_JAVA_DECLARE_JREFS( jobject,       Obj );
+	DETAIL_JOINT_JAVA_DECLARE_JREFS( jthrowable,    Throwable );
+	DETAIL_JOINT_JAVA_DECLARE_JREFS( jobjectArray,  ObjArray );
+	DETAIL_JOINT_JAVA_DECLARE_JREFS( jstring,       String );
+	DETAIL_JOINT_JAVA_DECLARE_JREFS( jclass,        Class );
 
 #undef DETAIL_JOINT_JAVA_DECLARE_JPTR
 
