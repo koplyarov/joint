@@ -1,6 +1,5 @@
 #include <binding/JointJavaContext.hpp>
 
-#include <utils/JavaVirtualMachine.hpp>
 #include <utils/Utils.hpp>
 
 
@@ -8,20 +7,42 @@ namespace joint {
 namespace java
 {
 
+	using namespace joint::devkit;
+
+
 	JointJavaContext::JointJavaContext()
 	{
-		auto jvm = JavaVirtualMachine::GetJvm();
-		auto env = GetJavaEnv(jvm);
+		std::string class_path_opt = "-Djava.class.path=/home/koplyarov/work/joint/build/bin/joint.jar";
+		std::string lib_path_opt = "-Djava.library.path=/home/koplyarov/work/joint/build/bin";
+		JavaVMOption opt[] = {
+			{ const_cast<char*>(class_path_opt.c_str()), nullptr },
+			{ const_cast<char*>(lib_path_opt.c_str()), nullptr }
+		};
 
-		TypeDescriptor_cls                   = JGlobalClassPtr(env, JAVA_CALL(env->FindClass("org/joint/TypeDescriptor")));
-		MethodDescriptor_cls                 = JGlobalClassPtr(env, JAVA_CALL(env->FindClass("org/joint/MethodDescriptor")));
-		InterfaceDescriptor_cls              = JGlobalClassPtr(env, JAVA_CALL(env->FindClass("org/joint/InterfaceDescriptor")));
-		MemberInfo_cls                       = JGlobalClassPtr(env, JAVA_CALL(env->FindClass("org/joint/TypeDescriptor$MemberInfo")));
-		Accessor_cls                         = JGlobalClassPtr(env, JAVA_CALL(env->FindClass("org/joint/Accessor")));
-		JointObject_cls                      = JGlobalClassPtr(env, JAVA_CALL(env->FindClass("org/joint/JointObject")));
-		ModuleContext_cls                    = JGlobalClassPtr(env, JAVA_CALL(env->FindClass("org/joint/ModuleContext")));
-		InterfaceId_cls                      = JGlobalClassPtr(env, JAVA_CALL(env->FindClass("org/joint/InterfaceId")));
-		JointException_cls                   = JGlobalClassPtr(env, JAVA_CALL(env->FindClass("org/joint/JointException")));
+		JavaVMInitArgs vm_args = { };
+		vm_args.version = 0x00010006;
+		jint ret = JNI_GetDefaultJavaVMInitArgs(&vm_args);
+		JOINT_CHECK(ret == 0, StringBuilder() % "JNI_GetDefaultJavaVMInitArgs failed: " % JniErrorToString(ret));
+		vm_args.options = opt;
+		vm_args.nOptions = sizeof(opt) / sizeof(opt[0]);
+
+		JavaVM* jvm = nullptr;
+		JNIEnv* env = nullptr;
+		ret = JNI_CreateJavaVM(&jvm, reinterpret_cast<void**>(&env), &vm_args);
+		JOINT_CHECK(ret == 0, StringBuilder() % "JNI_CreateJavaVM failed: " % JniErrorToString(ret));
+		JOINT_CHECK(jvm, "JNI_CreateJavaVM failed!");
+
+		_jvm = Holder<JavaVM*>(jvm, [](JavaVM* jvm) { jvm->DestroyJavaVM(); });
+
+		TypeDescriptor_cls                   = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/TypeDescriptor")));
+		MethodDescriptor_cls                 = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/MethodDescriptor")));
+		InterfaceDescriptor_cls              = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/InterfaceDescriptor")));
+		MemberInfo_cls                       = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/TypeDescriptor$MemberInfo")));
+		Accessor_cls                         = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/Accessor")));
+		JointObject_cls                      = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/JointObject")));
+		ModuleContext_cls                    = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/ModuleContext")));
+		InterfaceId_cls                      = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/InterfaceId")));
+		JointException_cls                   = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/JointException")));
 
 		TypeDescriptor_typeId                = JAVA_CALL(env->GetFieldID(TypeDescriptor_cls, "typeId", "I"));
 		TypeDescriptor_interfaceChecksum     = JAVA_CALL(env->GetFieldID(TypeDescriptor_cls, "interfaceChecksum", "I"));

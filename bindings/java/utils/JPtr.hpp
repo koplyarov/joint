@@ -183,6 +183,9 @@ namespace java
 	};
 
 	template < typename T_ >
+	class JGlobalRef;
+
+	template < typename T_ >
 	class JLocalRef : public JRef<T_>
 	{
 		using Base = JRef<T_>;
@@ -191,6 +194,9 @@ namespace java
 		JNIEnv*       _env;
 
 	public:
+		JLocalRef(const JLocalRef&) = delete;
+		JLocalRef& operator = (const JLocalRef&) = delete;
+
 		JLocalRef()
 			: Base(nullptr), _env(nullptr)
 		{ }
@@ -231,6 +237,8 @@ namespace java
 		JNIEnv* GetEnv() const
 		{ return _env; }
 
+		JGlobalRef<T_> Global() const;
+
 		template < bool Enabled_ = !std::is_same<T_, jobject>::value >
 		static typename std::enable_if<Enabled_, JLocalRef>::type StealLocal(JNIEnv* env, jobject obj)
 		{ return JLocalRef(env, reinterpret_cast<T_>(obj)); }
@@ -245,6 +253,92 @@ namespace java
 	};
 
 
+	template < typename T_ >
+	class JGlobalRef
+	{
+		template < typename U_ >
+		friend class JLocalRef;
+
+	private:
+		JavaVM*       _jvm;
+		T_            _obj;
+
+	public:
+		JGlobalRef(const JGlobalRef&) = delete;
+		JGlobalRef& operator = (const JGlobalRef&) = delete;
+
+		JGlobalRef()
+			: _jvm(nullptr), _obj(nullptr)
+		{ }
+
+		JGlobalRef(JGlobalRef&& other)
+			: _jvm(other._jvm), _obj(other._obj)
+		{
+			other._jvm = nullptr;
+			other._obj = nullptr;
+		}
+
+		JGlobalRef& operator = (JGlobalRef&& other)
+		{
+			JGlobalRef tmp(std::move(other));
+			Swap(tmp);
+			return *this;
+		}
+
+		~JGlobalRef()
+		{
+			if (!_jvm || !_obj)
+				return;
+
+			auto env = GetJavaEnv(_jvm);
+			env->DeleteGlobalRef(_obj);
+		}
+
+		void Swap(JGlobalRef& other)
+		{
+			std::swap(_jvm, other._jvm);
+			std::swap(_obj, other._obj);
+		}
+
+		operator T_() const
+		{ return _obj; }
+
+		T_ Get() const
+		{ return _obj; }
+
+		JLocalRef<T_> Local() const
+		{
+			auto env = GetJavaEnv(_jvm);
+			return _obj ? JLocalRef<T_>::StealLocal(env, env->NewLocalRef(_obj)) : JLocalRef<T_>();
+		}
+
+		template < bool Enabled_ = !std::is_same<T_, jobject>::value >
+		static typename std::enable_if<Enabled_, JGlobalRef>::type StealLocal(JNIEnv* env, jobject obj)
+		{ return JLocalRef<T_>::StealLocal(env, reinterpret_cast<T_>(obj)).Global(); }
+
+		static JGlobalRef StealLocal(JNIEnv* env, T_ obj)
+		{ return JLocalRef<T_>::StealLocal(env, obj).Global(); }
+
+		JavaVM* GetJvm() const
+		{ return _jvm; }
+
+	private:
+		JGlobalRef(JavaVM* jvm, T_ obj)
+			: _jvm(jvm), _obj(obj)
+		{ }
+	};
+
+
+	template < typename T_ >
+	JGlobalRef<T_> JLocalRef<T_>::Global() const
+	{
+		JOINT_DEVKIT_FUNCTION_LOCAL_LOGGER("Joint.Java.JLocalRef");
+		JavaVM* jvm = nullptr;
+		JNI_CALL( _env->GetJavaVM(&jvm) );
+		return this->_obj ? JGlobalRef<T_>(jvm, reinterpret_cast<T_>(_env->NewGlobalRef(this->_obj))) : JGlobalRef<T_>();
+	}
+
+
 #define DETAIL_JOINT_JAVA_DECLARE_JPTR(JType_, Name_) \
 	typedef BasicJPtr < JType_, GlobalRefPolicy >    JGlobal##Name_##Ptr; \
 	typedef BasicJPtr < JType_, LocalRefPolicy >     JLocal##Name_##Ptr
@@ -256,8 +350,9 @@ namespace java
 	DETAIL_JOINT_JAVA_DECLARE_JPTR( jclass,        Class );
 
 #define DETAIL_JOINT_JAVA_DECLARE_JREFS(JType_, Name_) \
-	typedef JRef<JType_>     J##Name_##Ref; \
-	typedef JLocalRef<JType_>     J##Name_##LocalRef
+	typedef JRef<JType_>         J##Name_##Ref; \
+	typedef JLocalRef<JType_>    J##Name_##LocalRef; \
+	typedef JGlobalRef<JType_>   J##Name_##GlobalRef
 
 	DETAIL_JOINT_JAVA_DECLARE_JREFS( jobject,       Obj );
 	DETAIL_JOINT_JAVA_DECLARE_JREFS( jthrowable,    Throwable );

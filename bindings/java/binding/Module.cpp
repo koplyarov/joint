@@ -2,7 +2,7 @@
 
 #include <joint/devkit/JointException.hpp>
 
-#include <utils/JavaVirtualMachine.hpp>
+#include <binding/JointJavaContext.hpp>
 #include <utils/JniError.hpp>
 #include <utils/Utils.hpp>
 
@@ -18,7 +18,7 @@ namespace binding
 	Module::Module(const std::string& jarPath, const std::string& className)
 		: _cls()
 	{
-		auto jvm = JavaVirtualMachine::GetJvm();
+		auto jvm = JointJavaContext::GetJvm();
 		auto env = GetJavaEnv(jvm);
 
 		auto url_string = JStringLocalRef::StealLocal(env, JAVA_CALL(env->NewStringUTF(jarPath.c_str())));

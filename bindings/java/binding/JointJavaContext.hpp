@@ -47,6 +47,8 @@ namespace java
 		};
 
 	public:
+		static JavaVM* GetJvm() { return Instance()._jvm.Get(); }
+
 		struct InterfaceDescriptor : public WrapperBase
 		{
 			using WrapperBase::WrapperBase;
@@ -122,15 +124,17 @@ namespace java
 		};
 
 	private:
-		JGlobalClassPtr TypeDescriptor_cls;
-		JGlobalClassPtr MethodDescriptor_cls;
-		JGlobalClassPtr InterfaceDescriptor_cls;
-		JGlobalClassPtr MemberInfo_cls;
-		JGlobalClassPtr Accessor_cls;
-		JGlobalClassPtr JointObject_cls;
-		JGlobalClassPtr ModuleContext_cls;
-		JGlobalClassPtr InterfaceId_cls;
-		JGlobalClassPtr JointException_cls;
+		devkit::Holder<JavaVM*> _jvm;
+
+		JClassGlobalRef TypeDescriptor_cls;
+		JClassGlobalRef MethodDescriptor_cls;
+		JClassGlobalRef InterfaceDescriptor_cls;
+		JClassGlobalRef MemberInfo_cls;
+		JClassGlobalRef Accessor_cls;
+		JClassGlobalRef JointObject_cls;
+		JClassGlobalRef ModuleContext_cls;
+		JClassGlobalRef InterfaceId_cls;
+		JClassGlobalRef JointException_cls;
 
 		jfieldID TypeDescriptor_typeId;
 		jfieldID TypeDescriptor_interfaceChecksum;
