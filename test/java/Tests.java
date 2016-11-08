@@ -50,7 +50,8 @@ class Tests
 			Adapters.test_IEnumTests_impl,
 			Adapters.test_ICastTests_impl,
 			Adapters.test_IExceptionTests_impl,
-			Adapters.test_IStructTests_impl
+			Adapters.test_IStructTests_impl,
+			Adapters.test_IArrayTests_impl
 	{
 		private ModuleContext module;
 
@@ -62,6 +63,7 @@ class Tests
 			Adapters.test_ICastTests.registerAccessors(this);
 			Adapters.test_IExceptionTests.registerAccessors(this);
 			Adapters.test_IStructTests.registerAccessors(this);
+            Adapters.test_IArrayTests.registerAccessors(this);
 			this.module = module;
 		}
 
@@ -148,6 +150,9 @@ class Tests
 		public Adapters.test_S1 CallbackMakeS1(Adapters.test_IStructTestsCallback cb, int i, String s) { return cb.MakeS1(i, s); }
 		public String CallbackGetS(Adapters.test_IStructTestsCallback cb, Adapters.test_S1 s) { return cb.GetS(s); }
 		public int CallbackGetI(Adapters.test_IStructTestsCallback cb, Adapters.test_S1 s) { return cb.GetI(s); }
+
+		public Array<Integer> MakeI32Array(int len) { return Array.<Integer>create(BuiltinTypes.I32, len); }
+		public int GetI32Element(Array<Integer> array, int index) { return array.get(index); }
 	}
 
 	public static JointObject GetTests(ModuleContext module)

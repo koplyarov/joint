@@ -43,6 +43,7 @@ namespace java
 		ModuleContext_cls                    = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/ModuleContext")));
 		InterfaceId_cls                      = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/InterfaceId")));
 		JointException_cls                   = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/JointException")));
+		Array_cls                            = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/Array")));
 
 		TypeDescriptor_typeId                = JAVA_CALL(env->GetFieldID(TypeDescriptor_cls, "typeId", "I"));
 		TypeDescriptor_interfaceChecksum     = JAVA_CALL(env->GetFieldID(TypeDescriptor_cls, "interfaceChecksum", "I"));
@@ -50,6 +51,7 @@ namespace java
 		TypeDescriptor_mangledTypeName       = JAVA_CALL(env->GetFieldID(TypeDescriptor_cls, "mangledTypeName", "Ljava/lang/String;"));
 		TypeDescriptor_structCtorSignature   = JAVA_CALL(env->GetFieldID(TypeDescriptor_cls, "structCtorSignature", "Ljava/lang/String;"));
 		TypeDescriptor_members               = JAVA_CALL(env->GetFieldID(TypeDescriptor_cls, "members", "[Lorg/joint/TypeDescriptor$MemberInfo;"));
+		TypeDescriptor_elementType           = JAVA_CALL(env->GetFieldID(TypeDescriptor_cls, "elementType", "Lorg/joint/TypeDescriptor;"));
 
 		MethodDescriptor_name                = JAVA_CALL(env->GetFieldID(MethodDescriptor_cls, "name", "Ljava/lang/String;"));
 		MethodDescriptor_signature           = JAVA_CALL(env->GetFieldID(MethodDescriptor_cls, "signature", "Ljava/lang/String;"));
@@ -75,6 +77,10 @@ namespace java
 		InterfaceId_String_ctor              = JAVA_CALL(env->GetMethodID(InterfaceId_cls, "<init>", "(Ljava/lang/String;)V"));
 
 		JointException_long_ctor             = JAVA_CALL(env->GetMethodID(JointException_cls, "<init>", "(J)V"));
+
+		Array_elementType                    = JAVA_CALL(env->GetFieldID(Array_cls, "elementType", "Lorg/joint/TypeDescriptor;"));
+		Array_handle                         = JAVA_CALL(env->GetFieldID(Array_cls, "handle", "J"));
+		Array_TypeDescriptor_long_ctor       = JAVA_CALL(env->GetMethodID(Array_cls, "<init>", "(Lorg/joint/TypeDescriptor;J)V"));
 	}
 
 
@@ -119,6 +125,9 @@ namespace java
 	JObjArrayLocalRef JointJavaContext::TypeDescriptor::GetMembers() const
 	{ return JObjArrayLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().TypeDescriptor_members))); }
 
+	JObjLocalRef JointJavaContext::TypeDescriptor::GetElementType() const
+	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().TypeDescriptor_elementType))); }
+
 
 	std::string JointJavaContext::MemberInfo::GetName() const
 	{ return ToStdString(JStringLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().MemberInfo_name)))); }
@@ -154,5 +163,15 @@ namespace java
 
 	JObjLocalRef JointJavaContext::JointException::Make(JNIEnv* env, Joint_ExceptionHandle handle)
 	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().JointException_cls, ConstInstance().JointException_long_ctor, (jlong)handle))); }
+
+
+	JObjLocalRef JointJavaContext::Array::Make(JNIEnv* env, JObjTempRef elementType, Joint_ArrayHandle handle)
+	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().Array_cls, ConstInstance().Array_TypeDescriptor_long_ctor, elementType.Get(), (jlong)handle))); }
+
+	JObjLocalRef JointJavaContext::Array::GetElementType() const
+	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().Array_elementType))); }
+
+	Joint_ArrayHandle JointJavaContext::Array::GetHandle() const
+	{ return reinterpret_cast<Joint_ArrayHandle>(JAVA_CALL(env->GetLongField(_obj, ConstInstance().Array_handle))); }
 
 }}

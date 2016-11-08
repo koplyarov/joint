@@ -22,6 +22,7 @@ joint_generate_adapters(java ${CMAKE_CURRENT_BINARY_DIR}/Adapters.java
 	../idl/ICastTests.idl
 	../idl/IExceptionTests.idl
 	../idl/IStructTests.idl
+	../idl/IArrayTests.idl
 )
 
 

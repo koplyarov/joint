@@ -16,7 +16,12 @@ namespace java
 
 
 	JavaBindingInfo::ArrayUserData JavaBindingInfo::GetArrayUserData(JObjTempRef typeNode) const
-	{ return ArrayUserData(); }
+	{
+		auto element_type = JointJavaContext::TypeDescriptor(typeNode.Weak()).GetElementType().Global();
+		JOINT_CHECK(element_type, "Invalid TypeDescriptor for array");
+
+		return ArrayUserData{std::move(element_type)};
+	}
 
 
 	JavaBindingInfo::ObjectUserData JavaBindingInfo::GetObjectUserData(JObjTempRef typeNode) const
@@ -79,7 +84,7 @@ namespace java
 
 
 	JObjLocalRef JavaBindingInfo::GetArrayElementTypeNode(JObjTempRef typeNode) const
-	{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+	{ return JointJavaContext::TypeDescriptor(typeNode.Weak()).GetElementType(); }
 
 
 	JavaBindingInfo::Sequence JavaBindingInfo::GetParamsNodes(JObjTempRef methodNode) const

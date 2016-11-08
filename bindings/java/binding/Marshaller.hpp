@@ -114,7 +114,23 @@ namespace java
 		}
 
 		JavaVariant FromJointArray(devkit::ValueDirection dir, Joint_ArrayHandle val, const JavaBindingInfo::ArrayUserData& elementTypeDesc) const
-		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		{
+			if (dir == devkit::ValueDirection::Parameter)
+				Joint_IncRefArray(val);
+
+			JObjLocalRef array = JointJavaContext::Array::Make(env, elementTypeDesc.ElementType.Temp(env), val);
+
+			auto sg(devkit::ScopeExit([&]{
+				if (dir == devkit::ValueDirection::Parameter)
+					Joint_DecRefArray(val);
+			}));
+
+			sg.Cancel();
+
+			jvalue result;
+			result.l = array.Release();
+			return result;
+		}
 
 		class ParamsArray
 		{
@@ -177,7 +193,13 @@ namespace java
 		}
 
 		Joint_ArrayHandle ToJointArray(devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::ArrayUserData& objType) const
-		{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
+		{
+			auto handle = JointJavaContext::Array(JObjWeakRef(env, val.l)).GetHandle();
+
+			if (dir == devkit::ValueDirection::Return)
+				Joint_IncRefArray(handle);
+			return handle;
+		}
 
 		template < typename Allocator_ >
 		const char* ToJointUtf8(jvalue val, Allocator_& alloc) const

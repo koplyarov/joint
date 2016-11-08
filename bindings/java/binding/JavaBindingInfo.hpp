@@ -28,6 +28,7 @@ namespace java
 
 		struct ArrayUserData
 		{
+			JObjGlobalRef      ElementType;
 		};
 
 		struct ObjectUserData

@@ -86,6 +86,7 @@ namespace binding
 		case JOINT_TYPE_ENUM:
 		case JOINT_TYPE_OBJ:
 		case JOINT_TYPE_STRUCT:
+		case JOINT_TYPE_ARRAY:
 			j_res.l = env->CallObjectMethodA(_obj.Get(), m_desc.GetUserData().Id, jparams);
 			break;
 		default:

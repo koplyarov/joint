@@ -64,6 +64,7 @@ namespace java
 			std::string GetMangledTypeName() const;
 			std::string GetStructCtorSignature() const;
 			JObjArrayLocalRef GetMembers() const;
+			JObjLocalRef GetElementType() const;
 		};
 
 		struct MemberInfo : public WrapperBase
@@ -85,28 +86,38 @@ namespace java
 
 		struct JointObject : public WrapperBase
 		{
-			 using WrapperBase::WrapperBase;
+			using WrapperBase::WrapperBase;
 
-			 Joint_ObjectHandle GetHandle() const;
+			Joint_ObjectHandle GetHandle() const;
 
-			 static JObjLocalRef Make(JNIEnv* env, Joint_ObjectHandle handle);
+			static JObjLocalRef Make(JNIEnv* env, Joint_ObjectHandle handle);
 		};
 
 		struct ModuleContext : public WrapperBase
 		{
-			 Joint_ObjectHandle GetHandle() const;
+			Joint_ObjectHandle GetHandle() const;
 
-			 static JObjLocalRef Make(JNIEnv* env, Joint_ModuleHandle handle);
+			static JObjLocalRef Make(JNIEnv* env, Joint_ModuleHandle handle);
 		};
 
 		struct InterfaceId : public WrapperBase
 		{
-			 static JObjLocalRef Make(JNIEnv* env, const JStringTempRef& id);
+			static JObjLocalRef Make(JNIEnv* env, const JStringTempRef& id);
 		};
 
 		struct JointException : public WrapperBase
 		{
-			 static JObjLocalRef Make(JNIEnv* env, Joint_ExceptionHandle handle);
+			static JObjLocalRef Make(JNIEnv* env, Joint_ExceptionHandle handle);
+		};
+
+		struct Array : public WrapperBase
+		{
+			using WrapperBase::WrapperBase;
+
+			JObjLocalRef GetElementType() const;
+			Joint_ArrayHandle GetHandle() const;
+
+			static JObjLocalRef Make(JNIEnv* env, JObjTempRef elementType, Joint_ArrayHandle handle);
 		};
 
 	private:
@@ -121,6 +132,7 @@ namespace java
 		JClassGlobalRef ModuleContext_cls;
 		JClassGlobalRef InterfaceId_cls;
 		JClassGlobalRef JointException_cls;
+		JClassGlobalRef Array_cls;
 
 		jfieldID TypeDescriptor_typeId;
 		jfieldID TypeDescriptor_interfaceChecksum;
@@ -128,6 +140,7 @@ namespace java
 		jfieldID TypeDescriptor_mangledTypeName;
 		jfieldID TypeDescriptor_structCtorSignature;
 		jfieldID TypeDescriptor_members;
+		jfieldID TypeDescriptor_elementType;
 
 		jfieldID MethodDescriptor_name;
 		jfieldID MethodDescriptor_signature;
@@ -153,6 +166,10 @@ namespace java
 		jmethodID InterfaceId_String_ctor;
 
 		jmethodID JointException_long_ctor;
+
+		jfieldID Array_elementType;
+		jfieldID Array_handle;
+		jmethodID Array_TypeDescriptor_long_ctor;
 
 	private:
 		JointJavaContext();

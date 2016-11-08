@@ -39,20 +39,6 @@ class JavaGenerator:
                 yield l
             yield ''
 
-    def _typeDescriptor(self, type):
-        if isinstance(type, BuiltinType):
-            return self._tuple([str(type.index)])
-        if isinstance(type, Enum):
-            return self._tuple([str(type.index), self._mangleType(type)])
-        elif isinstance(type, Interface):
-            return self._tuple([str(type.index), '{}_proxy'.format(self._mangleType(type)), hex(type.checksum)])
-        elif isinstance(type, Struct):
-            return self._tuple([str(type.index), self._mangleType(type), self._tuple([self._tuple(['\'{}\''.format(m.name), self._typeDescriptor(m.type)]) for m in type.members])])
-        elif isinstance(type, Array):
-            return self._tuple([str(type.index), self._typeDescriptor(type.elementType)])
-        else:
-            raise RuntimeError('Not implemented (type: {})!'.format(type))
-
     def _generateInterfaceDescriptor(self, ifc):
         methods = []
         for m in ifc.methods:
@@ -176,6 +162,20 @@ class JavaGenerator:
             yield '\t{} {}({});'.format(self._toJavaType(m.retType), m.name, ', '.join('{} {}'.format(self._toJavaType(p.type), p.name) for p in m.params))
         yield '}'
 
+    def _toBoxedType(self, type):
+        if isinstance(type, BuiltinType):
+            if type.category == BuiltinTypeCategory.void:
+                raise RuntimeError('Invalid type: {}'.format(type))
+            if type.category == BuiltinTypeCategory.int:
+                return {8: 'Byte', 16: 'Short', 32: 'Integer', 64: 'Long'}[type.bits]
+            if type.category == BuiltinTypeCategory.bool:
+                return 'Boolean'
+            if type.category == BuiltinTypeCategory.float:
+                return {32: 'Float', 64: 'Fouble'}[type.bits]
+            return self._toJavaType(type)
+        else:
+            return self._toJavaType(type)
+
     def _toJavaType(self, type):
         if isinstance(type, BuiltinType):
             if type.category == BuiltinTypeCategory.void:
@@ -191,8 +191,8 @@ class JavaGenerator:
             raise RuntimeError('Unknown type: {}'.format(type))
         elif isinstance(type, (Interface, Enum, Struct)):
             return '{}'.format(self._mangleType(type));
-        #elif isinstance(type, Array):
-            #return '::joint::Array<{}>'.format(self._toCppType(type.elementType))
+        elif isinstance(type, Array):
+            return 'Array<{}>'.format(self._toBoxedType(type.elementType))
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 
@@ -201,8 +201,8 @@ class JavaGenerator:
             return 'BuiltinTypes.{}'.format(type.name.capitalize())
         elif isinstance(type, (Interface, Enum, Struct)):
             return '{}.typeDescriptor'.format(self._mangleType(type));
-        #elif isinstance(type, Array):
-            #return '::joint::Array<{}>'.format(self._toCppType(type.elementType))
+        elif isinstance(type, Array):
+            return 'TypeDescriptor.arrayType({})'.format(self._toTypeDescriptor(type.elementType))
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(type))
 
