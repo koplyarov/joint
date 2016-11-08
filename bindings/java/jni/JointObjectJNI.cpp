@@ -1,23 +1,14 @@
-#include <joint/devkit/ExceptionInfo.hpp>
-#include <joint/devkit/ScopeExit.hpp>
-#include <joint/devkit/StackStorage.hpp>
-
-#include <vector>
-
 #include <JointJNI.h>
 #include <binding/Boxing.hpp>
 #include <binding/JavaBindingInfo.hpp>
 #include <binding/Marshaller.hpp>
-#include <binding/Object.hpp>
-#include <utils/JPtr.hpp>
-#include <utils/Utils.hpp>
 
 
 using namespace joint::devkit;
 using namespace joint::java;
-using namespace joint::java::binding;
 
 JOINT_DEVKIT_LOGGER("Joint.Java.JNI")
+
 
 JNIEXPORT void JNICALL Java_org_joint_JointObject_releaseObject(JNIEnv* env, jclass cls, jlong handleLong)
 {
@@ -113,44 +104,3 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod(JNIEnv* env,
 }
 
 
-JNIEXPORT jlong JNICALL Java_org_joint_ModuleContext_doRegister(JNIEnv* env, jclass cls, jlong moduleHandleLong, jobject accessor)
-{
-	JNI_WRAP_CPP_BEGIN
-
-	JavaVM* jvm = nullptr;
-	JNI_CALL( env->GetJavaVM(&jvm) );
-
-	std::unique_ptr<Object> o(new Object(env, JObjGlobalRef::StealLocal(env, accessor)));
-	Joint_ObjectHandle handle = JOINT_NULL_HANDLE;
-	Joint_ModuleHandle module = (Joint_ModuleHandle)moduleHandleLong;
-	Joint_Error ret = Joint_CreateObject(module, o.get(), &handle);
-	JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
-	o.release();
-
-	JNI_WRAP_CPP_END(reinterpret_cast<jlong>(handle), 0)
-}
-
-
-JNIEXPORT jlong JNICALL Java_org_joint_InterfaceDescriptor_initNative(JNIEnv* env, jobject self)
-{
-	JNI_WRAP_CPP_BEGIN
-	env->NewLocalRef(self); // one new ref for JLocalObjPtr
-	auto result = new JavaInterfaceDescriptor(JObjTempRef(env, self), JavaBindingInfo());
-	JNI_WRAP_CPP_END(reinterpret_cast<jlong>(result), 0)
-}
-
-
-JNIEXPORT void JNICALL Java_org_joint_InterfaceDescriptor_deinitNative(JNIEnv* env, jclass cls, jlong native)
-{
-	JNI_WRAP_CPP_BEGIN
-	delete reinterpret_cast<JavaInterfaceDescriptor*>(native);
-	JNI_WRAP_CPP_END_VOID()
-}
-
-
-JNIEXPORT void JNICALL Java_org_joint_JointException_deinitNative(JNIEnv* env, jclass cls, jlong nativeData)
-{
-	JNI_WRAP_CPP_BEGIN
-	delete reinterpret_cast<ExceptionInfo*>(nativeData);
-	JNI_WRAP_CPP_END_VOID()
-}

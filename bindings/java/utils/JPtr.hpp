@@ -4,6 +4,7 @@
 
 #include <joint/devkit/Exceptions.hpp>
 #include <joint/devkit/JointException.hpp>
+#include <joint/devkit/Logger.hpp>
 
 #include <algorithm>
 #include <memory>

@@ -9,6 +9,7 @@ set(JAVA_SOURCES
 	org/joint/Accessor.java
 	org/joint/AccessorBase.java
 	org/joint/AccessorsContainer.java
+	org/joint/Array.java
 	org/joint/BuiltinTypes.java
 	org/joint/Component.java
 	org/joint/ComponentProxy.java
@@ -37,6 +38,7 @@ add_custom_command(
 	-jni
 	-o "${CMAKE_CURRENT_BINARY_DIR}/JointJNI.h"
 	-classpath "${JOINT_JAR_CLASSDIR}"
+	org.joint.Array
 	org.joint.InterfaceDescriptor
 	org.joint.JointException
 	org.joint.JointObject
@@ -44,7 +46,11 @@ add_custom_command(
 )
 
 set_source_files_properties(
-	jni/JointJNI.cpp
+	jni/ArrayJNI.cpp
+	jni/InterfaceDescriptorJNI.cpp
+	jni/JointExceptionJNI.cpp
+	jni/JointObjectJNI.cpp
+	jni/ModuleContextJNI.cpp
 	OBJECT_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/JointJNI.h"
 )
 
@@ -66,7 +72,11 @@ add_library(joint-java SHARED
 	binding/JointJavaContext.cpp
 	binding/Module.cpp
 	binding/Object.cpp
-	jni/JointJNI.cpp
+	jni/ArrayJNI.cpp
+	jni/InterfaceDescriptorJNI.cpp
+	jni/JointExceptionJNI.cpp
+	jni/JointObjectJNI.cpp
+	jni/ModuleContextJNI.cpp
 	utils/JniError.cpp
 )
 target_link_libraries(joint-java joint ${JNI_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
