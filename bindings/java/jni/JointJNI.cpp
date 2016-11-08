@@ -38,7 +38,7 @@ JNIEXPORT jlong JNICALL Java_org_joint_JointObject_doCast(JNIEnv* env, jclass cl
 	Joint_ObjectHandle handle = (Joint_ObjectHandle)handleLong;
 
 	Joint_ObjectHandle new_handle = JOINT_NULL_HANDLE;
-	Joint_Error ret = Joint_CastObject(handle, StringDataHolder(env, interfaceId).GetData(), interfaceChecksum, &new_handle);
+	Joint_Error ret = Joint_CastObject(handle, StringDataHolder(JStringWeakRef(env, interfaceId)).GetData(), interfaceChecksum, &new_handle);
 	JOINT_CHECK(ret == JOINT_ERROR_NONE || JOINT_ERROR_CAST_FAILED, ret);
 
 
@@ -120,7 +120,7 @@ JNIEXPORT jlong JNICALL Java_org_joint_ModuleContext_doRegister(JNIEnv* env, jcl
 	JavaVM* jvm = nullptr;
 	JNI_CALL( env->GetJavaVM(&jvm) );
 
-	std::unique_ptr<Object> o(new Object(JGlobalObjPtr(jvm, accessor)));
+	std::unique_ptr<Object> o(new Object(env, JObjGlobalRef::StealLocal(env, accessor)));
 	Joint_ObjectHandle handle = JOINT_NULL_HANDLE;
 	Joint_ModuleHandle module = (Joint_ModuleHandle)moduleHandleLong;
 	Joint_Error ret = Joint_CreateObject(module, o.get(), &handle);
@@ -135,7 +135,7 @@ JNIEXPORT jlong JNICALL Java_org_joint_InterfaceDescriptor_initNative(JNIEnv* en
 {
 	JNI_WRAP_CPP_BEGIN
 	env->NewLocalRef(self); // one new ref for JLocalObjPtr
-	auto result = new JavaInterfaceDescriptor(JLocalObjPtr(env, self), JavaBindingInfo());
+	auto result = new JavaInterfaceDescriptor(JObjTempRef(env, self), JavaBindingInfo());
 	JNI_WRAP_CPP_END(reinterpret_cast<jlong>(result), 0)
 }
 

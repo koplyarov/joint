@@ -20,13 +20,13 @@ namespace binding
 		JOINT_DEVKIT_LOGGER("Joint.Java.Module")
 
 	private:
-		JGlobalClassPtr     _cls;
+		JClassGlobalRef     _cls;
 
 	public:
 		Module(const std::string& jarPath, const std::string& className);
 		~Module();
 
-		const JGlobalClassPtr& GetClass() const { return _cls; }
+		const JClassGlobalRef& GetClass() const { return _cls; }
 	};
 
 }}}

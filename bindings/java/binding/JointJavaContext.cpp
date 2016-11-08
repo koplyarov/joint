@@ -78,27 +78,27 @@ namespace java
 	}
 
 
-	JLocalObjArrayPtr JointJavaContext::InterfaceDescriptor::GetMethods() const
-	{ return JLocalObjArrayPtr(env, reinterpret_cast<jobjectArray>(JAVA_CALL(env->GetObjectField(_obj, ConstInstance().InterfaceDescriptor_methods)))); }
+	JObjArrayLocalRef JointJavaContext::InterfaceDescriptor::GetMethods() const
+	{ return JObjArrayLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().InterfaceDescriptor_methods))); }
 
 	JavaInterfaceDescriptor* JointJavaContext::InterfaceDescriptor::GetNative() const
 	{ return reinterpret_cast<JavaInterfaceDescriptor*>(JAVA_CALL(env->GetLongField(_obj, ConstInstance().InterfaceDescriptor_nativeDescriptor))); }
 
 
 	std::string JointJavaContext::MethodDescriptor::GetName() const
-	{ return StringDataHolder(env, reinterpret_cast<jstring>(JAVA_CALL(env->GetObjectField(_obj, ConstInstance().MethodDescriptor_name)))).GetData(); }
+	{ return ToStdString(JStringLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().MethodDescriptor_name)))); }
 
 	std::string JointJavaContext::MethodDescriptor::GetSignature() const
-	{ return StringDataHolder(env, reinterpret_cast<jstring>(JAVA_CALL(env->GetObjectField(_obj, ConstInstance().MethodDescriptor_signature)))).GetData(); }
+	{ return ToStdString(JStringLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().MethodDescriptor_signature)))); }
 
-	JLocalClassPtr JointJavaContext::MethodDescriptor::GetInterfaceClass() const
-	{ return JLocalClassPtr(env, reinterpret_cast<jclass>(JAVA_CALL(env->GetObjectField(_obj, ConstInstance().MethodDescriptor_interfaceCls)))); }
+	JClassLocalRef JointJavaContext::MethodDescriptor::GetInterfaceClass() const
+	{ return JClassLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().MethodDescriptor_interfaceCls))); }
 
-	JLocalObjPtr JointJavaContext::MethodDescriptor::GetRetType() const
-	{ return JLocalObjPtr(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().MethodDescriptor_retType))); }
+	JObjLocalRef JointJavaContext::MethodDescriptor::GetRetType() const
+	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().MethodDescriptor_retType))); }
 
-	JLocalObjArrayPtr JointJavaContext::MethodDescriptor::GetParamTypes() const
-	{ return JLocalObjArrayPtr(env, reinterpret_cast<jobjectArray>(JAVA_CALL(env->GetObjectField(_obj, ConstInstance().MethodDescriptor_paramTypes)))); }
+	JObjArrayLocalRef JointJavaContext::MethodDescriptor::GetParamTypes() const
+	{ return JObjArrayLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().MethodDescriptor_paramTypes))); }
 
 
 	Joint_TypeId JointJavaContext::TypeDescriptor::GetId() const
@@ -107,56 +107,52 @@ namespace java
 	Joint_InterfaceChecksum JointJavaContext::TypeDescriptor::GetInterfaceChecksum() const
 	{ return static_cast<Joint_InterfaceChecksum>(JAVA_CALL(env->GetIntField(_obj, ConstInstance().TypeDescriptor_interfaceChecksum))); }
 
-	JLocalClassPtr JointJavaContext::TypeDescriptor::GetProxyClass() const
-	{ return JLocalClassPtr(env, reinterpret_cast<jclass>(JAVA_CALL(env->GetObjectField(_obj, ConstInstance().TypeDescriptor_proxyClass)))); }
+	JClassLocalRef JointJavaContext::TypeDescriptor::GetProxyClass() const
+	{ return JClassLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().TypeDescriptor_proxyClass))); }
 
 	std::string JointJavaContext::TypeDescriptor::GetMangledTypeName() const
-	{ return StringDataHolder(env, reinterpret_cast<jstring>(JAVA_CALL(env->GetObjectField(_obj, ConstInstance().TypeDescriptor_mangledTypeName)))).GetData(); }
+	{ return ToStdString(JStringLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().TypeDescriptor_mangledTypeName)))); }
 
 	std::string JointJavaContext::TypeDescriptor::GetStructCtorSignature() const
-	{ return StringDataHolder(env, reinterpret_cast<jstring>(JAVA_CALL(env->GetObjectField(_obj, ConstInstance().TypeDescriptor_structCtorSignature)))).GetData(); }
+	{ return ToStdString(JStringLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().TypeDescriptor_structCtorSignature)))); }
 
-	JLocalObjArrayPtr JointJavaContext::TypeDescriptor::GetMembers() const
-	{ return JLocalObjArrayPtr(env, reinterpret_cast<jobjectArray>(JAVA_CALL(env->GetObjectField(_obj, ConstInstance().TypeDescriptor_members)))); }
+	JObjArrayLocalRef JointJavaContext::TypeDescriptor::GetMembers() const
+	{ return JObjArrayLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().TypeDescriptor_members))); }
 
 
 	std::string JointJavaContext::MemberInfo::GetName() const
-	{ return StringDataHolder(env, reinterpret_cast<jstring>(JAVA_CALL(env->GetObjectField(_obj, ConstInstance().MemberInfo_name)))).GetData(); }
+	{ return ToStdString(JStringLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().MemberInfo_name)))); }
 
-	JLocalObjPtr JointJavaContext::MemberInfo::GetType() const
-	{ return JLocalObjPtr(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().MemberInfo_type))); }
-
-
-	JLocalObjPtr JointJavaContext::Accessor::GetObj() const
-	{ return JLocalObjPtr(env, JAVA_CALL(env->CallObjectMethod(_obj, ConstInstance().Accessor_getObj))); }
-
-	JLocalObjPtr JointJavaContext::Accessor::GetInterfaceDescriptor() const
-	{ return JLocalObjPtr(env, JAVA_CALL(env->CallObjectMethod(_obj, ConstInstance().Accessor_getInterfaceDescriptor))); }
-
-	JLocalObjPtr JointJavaContext::Accessor::Cast(const JObjRef& iid) const
-	{ return JLocalObjPtr(env, JAVA_CALL(env->CallObjectMethod(_obj, ConstInstance().Accessor_cast, iid.Get()))); }
+	JObjLocalRef JointJavaContext::MemberInfo::GetType() const
+	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(_obj, ConstInstance().MemberInfo_type))); }
 
 
-	JointJavaContext::JointObject::JointObject(JNIEnv* env, Joint_ObjectHandle handle)
-		: WrapperBaseNew(JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().JointObject_cls, ConstInstance().JointObject_long_ctor, (jlong)handle))))
-	{ }
+	JObjLocalRef JointJavaContext::Accessor::GetObj() const
+	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->CallObjectMethod(_obj, ConstInstance().Accessor_getObj))); }
+
+	JObjLocalRef JointJavaContext::Accessor::GetInterfaceDescriptor() const
+	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->CallObjectMethod(_obj, ConstInstance().Accessor_getInterfaceDescriptor))); }
+
+	JObjLocalRef JointJavaContext::Accessor::Cast(const JObjWeakRef& iid) const
+	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->CallObjectMethod(_obj, ConstInstance().Accessor_cast, iid.Get()))); }
+
+
+	JObjLocalRef JointJavaContext::JointObject::Make(JNIEnv* env, Joint_ObjectHandle handle)
+	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().JointObject_cls, ConstInstance().JointObject_long_ctor, (jlong)handle))); }
 
 	Joint_ObjectHandle JointJavaContext::JointObject::GetHandle() const
 	{ return reinterpret_cast<Joint_ObjectHandle>(JAVA_CALL(env->GetLongField(_obj, ConstInstance().JointObject_handle))); }
 
 
-	JointJavaContext::ModuleContext::ModuleContext(JNIEnv* env, Joint_ModuleHandle handle)
-		: WrapperBaseNew(JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().ModuleContext_cls, ConstInstance().ModuleContext_long_ctor, (jlong)handle))))
-	{ }
+	JObjLocalRef JointJavaContext::ModuleContext::Make(JNIEnv* env, Joint_ModuleHandle handle)
+	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().ModuleContext_cls, ConstInstance().ModuleContext_long_ctor, (jlong)handle)));}
 
 
-	JointJavaContext::InterfaceId::InterfaceId(JNIEnv* env, const JStringRef& id)
-		: WrapperBaseNew(JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().InterfaceId_cls, ConstInstance().InterfaceId_String_ctor, id.Get()))))
-	{ }
+	JObjLocalRef JointJavaContext::InterfaceId::Make(JNIEnv* env, const JStringTempRef& id)
+	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().InterfaceId_cls, ConstInstance().InterfaceId_String_ctor, id.Get()))); }
 
 
-	JointJavaContext::JointException::JointException(JNIEnv* env, Joint_ExceptionHandle handle)
-		: WrapperBaseNew(JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().JointException_cls, ConstInstance().JointException_long_ctor, (jlong)handle))))
-	{ }
+	JObjLocalRef JointJavaContext::JointException::Make(JNIEnv* env, Joint_ExceptionHandle handle)
+	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().JointException_cls, ConstInstance().JointException_long_ctor, (jlong)handle))); }
 
 }}

@@ -19,13 +19,13 @@ namespace binding
 
 	using namespace devkit;
 
-	Object::Object(const JGlobalObjPtr& accessor)
-		: _accessor(accessor)
+	Object::Object(JNIEnv* env, JObjGlobalRef accessor)
+		: _accessor(std::move(accessor))
 	{
-		JointJavaContext::Accessor a(_accessor);
-		_obj = a.GetObj();
-		_interfaceDesc = a.GetInterfaceDescriptor();
-		_nativeInterfaceDesc = JointJavaContext::InterfaceDescriptor(_interfaceDesc).GetNative();
+		JointJavaContext::Accessor a(_accessor.Weak(env));
+		_obj = a.GetObj().Global();
+		_interfaceDesc = a.GetInterfaceDescriptor().Global();
+		_nativeInterfaceDesc = JointJavaContext::InterfaceDescriptor(_interfaceDesc.Weak(env)).GetNative();
 	}
 
 
@@ -39,7 +39,8 @@ namespace binding
 
 		StackStorage<jvalue, 1024> params_storage;
 
-		auto env = _accessor.GetEnv();
+		auto jvm = JointJavaContext::GetJvm();
+		auto env = GetJavaEnv(jvm);
 
 		jvalue* jparams = nullptr;
 		if (!params.empty())

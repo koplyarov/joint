@@ -36,7 +36,7 @@ namespace binding
 
 		auto class_loader = JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(URLClassLoader_cls, URLClassLoader_ctor_id, urls.Get())));
 
-		_cls = JGlobalClassPtr(env, reinterpret_cast<jclass>(JAVA_CALL(env->CallObjectMethod(class_loader, loadClass_id, class_name_string.Get()))));
+		_cls = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->CallObjectMethod(class_loader, loadClass_id, class_name_string.Get())));
 		JOINT_CHECK(_cls, StringBuilder() % "Class " % className % " not found");
 	}
 

@@ -22,28 +22,14 @@ namespace java
 		class WrapperBase
 		{
 		protected:
-			JNIEnv*       env;
-			JLocalObjPtr  _obj;
+			JNIEnv*      env;
+			JObjWeakRef  _obj;
 
 			~WrapperBase() { }
 
 		public:
-			WrapperBase(JLocalObjPtr obj) : env(obj.GetEnv()), _obj(obj) { }
-			JLocalObjPtr GetWrapped() const { return _obj; }
-		};
-
-		class WrapperBaseNew
-		{
-		protected:
-			JNIEnv*       env;
-			JObjLocalRef  _obj;
-
-			~WrapperBaseNew() { }
-
-		public:
-			WrapperBaseNew(JObjLocalRef obj) : env(obj.GetEnv()), _obj(std::move(obj)) { }
-			const JObjLocalRef& GetWrapped() const & { return _obj; }
-			JObjLocalRef GetWrapped() && { return std::move(_obj); }
+			WrapperBase(JObjWeakRef obj) : env(obj.GetEnv()), _obj(obj) { }
+			JObjWeakRef GetWrapped() const { return _obj; }
 		};
 
 	public:
@@ -53,7 +39,7 @@ namespace java
 		{
 			using WrapperBase::WrapperBase;
 
-			JLocalObjArrayPtr GetMethods() const;
+			JObjArrayLocalRef GetMethods() const;
 			JavaInterfaceDescriptor* GetNative() const;
 		};
 
@@ -63,9 +49,9 @@ namespace java
 
 			std::string GetName() const;
 			std::string GetSignature() const;
-			JLocalClassPtr GetInterfaceClass() const;
-			JLocalObjPtr GetRetType() const;
-			JLocalObjArrayPtr GetParamTypes() const;
+			JClassLocalRef GetInterfaceClass() const;
+			JObjLocalRef GetRetType() const;
+			JObjArrayLocalRef GetParamTypes() const;
 		};
 
 		struct TypeDescriptor : public WrapperBase
@@ -74,10 +60,10 @@ namespace java
 
 			Joint_TypeId GetId() const;
 			Joint_InterfaceChecksum GetInterfaceChecksum() const;
-			JLocalClassPtr GetProxyClass() const;
+			JClassLocalRef GetProxyClass() const;
 			std::string GetMangledTypeName() const;
 			std::string GetStructCtorSignature() const;
-			JLocalObjArrayPtr GetMembers() const;
+			JObjArrayLocalRef GetMembers() const;
 		};
 
 		struct MemberInfo : public WrapperBase
@@ -85,42 +71,42 @@ namespace java
 			using WrapperBase::WrapperBase;
 
 			std::string GetName() const;
-			JLocalObjPtr GetType() const;
+			JObjLocalRef GetType() const;
 		};
 
 		struct Accessor : public WrapperBase
 		{
 			using WrapperBase::WrapperBase;
 
-			JLocalObjPtr GetObj() const;
-			JLocalObjPtr GetInterfaceDescriptor() const;
-			JLocalObjPtr Cast(const JObjRef& iid) const;
+			JObjLocalRef GetObj() const;
+			JObjLocalRef GetInterfaceDescriptor() const;
+			JObjLocalRef Cast(const JObjWeakRef& iid) const;
 		};
 
-		struct JointObject : public WrapperBaseNew
+		struct JointObject : public WrapperBase
 		{
-			 using WrapperBaseNew::WrapperBaseNew;
-
-			 JointObject(JNIEnv* env, Joint_ObjectHandle handle);
+			 using WrapperBase::WrapperBase;
 
 			 Joint_ObjectHandle GetHandle() const;
+
+			 static JObjLocalRef Make(JNIEnv* env, Joint_ObjectHandle handle);
 		};
 
-		struct ModuleContext : public WrapperBaseNew
+		struct ModuleContext : public WrapperBase
 		{
 			 Joint_ObjectHandle GetHandle() const;
 
-			 ModuleContext(JNIEnv* env, Joint_ModuleHandle handle);
+			 static JObjLocalRef Make(JNIEnv* env, Joint_ModuleHandle handle);
 		};
 
-		struct InterfaceId : public WrapperBaseNew
+		struct InterfaceId : public WrapperBase
 		{
-			 InterfaceId(JNIEnv* env, const JStringRef& id);
+			 static JObjLocalRef Make(JNIEnv* env, const JStringTempRef& id);
 		};
 
-		struct JointException : public WrapperBaseNew
+		struct JointException : public WrapperBase
 		{
-			 JointException(JNIEnv* env, Joint_ExceptionHandle handle);
+			 static JObjLocalRef Make(JNIEnv* env, Joint_ExceptionHandle handle);
 		};
 
 	private:

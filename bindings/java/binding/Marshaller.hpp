@@ -25,7 +25,7 @@ namespace java
 
 	public:
 		const char* AllocateUtf8(JNIEnv* env, const jstring& value)
-		{ return _strParams.MakeSingle(env, value).GetData(); }
+		{ return _strParams.MakeSingle(JStringWeakRef(env, value)).GetData(); }
 
 		Joint_Value* AllocateMembers(size_t count)
 		{ return _members.Make(count); }
@@ -37,7 +37,7 @@ namespace java
 	public:
 		const char* AllocateUtf8(JNIEnv* env, const jstring& value)
 		{
-			StringDataHolder str_data(env, value);
+			StringDataHolder str_data(JStringWeakRef(env, value));
 			std::unique_ptr<char[]> result_str(new char[strlen(str_data.GetData()) + 1]);
 			strcpy(result_str.get(), str_data.GetData());
 			return result_str.release();
@@ -106,7 +106,7 @@ namespace java
 					Joint_DecRefObject(val);
 			}));
 
-			JObjLocalRef joint_obj = JointJavaContext::JointObject(env, val).GetWrapped();
+			auto joint_obj = JointJavaContext::JointObject::Make(env, val);
 
 			result.l = JAVA_CALL(env->NewObject(proxyType.Cls, proxyType.CtorId, joint_obj.Get()));
 			sg.Cancel();
@@ -136,8 +136,6 @@ namespace java
 
 		JavaVariant MakeStruct(const ParamsArray& params, const JavaBindingInfo::StructUserData& structType) const
 		{
-			auto env = structType.Cls.GetEnv();
-
 			jvalue result;
 			result.l = JAVA_CALL(env->NewObjectA(structType.Cls, structType.CtorId, params.GetVector().data()));
 			return result;
@@ -168,7 +166,9 @@ namespace java
 
 			auto cls = JClassLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectClass(val.l)));
 			jfieldID obj_id = JAVA_CALL(env->GetFieldID(cls, "_obj", "Lorg/joint/JointObject;"));
-			JointJavaContext::JointObject joint_obj(JObjLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(val.l, obj_id))));
+
+			auto raw_joint_obj = JObjLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(val.l, obj_id)));
+			JointJavaContext::JointObject joint_obj(raw_joint_obj);
 
 			auto handle = joint_obj.GetHandle();
 			if (dir == devkit::ValueDirection::Return)
@@ -187,8 +187,6 @@ namespace java
 		jvalue GetStructMember(jvalue val, size_t i, const MemberInfo_& memberInfo, const JavaBindingInfo::StructUserData& structType) const
 		{
 			jvalue res;
-			auto env = structType.Cls.GetEnv();
-
 			switch (memberInfo.GetType().GetJointType().id)
 			{
 			case JOINT_TYPE_BOOL:

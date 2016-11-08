@@ -7,66 +7,66 @@ namespace joint {
 namespace java
 {
 
-	Joint_TypeId JavaBindingInfo::GetJointTypeId(const JLocalObjPtr& typeNode) const
-	{ return JointJavaContext::TypeDescriptor(typeNode).GetId(); }
+	Joint_TypeId JavaBindingInfo::GetJointTypeId(JObjTempRef typeNode) const
+	{ return JointJavaContext::TypeDescriptor(typeNode.Weak()).GetId(); }
 
 
-	Joint_InterfaceChecksum JavaBindingInfo::GetInterfaceChecksum(const JLocalObjPtr& typeNode) const
-	{ return JointJavaContext::TypeDescriptor(typeNode).GetInterfaceChecksum(); }
+	Joint_InterfaceChecksum JavaBindingInfo::GetInterfaceChecksum(JObjTempRef typeNode) const
+	{ return JointJavaContext::TypeDescriptor(typeNode.Weak()).GetInterfaceChecksum(); }
 
 
-	JavaBindingInfo::ArrayUserData JavaBindingInfo::GetArrayUserData(const JLocalObjPtr& typeNode) const
+	JavaBindingInfo::ArrayUserData JavaBindingInfo::GetArrayUserData(JObjTempRef typeNode) const
 	{ return ArrayUserData(); }
 
 
-	JavaBindingInfo::ObjectUserData JavaBindingInfo::GetObjectUserData(const JLocalObjPtr& typeNode) const
+	JavaBindingInfo::ObjectUserData JavaBindingInfo::GetObjectUserData(JObjTempRef typeNode) const
 	{
 		auto env = typeNode.GetEnv();
 
-		JGlobalClassPtr proxy_class(JointJavaContext::TypeDescriptor(typeNode).GetProxyClass());
+		auto proxy_class = JointJavaContext::TypeDescriptor(typeNode.Weak()).GetProxyClass().Global();
 		JOINT_CHECK(proxy_class, "Invalid TypeDescriptor for interface");
 
 		jmethodID proxy_ctor_id = JAVA_CALL(env->GetMethodID(proxy_class, "<init>", "(Lorg/joint/JointObject;)V"));
 
-		return ObjectUserData{proxy_class, proxy_ctor_id};
+		return ObjectUserData{std::move(proxy_class), proxy_ctor_id};
 	}
 
 
-	JavaBindingInfo::EnumUserData JavaBindingInfo::GetEnumUserData(const JLocalObjPtr& typeNode) const
+	JavaBindingInfo::EnumUserData JavaBindingInfo::GetEnumUserData(JObjTempRef typeNode) const
 	{
 		auto env = typeNode.GetEnv();
 
-		JointJavaContext::TypeDescriptor td(typeNode);
+		JointJavaContext::TypeDescriptor td(typeNode.Weak());
 
-		JGlobalClassPtr enum_class(JointJavaContext::TypeDescriptor(typeNode).GetProxyClass());
+		auto enum_class = td.GetProxyClass().Global();
 		JOINT_CHECK(enum_class, "Invalid TypeDescriptor for enum");
 
 		jmethodID enum_creator_id = JAVA_CALL(env->GetStaticMethodID(enum_class, "fromInt", ("(I)" + td.GetMangledTypeName()).c_str()));
 
-		return EnumUserData{enum_class, enum_creator_id};
+		return EnumUserData{std::move(enum_class), enum_creator_id};
 	}
 
 
-	JavaBindingInfo::StructUserData JavaBindingInfo::GetStructUserData(const JLocalObjPtr& typeNode) const
+	JavaBindingInfo::StructUserData JavaBindingInfo::GetStructUserData(JObjTempRef typeNode) const
 	{
 		auto env = typeNode.GetEnv();
 
-		JointJavaContext::TypeDescriptor td(typeNode);
+		JointJavaContext::TypeDescriptor td(typeNode.Weak());
 
-		JGlobalClassPtr struct_class(JointJavaContext::TypeDescriptor(typeNode).GetProxyClass());
+		auto struct_class = td.GetProxyClass().Global();
 		JOINT_CHECK(struct_class, "Invalid TypeDescriptor for struct");
 
 		jmethodID struct_ctor_id = JAVA_CALL(env->GetMethodID(struct_class, "<init>", td.GetStructCtorSignature().c_str()));
 
-		return StructUserData{struct_class, struct_ctor_id};
+		return StructUserData{std::move(struct_class), struct_ctor_id};
 	}
 
 
-	JavaBindingInfo::MethodUserData JavaBindingInfo::GetMethodUserData(const JLocalObjPtr& methodNode) const
+	JavaBindingInfo::MethodUserData JavaBindingInfo::GetMethodUserData(JObjTempRef methodNode) const
 	{
 		auto env = methodNode.GetEnv();
 
-		JointJavaContext::MethodDescriptor md(methodNode);
+		JointJavaContext::MethodDescriptor md(methodNode.Weak());
 
 		jmethodID id = JAVA_CALL(env->GetMethodID(md.GetInterfaceClass(), md.GetName().c_str(), md.GetSignature().c_str()));
 
@@ -74,32 +74,33 @@ namespace java
 	}
 
 
-	JLocalObjPtr JavaBindingInfo::GetRetTypeNode(const JLocalObjPtr& methodNode) const
-	{ return JointJavaContext::MethodDescriptor(methodNode).GetRetType(); }
+	JObjLocalRef JavaBindingInfo::GetRetTypeNode(JObjTempRef methodNode) const
+	{ return JointJavaContext::MethodDescriptor(methodNode.Weak()).GetRetType(); }
 
 
-	JLocalObjPtr JavaBindingInfo::GetArrayElementTypeNode(const JLocalObjPtr& typeNode) const
+	JObjLocalRef JavaBindingInfo::GetArrayElementTypeNode(JObjTempRef typeNode) const
 	{ JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED); }
 
 
-	JavaBindingInfo::Sequence JavaBindingInfo::GetParamsNodes(const JLocalObjPtr& methodNode) const
-	{ return Sequence(JointJavaContext::MethodDescriptor(methodNode).GetParamTypes()); }
+	JavaBindingInfo::Sequence JavaBindingInfo::GetParamsNodes(JObjTempRef methodNode) const
+	{ return Sequence(JointJavaContext::MethodDescriptor(methodNode.Weak()).GetParamTypes()); }
 
 
-	JavaBindingInfo::Sequence JavaBindingInfo::GetMethodsNodes(const JLocalObjPtr& ifcNode) const
-	{ return Sequence(JointJavaContext::InterfaceDescriptor(ifcNode).GetMethods()); }
+	JavaBindingInfo::Sequence JavaBindingInfo::GetMethodsNodes(JObjTempRef ifcNode) const
+	{ return Sequence(JointJavaContext::InterfaceDescriptor(ifcNode.Weak()).GetMethods()); }
 
 
-	JavaBindingInfo::Sequence JavaBindingInfo::GetMembersNodes(const JLocalObjPtr& typeNode) const
-	{ return Sequence(JointJavaContext::TypeDescriptor(typeNode).GetMembers()); }
+	JavaBindingInfo::Sequence JavaBindingInfo::GetMembersNodes(JObjTempRef typeNode) const
+	{ return Sequence(JointJavaContext::TypeDescriptor(typeNode.Weak()).GetMembers()); }
 
 
-	JavaBindingInfo::MemberId JavaBindingInfo::GetMemberId(const StructUserData& structUserData, const JLocalObjPtr& memberNode) const
+	JavaBindingInfo::MemberId JavaBindingInfo::GetMemberId(const StructUserData& structUserData, JObjTempRef memberNode) const
 	{
 		auto env = memberNode.GetEnv();
 
-		JointJavaContext::MemberInfo mi(memberNode);
-		JointJavaContext::TypeDescriptor td(mi.GetType());
+		JointJavaContext::MemberInfo mi(memberNode.Weak());
+		auto member_type = mi.GetType();
+		JointJavaContext::TypeDescriptor td(member_type);
 
 		jfieldID id = JAVA_CALL(env->GetFieldID(structUserData.Cls, mi.GetName().c_str(), td.GetMangledTypeName().c_str()));
 
@@ -107,7 +108,7 @@ namespace java
 	}
 
 
-	JLocalObjPtr JavaBindingInfo::GetMemberType(const StructUserData& structUserData, const JLocalObjPtr& memberNode) const
-	{ return JointJavaContext::MemberInfo(memberNode).GetType(); }
+	JObjLocalRef JavaBindingInfo::GetMemberType(const StructUserData& structUserData, JObjTempRef memberNode) const
+	{ return JointJavaContext::MemberInfo(memberNode.Weak()).GetType(); }
 
 }}

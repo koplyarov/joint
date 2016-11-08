@@ -33,176 +33,79 @@ namespace java
 	}
 
 
-	template < typename T_ >
-	struct LocalRefPolicy
-	{
-		using PointedType = typename std::remove_pointer<T_>::type;
-		using SharedT = std::shared_ptr<PointedType>;
+	// States that someone else owns the object, so the one who uses it should die before the owner.
+	template < typename T_ > class JWeakRef;
 
-		static SharedT InitRef(JavaVM* jvm, T_ obj)
-		{ return SharedT(obj, [jvm] (T_ obj) { GetJavaEnv(jvm)->DeleteLocalRef(obj); }); }
+	// States that the object user is not going to save the reference. A typical usage is a function parameter.
+	template < typename T_ > class JTempRef;
 
-		static SharedT NewRef(JavaVM* jvm, T_ obj)
-		{ return SharedT((T_)GetJavaEnv(jvm)->NewLocalRef(obj), [jvm] (T_ obj) { GetJavaEnv(jvm)->DeleteLocalRef(obj); }); }
-	};
+	// Owns the local object reference
+	template < typename T_ > class JLocalRef;
 
-
-	template < typename T_ >
-	struct GlobalRefPolicy
-	{
-		using PointedType = typename std::remove_pointer<T_>::type;
-		using SharedT = std::shared_ptr<PointedType>;
-
-		static SharedT InitRef(JavaVM* jvm, T_ obj)
-		{
-			auto env = GetJavaEnv(jvm);
-			T_ global = (T_)env->NewGlobalRef(obj);
-			env->DeleteLocalRef(obj);
-			return SharedT(global, [jvm] (T_ obj) { GetJavaEnv(jvm)->DeleteGlobalRef(obj); });
-		}
-
-		static SharedT NewRef(JavaVM* jvm, T_ obj)
-		{ return SharedT((T_)GetJavaEnv(jvm)->NewGlobalRef(obj), [jvm] (T_ obj) { GetJavaEnv(jvm)->DeleteGlobalRef(obj); }); }
-	};
-
-
-	template < typename T, template < typename > class RefPolicy >
-	class BasicJPtr
-	{
-		template < typename T2, template < typename > class RefPolicy2 >
-		friend class BasicJPtr;
-
-		using PointedType = typename std::remove_pointer<T>::type;
-		using SharedT = std::shared_ptr<PointedType>;
-
-		JOINT_DEVKIT_LOGGER("Joint.Java.JPtr")
-
-	private:
-		JavaVM*     _jvm;
-		SharedT     _obj;
-
-	public:
-		BasicJPtr()
-			: _jvm(NULL), _obj()
-		{ }
-
-		template < template < typename > class OtherRefPolicy >
-		BasicJPtr(const BasicJPtr<T, OtherRefPolicy>& other)
-			: _jvm(other._jvm), _obj(other._obj)
-		{
-			static_assert(!std::is_same<BasicJPtr<T, RefPolicy>, BasicJPtr<T, OtherRefPolicy> >::value, "wtf");
-			if (other._obj)
-				_obj = RefPolicy<T>::NewRef(_jvm, other._obj.get());
-		}
-
-		template < typename U >
-		BasicJPtr(const BasicJPtr<U, RefPolicy>& other,
-			typename std::enable_if<std::is_base_of<typename std::remove_pointer<T>::type, typename std::remove_pointer<U>::type>::value>::type* = 0)
-			: _jvm(other._jvm), _obj(other._obj)
-		{ }
-
-		template < template < typename > class OtherRefPolicy, typename U >
-		BasicJPtr(const BasicJPtr<U, OtherRefPolicy>& other,
-			typename std::enable_if<std::is_base_of<typename std::remove_pointer<T>::type, typename std::remove_pointer<U>::type>::value>::type* = 0)
-			: _jvm(other._jvm), _obj(NULL)
-		{
-			static_assert(!std::is_same<BasicJPtr<T, RefPolicy>, BasicJPtr<T, OtherRefPolicy> >::Value, "wtf");
-			if (other._obj)
-				_obj = RefPolicy<T>::NewRef(_jvm, other._obj);
-		}
-
-		BasicJPtr(JNIEnv* env, T obj)
-			: _jvm(NULL), _obj(NULL)
-		{
-			JNI_CALL( env->GetJavaVM(&_jvm) );
-			if (obj)
-				_obj = RefPolicy<T>::InitRef(_jvm, obj);
-		}
-
-		BasicJPtr(JavaVM* jvm, T obj)
-			: _jvm(JOINT_DEVKIT_REQUIRE_NOT_NULL(jvm)), _obj(NULL)
-		{
-			if (obj)
-				_obj = RefPolicy<T>::InitRef(_jvm, obj);
-		}
-
-		BasicJPtr(const BasicJPtr<T, RefPolicy>& other)
-			: _jvm(other._jvm), _obj(other._obj)
-		{ }
-
-		~BasicJPtr()
-		{ }
-
-		JavaVM* GetJvm() const
-		{ return JOINT_DEVKIT_REQUIRE_NOT_NULL(_jvm); }
-
-		operator T() const
-		{ return _obj.get(); }
-
-		T Get() const
-		{ return _obj.get(); }
-
-		T operator -> () const
-		{ CheckPtr(); return _obj; }
-
-		explicit operator bool() const
-		{ return (bool)_obj; }
-
-		void Reset()
-		{ *this = BasicJPtr<T, RefPolicy>(); }
-
-		JNIEnv* GetEnv() const
-		{ return GetJavaEnv(GetJvm()); }
-
-	private:
-		void CheckPtr() const
-		{ JOINT_DEVKIT_REQUIRE_NOT_NULL(_obj); }
-	};
+	// Owns the global object reference
+	template < typename T_ > class JGlobalRef;
 
 
 	template < typename T_ >
-	class JRef
+	class JTempRef
 	{
 	protected:
+		JNIEnv*       _env;
 		T_            _obj;
 
 	public:
-		operator T_() const
-		{ return _obj; }
+		JTempRef(JNIEnv* env, T_ obj) : _env(env), _obj(obj) { }
 
-		T_ Get() const
-		{ return _obj; }
+		explicit operator bool() const { return _obj; }
+		operator T_() const { return _obj; }
+		T_ Get() const { return _obj; }
+		JNIEnv* GetEnv() const { return _env; }
 
+		JWeakRef<T_> Weak() && = delete;
+		JWeakRef<T_> Weak() const &;
+	};
+
+
+	template < typename T_ >
+	class JWeakRef
+	{
 	protected:
-		JRef(T_ obj)
-			: _obj(obj)
-		{ }
+		JNIEnv*       _env;
+		T_            _obj;
 
-		~JRef()
-		{ }
+	public:
+		JWeakRef(JNIEnv* env, T_ obj) : _env(env), _obj(obj) { }
+
+		explicit operator bool() const { return _obj; }
+		operator T_() const { return _obj; }
+		T_ Get() const { return _obj; }
+		JNIEnv* GetEnv() const { return _env; }
+
+		JTempRef<T_> Temp() const { return JTempRef<T_>(_env, _obj); }
+		operator JTempRef<T_> () const { return JTempRef<T_>(_env, _obj); }
 	};
 
 	template < typename T_ >
-	class JGlobalRef;
+	JWeakRef<T_> JTempRef<T_>::Weak() const & { return JWeakRef<T_>(_env, _obj); }
+
 
 	template < typename T_ >
-	class JLocalRef : public JRef<T_>
+	class JLocalRef
 	{
-		using Base = JRef<T_>;
-
 	private:
 		JNIEnv*       _env;
+		T_            _obj;
 
 	public:
 		JLocalRef(const JLocalRef&) = delete;
 		JLocalRef& operator = (const JLocalRef&) = delete;
 
 		JLocalRef()
-			: Base(nullptr), _env(nullptr)
+			: _env(nullptr), _obj(nullptr)
 		{ }
 
 		JLocalRef(JLocalRef&& other)
-			: Base(other._obj), _env(other._env)
+			: _env(other._env), _obj(other._obj)
 		{
 			other._env = nullptr;
 			other._obj = nullptr;
@@ -234,10 +137,22 @@ namespace java
 			return result;
 		}
 
-		JNIEnv* GetEnv() const
-		{ return _env; }
+		explicit operator bool() const { return _obj; }
+		operator T_() const { return _obj; }
+		T_ Get() const { return _obj; }
+		JNIEnv* GetEnv() const { return _env; }
 
 		JGlobalRef<T_> Global() const;
+
+		JWeakRef<T_> Weak() && = delete;
+		JWeakRef<T_> Weak() const & { return JWeakRef<T_>(_env, _obj); }
+
+		JTempRef<T_> Temp() const { return JTempRef<T_>(_env, _obj); }
+
+		operator JWeakRef<T_> () && = delete;
+		operator JWeakRef<T_> () const & { return JWeakRef<T_>(_env, _obj); }
+
+		operator JTempRef<T_> () const { return JTempRef<T_>(_env, _obj); }
 
 		template < bool Enabled_ = !std::is_same<T_, jobject>::value >
 		static typename std::enable_if<Enabled_, JLocalRef>::type StealLocal(JNIEnv* env, jobject obj)
@@ -248,7 +163,7 @@ namespace java
 
 	private:
 		JLocalRef(JNIEnv* env, T_ obj)
-			: Base(obj), _env(env)
+			: _env(env), _obj(obj)
 		{ }
 	};
 
@@ -300,17 +215,20 @@ namespace java
 			std::swap(_obj, other._obj);
 		}
 
-		operator T_() const
-		{ return _obj; }
-
-		T_ Get() const
-		{ return _obj; }
+		explicit operator bool() const { return _obj; }
+		operator T_() const { return _obj; }
+		T_ Get() const { return _obj; }
 
 		JLocalRef<T_> Local() const
 		{
 			auto env = GetJavaEnv(_jvm);
 			return _obj ? JLocalRef<T_>::StealLocal(env, env->NewLocalRef(_obj)) : JLocalRef<T_>();
 		}
+
+		JWeakRef<T_> Weak(JNIEnv* env) && = delete;
+		JWeakRef<T_> Weak(JNIEnv* env) const & { return JWeakRef<T_>(env, _obj); }
+
+		JTempRef<T_> Temp(JNIEnv* env) const { return JTempRef<T_>(env, _obj); }
 
 		template < bool Enabled_ = !std::is_same<T_, jobject>::value >
 		static typename std::enable_if<Enabled_, JGlobalRef>::type StealLocal(JNIEnv* env, jobject obj)
@@ -339,18 +257,9 @@ namespace java
 	}
 
 
-#define DETAIL_JOINT_JAVA_DECLARE_JPTR(JType_, Name_) \
-	typedef BasicJPtr < JType_, GlobalRefPolicy >    JGlobal##Name_##Ptr; \
-	typedef BasicJPtr < JType_, LocalRefPolicy >     JLocal##Name_##Ptr
-
-	DETAIL_JOINT_JAVA_DECLARE_JPTR( jobject,       Obj );
-	DETAIL_JOINT_JAVA_DECLARE_JPTR( jthrowable,    Throwable );
-	DETAIL_JOINT_JAVA_DECLARE_JPTR( jobjectArray,  ObjArray );
-	DETAIL_JOINT_JAVA_DECLARE_JPTR( jstring,       String );
-	DETAIL_JOINT_JAVA_DECLARE_JPTR( jclass,        Class );
-
 #define DETAIL_JOINT_JAVA_DECLARE_JREFS(JType_, Name_) \
-	typedef JRef<JType_>         J##Name_##Ref; \
+	typedef JWeakRef<JType_>     J##Name_##WeakRef; \
+	typedef JTempRef<JType_>     J##Name_##TempRef; \
 	typedef JLocalRef<JType_>    J##Name_##LocalRef; \
 	typedef JGlobalRef<JType_>   J##Name_##GlobalRef
 
@@ -360,7 +269,7 @@ namespace java
 	DETAIL_JOINT_JAVA_DECLARE_JREFS( jstring,       String );
 	DETAIL_JOINT_JAVA_DECLARE_JREFS( jclass,        Class );
 
-#undef DETAIL_JOINT_JAVA_DECLARE_JPTR
+#undef DETAIL_JOINT_JAVA_DECLARE_JREFS
 
 }}
 

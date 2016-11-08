@@ -32,19 +32,19 @@ namespace java
 
 		struct ObjectUserData
 		{
-			JGlobalClassPtr    Cls;
+			JClassGlobalRef    Cls;
 			jmethodID          CtorId;
 		};
 
 		struct EnumUserData
 		{
-			JGlobalClassPtr    Cls;
+			JClassGlobalRef    Cls;
 			jmethodID          FromIntId;
 		};
 
 		struct StructUserData
 		{
-			JGlobalClassPtr    Cls;
+			JClassGlobalRef    Cls;
 			jmethodID          CtorId;
 		};
 
@@ -54,46 +54,46 @@ namespace java
 		};
 
 	public:
-		Joint_TypeId GetJointTypeId(const JLocalObjPtr& typeNode) const;
-		Joint_InterfaceChecksum GetInterfaceChecksum(const JLocalObjPtr& typeNode) const;
+		Joint_TypeId GetJointTypeId(JObjTempRef typeNode) const;
+		Joint_InterfaceChecksum GetInterfaceChecksum(JObjTempRef typeNode) const;
 
-		ArrayUserData GetArrayUserData(const JLocalObjPtr& typeNode) const;
-		ObjectUserData GetObjectUserData(const JLocalObjPtr& typeNode) const;
-		EnumUserData GetEnumUserData(const JLocalObjPtr& typeNode) const;
-		StructUserData GetStructUserData(const JLocalObjPtr& typeNode) const;
+		ArrayUserData GetArrayUserData(JObjTempRef typeNode) const;
+		ObjectUserData GetObjectUserData(JObjTempRef typeNode) const;
+		EnumUserData GetEnumUserData(JObjTempRef typeNode) const;
+		StructUserData GetStructUserData(JObjTempRef typeNode) const;
 
-		MethodUserData GetMethodUserData(const JLocalObjPtr& methodNode) const;
+		MethodUserData GetMethodUserData(JObjTempRef methodNode) const;
 
-		JLocalObjPtr GetRetTypeNode(const JLocalObjPtr& methodNode) const;
-		JLocalObjPtr GetArrayElementTypeNode(const JLocalObjPtr& typeNode) const;
+		JObjLocalRef GetRetTypeNode(JObjTempRef methodNode) const;
+		JObjLocalRef GetArrayElementTypeNode(JObjTempRef typeNode) const;
 
 
 		class Sequence
 		{
 		private:
-			JLocalObjArrayPtr    _array;
+			JObjArrayLocalRef    _array;
 
 		public:
-			Sequence(const JLocalObjArrayPtr& array) : _array(array) { }
+			Sequence(JObjArrayLocalRef array) : _array(std::move(array)) { }
 
 			size_t GetCount() const
 			{
 				auto env = _array.GetEnv();
-				return JAVA_CALL(_array.GetEnv()->GetArrayLength(_array.Get()));
+				return JAVA_CALL(env->GetArrayLength(_array.Get()));
 			}
 
-			JLocalObjPtr Get(size_t index) const
+			JObjLocalRef Get(size_t index) const
 			{
 				auto env = _array.GetEnv();
-				return JLocalObjPtr(env, JAVA_CALL(env->GetObjectArrayElement(_array.Get(), index)));
+				return JObjLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectArrayElement(_array.Get(), index)));
 			}
 		};
 
-		Sequence GetParamsNodes(const JLocalObjPtr& methodNode) const;
-		Sequence GetMethodsNodes(const JLocalObjPtr& ifcNode) const;
-		Sequence GetMembersNodes(const JLocalObjPtr& typeNode) const;
-		MemberId GetMemberId(const StructUserData& structUserData, const JLocalObjPtr& memberNode) const;
-		JLocalObjPtr GetMemberType(const StructUserData& structUserData, const JLocalObjPtr& memberNode) const;
+		Sequence GetParamsNodes(JObjTempRef methodNode) const;
+		Sequence GetMethodsNodes(JObjTempRef ifcNode) const;
+		Sequence GetMembersNodes(JObjTempRef typeNode) const;
+		MemberId GetMemberId(const StructUserData& structUserData, JObjTempRef memberNode) const;
+		JObjLocalRef GetMemberType(const StructUserData& structUserData, JObjTempRef memberNode) const;
 	};
 
 

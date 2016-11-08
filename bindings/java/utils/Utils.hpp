@@ -47,15 +47,8 @@ namespace java
 		const char*        _data;
 
 	public:
-		template < template < typename > class RefPolicy >
-		StringDataHolder(const BasicJPtr<jstring, RefPolicy>& str)
+		StringDataHolder(JStringWeakRef str)
 		{ Init(str.GetEnv(), str.Get()); }
-
-		StringDataHolder(const JStringLocalRef& str)
-		{ Init(str.GetEnv(), str.Get()); }
-
-		StringDataHolder(JNIEnv* env, jstring str)
-		{ Init(env, str); }
 
 		~StringDataHolder()
 		{ _env->ReleaseStringUTFChars(_strObj, _data); }
@@ -72,6 +65,10 @@ namespace java
 			_data = _env->GetStringUTFChars(_strObj, &is_copy);
 		}
 	};
+
+
+	inline std::string ToStdString(JStringTempRef str)
+	{ return StringDataHolder(str.Weak()).GetData(); }
 
 
 	inline void ThrowJavaException(JNIEnv* env, const std::string& msg)

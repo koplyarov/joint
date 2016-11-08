@@ -22,7 +22,7 @@ namespace java
 			: env(env)
 		{ }
 
-		jvalue Unbox(Joint_Type type, const JObjRef& boxed) const
+		jvalue Unbox(Joint_Type type, const JObjWeakRef& boxed) const
 		{
 			jvalue result;
 
@@ -100,7 +100,7 @@ namespace java
 
 	private:
 #define DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(TypeName_, CppType_, JniType_, CallMethod_, ClassName_, ValueGetterName_, MangledType_) \
-			CppType_ Unbox##TypeName_(const JObjRef& val) const \
+			CppType_ Unbox##TypeName_(const JObjWeakRef& val) const \
 			{ \
 				auto cls = JClassLocalRef::StealLocal(env, JAVA_CALL(env->FindClass(ClassName_))); \
 				jmethodID method_id = JAVA_CALL(env->GetMethodID(cls, ValueGetterName_, "()" MangledType_)); \
