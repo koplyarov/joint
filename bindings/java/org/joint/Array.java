@@ -15,9 +15,9 @@ public class Array<T>
 	public void set(long index, T value)
 	{ doSet(handle, index, value); }
 
-	private native long initNative(TypeDescriptor type, long size);
-	private native void deinitNative(long handle);
+	private static native long initNative(TypeDescriptor type, long size);
+	private static native void deinitNative(long handle);
 
-	private native Object doGet(long handle, long index);
-	private native void doSet(long handle, long index, Object value);
+	private static native Object doGet(long handle, long index);
+	private static native void doSet(long handle, long index, Object value);
 }
