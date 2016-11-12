@@ -31,7 +31,7 @@ namespace java
 		auto proxy_class = JointJavaContext::TypeDescriptor(typeNode.Weak()).GetProxyClass().Global();
 		JOINT_CHECK(proxy_class, "Invalid TypeDescriptor for interface");
 
-		jmethodID proxy_ctor_id = JAVA_CALL(env->GetMethodID(proxy_class, "<init>", "(Lorg/joint/JointObject;)V"));
+		jmethodID proxy_ctor_id = JAVA_CALL(env->GetMethodID(proxy_class.Get(), "<init>", "(Lorg/joint/JointObject;)V"));
 
 		return ObjectUserData{std::move(proxy_class), proxy_ctor_id};
 	}
@@ -46,7 +46,7 @@ namespace java
 		auto enum_class = td.GetProxyClass().Global();
 		JOINT_CHECK(enum_class, "Invalid TypeDescriptor for enum");
 
-		jmethodID enum_creator_id = JAVA_CALL(env->GetStaticMethodID(enum_class, "fromInt", ("(I)" + td.GetMangledTypeName()).c_str()));
+		jmethodID enum_creator_id = JAVA_CALL(env->GetStaticMethodID(enum_class.Get(), "fromInt", ("(I)" + td.GetMangledTypeName()).c_str()));
 
 		return EnumUserData{std::move(enum_class), enum_creator_id};
 	}
@@ -61,7 +61,7 @@ namespace java
 		auto struct_class = td.GetProxyClass().Global();
 		JOINT_CHECK(struct_class, "Invalid TypeDescriptor for struct");
 
-		jmethodID struct_ctor_id = JAVA_CALL(env->GetMethodID(struct_class, "<init>", td.GetStructCtorSignature().c_str()));
+		jmethodID struct_ctor_id = JAVA_CALL(env->GetMethodID(struct_class.Get(), "<init>", td.GetStructCtorSignature().c_str()));
 
 		return StructUserData{std::move(struct_class), struct_ctor_id};
 	}
@@ -73,7 +73,7 @@ namespace java
 
 		JointJavaContext::MethodDescriptor md(methodNode.Weak());
 
-		jmethodID id = JAVA_CALL(env->GetMethodID(md.GetInterfaceClass(), md.GetName().c_str(), md.GetSignature().c_str()));
+		jmethodID id = JAVA_CALL(env->GetMethodID(md.GetInterfaceClass().Get(), md.GetName().c_str(), md.GetSignature().c_str()));
 
 		return MethodUserData{id};
 	}
@@ -107,7 +107,7 @@ namespace java
 		auto member_type = mi.GetType();
 		JointJavaContext::TypeDescriptor td(member_type);
 
-		jfieldID id = JAVA_CALL(env->GetFieldID(structUserData.Cls, mi.GetName().c_str(), td.GetMangledTypeName().c_str()));
+		jfieldID id = JAVA_CALL(env->GetFieldID(structUserData.Cls.Get(), mi.GetName().c_str(), td.GetMangledTypeName().c_str()));
 
 		return MemberId{id};
 	}

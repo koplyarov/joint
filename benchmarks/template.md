@@ -26,3 +26,12 @@
 | Native call   | ${basic.invokeNoParams.swig(binding:python,module:swig_benchmarks)[invokeNoParams_native]} |
 | Incoming call | ${basic.invokeNoParams.swig(binding:python,module:swig_benchmarks)[invokeNoParams]} |
 | Outgoing call | ${basic.invokeNoParams.swig(binding:python,module:swig_benchmarks)[invokeNoParams_outgoing]} |
+
+# Java
+## joint
+|               | time, ns |
+| ------------- | -------: |
+| Native call   | ${basic.invokeNoParams.joint(binding:java,module:file://`pwd`/build/bin/benchmarks-java.jar:benchmarks.Benchmarks)[invokeNoParams_native]} |
+| Incoming call | ${basic.invokeNoParams.joint(binding:java,module:file://`pwd`/build/bin/benchmarks-java.jar:benchmarks.Benchmarks)[invokeNoParams]} |
+| Outgoing call | ${basic.invokeNoParams.joint(binding:java,module:file://`pwd`/build/bin/benchmarks-java.jar:benchmarks.Benchmarks)[invokeNoParams_outgoing]} |
+

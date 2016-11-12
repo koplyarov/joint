@@ -4,8 +4,12 @@ add_subdirectory(core)
 
 find_package(SWIG)
 find_package(PythonLibs)
+find_package(JNI)
+find_package(Java)
 
-if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PythonLibs_FOUND)
+if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PythonLibs_FOUND AND JNI_FOUND AND Java_FOUND)
+	include(UseJava)
+
 	if (MSVC)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
 		add_definitions(-DSWIG_PYTHON_INTERPRETER_NO_DEBUG)
@@ -26,7 +30,8 @@ if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PythonLibs_FOUND)
 
 	set_source_files_properties(${swig_SRCS} PROPERTIES CPLUSPLUS ON)
 	if (NOT MSVC)
-		set_source_files_properties("bin/hidePYTHON_wrap.cxx" PROPERTIES COMPILE_FLAGS "-Wno-maybe-uninitialized")
+		set_source_files_properties("${CMAKE_SWIG_OUTDIR}/ISwigBenchmarksPYTHON_wrap.cxx" PROPERTIES COMPILE_FLAGS "-Wno-maybe-uninitialized")
+		set_source_files_properties("${CMAKE_SWIG_OUTDIR}/ISwigBenchmarksJAVA_wrap.cxx" PROPERTIES COMPILE_FLAGS "-Wno-strict-aliasing")
 		set_source_files_properties("swig/ISwigBenchmarks.cpp" PROPERTIES COMPILE_FLAGS "-fPIC")
 	endif()
 
@@ -34,7 +39,8 @@ if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PythonLibs_FOUND)
 
 	add_library(swig_benchmarks_native swig/ISwigBenchmarks.cpp)
 	swig_add_module(swig_benchmarks_wrappers python ${swig_SRCS})
-	swig_link_libraries(swig_benchmarks_wrappers swig_benchmarks_native ${PYTHON_LIBRARIES})
+	swig_add_module(swig_benchmarks_wrappers java ${swig_SRCS})
+	swig_link_libraries(swig_benchmarks_wrappers swig_benchmarks_native ${PYTHON_LIBRARIES} ${JNI_LIBRARIES})
 
 	################################################################################
 
@@ -43,8 +49,10 @@ if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PythonLibs_FOUND)
 	add_subdirectory(python)
 	add_subdirectory(cpp)
 	add_subdirectory(c)
+	add_subdirectory(java)
 
 	include_directories(${PYTHON_INCLUDE_DIRS})
+	include_directories(${JNI_INCLUDE_DIRS})
 
 	include_directories(${CMAKE_CURRENT_BINARY_DIR})
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR})

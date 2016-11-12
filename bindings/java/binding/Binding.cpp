@@ -78,9 +78,9 @@ namespace binding
 
 		auto jm = JointJavaContext::ModuleContext::Make(env, module);
 
-		jmethodID root_obj_getter_id = JAVA_CALL(env->GetStaticMethodID(cls, getterName, "(Lorg/joint/ModuleContext;)Lorg/joint/JointObject;"));
+		jmethodID root_obj_getter_id = JAVA_CALL(env->GetStaticMethodID(cls.Get(), getterName, "(Lorg/joint/ModuleContext;)Lorg/joint/JointObject;"));
 
-		auto root_obj = JObjLocalRef::StealLocal(env, JAVA_CALL(env->CallStaticObjectMethod(cls, root_obj_getter_id, jm.Get())));
+		auto root_obj = JObjLocalRef::StealLocal(env, JAVA_CALL(env->CallStaticObjectMethod(cls.Get(), root_obj_getter_id, jm.Get())));
 		JointJavaContext::JointObject jo(root_obj);
 
 		*outObject = jo.GetHandle();

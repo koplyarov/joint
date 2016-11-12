@@ -91,11 +91,11 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod(JNIEnv* env,
 	else if (ret == JOINT_ERROR_EXCEPTION)
 	{
 		auto JointException_cls = JClassLocalRef::StealLocal(env, JAVA_CALL(env->FindClass("Lorg/joint/JointException;")));
-		jmethodID JointException_ctor_id = JAVA_CALL(env->GetMethodID(JointException_cls, "<init>", "(J)V"));
+		jmethodID JointException_ctor_id = JAVA_CALL(env->GetMethodID(JointException_cls.Get(), "<init>", "(J)V"));
 		std::unique_ptr<ExceptionInfo> ex_info(new ExceptionInfo(ExceptionInfo::FromJointException(ret_value.result.ex)));
-		auto ex = JThrowableLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(JointException_cls, JointException_ctor_id, ex_info.get())));
+		auto ex = JThrowableLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(JointException_cls.Get(), JointException_ctor_id, ex_info.get())));
 		ex_info.release();
-		env->Throw(ex);
+		env->Throw(ex.Get());
 	}
 	else
 		JOINT_THROW((std::string("Joint_InvokeMethod failed: ") + Joint_ErrorToString(ret)).c_str());

@@ -85,7 +85,7 @@ namespace java
 		JavaVariant FromJointEnum(int32_t val, const JavaBindingInfo::EnumUserData& enumType) const
 		{
 			jvalue result;
-			result.l = JAVA_CALL(env->CallStaticObjectMethod(enumType.Cls, enumType.FromIntId, (jint)val));
+			result.l = JAVA_CALL(env->CallStaticObjectMethod(enumType.Cls.Get(), enumType.FromIntId, (jint)val));
 			return result;
 		}
 
@@ -108,7 +108,7 @@ namespace java
 
 			auto joint_obj = JointJavaContext::JointObject::Make(env, val);
 
-			result.l = JAVA_CALL(env->NewObject(proxyType.Cls, proxyType.CtorId, joint_obj.Get()));
+			result.l = JAVA_CALL(env->NewObject(proxyType.Cls.Get(), proxyType.CtorId, joint_obj.Get()));
 			sg.Cancel();
 			return result;
 		}
@@ -153,7 +153,7 @@ namespace java
 		JavaVariant MakeStruct(const ParamsArray& params, const JavaBindingInfo::StructUserData& structType) const
 		{
 			jvalue result;
-			result.l = JAVA_CALL(env->NewObjectA(structType.Cls, structType.CtorId, params.GetVector().data()));
+			result.l = JAVA_CALL(env->NewObjectA(structType.Cls.Get(), structType.CtorId, params.GetVector().data()));
 			return result;
 		}
 
@@ -171,7 +171,7 @@ namespace java
 
 		int32_t ToJointEnum(jvalue val, const JavaBindingInfo::EnumUserData& enumType) const
 		{
-			jfieldID value_id = JAVA_CALL(env->GetFieldID(enumType.Cls, "value", "I"));
+			jfieldID value_id = JAVA_CALL(env->GetFieldID(enumType.Cls.Get(), "value", "I"));
 			return  JAVA_CALL(env->GetIntField(val.l, value_id));
 		}
 
@@ -181,7 +181,7 @@ namespace java
 				return JOINT_NULL_HANDLE;
 
 			auto cls = JClassLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectClass(val.l)));
-			jfieldID obj_id = JAVA_CALL(env->GetFieldID(cls, "_obj", "Lorg/joint/JointObject;"));
+			jfieldID obj_id = JAVA_CALL(env->GetFieldID(cls.Get(), "_obj", "Lorg/joint/JointObject;"));
 
 			auto raw_joint_obj = JObjLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(val.l, obj_id)));
 			JointJavaContext::JointObject joint_obj(raw_joint_obj);

@@ -58,7 +58,6 @@ namespace java
 		JTempRef(JNIEnv* env, T_ obj) : _env(env), _obj(obj) { }
 
 		explicit operator bool() const { return _obj; }
-		operator T_() const { return _obj; }
 		T_ Get() const { return _obj; }
 		JNIEnv* GetEnv() const { return _env; }
 
@@ -78,7 +77,6 @@ namespace java
 		JWeakRef(JNIEnv* env, T_ obj) : _env(env), _obj(obj) { }
 
 		explicit operator bool() const { return _obj; }
-		operator T_() const { return _obj; }
 		T_ Get() const { return _obj; }
 		JNIEnv* GetEnv() const { return _env; }
 
@@ -139,7 +137,6 @@ namespace java
 		}
 
 		explicit operator bool() const { return _obj; }
-		operator T_() const { return _obj; }
 		T_ Get() const { return _obj; }
 		JNIEnv* GetEnv() const { return _env; }
 
@@ -217,7 +214,6 @@ namespace java
 		}
 
 		explicit operator bool() const { return _obj; }
-		operator T_() const { return _obj; }
 		T_ Get() const { return _obj; }
 
 		JLocalRef<T_> Local() const
