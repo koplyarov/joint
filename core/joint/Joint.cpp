@@ -221,18 +221,6 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_ReleaseBinding(Joint_BindingHandle binding)
-	{
-		JOINT_CPP_WRAP_BEGIN
-
-		GetLogger().Info() << "ReleaseBinding(binding: " << binding << " (userData: " << (binding ? binding->userData : NULL) << ")" << ")";
-
-		JOINT_CHECK(binding != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
-
-		JOINT_CPP_WRAP_END
-	}
-
-
 	Joint_Error Joint_LoadModule(Joint_BindingHandle binding, const char* moduleName, Joint_ModuleHandle* outModule)
 	{
 		JOINT_CPP_WRAP_BEGIN
@@ -302,7 +290,7 @@ extern "C"
 		JOINT_CPP_WRAP_BEGIN
 
 		*outObject = new Joint_Object(internal, module);
-		++module->refCount;
+		return Joint_IncRefModule(module);
 
 		JOINT_CPP_WRAP_END
 	}
@@ -320,7 +308,6 @@ extern "C"
 
 		Joint_Error ret = module->binding->desc.getRootObject(module, module->binding->userData, module->internal, getterName, outObject);
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
-		++module->refCount;
 
 		GetLogger().Debug() << "  GetRootObject.outObject: " << *outObject << " (internal: " << (*outObject)->internal << ")";
 
@@ -369,12 +356,15 @@ extern "C"
 			JOINT_CPP_WRAP_BEGIN
 
 			GetLogger().Debug() << "ReleaseObject(obj: " << handle << " (internal: " << (handle ? handle->internal : NULL) << "))";
+
 			Joint_Error ret = handle->module->binding->desc.releaseObject(handle->module->binding->userData, handle->module->internal, handle->internal);
 			if (ret != JOINT_ERROR_NONE)
 				GetLogger().Error() << "releaseObject failed: " << ret;
+
 			ret = Joint_DecRefModule(handle->module);
 			if (ret != JOINT_ERROR_NONE)
 				GetLogger().Error() << "Joint_DecRefModule failed: " << ret;
+
 			delete handle;
 
 			JOINT_CPP_WRAP_END_VOID
@@ -405,7 +395,8 @@ extern "C"
 
 		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
 		*outHandle = new Joint_Object(internal, handle->module);
-		++handle->module->refCount;
+
+		return Joint_IncRefModule(handle->module);
 
 		JOINT_CPP_WRAP_END
 	}
