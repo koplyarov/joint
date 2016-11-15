@@ -223,9 +223,7 @@ namespace devkit
 
 		const MethodDescriptor& GetMethod(size_t index) const
 		{
-			if (index >= _methodsCount)
-				JOINT_THROW("Method index out of range");
-
+			JOINT_ASSERT_EX(GetLogger().GetName(), index >= _methodsCount);
 			return _methods[index];
 		}
 	};

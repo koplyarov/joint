@@ -73,31 +73,33 @@ namespace java
 
 	inline void ThrowJavaException(JNIEnv* env, const std::string& msg)
 	{
+		const char* LoggerName = "Joint.Java.Utils";
+
 		auto jmsg = JStringLocalRef::StealLocal(env, env->NewStringUTF(msg.c_str()));
 		auto RuntimeException_cls = JClassLocalRef::StealLocal(env, env->FindClass("java/lang/RuntimeException"));
 		if (!RuntimeException_cls)
-			JOINT_TERMINATE("Joint.Java.Utils", "Could not find class java.lang.RuntimeException");
+			JOINT_TERMINATE("Could not find class java.lang.RuntimeException");
 
 		jmethodID RuntimeException_ctor_id = env->GetMethodID(RuntimeException_cls.Get(), "<init>", "(Ljava/lang/String;)V");
 		if (!RuntimeException_ctor_id)
-			JOINT_TERMINATE("Joint.Java.Utils", "Could not find java.lang.RuntimeException(java.lang.String) constructor");
+			JOINT_TERMINATE("Could not find java.lang.RuntimeException(java.lang.String) constructor");
 
 		auto ex = JThrowableLocalRef::StealLocal(env, reinterpret_cast<jthrowable>(env->NewObject(RuntimeException_cls.Get(), RuntimeException_ctor_id, jmsg.Get())));
 		if (!ex)
-			JOINT_TERMINATE("Joint.Java.Utils", "Could not create java.lang.RuntimeException object");
+			JOINT_TERMINATE("Could not create java.lang.RuntimeException object");
 
 		env->Throw(ex.Get());
 	}
 
 
-#define DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION do { if (env->ExceptionCheck()) JOINT_TERMINATE("Joint.Java.Utils", "Got an exception from java while processing another one"); } while (false)
+#define DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION do { if (env->ExceptionCheck()) JOINT_TERMINATE_EX("Joint.Java.Utils", "Got an exception from java while processing another one"); } while (false)
 
 	inline devkit::ExceptionInfo GetJavaExceptionInfo(JNIEnv *env)
 	{
 		using namespace devkit;
 
 		if (!env->ExceptionCheck())
-			JOINT_TERMINATE("Joint.Java.Utils", "GetJavaExceptionInfo failed: no active java exception");
+			JOINT_TERMINATE_EX("Joint.Java.Utils", "GetJavaExceptionInfo failed: no active java exception");
 
 		jthrowable raw_throwable = env->ExceptionOccurred();
 		env->ExceptionClear();

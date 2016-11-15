@@ -22,7 +22,8 @@
 #endif
 
 
-JOINT_DEVKIT_LOGGER("Joint.Core")
+static const char* LoggerName = "Joint.Core";
+JOINT_DEVKIT_LOGGER(LoggerName)
 
 
 static void DefaultLogCallback(Joint_LogLevel logLevel, const char* subsystem, const char* message)
@@ -338,7 +339,7 @@ extern "C"
 			return;
 
 		if (++handle->refCount <= 1)
-			JOINT_TERMINATE("Joint.Core", "Inconsistent reference counter!");
+			JOINT_TERMINATE("Inconsistent reference counter!");
 	}
 
 
@@ -349,7 +350,7 @@ extern "C"
 
 		auto refs = --handle->refCount;
 		if (refs < 0)
-			JOINT_TERMINATE("Joint.Core", "Inconsistent reference counter!");
+			JOINT_TERMINATE("Inconsistent reference counter!");
 
 		if (refs == 0)
 		{
@@ -505,7 +506,7 @@ extern "C"
 			return;
 
 		if (++handle->refCount <= 1)
-			JOINT_TERMINATE("Joint.Core", "Inconsistent reference counter!");
+			JOINT_TERMINATE("Inconsistent reference counter!");
 	}
 
 
@@ -516,7 +517,7 @@ extern "C"
 
 		auto refs = --handle->refCount;
 		if (refs < 0)
-			JOINT_TERMINATE("Joint.Core", "Inconsistent reference counter!");
+			JOINT_TERMINATE("Inconsistent reference counter!");
 
 		if (refs == 0)
 		{

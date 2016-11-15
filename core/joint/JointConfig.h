@@ -48,4 +48,13 @@
 #	endif
 #endif
 
+
+#if !defined(JOINT_DEBUG)
+#	if defined(NDEBUG)
+#		define JOINT_DEBUG 0
+#	else
+#		define JOINT_DEBUG 1
+#	endif
+#endif
+
 #endif

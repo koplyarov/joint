@@ -98,6 +98,8 @@ namespace devkit
 			: _name(std::move(name))
 		{ }
 
+		const char* GetName() const { return _name; }
+
 		Stream Debug() const   { return Stream(_name, JOINT_LOGLEVEL_DEBUG); }
 		Stream Info() const    { return Stream(_name, JOINT_LOGLEVEL_INFO); }
 		Stream Warning() const { return Stream(_name, JOINT_LOGLEVEL_WARNING); }

@@ -28,23 +28,25 @@ namespace devkit
 		using ElementStorage = typename std::aligned_storage<sizeof(T_), alignof(T_)>::type;
 		using BufArray = std::array<ElementStorage, BytesSize_ / sizeof(T_)>;
 
-		struct BlockDescriptor
+		struct BlockNode
 		{
-			size_t  			Count;
-			ElementStorage*     Pointer;
-		};
+			static const size_t HeaderSize = sizeof(BlockNode) - sizeof(BlockNode::StorageBegin);
 
-		using BlocksVector = std::vector<BlockDescriptor>;
+			BlockNode*       Prev;
+			BlockNode*       Next;
+			size_t           Count;
+			ElementStorage   StorageBegin;
+		};
 
 	private:
 		BufArray              _buf;
 		size_t                _freeOfs;
-		BlocksVector          _fallbackBlocks;
+		BlockNode             _fallbackBlocksHead;
 
 	public:
 		StackStorage()
 			: _freeOfs()
-		{ }
+		{ _fallbackBlocksHead.Next = _fallbackBlocksHead.Prev = &_fallbackBlocksHead; }
 
 		StackStorage(const StackStorage&) = delete;
 		StackStorage* operator = (const StackStorage&) = delete;
@@ -54,18 +56,23 @@ namespace devkit
 			while (_freeOfs--)
 				reinterpret_cast<T_&>(_buf[_freeOfs]).~T_();
 
-			for (auto block : _fallbackBlocks)
+			BlockNode* next;
+			for (BlockNode* n = _fallbackBlocksHead.Next; n != &_fallbackBlocksHead; n = next)
 			{
-				auto count = block.Count;
-				auto ptr = block.Pointer;
+				next = n->Next;
+				auto count = n->Count;
+				auto ptr = &n->StorageBegin;
 				for (size_t i = 0; i < count; ++i)
 					reinterpret_cast<T_&>(ptr[i]).~T_();
-				delete[] ptr;
+				free(n);
 			}
 		}
 
 		T_* Make(size_t count)
 		{
+			if (count == 0)
+				return nullptr;
+
 			return AllocateAndConstruct(count, [&](T_* p) {
 				size_t i = 0;
 				auto sg(ScopeExit([&]{ while (i--) p[i].~T_(); }));
@@ -97,13 +104,20 @@ namespace devkit
 			else
 			{
 				static_assert(sizeof(ElementStorage) >= sizeof(T_), "sdfsdfgsdfg");
-				auto ptr = new ElementStorage[count];
-				_fallbackBlocks.push_back({ count, ptr });
+				auto b = reinterpret_cast<BlockNode*>(malloc(BlockNode::HeaderSize + sizeof(ElementStorage) * count));
 
-				auto sg(ScopeExit([&]{ _fallbackBlocks.pop_back(); delete[] ptr; }));
+				b->Count = count;
+				auto ptr = &b->StorageBegin;
+
+				auto sg(ScopeExit([&]{ free(b); delete[] ptr; }));
 				result = reinterpret_cast<T_*>(ptr);
 				constructFunc(result, std::forward<Args_>(args)...);
 				sg.Cancel();
+
+				b->Next = _fallbackBlocksHead.Next;
+				b->Prev = &_fallbackBlocksHead;
+				_fallbackBlocksHead.Next->Prev = b;
+				_fallbackBlocksHead.Next = b;
 			}
 
 			return result;

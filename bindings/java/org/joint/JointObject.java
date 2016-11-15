@@ -15,7 +15,7 @@ public class JointObject
 	{ releaseObject(handle); }
 
 	public Object invokeMethod(long nativeInterfaceDescriptor, int methodId, Object... params)
-	{ return doInvokeMethod(handle, nativeInterfaceDescriptor, methodId, params); }
+	{ return doInvokeMethod(handle, nativeInterfaceDescriptor, methodId, params.length, params); }
 
 	public JointObject cast(InterfaceId interfaceId, int interfaceChecksum)
 	{
@@ -23,7 +23,7 @@ public class JointObject
 		return newHandle != 0 ? new JointObject(newHandle) : null;
 	}
 
-	private static native Object doInvokeMethod(long handle, long nativeInterfaceDescriptor, int methodId, Object[] params);
+	private static native Object doInvokeMethod(long handle, long nativeInterfaceDescriptor, int methodId, int paramsCount, Object[] params);
 	private static native long doCast(long handle, String interfaceId, int interfaceChecksum);
 	static native void releaseObject(long handle);
 }

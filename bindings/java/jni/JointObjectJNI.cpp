@@ -7,7 +7,8 @@
 using namespace joint::devkit;
 using namespace joint::java;
 
-JOINT_DEVKIT_LOGGER("Joint.Java.JNI")
+static const char* LoggerName = "Joint.Java.JNI";
+JOINT_DEVKIT_LOGGER(LoggerName)
 
 
 JNIEXPORT void JNICALL Java_org_joint_JointObject_releaseObject(JNIEnv* env, jclass cls, jlong handleLong)
@@ -34,29 +35,24 @@ JNIEXPORT jlong JNICALL Java_org_joint_JointObject_doCast(JNIEnv* env, jclass cl
 	JNI_WRAP_CPP_END(ret == JOINT_ERROR_NONE ? reinterpret_cast<jlong>(new_handle) : 0, 0)
 }
 
-JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod(JNIEnv* env, jclass cls, jlong handle, jlong nativeInterfaceDescriptor, jint methodId, jobjectArray jparams)
+JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod(JNIEnv* env, jclass cls, jlong handle, jlong nativeInterfaceDescriptor, jint methodId, jint paramsCount, jobjectArray jparams)
 {
 	JNI_WRAP_CPP_BEGIN
 
-	JavaVM* jvm = nullptr;
-	JNI_CALL( env->GetJavaVM(&jvm) );
+	JOINT_ASSERT(paramsCount == JAVA_CALL(env->GetArrayLength(jparams)));
 
 	auto obj = reinterpret_cast<Joint_ObjectHandle>(handle);
-	JOINT_CHECK(obj, "Invalid object");
-
 	auto ifc_desc = reinterpret_cast<JavaInterfaceDescriptor*>(nativeInterfaceDescriptor);
-	JOINT_CHECK(ifc_desc, "Invalid object");
+	JOINT_ASSERT(obj && ifc_desc);
 
 	const auto& method_desc = ifc_desc->GetMethod(methodId);
 
 	StackStorage<Joint_Parameter, 64> params_storage;
 
-	auto params_count = JAVA_CALL(env->GetArrayLength(jparams));
-	auto params = params_storage.Make(params_count);
+	Joint_Parameter* params = params_storage.Make(paramsCount);
 
 	ParamsAllocator alloc;
-
-	for (auto i = 0; i < params_count; ++i)
+	for (auto i = 0; i < paramsCount; ++i)
 	{
 		const auto& t = method_desc.GetParamType(i);
 
@@ -67,7 +63,7 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod(JNIEnv* env,
 
 	Joint_Type ret_type = method_desc.GetRetType().GetJointType();
 	Joint_RetValue ret_value;
-	Joint_Error ret = Joint_InvokeMethod(obj, methodId, params, params_count, ret_type, &ret_value);
+	Joint_Error ret = Joint_InvokeMethod(obj, methodId, params, paramsCount, ret_type, &ret_value);
 	JOINT_CHECK(ret == JOINT_ERROR_NONE || ret == JOINT_ERROR_EXCEPTION, (std::string("Joint_InvokeMethod failed: ") + Joint_ErrorToString(ret)).c_str());
 
 	JObjLocalRef result;
