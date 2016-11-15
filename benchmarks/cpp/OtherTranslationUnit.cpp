@@ -1,6 +1,5 @@
 #include "OtherTranslationUnit.hpp"
 
 
-void NoParamsFunc()
-{
-}
+void NativeNoParamsToVoid() { }
+void NativeI32ToVoid(int32_t p) { }

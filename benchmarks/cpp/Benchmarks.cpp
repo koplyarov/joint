@@ -18,18 +18,31 @@ public:
 	~Benchmarks()
 	{ }
 
-	void NoParamsMethod() { }
+	void NoParamsToVoid() { }
+	void I32ToVoid(int32_t p) { }
 
-	void MeasureNativeNoParams(int64_t n)
+	void MeasureNativeNoParamsToVoid(int64_t n)
 	{
 		for (auto i = 0; i < n; ++i)
-			NoParamsFunc();
+			NativeNoParamsToVoid();
 	}
 
-	void MeasureOutgoingNoParams(benchmarks::IInvokable_Ptr invokable, int64_t n)
+	void MeasureNativeI32ToVoid(int64_t n)
 	{
 		for (auto i = 0; i < n; ++i)
-			invokable->NoParamsMethod();
+			NativeI32ToVoid(0);
+	}
+
+	void MeasureOutgoingNoParamsToVoid(benchmarks::IInvokable_Ptr invokable, int64_t n)
+	{
+		for (auto i = 0; i < n; ++i)
+			invokable->NoParamsToVoid();
+	}
+
+	void MeasureOutgoingI32ToVoid(benchmarks::IInvokable_Ptr invokable, int64_t n)
+	{
+		for (auto i = 0; i < n; ++i)
+			invokable->I32ToVoid(0);
 	}
 };
 

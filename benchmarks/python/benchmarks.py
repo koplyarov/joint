@@ -7,16 +7,24 @@ class Benchmarks(benchmarks_IBenchmarks):
         super(Benchmarks, self).__init__()
         self.jointModule = jointModule
 
-    def NoParamsMethod(self):
-        pass
+    def NoParamsToVoid(self): pass
+    def I32ToVoid(self, p): pass
 
-    def MeasureNativeNoParams(self, n):
+    def MeasureNativeNoParamsToVoid(self, n):
         for i in range(n):
-            self.NoParamsMethod()
+            self.NoParamsToVoid()
 
-    def MeasureOutgoingNoParams(self, invokable, n):
+    def MeasureNativeI32ToVoid(self, n):
         for i in range(n):
-            invokable.NoParamsMethod()
+            self.I32ToVoid(0)
+
+    def MeasureOutgoingNoParamsToVoid(self, invokable, n):
+        for i in range(n):
+            invokable.NoParamsToVoid()
+
+    def MeasureOutgoingI32ToVoid(self, invokable, n):
+        for i in range(n):
+            invokable.I32ToVoid(0)
 
 def GetBenchmarks(jointModule):
     return jointModule.CreateComponent(joint_IObject, Benchmarks, jointModule)

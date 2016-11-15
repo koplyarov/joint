@@ -1,6 +1,11 @@
 #ifndef CPP_OTHERTRANSLATIONUNIT_HPP
 #define CPP_OTHERTRANSLATIONUNIT_HPP
 
-void NoParamsFunc();
+
+#include <stdint.h>
+
+
+void NativeNoParamsToVoid();
+void NativeI32ToVoid(int32_t p);
 
 #endif

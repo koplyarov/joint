@@ -2,13 +2,16 @@ package benchmarks
 {
 	interface IInvokable
 	{
-		void NoParamsMethod();
+		void NoParamsToVoid();
+		void I32ToVoid(i32 p);
 	}
 
-	interface IBenchmarks
+	interface IBenchmarks : IInvokable
 	{
-		void NoParamsMethod();
-		void MeasureNativeNoParams(i64 n);
-		void MeasureOutgoingNoParams(IInvokable callback, i64 n);
+		void MeasureNativeNoParamsToVoid(i64 n);
+		void MeasureNativeI32ToVoid(i64 n);
+
+		void MeasureOutgoingNoParamsToVoid(IInvokable callback, i64 n);
+		void MeasureOutgoingI32ToVoid(IInvokable callback, i64 n);
 	}
 }

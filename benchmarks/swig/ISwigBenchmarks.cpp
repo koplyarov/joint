@@ -2,24 +2,16 @@
 
 
 
-IInvokable::~IInvokable()
-{ }
-
-void IInvokable::NoParamsMethod()
-{ }
+IInvokable::~IInvokable() { }
+void IInvokable::NoParamsToVoid() { }
+void IInvokable::I32ToVoid(int32_t) { }
 
 
-IBenchmarks::~IBenchmarks()
-{ }
-
-void IBenchmarks::NoParamsMethod()
-{ }
-
-void IBenchmarks::MeasureNativeNoParams(int64_t n)
-{ }
-
-void IBenchmarks::MeasureOutgoingNoParams(IInvokable* callback, int64_t n)
-{ }
+IBenchmarks::~IBenchmarks() { }
+void IBenchmarks::MeasureNativeNoParamsToVoid(int64_t n) { }
+void IBenchmarks::MeasureNativeI32ToVoid(int64_t n) { }
+void IBenchmarks::MeasureOutgoingNoParamsToVoid(IInvokable* callback, int64_t n) { }
+void IBenchmarks::MeasureOutgoingI32ToVoid(IInvokable* callback, int64_t n) { }
 
 
 IBenchmarks* g_benchmarks = nullptr;

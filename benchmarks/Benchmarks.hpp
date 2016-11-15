@@ -27,9 +27,9 @@ namespace benchmarks
 		Benchmarks()
 			: BenchmarksClass("basic")
 		{
-			AddBenchmark<std::string, std::string>("invokeNoParamsNative", &Benchmarks::InvokeNoParamsNative, {"binding", "module"});
-			AddBenchmark<std::string, std::string>("invokeNoParams", &Benchmarks::InvokeNoParams, {"binding", "module"});
-			AddBenchmark<std::string, std::string>("invokeNoParamsOutgoing", &Benchmarks::InvokeNoParamsOutgoing, {"binding", "module"});
+			AddBenchmark<std::string, std::string>("invokeNative", &Benchmarks::InvokeNoParamsNative, {"binding", "module"});
+			AddBenchmark<std::string, std::string>("invoke", &Benchmarks::InvokeNoParams, {"binding", "module"});
+			AddBenchmark<std::string, std::string>("invokeOutgoing", &Benchmarks::InvokeNoParamsOutgoing, {"binding", "module"});
 		}
 
 	private:
@@ -39,8 +39,11 @@ namespace benchmarks
 			BenchmarkCtx ctx(binding, module);
 			auto b = ctx.CreateBenchmarks();
 
-			b->MeasureNativeNoParams(n);
-			context.Profile("time", n, [&]{ b->MeasureNativeNoParams(n); });
+			b->MeasureNativeNoParamsToVoid(n);
+			context.Profile("void_noParams", n, [&]{ b->MeasureNativeNoParamsToVoid(n); });
+
+			b->MeasureNativeI32ToVoid(n);
+			context.Profile("void_i32", n, [&]{ b->MeasureNativeI32ToVoid(n); });
 		}
 
 		static void InvokeNoParams(BenchmarkContext& context, const std::string& binding, const std::string& module)
@@ -50,8 +53,12 @@ namespace benchmarks
 			auto b = ctx.CreateBenchmarks();
 
 			for (auto i = 0; i < n; ++i)
-				b->NoParamsMethod();
-			context.Profile("time", n, [&]{ for (auto i = 0; i < n; ++i) b->NoParamsMethod(); });
+				b->NoParamsToVoid();
+			context.Profile("void_noParams", n, [&]{ for (auto i = 0; i < n; ++i) b->NoParamsToVoid(); });
+
+			for (auto i = 0; i < n; ++i)
+				b->I32ToVoid(0);
+			context.Profile("void_i32", n, [&]{ for (auto i = 0; i < n; ++i) b->I32ToVoid(0); });
 		}
 
 		static void InvokeNoParamsOutgoing(BenchmarkContext& context, const std::string& binding, const std::string& module)
@@ -59,10 +66,13 @@ namespace benchmarks
 			const auto n = context.GetIterationsCount();
 			BenchmarkCtx ctx(binding, module);
 			auto b = ctx.CreateBenchmarks();
-
 			auto invokable = ctx.CreateLocalInvokable();
-			b->MeasureOutgoingNoParams(invokable, n);
-			context.Profile("time", n, [&]{ b->MeasureOutgoingNoParams(invokable, n); });
+
+			b->MeasureOutgoingNoParamsToVoid(invokable, n);
+			context.Profile("void_noParams", n, [&]{ b->MeasureOutgoingNoParamsToVoid(invokable, n); });
+
+			b->MeasureOutgoingI32ToVoid(invokable, n);
+			context.Profile("void_i32", n, [&]{ b->MeasureOutgoingI32ToVoid(invokable, n); });
 		}
 	};
 

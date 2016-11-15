@@ -21,22 +21,34 @@ class Benchmarks
 			benchmarks_IBenchmarks.registerAccessors(this);
 		}
 
-		public void NativeNoParamsMethod()
-		{ dummyInt = r.nextInt(); }
+		public void NativeNoParamsToVoid() { dummyInt = r.nextInt(); }
+		public void NativeI32ToVoid(int p) { dummyInt = r.nextInt() + p; }
 
-		public void NoParamsMethod()
-		{ }
+		public void NoParamsToVoid() { }
+		public void I32ToVoid(int p) { }
 
-		public void MeasureNativeNoParams(long n)
+		public void MeasureNativeNoParamsToVoid(long n)
 		{
 			for (long i = 0; i < n; ++i)
-				NativeNoParamsMethod();
+				NativeNoParamsToVoid();
 		}
 
-		public void MeasureOutgoingNoParams(benchmarks_IInvokable invokable, long n)
+		public void MeasureNativeI32ToVoid(long n)
 		{
 			for (long i = 0; i < n; ++i)
-				invokable.NoParamsMethod();
+				NativeI32ToVoid(42);
+		}
+
+		public void MeasureOutgoingNoParamsToVoid(benchmarks_IInvokable invokable, long n)
+		{
+			for (long i = 0; i < n; ++i)
+				invokable.NoParamsToVoid();
+		}
+
+		public void MeasureOutgoingI32ToVoid(benchmarks_IInvokable invokable, long n)
+		{
+			for (long i = 0; i < n; ++i)
+				invokable.I32ToVoid(0);
 		}
 	}
 
