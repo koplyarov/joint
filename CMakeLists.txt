@@ -1,5 +1,7 @@
+cmake_minimum_required(VERSION 2.8)
+cmake_policy(SET CMP0058 OLD)
+
 project(joint)
-cmake_minimum_required(VERSION 2.8.12)
 
 if (JOINT_TREAT_WARNINGS_AS_ERRORS)
 	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")

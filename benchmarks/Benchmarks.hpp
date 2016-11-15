@@ -37,10 +37,15 @@ namespace benchmarks
 			BenchmarkCtx ctx(binding, module);
 			auto b = ctx.CreateBenchmarks();
 
+			for (auto i = 0; i < n; ++i)
+				b->NoParamsMethod();
 			context.Profile("invokeNoParams", n, [&]{ for (auto i = 0; i < n; ++i) b->NoParamsMethod(); });
+
+			b->MeasureNativeNoParams(n);
 			context.Profile("invokeNoParams_native", n, [&]{ b->MeasureNativeNoParams(n); });
 
 			auto invokable = ctx.CreateLocalInvokable();
+			b->MeasureOutgoingNoParams(invokable, n);
 			context.Profile("invokeNoParams_outgoing", n, [&]{ b->MeasureOutgoingNoParams(invokable, n); });
 		}
 	};

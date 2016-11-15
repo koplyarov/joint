@@ -35,3 +35,9 @@
 | Incoming call | ${basic.invokeNoParams.joint(binding:java,module:file://`pwd`/build/bin/benchmarks-java.jar:benchmarks.Benchmarks)[invokeNoParams]} |
 | Outgoing call | ${basic.invokeNoParams.joint(binding:java,module:file://`pwd`/build/bin/benchmarks-java.jar:benchmarks.Benchmarks)[invokeNoParams_outgoing]} |
 
+## swig
+|               | time, ns |
+| ------------- | -------: |
+| Native call   | ${basic.invokeNoParams.swig(binding:java,module:`pwd`/build/bin/benchmarks-java-swig.jar:SwigBenchmarks)[invokeNoParams_native]} |
+| Incoming call | ${basic.invokeNoParams.swig(binding:java,module:`pwd`/build/bin/benchmarks-java-swig.jar:SwigBenchmarks)[invokeNoParams]} |
+| Outgoing call | ${basic.invokeNoParams.swig(binding:java,module:`pwd`/build/bin/benchmarks-java-swig.jar:SwigBenchmarks)[invokeNoParams_outgoing]} |

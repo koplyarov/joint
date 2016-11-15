@@ -13,10 +13,16 @@ class Benchmarks
 		implements
 			benchmarks_IBenchmarks_impl
 	{
+		private java.util.Random r = new java.util.Random();
+		public int dummyInt = 0;
+
 		Component()
 		{
 			benchmarks_IBenchmarks.registerAccessors(this);
 		}
+
+		public void NativeNoParamsMethod()
+		{ dummyInt = r.nextInt(); }
 
 		public void NoParamsMethod()
 		{ }
@@ -24,7 +30,7 @@ class Benchmarks
 		public void MeasureNativeNoParams(long n)
 		{
 			for (long i = 0; i < n; ++i)
-				NoParamsMethod();
+				NativeNoParamsMethod();
 		}
 
 		public void MeasureOutgoingNoParams(benchmarks_IInvokable invokable, long n)

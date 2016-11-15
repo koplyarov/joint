@@ -14,9 +14,7 @@ JNIEXPORT void JNICALL Java_org_joint_JointObject_releaseObject(JNIEnv* env, jcl
 {
 	JNI_WRAP_CPP_BEGIN
 
-	Joint_ObjectHandle handle = (Joint_ObjectHandle)handleLong;
-	printf("JNI FINALIZE handle: %p\n", handle);
-	Joint_DecRefObject(handle);
+	Joint_DecRefObject(reinterpret_cast<Joint_ObjectHandle>(handleLong));
 
 	JNI_WRAP_CPP_END_VOID()
 }
@@ -26,7 +24,7 @@ JNIEXPORT jlong JNICALL Java_org_joint_JointObject_doCast(JNIEnv* env, jclass cl
 {
 	JNI_WRAP_CPP_BEGIN
 
-	Joint_ObjectHandle handle = (Joint_ObjectHandle)handleLong;
+	Joint_ObjectHandle handle = reinterpret_cast<Joint_ObjectHandle>(handleLong);
 
 	Joint_ObjectHandle new_handle = JOINT_NULL_HANDLE;
 	Joint_Error ret = Joint_CastObject(handle, StringDataHolder(JStringWeakRef(env, interfaceId)).GetData(), interfaceChecksum, &new_handle);

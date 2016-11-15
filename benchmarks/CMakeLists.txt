@@ -25,7 +25,6 @@ if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PythonLibs_FOUND AND JNI
 	include(${SWIG_USE_FILE})
 	set(swig_SRCS swig/ISwigBenchmarks.i)
 
-	#set(CMAKE_SWIG_FLAGS "-threads")
 	set(CMAKE_SWIG_OUTDIR ${CMAKE_BINARY_DIR}/bin)
 
 	set_source_files_properties(${swig_SRCS} PROPERTIES CPLUSPLUS ON)
@@ -35,12 +34,29 @@ if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PythonLibs_FOUND AND JNI
 		set_source_files_properties("swig/ISwigBenchmarks.cpp" PROPERTIES COMPILE_FLAGS "-fPIC")
 	endif()
 
-	set(SWIG_MODULE_swig_benchmarks_wrappers_EXTRA_DEPS swig/ISwigBenchmarks.hpp swig/ISwigBenchmarks.cpp)
+	set(SWIG_MODULE_swig_benchmarks_wrappers_py_EXTRA_DEPS swig/ISwigBenchmarks.hpp swig/ISwigBenchmarks.cpp)
+	set(SWIG_MODULE_swig_benchmarks_wrappers_java_EXTRA_DEPS swig/ISwigBenchmarks.hpp swig/ISwigBenchmarks.cpp)
 
 	add_library(swig_benchmarks_native swig/ISwigBenchmarks.cpp)
-	swig_add_module(swig_benchmarks_wrappers python ${swig_SRCS})
-	swig_add_module(swig_benchmarks_wrappers java ${swig_SRCS})
-	swig_link_libraries(swig_benchmarks_wrappers swig_benchmarks_native ${PYTHON_LIBRARIES} ${JNI_LIBRARIES})
+
+	#set(CMAKE_SWIG_FLAGS "-threads")
+	swig_add_module(swig_benchmarks_wrappers_py python ${swig_SRCS})
+	swig_link_libraries(swig_benchmarks_wrappers_py swig_benchmarks_native ${PYTHON_LIBRARIES})
+
+	set(CMAKE_SWIG_FLAGS -package SB)
+	swig_add_module(swig_benchmarks_wrappers_java java ${swig_SRCS})
+	swig_link_libraries(swig_benchmarks_wrappers_java swig_benchmarks_native ${JNI_LIBRARIES})
+
+	add_jar(benchmarks-java-swig
+		SOURCES
+			swig/SwigBenchmarks.java
+			${CMAKE_SWIG_OUTDIR}/IBenchmarks.java
+			${CMAKE_SWIG_OUTDIR}/IInvokable.java
+			${CMAKE_SWIG_OUTDIR}/swig_benchmarks_wrappers_java.java
+			${CMAKE_SWIG_OUTDIR}/swig_benchmarks_wrappers_javaJNI.java
+		OUTPUT_DIR
+			${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+	)
 
 	################################################################################
 
