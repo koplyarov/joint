@@ -223,7 +223,7 @@ namespace devkit
 
 		const MethodDescriptor& GetMethod(size_t index) const
 		{
-			JOINT_ASSERT_EX(GetLogger().GetName(), index >= _methodsCount);
+			JOINT_ASSERT_EX(GetLogger().GetName(), index < _methodsCount);
 			return _methods[index];
 		}
 	};
