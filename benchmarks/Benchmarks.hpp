@@ -27,10 +27,22 @@ namespace benchmarks
 		Benchmarks()
 			: BenchmarksClass("basic")
 		{
+			AddBenchmark<std::string, std::string>("invokeNoParamsNative", &Benchmarks::InvokeNoParamsNative, {"binding", "module"});
 			AddBenchmark<std::string, std::string>("invokeNoParams", &Benchmarks::InvokeNoParams, {"binding", "module"});
+			AddBenchmark<std::string, std::string>("invokeNoParamsOutgoing", &Benchmarks::InvokeNoParamsOutgoing, {"binding", "module"});
 		}
 
 	private:
+		static void InvokeNoParamsNative(BenchmarkContext& context, const std::string& binding, const std::string& module)
+		{
+			const auto n = context.GetIterationsCount();
+			BenchmarkCtx ctx(binding, module);
+			auto b = ctx.CreateBenchmarks();
+
+			b->MeasureNativeNoParams(n);
+			context.Profile("time", n, [&]{ b->MeasureNativeNoParams(n); });
+		}
+
 		static void InvokeNoParams(BenchmarkContext& context, const std::string& binding, const std::string& module)
 		{
 			const auto n = context.GetIterationsCount();
@@ -39,14 +51,18 @@ namespace benchmarks
 
 			for (auto i = 0; i < n; ++i)
 				b->NoParamsMethod();
-			context.Profile("invokeNoParams", n, [&]{ for (auto i = 0; i < n; ++i) b->NoParamsMethod(); });
+			context.Profile("time", n, [&]{ for (auto i = 0; i < n; ++i) b->NoParamsMethod(); });
+		}
 
-			b->MeasureNativeNoParams(n);
-			context.Profile("invokeNoParams_native", n, [&]{ b->MeasureNativeNoParams(n); });
+		static void InvokeNoParamsOutgoing(BenchmarkContext& context, const std::string& binding, const std::string& module)
+		{
+			const auto n = context.GetIterationsCount();
+			BenchmarkCtx ctx(binding, module);
+			auto b = ctx.CreateBenchmarks();
 
 			auto invokable = ctx.CreateLocalInvokable();
 			b->MeasureOutgoingNoParams(invokable, n);
-			context.Profile("invokeNoParams_outgoing", n, [&]{ b->MeasureOutgoingNoParams(invokable, n); });
+			context.Profile("time", n, [&]{ b->MeasureOutgoingNoParams(invokable, n); });
 		}
 	};
 
