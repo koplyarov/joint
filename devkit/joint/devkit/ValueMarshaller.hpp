@@ -26,7 +26,6 @@ namespace devkit
 		static WrappedType_ FromJoint(ValueDirection dir, const TypeDescriptor<UserData_>& type, const Joint_Value& value, const ValueWrapper_& wrapper)
 		{
 			auto jtype = type.GetJointType();
-			//printf("_FromJoint: %d\n", jtype.id);
 			switch (jtype.id)
 			{
 			case JOINT_TYPE_BOOL: return wrapper.FromJointBool(value.b);
@@ -64,7 +63,6 @@ namespace devkit
 		static Joint_Value ToJoint(ValueDirection dir, const TypeDescriptor<UserData_>& type, const WrappedType_& value, const Unwrapper_& unwrapper, Allocator_& alloc)
 		{
 			auto jtype = type.GetJointType();
-			//printf("_ToJoint: %d\n", jtype.id);
 			Joint_Value res = { };
 			switch (jtype.id)
 			{

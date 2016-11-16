@@ -189,9 +189,7 @@ namespace devkit
 
 		const TypeDescriptor& GetParamType(size_t index) const
 		{
-			if (index >= _paramsCount)
-				JOINT_THROW("Parameter index out of range");
-
+			JOINT_ASSERT_EX(GetLogger().GetName(), index < _paramsCount);
 			return _paramTypes[index];
 		}
 	};
