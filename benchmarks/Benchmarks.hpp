@@ -27,52 +27,44 @@ namespace benchmarks
 		Benchmarks()
 			: BenchmarksClass("basic")
 		{
-			AddBenchmark<std::string, std::string>("invokeNative", &Benchmarks::InvokeNoParamsNative, {"binding", "module"});
-			AddBenchmark<std::string, std::string>("invoke", &Benchmarks::InvokeNoParams, {"binding", "module"});
-			AddBenchmark<std::string, std::string>("invokeOutgoing", &Benchmarks::InvokeNoParamsOutgoing, {"binding", "module"});
+			AddBenchmark<std::string, std::string>("invokeNative", &Benchmarks::InvokeVoidNative, {"binding", "module"});
+			AddBenchmark<std::string, std::string>("invoke", &Benchmarks::InvokeVoid, {"binding", "module"});
+			AddBenchmark<std::string, std::string>("invokeOutgoing", &Benchmarks::InvokeVoidOutgoing, {"binding", "module"});
 		}
 
 	private:
-		static void InvokeNoParamsNative(BenchmarkContext& context, const std::string& binding, const std::string& module)
+		static void InvokeVoidNative(BenchmarkContext& context, const std::string& binding, const std::string& module)
 		{
 			const auto n = context.GetIterationsCount();
 			BenchmarkCtx ctx(binding, module);
 			auto b = ctx.CreateBenchmarks();
 
-			b->MeasureNativeNoParamsToVoid(n);
-			context.Profile("void_noParams", n, [&]{ b->MeasureNativeNoParamsToVoid(n); });
-
-			b->MeasureNativeI32ToVoid(n);
-			context.Profile("void_i32", n, [&]{ b->MeasureNativeI32ToVoid(n); });
+			context.WarmUpAndProfile("void_void", n, [&]{ b->MeasureNativeVoidToVoid(n); });
+			context.WarmUpAndProfile("void_i32", n, [&]{ b->MeasureNativeI32ToVoid(n); });
+			context.WarmUpAndProfile("i32_void", n, [&]{ b->MeasureNativeVoidToI32(n); });
 		}
 
-		static void InvokeNoParams(BenchmarkContext& context, const std::string& binding, const std::string& module)
+		static void InvokeVoid(BenchmarkContext& context, const std::string& binding, const std::string& module)
 		{
 			const auto n = context.GetIterationsCount();
 			BenchmarkCtx ctx(binding, module);
 			auto b = ctx.CreateBenchmarks();
 
-			for (auto i = 0; i < n; ++i)
-				b->NoParamsToVoid();
-			context.Profile("void_noParams", n, [&]{ for (auto i = 0; i < n; ++i) b->NoParamsToVoid(); });
-
-			for (auto i = 0; i < n; ++i)
-				b->I32ToVoid(0);
-			context.Profile("void_i32", n, [&]{ for (auto i = 0; i < n; ++i) b->I32ToVoid(0); });
+			context.WarmUpAndProfile("void_void", n, [&]{ for (auto i = 0; i < n; ++i) b->VoidToVoid(); });
+			context.WarmUpAndProfile("void_i32", n, [&]{ for (auto i = 0; i < n; ++i) b->I32ToVoid(0); });
+			context.WarmUpAndProfile("i32_void", n, [&]{ for (auto i = 0; i < n; ++i) b->VoidToI32(); });
 		}
 
-		static void InvokeNoParamsOutgoing(BenchmarkContext& context, const std::string& binding, const std::string& module)
+		static void InvokeVoidOutgoing(BenchmarkContext& context, const std::string& binding, const std::string& module)
 		{
 			const auto n = context.GetIterationsCount();
 			BenchmarkCtx ctx(binding, module);
 			auto b = ctx.CreateBenchmarks();
 			auto invokable = ctx.CreateLocalInvokable();
 
-			b->MeasureOutgoingNoParamsToVoid(invokable, n);
-			context.Profile("void_noParams", n, [&]{ b->MeasureOutgoingNoParamsToVoid(invokable, n); });
-
-			b->MeasureOutgoingI32ToVoid(invokable, n);
-			context.Profile("void_i32", n, [&]{ b->MeasureOutgoingI32ToVoid(invokable, n); });
+			context.WarmUpAndProfile("void_void", n, [&]{ b->MeasureOutgoingVoidToVoid(invokable, n); });
+			context.WarmUpAndProfile("void_i32", n, [&]{ b->MeasureOutgoingI32ToVoid(invokable, n); });
+			context.WarmUpAndProfile("i32_void", n, [&]{ b->MeasureOutgoingVoidToI32(invokable, n); });
 		}
 	};
 

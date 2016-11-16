@@ -8,24 +8,36 @@ class Benchmarks(swig_benchmarks_wrappers_py.IBenchmarks):
     def __del__(self):
         swig_benchmarks_wrappers_py.SetGlobalBenchmarks(None)
 
-    def NoParamsToVoid(self): pass
+    def VoidToVoid(self): pass
     def I32ToVoid(self, p): pass
+    def VoidToI32(self): return 0
 
-    def MeasureNativeNoParamsToVoid(self, n):
+
+    def MeasureNativeVoidToVoid(self, n):
         for i in range(n):
-            self.NoParamsToVoid()
+            self.VoidToVoid()
 
     def MeasureNativeI32ToVoid(self, n):
         for i in range(n):
             self.I32ToVoid(0)
 
-    def MeasureOutgoingNoParamsToVoid(self, invokable, n):
+    def MeasureNativeVoidToI32(self, n):
         for i in range(n):
-            invokable.NoParamsToVoid()
+            self.VoidToI32()
+
+
+    def MeasureOutgoingVoidToVoid(self, invokable, n):
+        for i in range(n):
+            invokable.VoidToVoid()
 
     def MeasureOutgoingI32ToVoid(self, invokable, n):
         for i in range(n):
             invokable.I32ToVoid(0)
+
+    def MeasureOutgoingVoidToI32(self, invokable, n):
+        for i in range(n):
+            invokable.VoidToI32()
+
 
 def GetBenchmarks():
     return Benchmarks()

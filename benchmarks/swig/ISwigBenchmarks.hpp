@@ -8,17 +8,20 @@
 struct IInvokable
 {
 	virtual ~IInvokable();
-	virtual void NoParamsToVoid();
+	virtual void VoidToVoid();
 	virtual void I32ToVoid(int32_t);
+	virtual int32_t VoidToI32();
 };
 
 struct IBenchmarks : public IInvokable
 {
 	virtual ~IBenchmarks();
-	virtual void MeasureNativeNoParamsToVoid(int64_t n);
+	virtual void MeasureNativeVoidToVoid(int64_t n);
 	virtual void MeasureNativeI32ToVoid(int64_t n);
-	virtual void MeasureOutgoingNoParamsToVoid(IInvokable* callback, int64_t n);
+	virtual void MeasureNativeVoidToI32(int64_t n);
+	virtual void MeasureOutgoingVoidToVoid(IInvokable* callback, int64_t n);
 	virtual void MeasureOutgoingI32ToVoid(IInvokable* callback, int64_t n);
+	virtual void MeasureOutgoingVoidToI32(IInvokable* callback, int64_t n);
 };
 
 extern IBenchmarks* GetGlobalBenchmarks();

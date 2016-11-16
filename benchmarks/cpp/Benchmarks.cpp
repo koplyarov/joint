@@ -9,7 +9,7 @@ using namespace joint;
 class Benchmarks
 {
 public:
-	typedef TypeList<benchmarks::IBenchmarks>	JointInterfaces;
+	using JointInterfaces = TypeList<benchmarks::IBenchmarks>;
 
 public:
 	Benchmarks()
@@ -18,13 +18,15 @@ public:
 	~Benchmarks()
 	{ }
 
-	void NoParamsToVoid() { }
+	void VoidToVoid() { }
 	void I32ToVoid(int32_t p) { }
+	int32_t VoidToI32() { return 0; }
 
-	void MeasureNativeNoParamsToVoid(int64_t n)
+
+	void MeasureNativeVoidToVoid(int64_t n)
 	{
 		for (auto i = 0; i < n; ++i)
-			NativeNoParamsToVoid();
+			NativeVoidToVoid();
 	}
 
 	void MeasureNativeI32ToVoid(int64_t n)
@@ -33,16 +35,29 @@ public:
 			NativeI32ToVoid(0);
 	}
 
-	void MeasureOutgoingNoParamsToVoid(benchmarks::IInvokable_Ptr invokable, int64_t n)
+	void MeasureNativeVoidToI32(int64_t n)
 	{
 		for (auto i = 0; i < n; ++i)
-			invokable->NoParamsToVoid();
+			NativeVoidToI32();
+	}
+
+
+	void MeasureOutgoingVoidToVoid(benchmarks::IInvokable_Ptr invokable, int64_t n)
+	{
+		for (auto i = 0; i < n; ++i)
+			invokable->VoidToVoid();
 	}
 
 	void MeasureOutgoingI32ToVoid(benchmarks::IInvokable_Ptr invokable, int64_t n)
 	{
 		for (auto i = 0; i < n; ++i)
 			invokable->I32ToVoid(0);
+	}
+
+	void MeasureOutgoingVoidToI32(benchmarks::IInvokable_Ptr invokable, int64_t n)
+	{
+		for (auto i = 0; i < n; ++i)
+			invokable->VoidToI32();
 	}
 };
 

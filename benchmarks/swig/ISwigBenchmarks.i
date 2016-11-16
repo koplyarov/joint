@@ -17,7 +17,7 @@
 	if ($error != NULL) {
 		struct PyObjectHolder
 		{
-			PyObject*	Obj;
+			PyObject* Obj;
 
 			PyObjectHolder(PyObject* obj) : Obj(obj) { }
 			~PyObjectHolder() { Py_DECREF(Obj); }

@@ -6,16 +6,19 @@ public class SwigBenchmarks extends SB.IBenchmarks
 	public SwigBenchmarks()
 	{ SB.swig_benchmarks_wrappers_java.SetGlobalBenchmarks(this); }
 
-	public void NativeNoParamsToVoid() { dummyInt = r.nextInt(); }
+	public void NativeVoidToVoid() { dummyInt = r.nextInt(); }
 	public void NativeI32ToVoid(int p) { dummyInt = r.nextInt() + p; }
+	public int NativeVoidToI32() { dummyInt = r.nextInt(); return dummyInt; }
 
-	public void NoParamsToVoid() { }
+	public void VoidToVoid() { }
 	public void I32ToVoid(int p) { }
+	public int VoidToI32() { return 0; }
 
-	public void MeasureNativeNoParamsToVoid(long n)
+
+	public void MeasureNativeVoidToVoid(long n)
 	{
 		for (long i = 0; i < n; ++i)
-			NativeNoParamsToVoid();
+			NativeVoidToVoid();
 	}
 
 	public void MeasureNativeI32ToVoid(long n)
@@ -24,15 +27,28 @@ public class SwigBenchmarks extends SB.IBenchmarks
 			NativeI32ToVoid(42);
 	}
 
-	public void MeasureOutgoingNoParamsToVoid(SB.IInvokable invokable, long n)
+	public void MeasureNativeVoidToI32(long n)
 	{
 		for (long i = 0; i < n; ++i)
-			invokable.NoParamsToVoid();
+			NativeVoidToI32();
+	}
+
+
+	public void MeasureOutgoingVoidToVoid(SB.IInvokable invokable, long n)
+	{
+		for (long i = 0; i < n; ++i)
+			invokable.VoidToVoid();
 	}
 
 	public void MeasureOutgoingI32ToVoid(SB.IInvokable invokable, long n)
 	{
 		for (long i = 0; i < n; ++i)
 			invokable.I32ToVoid(0);
+	}
+
+	public void MeasureOutgoingVoidToI32(SB.IInvokable invokable, long n)
+	{
+		for (long i = 0; i < n; ++i)
+			invokable.VoidToI32();
 	}
 }

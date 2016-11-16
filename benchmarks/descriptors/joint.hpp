@@ -16,8 +16,9 @@ namespace joint
 		public:
 			typedef ::joint::TypeList<benchmarks::IInvokable>	JointInterfaces;
 
-			void NoParamsToVoid() { }
+			void VoidToVoid() { }
 			void I32ToVoid(int32_t) { }
+			int32_t VoidToI32() { return 0; }
 		};
 
 		class BenchmarkCtx
