@@ -174,11 +174,13 @@ namespace java
 #undef DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION
 
 
+	void ThrowExceptionFromJava(JNIEnv* env, const char* location);
+
 	template < typename T_ >
 	T_ JavaCallImpl(JNIEnv *env, T_ result, const char* location)
 	{
 		if (env->ExceptionCheck())
-			throw std::runtime_error(devkit::StringBuilder() % "Java exception at " % location % ": " % GetJavaExceptionInfo(env).ToString());
+			ThrowExceptionFromJava(env, location);
 
 		return result;
 	}

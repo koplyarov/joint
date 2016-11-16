@@ -100,25 +100,30 @@ namespace java
 		}
 
 	private:
-#define DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(TypeName_, CppType_, JniType_, GetField_) \
+#define DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(TypeName_, CppType_, JniType_, FieldAccess_) \
 			CppType_ Unbox##TypeName_(const JObjWeakRef& val) const \
 			{ \
 				const auto& jctx = JointJavaContext::ConstInstance(); \
-				return static_cast<CppType_>(JAVA_CALL(env->GetField_(val.Get(), jctx.TypeName_##_value))); \
+				return static_cast<CppType_>(JAVA_CALL(env->Get##FieldAccess_(val.Get(), jctx.TypeName_##_value))); \
 			} \
 			JObjLocalRef Box##TypeName_(CppType_ val) const \
 			{ \
 				const auto& jctx = JointJavaContext::ConstInstance(); \
-				return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(jctx.TypeName_##_cls.Get(), jctx.TypeName_##_ctor, (JniType_)val))); \
+				auto res = JObjLocalRef::StealLocal(env, env->AllocObject(jctx.TypeName_##_cls.Get())); \
+				if (res) \
+					env->Set##FieldAccess_(res.Get(), jctx.TypeName_##_value, val); \
+				if (env->ExceptionCheck()) \
+					ThrowExceptionFromJava(env, JOINT_SOURCE_LOCATION); \
+				return res; \
 			}
 
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Boolean, Joint_Bool, jboolean, GetBooleanField)
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Byte,    int8_t,     jbyte,    GetByteField)
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Short,   int16_t,    jshort,   GetShortField)
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Integer, int32_t,    jint,     GetIntField)
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Long,    int64_t,    jlong,    GetLongField)
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Float,   float,      jfloat,   GetFloatField)
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Double,  double,     jdouble,  GetDoubleField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Boolean, Joint_Bool, jboolean, BooleanField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Byte,    int8_t,     jbyte,    ByteField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Short,   int16_t,    jshort,   ShortField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Integer, int32_t,    jint,     IntField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Long,    int64_t,    jlong,    LongField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Float,   float,      jfloat,   FloatField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Double,  double,     jdouble,  DoubleField)
 
 #undef DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING
 
