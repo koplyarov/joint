@@ -2,6 +2,7 @@
 #define BINDING_BOXING_HPP
 
 
+#include <binding/JointJavaContext.hpp>
 #include <utils/JPtr.hpp>
 #include <utils/Utils.hpp>
 
@@ -29,7 +30,7 @@ namespace java
 			switch (type.id)
 			{
 			case JOINT_TYPE_BOOL:
-				result.z = UnboxBool(boxed);
+				result.z = UnboxBoolean(boxed);
 				break;
 			case JOINT_TYPE_U8:
 			case JOINT_TYPE_I8:
@@ -41,7 +42,7 @@ namespace java
 				break;
 			case JOINT_TYPE_U32:
 			case JOINT_TYPE_I32:
-				result.i = UnboxInt(boxed);
+				result.i = UnboxInteger(boxed);
 				break;
 			case JOINT_TYPE_U64:
 			case JOINT_TYPE_I64:
@@ -71,7 +72,7 @@ namespace java
 			switch (type.id)
 			{
 			case JOINT_TYPE_BOOL:
-				return BoxBool(unboxed.z);
+				return BoxBoolean(unboxed.z);
 			case JOINT_TYPE_U8:
 			case JOINT_TYPE_I8:
 				return BoxByte(unboxed.b);
@@ -80,7 +81,7 @@ namespace java
 				return BoxShort(unboxed.s);
 			case JOINT_TYPE_U32:
 			case JOINT_TYPE_I32:
-				return BoxInt(unboxed.i);
+				return BoxInteger(unboxed.i);
 			case JOINT_TYPE_U64:
 			case JOINT_TYPE_I64:
 				return BoxLong(unboxed.j);
@@ -99,27 +100,25 @@ namespace java
 		}
 
 	private:
-#define DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(TypeName_, CppType_, JniType_, CallMethod_, ClassName_, ValueGetterName_, MangledType_) \
+#define DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(TypeName_, CppType_, JniType_, GetField_) \
 			CppType_ Unbox##TypeName_(const JObjWeakRef& val) const \
 			{ \
-				auto cls = JClassLocalRef::StealLocal(env, JAVA_CALL(env->FindClass(ClassName_))); \
-				jmethodID method_id = JAVA_CALL(env->GetMethodID(cls.Get(), ValueGetterName_, "()" MangledType_)); \
-				return static_cast<CppType_>(JAVA_CALL(env->CallMethod_(val.Get(), method_id))); \
+				const auto& jctx = JointJavaContext::ConstInstance(); \
+				return static_cast<CppType_>(JAVA_CALL(env->GetField_(val.Get(), jctx.TypeName_##_value))); \
 			} \
 			JObjLocalRef Box##TypeName_(CppType_ val) const \
 			{ \
-				auto cls = JClassLocalRef::StealLocal(env, JAVA_CALL(env->FindClass(ClassName_))); \
-				jmethodID ctor_id = JAVA_CALL(env->GetMethodID(cls.Get(), "<init>", "(" MangledType_ ")V")); \
-				return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(cls.Get(), ctor_id, (JniType_)val))); \
+				const auto& jctx = JointJavaContext::ConstInstance(); \
+				return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(jctx.TypeName_##_cls.Get(), jctx.TypeName_##_ctor, (JniType_)val))); \
 			}
 
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Bool,   Joint_Bool, jboolean, CallBooleanMethod, "java/lang/Boolean", "booleanValue", "Z")
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Byte,   int8_t,     jbyte,    CallByteMethod,    "java/lang/Byte",    "byteValue",    "B")
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Short,  int16_t,    jshort,   CallShortMethod,   "java/lang/Short",   "shortValue",   "S")
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Int,    int32_t,    jint,     CallIntMethod,     "java/lang/Integer", "intValue",     "I")
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Long,   int64_t,    jlong,    CallLongMethod,    "java/lang/Long",    "longValue",    "J")
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Float,  float,      jfloat,   CallFloatMethod,   "java/lang/Float",   "floatValue",   "F")
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Double, double,     jdouble,  CallDoubleMethod,  "java/lang/Double",  "doubleValue",  "D")
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Boolean, Joint_Bool, jboolean, GetBooleanField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Byte,    int8_t,     jbyte,    GetByteField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Short,   int16_t,    jshort,   GetShortField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Integer, int32_t,    jint,     GetIntField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Long,    int64_t,    jlong,    GetLongField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Float,   float,      jfloat,   GetFloatField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Double,  double,     jdouble,  GetDoubleField)
 
 #undef DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING
 

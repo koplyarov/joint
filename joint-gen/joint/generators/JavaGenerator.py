@@ -137,8 +137,11 @@ class JavaGenerator:
         for m in ifc.methods:
             yield ''
             yield '\tpublic {} {}({})'.format(self._toJavaType(m.retType), m.name, ', '.join('{} {}'.format(self._toJavaType(p.type), p.name) for p in m.params))
-            method_invokation = '_obj.invokeMethod(desc.getNative(), {}{})'.format(m.index, ''.join(', {}'.format(p.name) for p in m.params))
-            yield '\t{{ {}{}; }}'.format('return ({})'.format(self._toJavaType(m.retType)) if m.retType.fullname != 'void' else '', method_invokation)
+            method_invokation = '_obj.invokeMethod(desc.getNative(), {}{})'.format(m.index, ''.join(', {}'.format(self._jointBoxing(p)) for p in m.params))
+            if m.retType.fullname != 'void':
+                yield '\t{{ return {}; }}'.format(self._jointUnboxing(m.retType, method_invokation))
+            else:
+                yield '\t{{ {}; }}'.format(method_invokation)
         yield ''
         yield '\tpublic static InterfaceId id = new InterfaceId("{}");'.format(ifc.fullname)
         yield '\tpublic static int checksum = {};'.format(hex(ifc.checksum))
@@ -162,16 +165,32 @@ class JavaGenerator:
             yield '\t{} {}({});'.format(self._toJavaType(m.retType), m.name, ', '.join('{} {}'.format(self._toJavaType(p.type), p.name) for p in m.params))
         yield '}'
 
+    def _jointBoxing(self, var):
+        type = var.type
+        box = lambda boxedType: 'new {}({})'.format(boxedType, var.name)
+        if isinstance(type, BuiltinType):
+            if type.category in [ BuiltinTypeCategory.int, BuiltinTypeCategory.bool, BuiltinTypeCategory.float ]:
+                return box(self._toBoxedType(type))
+            return var.name
+        else:
+            return var.name
+
+    def _jointUnboxing(self, type, value):
+        if isinstance(type, BuiltinType) and (type.category in [ BuiltinTypeCategory.int, BuiltinTypeCategory.bool, BuiltinTypeCategory.float ]):
+            return '(({})({})).value'.format(self._toBoxedType(type), value)
+        else:
+            return '({})({})'.format(self._toBoxedType(type), value)
+
     def _toBoxedType(self, type):
         if isinstance(type, BuiltinType):
             if type.category == BuiltinTypeCategory.void:
                 raise RuntimeError('Invalid type: {}'.format(type))
             if type.category == BuiltinTypeCategory.int:
-                return {8: 'Byte', 16: 'Short', 32: 'Integer', 64: 'Long'}[type.bits]
+                return 'Boxing.{}'.format({8: 'Byte', 16: 'Short', 32: 'Integer', 64: 'Long'}[type.bits])
             if type.category == BuiltinTypeCategory.bool:
-                return 'Boolean'
+                return 'Boxing.Boolean'
             if type.category == BuiltinTypeCategory.float:
-                return {32: 'Float', 64: 'Fouble'}[type.bits]
+                return 'Boxing.{}'.format({32: 'Float', 64: 'Double'}[type.bits])
             return self._toJavaType(type)
         else:
             return self._toJavaType(type)

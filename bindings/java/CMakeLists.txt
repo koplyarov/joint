@@ -11,6 +11,7 @@ set(JAVA_SOURCES
 	org/joint/AccessorsContainer.java
 	org/joint/Array.java
 	org/joint/BuiltinTypes.java
+	org/joint/Boxing.java
 	org/joint/Component.java
 	org/joint/ComponentProxy.java
 	org/joint/InterfaceDescriptor.java

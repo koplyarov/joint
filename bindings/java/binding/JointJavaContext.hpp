@@ -14,7 +14,7 @@ namespace joint {
 namespace java
 {
 
-	class JointJavaContext : private devkit::Singleton<JointJavaContext>
+	class JointJavaContext : public devkit::Singleton<JointJavaContext>
 	{
 		JOINT_DEVKIT_SINGLETON_INTERNALS(JointJavaContext);
 		JOINT_DEVKIT_LOGGER("Joint.Java.JointJavaContext");
@@ -122,6 +122,22 @@ namespace java
 
 	private:
 		devkit::Holder<JavaVM*> _jvm;
+
+	public:
+#define DETAIL_JOINT_JAVA_SIMPLE_TYPE_STUFF(TypeName_) \
+		JClassGlobalRef  TypeName_##_cls; \
+		jfieldID         TypeName_##_value; \
+		jmethodID        TypeName_##_ctor;
+
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_STUFF(Boolean)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_STUFF(Byte)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_STUFF(Short)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_STUFF(Integer)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_STUFF(Long)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_STUFF(Float)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_STUFF(Double)
+
+#undef DETAIL_JOINT_JAVA_SIMPLE_TYPE_STUFF
 
 		JClassGlobalRef TypeDescriptor_cls;
 		JClassGlobalRef MethodDescriptor_cls;

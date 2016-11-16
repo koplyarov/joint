@@ -151,8 +151,8 @@ class Tests
 		public String CallbackGetS(test_IStructTestsCallback cb, test_S1 s) { return cb.GetS(s); }
 		public int CallbackGetI(test_IStructTestsCallback cb, test_S1 s) { return cb.GetI(s); }
 
-		public Array<Integer> MakeI32Array(int len) { return Array.<Integer>create(BuiltinTypes.I32, len); }
-		public int GetI32Element(Array<Integer> array, int index) { return array.get(index); }
+		public Array<Boxing.Integer> MakeI32Array(int len) { return Array.<Boxing.Integer>create(BuiltinTypes.I32, len); }
+		public int GetI32Element(Array<Boxing.Integer> array, int index) { return array.get(index).value; }
 	}
 
 	public static JointObject GetTests(ModuleContext module)

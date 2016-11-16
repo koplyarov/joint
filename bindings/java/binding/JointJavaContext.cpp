@@ -34,6 +34,21 @@ namespace java
 
 		_jvm = Holder<JavaVM*>(jvm, [](JavaVM* jvm) { jvm->DestroyJavaVM(); });
 
+#define DETAIL_JOINT_JAVA_INIT_SIMPLE_TYPE_STUFF(TypeName_, MangledType_) \
+			TypeName_##_cls = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/Boxing$" #TypeName_))); \
+			TypeName_##_value = JAVA_CALL(env->GetFieldID(TypeName_##_cls.Get(), "value", MangledType_)); \
+			TypeName_##_ctor = JAVA_CALL(env->GetMethodID(TypeName_##_cls.Get(), "<init>", "(" MangledType_ ")V"));
+
+		DETAIL_JOINT_JAVA_INIT_SIMPLE_TYPE_STUFF(Boolean, "Z")
+		DETAIL_JOINT_JAVA_INIT_SIMPLE_TYPE_STUFF(Byte,    "B")
+		DETAIL_JOINT_JAVA_INIT_SIMPLE_TYPE_STUFF(Short,   "S")
+		DETAIL_JOINT_JAVA_INIT_SIMPLE_TYPE_STUFF(Integer, "I")
+		DETAIL_JOINT_JAVA_INIT_SIMPLE_TYPE_STUFF(Long,    "J")
+		DETAIL_JOINT_JAVA_INIT_SIMPLE_TYPE_STUFF(Float,   "F")
+		DETAIL_JOINT_JAVA_INIT_SIMPLE_TYPE_STUFF(Double,  "D")
+
+#undef DETAIL_JOINT_JAVA_INIT_SIMPLE_TYPE_STUFF
+
 		TypeDescriptor_cls                   = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/TypeDescriptor")));
 		MethodDescriptor_cls                 = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/MethodDescriptor")));
 		InterfaceDescriptor_cls              = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/InterfaceDescriptor")));
