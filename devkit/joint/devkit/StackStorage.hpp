@@ -30,7 +30,7 @@ namespace devkit
 
 		struct BlockNode
 		{
-			static const size_t HeaderSize = sizeof(BlockNode) - sizeof(ElementStorage);
+			static const size_t HeaderSize = sizeof(BlockNode*) * 2 + sizeof(size_t);
 
 			BlockNode*       Prev;
 			BlockNode*       Next;
