@@ -57,6 +57,7 @@ if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PythonLibs_FOUND AND JNI
 		OUTPUT_DIR
 			${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 	)
+	add_dependencies(benchmarks-java-swig swig_benchmarks_wrappers_java)
 
 	################################################################################
 
