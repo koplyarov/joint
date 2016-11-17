@@ -22,14 +22,17 @@ namespace java
 	{
 		JOINT_DEVKIT_FUNCTION_LOCAL_LOGGER("Joint.Java.Utils");
 
-		JNIEnv* env = NULL;
-		int retcode = jvm->GetEnv((void **)&env, version);
-		if (retcode == JNI_EDETACHED)
-			JOINT_THROW("Java VM is not attached to the current thread!");
-		if (retcode == JNI_EVERSION)
-			JOINT_THROW(devkit::StringBuilder() % "Java VM does not support version " % (version >> 16) % "." % ((version >> 8) & 0xFF) % "." % (version & 0xFF));
-		if (retcode != JNI_OK)
-			JOINT_THROW(devkit::StringBuilder() % "Cannot get JNIEnv from Java VM, retcode: " % retcode);
+		thread_local JNIEnv* env = nullptr;
+		if (!env)
+		{
+			int retcode = jvm->GetEnv((void **)&env, version);
+			if (retcode == JNI_EDETACHED)
+				JOINT_THROW("Java VM is not attached to the current thread!");
+			if (retcode == JNI_EVERSION)
+				JOINT_THROW(devkit::StringBuilder() % "Java VM does not support version " % (version >> 16) % "." % ((version >> 8) & 0xFF) % "." % (version & 0xFF));
+			if (retcode != JNI_OK)
+				JOINT_THROW(devkit::StringBuilder() % "Cannot get JNIEnv from Java VM, retcode: " % retcode);
+		}
 		return env;
 	}
 

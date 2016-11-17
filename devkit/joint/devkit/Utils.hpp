@@ -12,6 +12,8 @@ namespace joint {
 namespace devkit
 {
 
+#define JOINT_DEVKIT_ARRAYSIZE(...) std::extent<decltype(__VA_ARGS__)>::value
+
 	template < typename Dst_, typename Src_ >
 	Dst_ NoOverflowCast(Src_ val)
 	{

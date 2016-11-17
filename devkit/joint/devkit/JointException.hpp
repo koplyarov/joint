@@ -31,7 +31,7 @@ namespace joint
 #if JOINT_DEBUG
 #	define JOINT_ASSERT_EX(LoggerName_, ...) do { if (!(__VA_ARGS__)) JOINT_TERMINATE_EX(LoggerName_, "JOINT_ASSERT failed: " #__VA_ARGS__); } while (false)
 #else
-#	define JOINT_ASSERT_EX(LoggerName_, ...)
+#	define JOINT_ASSERT_EX(LoggerName_, ...) do { (void)(LoggerName_); } while (false)
 #endif
 #define JOINT_ASSERT(...) JOINT_ASSERT_EX(LoggerName, __VA_ARGS__)
 
