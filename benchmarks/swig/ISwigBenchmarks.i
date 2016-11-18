@@ -6,6 +6,7 @@
 
 %include <stdint.i>
 %include <exception.i>
+%include <std_string.i>
 
 #ifdef SWIGPYTHON
 %exception {

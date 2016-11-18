@@ -6,7 +6,12 @@
 
 
 void NativeVoidToVoid();
+
 void NativeI32ToVoid(int32_t p);
 int32_t NativeVoidToI32();
+
+void NativeStringToVoid(const char* s);
+char* NativeVoidToString3();
+char* NativeVoidToString100();
 
 #endif

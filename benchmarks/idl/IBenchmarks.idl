@@ -3,18 +3,32 @@ package benchmarks
 	interface IInvokable
 	{
 		void VoidToVoid();
+
 		void I32ToVoid(i32 p);
 		i32 VoidToI32();
+
+		void StringToVoid(string s);
+		string VoidToString3();
+		string VoidToString100();
 	}
+
 
 	interface IBenchmarks : IInvokable
 	{
 		void MeasureNativeVoidToVoid(i64 n);
 		void MeasureNativeI32ToVoid(i64 n);
 		void MeasureNativeVoidToI32(i64 n);
+		void MeasureNativeString3ToVoid(i64 n);
+		void MeasureNativeVoidToString3(i64 n);
+		void MeasureNativeString100ToVoid(i64 n);
+		void MeasureNativeVoidToString100(i64 n);
 
 		void MeasureOutgoingVoidToVoid(IInvokable callback, i64 n);
 		void MeasureOutgoingI32ToVoid(IInvokable callback, i64 n);
 		void MeasureOutgoingVoidToI32(IInvokable callback, i64 n);
+		void MeasureOutgoingString3ToVoid(IInvokable callback, i64 n);
+		void MeasureOutgoingVoidToString3(IInvokable callback, i64 n);
+		void MeasureOutgoingString100ToVoid(IInvokable callback, i64 n);
+		void MeasureOutgoingVoidToString100(IInvokable callback, i64 n);
 	}
 }

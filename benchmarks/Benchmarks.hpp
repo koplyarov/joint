@@ -40,8 +40,15 @@ namespace benchmarks
 			auto b = ctx.CreateBenchmarks();
 
 			context.WarmUpAndProfile("void_void", n, [&]{ b->MeasureNativeVoidToVoid(n); });
+
 			context.WarmUpAndProfile("void_i32", n, [&]{ b->MeasureNativeI32ToVoid(n); });
 			context.WarmUpAndProfile("i32_void", n, [&]{ b->MeasureNativeVoidToI32(n); });
+
+			context.WarmUpAndProfile("void_string3", n, [&]{ b->MeasureNativeString3ToVoid(n); });
+			context.WarmUpAndProfile("string3_void", n, [&]{ b->MeasureNativeVoidToString3(n); });
+
+			context.WarmUpAndProfile("void_string100", n, [&]{ b->MeasureNativeString100ToVoid(n); });
+			context.WarmUpAndProfile("string100_void", n, [&]{ b->MeasureNativeVoidToString100(n); });
 		}
 
 		static void InvokeVoid(BenchmarkContext& context, const std::string& binding, const std::string& module)
@@ -51,8 +58,17 @@ namespace benchmarks
 			auto b = ctx.CreateBenchmarks();
 
 			context.WarmUpAndProfile("void_void", n, [&]{ for (auto i = 0; i < n; ++i) b->VoidToVoid(); });
+
 			context.WarmUpAndProfile("void_i32", n, [&]{ for (auto i = 0; i < n; ++i) b->I32ToVoid(0); });
 			context.WarmUpAndProfile("i32_void", n, [&]{ for (auto i = 0; i < n; ++i) b->VoidToI32(); });
+
+			std::string string3("abc");
+			context.WarmUpAndProfile("void_string3", n, [&]{ for (auto i = 0; i < n; ++i) b->StringToVoid(string3); });
+			context.WarmUpAndProfile("string3_void", n, [&]{ for (auto i = 0; i < n; ++i) b->VoidToString3(); });
+
+			std::string string100("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
+			context.WarmUpAndProfile("void_string100", n, [&]{ for (auto i = 0; i < n; ++i) b->StringToVoid(string100); });
+			context.WarmUpAndProfile("string100_void", n, [&]{ for (auto i = 0; i < n; ++i) b->VoidToString100(); });
 		}
 
 		static void InvokeVoidOutgoing(BenchmarkContext& context, const std::string& binding, const std::string& module)
@@ -63,8 +79,15 @@ namespace benchmarks
 			auto invokable = ctx.CreateLocalInvokable();
 
 			context.WarmUpAndProfile("void_void", n, [&]{ b->MeasureOutgoingVoidToVoid(invokable, n); });
+
 			context.WarmUpAndProfile("void_i32", n, [&]{ b->MeasureOutgoingI32ToVoid(invokable, n); });
 			context.WarmUpAndProfile("i32_void", n, [&]{ b->MeasureOutgoingVoidToI32(invokable, n); });
+
+			context.WarmUpAndProfile("void_string3", n, [&]{ b->MeasureOutgoingString3ToVoid(invokable, n); });
+			context.WarmUpAndProfile("string3_void", n, [&]{ b->MeasureOutgoingVoidToString3(invokable, n); });
+
+			context.WarmUpAndProfile("void_string100", n, [&]{ b->MeasureOutgoingString100ToVoid(invokable, n); });
+			context.WarmUpAndProfile("string100_void", n, [&]{ b->MeasureOutgoingVoidToString100(invokable, n); });
 		}
 	};
 

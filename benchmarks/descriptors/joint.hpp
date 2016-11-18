@@ -17,8 +17,13 @@ namespace joint
 			typedef ::joint::TypeList<benchmarks::IInvokable>	JointInterfaces;
 
 			void VoidToVoid() { }
+
 			void I32ToVoid(int32_t) { }
 			int32_t VoidToI32() { return 0; }
+
+			void StringToVoid(const std::string& s) { }
+			std::string VoidToString3() { return "abc"; }
+			std::string VoidToString100() { return "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"; }
 		};
 
 		class BenchmarkCtx
