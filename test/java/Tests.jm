@@ -1,0 +1,5 @@
+{
+	"binding": "java",
+	"jars": [ "tests.jar" ],
+	"class": "test.Tests"
+}

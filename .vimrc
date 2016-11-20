@@ -8,6 +8,8 @@ call g:cpp_plugin.indexer.builder.addCustomRegex('python', '/[ \t]*self\.([A-Za-
 
 call g:buildsystem.setAvailableBuildConfigs( { 'host': CMakeBuildConfig(4, './build/') } )
 
+au BufNew,BufRead *.jm set ft=json
+
 set path+=core
 set path+=devkit
 set path+=bindings/python
