@@ -30,6 +30,11 @@ extern "C"
 	};
 
 
+	struct Joint_ModuleManifest
+	{
+	};
+
+
 	struct Joint_Module
 	{
 		Joint_ModuleHandleInternal  internal;

@@ -1,9 +1,10 @@
 #include <joint/JointConfig.h>
-#include <joint/devkit/Logger.hpp>
-#include <joint/private/JointStructs.h>
 #include <joint/devkit/CppWrappers.hpp>
 #include <joint/devkit/JointException.hpp>
+#include <joint/devkit/Logger.hpp>
 #include <joint/devkit/MakeUnique.hpp>
+#include <joint/private/JointStructs.h>
+#include <joint/private/JsonParser.hpp>
 
 #include <algorithm>
 #include <atomic>
@@ -22,9 +23,12 @@
 #endif
 
 
+using namespace joint;
+using namespace joint::devkit;
+
+
 static const char* LoggerName = "Joint.Core";
 JOINT_DEVKIT_LOGGER(LoggerName)
-
 
 static void DefaultLogCallback(Joint_LogLevel logLevel, const char* subsystem, const char* message)
 {
@@ -217,6 +221,17 @@ extern "C"
 			delete handle;
 			JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 		}
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_ReadModuleManifestFromFile(const char* path, Joint_ModuleManifestHandle* outHandle)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		GetLogger().Info() << "ReadModuleManifestFromFile(path: " << (path ? path : "null") << ")";
+		JsonParser p(path);
 
 		JOINT_CPP_WRAP_END
 	}

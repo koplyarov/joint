@@ -30,6 +30,9 @@ extern "C" {
 	struct Joint_Binding;
 	typedef struct Joint_Binding* Joint_BindingHandle;
 
+	struct Joint_ModuleManifest;
+	typedef struct Joint_ModuleManifest* Joint_ModuleManifestHandle;
+
 	struct Joint_Module;
 	typedef struct Joint_Module* Joint_ModuleHandle;
 
@@ -199,6 +202,8 @@ extern "C" {
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_MakeBinding(Joint_BindingDesc desc, void* userData, Joint_BindingHandle* outBinding);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_IncRefBinding(Joint_BindingHandle handle);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_DecRefBinding(Joint_BindingHandle handle);
+
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_ReadModuleManifestFromFile(const char* path, Joint_ModuleManifestHandle* outHandle);
 
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_LoadModule(Joint_BindingHandle binding, const char* moduleName, Joint_ModuleHandle* outModule);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_MakeModule(Joint_BindingHandle binding, Joint_ModuleHandleInternal internal, Joint_ModuleHandle* outModule);
