@@ -28,7 +28,7 @@ namespace joint
 		std::ifstream file(path);
 		JOINT_CHECK(file, StringBuilder() % "Could not open file '" % path % "'");
 
-		LexerContext lexer_ctx(std::move(file));
+		LexerContext lexer_ctx(file);
 		::Detail_Joint_JsonParser_lex_init_extra(&lexer_ctx, &yy_scanner);
 
 		ParserContext parser_ctx(yy_scanner);

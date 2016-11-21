@@ -14,12 +14,12 @@ joint_generate_adapters(python ${CMAKE_CURRENT_SOURCE_DIR}/Tests_adapters.py
 
 add_custom_target(test-adapters-py ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Tests_adapters.py)
 
-joint_make_module_package(tests-component-py
-	PACKAGE_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/python/Tests
-	MANIFEST Tests.jm
-)
+#joint_make_module_package(tests-component-py
+	#PACKAGE_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/python/Tests
+	#MANIFEST Tests.jm
+#)
 
-joint_add_module_content(tests-component-py
-	DIRECTORY .
-	FILES Tests.py ${CMAKE_CURRENT_SOURCE_DIR}/Tests_adapters.py
-)
+#joint_add_module_content(tests-component-py
+	#DIRECTORY .
+	#FILES Tests.py ${CMAKE_CURRENT_SOURCE_DIR}/Tests_adapters.py
+#)

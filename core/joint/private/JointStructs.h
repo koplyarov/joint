@@ -32,6 +32,7 @@ extern "C"
 
 	struct Joint_ModuleManifest
 	{
+		int dummy;
 	};
 
 

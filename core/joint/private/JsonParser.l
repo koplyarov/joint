@@ -50,15 +50,6 @@ static inline int handle_hex(const char *hex)
 	return result;
 }
 
-static inline int handle_hex_word(const char *hex)
-{
-	int h = handle_hex(hex), l = handle_hex(hex + 2);
-	if (h >= 0 && l >= 0)
-		return (h << 8) | l;
-	else
-		return -1;
-}
-
 JOINT_DEVKIT_LOGGER("Joint.Core.JsonParser.Lexer")
 %}
 

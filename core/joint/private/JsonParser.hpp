@@ -23,11 +23,11 @@ namespace joint
 		class LexerContext
 		{
 		private:
-			std::ifstream         _file;
+			std::istream&         _file;
 			std::stringstream     _stringStream;
 
 		public:
-			LexerContext(std::ifstream file) : _file(std::move(file)) { }
+			LexerContext(std::istream& file) : _file(file) { }
 
 			int Input(char *buf, size_t maxSize)
 			{
