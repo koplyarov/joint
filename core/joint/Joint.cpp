@@ -141,6 +141,8 @@ extern "C"
 		DETAIL_JOINT_ERR_TO_STRING(JOINT_ERROR_IMPLEMENTATION_ERROR);
 		DETAIL_JOINT_ERR_TO_STRING(JOINT_ERROR_INVALID_INTERFACE_CHECKSUM);
 		DETAIL_JOINT_ERR_TO_STRING(JOINT_ERROR_INDEX_OUT_OF_RANGE);
+		DETAIL_JOINT_ERR_TO_STRING(JOINT_ERROR_IO_ERROR);
+		DETAIL_JOINT_ERR_TO_STRING(JOINT_ERROR_INVALID_MANIFEST);
 		}
 #undef DETAIL_JOINT_ERR_TO_STRING
 
@@ -232,6 +234,15 @@ extern "C"
 
 		GetLogger().Info() << "ReadModuleManifestFromFile(path: " << (path ? path : "null") << ")";
 		JsonNode n = JsonParser::Parse(path);
+		GetLogger().Debug() << "Module manifest: " << n;
+
+		JOINT_CHECK(n.GetType() == JsonNode::Type::Object, JOINT_ERROR_INVALID_MANIFEST);
+
+		auto binding_name_iter = n.AsObject().find("binding");
+		JOINT_CHECK(binding_name_iter != n.AsObject().end(), JOINT_ERROR_INVALID_MANIFEST);
+		JOINT_CHECK(binding_name_iter->second.GetType() == JsonNode::Type::String, JOINT_ERROR_INVALID_MANIFEST);
+
+		*outHandle = new Joint_ModuleManifest{binding_name_iter->second.AsString(), std::move(n)};
 
 		JOINT_CPP_WRAP_END
 	}

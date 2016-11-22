@@ -4,6 +4,7 @@
 
 #include <joint/Joint.h>
 #include <joint/private/Joint_Array.hpp>
+#include <joint/private/JsonNode.hpp>
 
 #include <atomic>
 #include <string>
@@ -32,7 +33,8 @@ extern "C"
 
 	struct Joint_ModuleManifest
 	{
-		int dummy;
+		std::string       bindingName;
+		joint::JsonNode   rootNode;
 	};
 
 
