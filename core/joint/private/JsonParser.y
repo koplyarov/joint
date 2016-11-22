@@ -42,7 +42,7 @@ value
 	: TINTEGER				{ ctx->GetObjectAssembler().SetIntValue($1); }
 	| TFLOAT				{ ctx->GetObjectAssembler().SetFloatValue($1); }
 	| TSTRING				{ ctx->GetObjectAssembler().SetStringValue(*$1); delete $1; }
-	| TBOOL					{ ctx->GetObjectAssembler().SetBoolValue($1); }
+	| TBOOL					{ ctx->GetObjectAssembler().SetBooleanValue($1); }
 	| TNULL					{ ctx->GetObjectAssembler().SetNullValue(); }
 	| array
 	| dict
@@ -67,10 +67,10 @@ array_end
 	;
 
 dict_start
-	: '{'					{ ctx->GetObjectAssembler().BeginDict(); }
+	: '{'					{ ctx->GetObjectAssembler().BeginObject(); }
 	;
 dict_end
-	: '}'					{ ctx->GetObjectAssembler().EndDict(); }
+	: '}'					{ ctx->GetObjectAssembler().EndObject(); }
 	;
 
 dict
@@ -79,7 +79,7 @@ dict
 	;
 
 dict_key
-	: TSTRING				{ ctx->GetObjectAssembler().SetDictKey(*$1); delete $1; }
+	: TSTRING				{ ctx->GetObjectAssembler().SetObjectKey(*$1); delete $1; }
 	;
 
 dict_entry

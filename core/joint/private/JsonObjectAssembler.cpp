@@ -4,37 +4,80 @@
 namespace joint
 {
 
-	void JsonObjectAssembler::BeginDict()
-	{ GetLogger().Warning() << "BeginDict"; }
+	void JsonObjectAssembler::StackEntry::AddChild(JsonNode node)
+	{
+		switch (NodeBuilder.GetType())
+		{
+		case JsonNode::Type::Array:
+			NodeBuilder.AsArray().emplace_back(std::move(node));
+			break;
+		case JsonNode::Type::Object:
+			JOINT_CHECK(!NextPropertyName.empty(), JOINT_ERROR_IMPLEMENTATION_ERROR);
+			NodeBuilder.AsObject().emplace(NextPropertyName, std::move(node));
+			NextPropertyName.clear();
+			break;
+		default:
+			JOINT_THROW(JOINT_ERROR_IMPLEMENTATION_ERROR);
+		}
+	}
 
-	void JsonObjectAssembler::EndDict()
-	{ GetLogger().Warning() << "EndDict"; }
+
+	void JsonObjectAssembler::BeginObject()
+	{ _nodesStack.push(StackEntry{JsonNode::Builder::MakeObject()}); }
+
+	void JsonObjectAssembler::EndObject()
+	{
+		JsonNode node(std::move(_nodesStack.top().NodeBuilder));
+		_nodesStack.pop();
+
+		if (!_nodesStack.empty())
+			_nodesStack.top().AddChild(std::move(node));
+		else
+			_result = std::move(node);
+	}
 
 
 	void JsonObjectAssembler::BeginArray()
-	{ GetLogger().Warning() << "BeginArray"; }
+	{ _nodesStack.push(StackEntry{JsonNode::Builder::MakeArray()}); }
 
 	void JsonObjectAssembler::EndArray()
-	{ GetLogger().Warning() << "EndArray"; }
+	{
+		JsonNode node(std::move(_nodesStack.top().NodeBuilder));
+		_nodesStack.pop();
+
+		if (!_nodesStack.empty())
+			_nodesStack.top().AddChild(std::move(node));
+		else
+			_result = std::move(node);
+	}
 
 
-	void JsonObjectAssembler::SetIntValue(int value)
-	{ GetLogger().Warning() << "SetIntValue: " << value; }
+	void JsonObjectAssembler::SetBooleanValue(bool value)
+	{ _nodesStack.top().AddChild({JsonNode::Builder::MakeBoolean(value)}); }
 
-	void JsonObjectAssembler::SetFloatValue(float value)
-	{ GetLogger().Warning() << "SetFloatValue: " << value; }
+
+	void JsonObjectAssembler::SetIntValue(int64_t value)
+	{ _nodesStack.top().AddChild({JsonNode::Builder::MakeInteger(value)}); }
+
+
+	void JsonObjectAssembler::SetFloatValue(double value)
+	{ _nodesStack.top().AddChild({JsonNode::Builder::MakeFloat(value)}); }
+
 
 	void JsonObjectAssembler::SetStringValue(const std::string& value)
-	{ GetLogger().Warning() << "SetStringValue: " << value; }
+	{ _nodesStack.top().AddChild({JsonNode::Builder::MakeString(value)}); }
 
-	void JsonObjectAssembler::SetBoolValue(bool value)
-	{ GetLogger().Warning() << "SetBoolValue: " << value; }
 
 	void JsonObjectAssembler::SetNullValue()
-	{ GetLogger().Warning() << "SetNullValue"; }
+	{ _nodesStack.top().AddChild({JsonNode::Builder::MakeNull()}); }
 
-	void JsonObjectAssembler::SetDictKey(const std::string& name)
-	{ GetLogger().Warning() << "SetDictKey: " << name; }
+
+	void JsonObjectAssembler::SetObjectKey(const std::string& name)
+	{
+		JOINT_CHECK(!_nodesStack.empty(), JOINT_ERROR_IMPLEMENTATION_ERROR);
+		JOINT_CHECK(_nodesStack.top().NextPropertyName.empty(), JOINT_ERROR_IMPLEMENTATION_ERROR);
+		_nodesStack.top().NextPropertyName = name;
+	}
 
 
 }

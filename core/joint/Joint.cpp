@@ -231,7 +231,7 @@ extern "C"
 		JOINT_CPP_WRAP_BEGIN
 
 		GetLogger().Info() << "ReadModuleManifestFromFile(path: " << (path ? path : "null") << ")";
-		JsonParser p(path);
+		JsonNode n = JsonParser::Parse(path);
 
 		JOINT_CPP_WRAP_END
 	}

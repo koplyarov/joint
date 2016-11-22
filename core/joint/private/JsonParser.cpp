@@ -21,7 +21,7 @@ namespace joint
 	////////////////////////////////////////////////////////////////////////////////
 
 
-	JsonParser::JsonParser(const std::string& path)
+	JsonNode JsonParser::Parse(const std::string& path)
 	{
 		void* yy_scanner = NULL;
 
@@ -37,12 +37,8 @@ namespace joint
 
 		parser_ctx.CheckError();
 
-		//_rootObject = parser_ctx.GetObjectAssembler().GetAssembledObject();
+		return std::move(parser_ctx.GetObjectAssembler()).GetAssembledObject();
 	}
-
-
-	JsonParser::~JsonParser()
-	{ }
 
 
 }

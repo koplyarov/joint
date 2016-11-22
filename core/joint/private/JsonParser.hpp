@@ -57,15 +57,7 @@ namespace joint
 			void CheckError() const;
 		};
 
-	private:
-		//DeclObjectPtr    _rootObject;
-
-	public:
-		JsonParser(const std::string& path);
-		~JsonParser();
-
-		//DeclObjectPtr GetRootObject() const
-		//{ return _rootObject; }
+		static JsonNode Parse(const std::string& path);
 	};
 
 }

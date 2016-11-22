@@ -43,6 +43,7 @@ set(JOINT_CORE_SRC
 	joint/private/Joint_Array.cpp
 	joint/private/JsonObjectAssembler.cpp
 	joint/private/JsonParser.cpp
+	joint/private/JsonNode.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/joint/JsonParser.l.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/joint/JsonParser.y.cpp
 )
