@@ -31,10 +31,18 @@ extern "C"
 	};
 
 
+	struct Joint_ManifestNode : public joint::JsonNode
+	{
+		Joint_ManifestNode(joint::JsonNode&& other)
+			: joint::JsonNode(std::move(other))
+		{ }
+	};
+
+
 	struct Joint_ModuleManifest
 	{
-		std::string       bindingName;
-		joint::JsonNode   rootNode;
+		std::string          bindingName;
+		Joint_ManifestNode   rootNode;
 	};
 
 

@@ -30,6 +30,9 @@ extern "C" {
 	struct Joint_Binding;
 	typedef struct Joint_Binding* Joint_BindingHandle;
 
+	struct Joint_ManifestNode;
+	typedef struct Joint_ManifestNode* Joint_ManifestNodeHandle;
+
 	struct Joint_ModuleManifest;
 	typedef struct Joint_ModuleManifest* Joint_ModuleManifestHandle;
 
@@ -89,6 +92,18 @@ extern "C" {
 
 	JOINT_API Joint_LogLevel Joint_GetLogLevel();
 	JOINT_API void Joint_Log(Joint_LogLevel logLevel, const char* subsystem, const char* format, ...);
+
+
+	typedef enum
+	{
+		JOINT_MANIFEST_NODE_NULL,
+		JOINT_MANIFEST_NODE_BOOLEAN,
+		JOINT_MANIFEST_NODE_INTEGER,
+		JOINT_MANIFEST_NODE_FLOAT,
+		JOINT_MANIFEST_NODE_STRING,
+		JOINT_MANIFEST_NODE_ARRAY,
+		JOINT_MANIFEST_NODE_OBJECT
+	} Joint_ManifestNodeType;
 
 
 	typedef enum
@@ -205,7 +220,18 @@ extern "C" {
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_IncRefBinding(Joint_BindingHandle handle);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_DecRefBinding(Joint_BindingHandle handle);
 
-	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_ReadModuleManifestFromFile(const char* path, Joint_ModuleManifestHandle* outHandle);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_ReadModuleManifestFromFile(const char* path, Joint_ModuleManifestHandle* outManifest);
+	JOINT_API void Joint_DeleteManifest(Joint_ModuleManifestHandle handle);
+
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetManifestRootNode(Joint_ModuleManifestHandle manifest, Joint_ManifestNodeHandle* outNode);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetManifestNodeType(Joint_ManifestNodeHandle node, Joint_ManifestNodeType* outType);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetManifestNodeBooleanValue(Joint_ManifestNodeHandle node, Joint_Bool* outVal);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetManifestNodeIntegerValue(Joint_ManifestNodeHandle node, int64_t* outVal);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetManifestNodeFloatValue(Joint_ManifestNodeHandle node, double* outVal);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetManifestNodeStringValue(Joint_ManifestNodeHandle node, const char** outVal);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetManifestNodeChildrenCount(Joint_ManifestNodeHandle node, Joint_SizeT* outCount);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetManifestNodeArrayElement(Joint_ManifestNodeHandle node, Joint_SizeT index, Joint_ManifestNodeHandle* outNode);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetManifestNodeObjectElementByKey(Joint_ManifestNodeHandle node, const char* key, Joint_ManifestNodeHandle* outValue);
 
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_LoadModule(Joint_BindingHandle binding, const char* moduleName, Joint_ModuleHandle* outModule);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_MakeModule(Joint_BindingHandle binding, Joint_ModuleHandleInternal internal, Joint_ModuleHandle* outModule);
@@ -218,7 +244,7 @@ extern "C" {
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_InvokeMethod(Joint_ObjectHandle obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
 	JOINT_API void Joint_IncRefObject(Joint_ObjectHandle handle);
 	JOINT_API void Joint_DecRefObject(Joint_ObjectHandle handle);
-	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, Joint_ObjectHandle* outHandle);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, Joint_ObjectHandle* outObject);
 
 	typedef struct
 	{
@@ -229,14 +255,14 @@ extern "C" {
 		const char*      function;
 	} Joint_StackFrame;
 
-	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_MakeException(const char* message, const Joint_StackFrame* backtrace, Joint_SizeT backtraceSize, Joint_ExceptionHandle* outHandle);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_MakeException(const char* message, const Joint_StackFrame* backtrace, Joint_SizeT backtraceSize, Joint_ExceptionHandle* outException);
 	JOINT_API void Joint_ReleaseException(Joint_ExceptionHandle handle);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetExceptionMessageSize(Joint_ExceptionHandle handle, Joint_SizeT* outSize);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetExceptionMessage(Joint_ExceptionHandle handle, char* buf, Joint_SizeT bufSize);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetExceptionBacktraceSize(Joint_ExceptionHandle handle, Joint_SizeT* outSize);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetExceptionBacktraceEntry(Joint_ExceptionHandle handle, Joint_SizeT index, Joint_StackFrame* outStackFrame);
 
-	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_MakeArray(Joint_Type elementType, Joint_SizeT size, Joint_ArrayHandle* outHandle);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_MakeArray(Joint_Type elementType, Joint_SizeT size, Joint_ArrayHandle* outArray);
 	JOINT_API void Joint_IncRefArray(Joint_ArrayHandle handle);
 	JOINT_API void Joint_DecRefArray(Joint_ArrayHandle handle);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_ArrayGetSize(Joint_ArrayHandle handle, Joint_SizeT* outSize);

@@ -23,7 +23,7 @@ namespace devkit
 
 		Dst_ result = static_cast<Dst_>(val);
 		JOINT_CHECK(static_cast<Src_>(result) == val, "Integer type overflow");
-		return result;
+		return result; // TODO: also check signedness issues
 	}
 
 }}

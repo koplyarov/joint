@@ -228,9 +228,11 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_ReadModuleManifestFromFile(const char* path, Joint_ModuleManifestHandle* outHandle)
+	Joint_Error Joint_ReadModuleManifestFromFile(const char* path, Joint_ModuleManifestHandle* outManifest)
 	{
 		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(outManifest, JOINT_ERROR_INVALID_PARAMETER);
 
 		GetLogger().Info() << "ReadModuleManifestFromFile(path: " << (path ? path : "null") << ")";
 		JsonNode n = JsonParser::Parse(path);
@@ -242,7 +244,150 @@ extern "C"
 		JOINT_CHECK(binding_name_iter != n.AsObject().end(), JOINT_ERROR_INVALID_MANIFEST);
 		JOINT_CHECK(binding_name_iter->second.GetType() == JsonNode::Type::String, JOINT_ERROR_INVALID_MANIFEST);
 
-		*outHandle = new Joint_ModuleManifest{binding_name_iter->second.AsString(), std::move(n)};
+		*outManifest = new Joint_ModuleManifest{binding_name_iter->second.AsString(), std::move(n)};
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	void Joint_DeleteManifest(Joint_ModuleManifestHandle handle)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		if (handle)
+			delete handle;
+
+		JOINT_CPP_WRAP_END_VOID
+	}
+
+
+	Joint_Error Joint_GetManifestRootNode(Joint_ModuleManifestHandle manifest, Joint_ManifestNodeHandle* outNode)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(manifest, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outNode, JOINT_ERROR_INVALID_PARAMETER);
+
+		*outNode = &manifest->rootNode;
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_GetManifestNodeType(Joint_ManifestNodeHandle node, Joint_ManifestNodeType* outType)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(node, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outType, JOINT_ERROR_INVALID_PARAMETER);
+
+		switch (node->GetType())
+		{
+		case JsonNode::Type::Null:    *outType = JOINT_MANIFEST_NODE_NULL; break;
+		case JsonNode::Type::Boolean: *outType = JOINT_MANIFEST_NODE_BOOLEAN; break;
+		case JsonNode::Type::Integer: *outType = JOINT_MANIFEST_NODE_INTEGER; break;
+		case JsonNode::Type::Float:   *outType = JOINT_MANIFEST_NODE_FLOAT; break;
+		case JsonNode::Type::String:  *outType = JOINT_MANIFEST_NODE_STRING; break;
+		case JsonNode::Type::Array:   *outType = JOINT_MANIFEST_NODE_ARRAY; break;
+		case JsonNode::Type::Object:  *outType = JOINT_MANIFEST_NODE_OBJECT; break;
+		default: JOINT_THROW(JOINT_ERROR_INVALID_PARAMETER);
+		}
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_GetManifestNodeBooleanValue(Joint_ManifestNodeHandle node, Joint_Bool* outVal)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(node, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outVal, JOINT_ERROR_INVALID_PARAMETER);
+
+		*outVal = (Joint_Bool)node->AsBoolean();
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_GetManifestNodeIntegerValue(Joint_ManifestNodeHandle node, int64_t* outVal)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(node, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outVal, JOINT_ERROR_INVALID_PARAMETER);
+
+		*outVal = node->AsInteger();
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_GetManifestNodeFloatValue(Joint_ManifestNodeHandle node, double* outVal)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(node, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outVal, JOINT_ERROR_INVALID_PARAMETER);
+
+		*outVal = node->AsFloat();
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_GetManifestNodeStringValue(Joint_ManifestNodeHandle node, const char** outVal)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(node, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outVal, JOINT_ERROR_INVALID_PARAMETER);
+
+		*outVal = node->AsString().c_str();
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_GetManifestNodeChildrenCount(Joint_ManifestNodeHandle node, Joint_SizeT* outCount)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(node, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outCount, JOINT_ERROR_INVALID_PARAMETER);
+
+		switch (node->GetType())
+		{
+		case JsonNode::Type::Array:  *outCount = node->AsArray().size(); break;
+		case JsonNode::Type::Object: *outCount = node->AsObject().size(); break;
+		default: JOINT_THROW(JOINT_ERROR_INVALID_PARAMETER);
+		}
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_GetManifestNodeArrayElement(Joint_ManifestNodeHandle node, Joint_SizeT index, Joint_ManifestNodeHandle* outNode)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(node, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outNode, JOINT_ERROR_INVALID_PARAMETER);
+
+		*outNode = static_cast<Joint_ManifestNodeHandle>(const_cast<JsonNode*>(&node->AsArray().at(index)));
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_GetManifestNodeObjectElementByKey(Joint_ManifestNodeHandle node, const char* key, Joint_ManifestNodeHandle* outValue)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(node, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outValue, JOINT_ERROR_INVALID_PARAMETER);
+
+		*outValue = static_cast<Joint_ManifestNodeHandle>(const_cast<JsonNode*>(&node->AsObject().at(key)));
 
 		JOINT_CPP_WRAP_END
 	}
@@ -399,7 +544,7 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, Joint_ObjectHandle* outHandle)
+	Joint_Error Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, Joint_ObjectHandle* outObject)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
@@ -413,7 +558,7 @@ extern "C"
 		{
 			if (ret == JOINT_ERROR_CAST_FAILED)
 			{
-				*outHandle = JOINT_NULL_HANDLE;
+				*outObject = JOINT_NULL_HANDLE;
 				return ret;
 			}
 
@@ -421,7 +566,7 @@ extern "C"
 		}
 
 		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
-		*outHandle = new Joint_Object(internal, handle->module);
+		*outObject = new Joint_Object(internal, handle->module);
 
 		return Joint_IncRefModule(handle->module);
 
@@ -429,11 +574,11 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_MakeException(const char* message, const Joint_StackFrame* backtrace, Joint_SizeT backtraceSize, Joint_ExceptionHandle* outHandle)
+	Joint_Error Joint_MakeException(const char* message, const Joint_StackFrame* backtrace, Joint_SizeT backtraceSize, Joint_ExceptionHandle* outException)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		JOINT_CHECK(outHandle, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outException, JOINT_ERROR_INVALID_PARAMETER);
 
 		std::vector<Joint_StackFrameData> bt;
 		bt.reserve(backtraceSize);
@@ -442,7 +587,7 @@ extern "C"
 			auto sf = backtrace[i];
 			bt.push_back(Joint_StackFrameData{sf.module, sf.filename, sf.line, sf.code, sf.function});
 		}
-		*outHandle = new Joint_Exception{message, bt};
+		*outException = new Joint_Exception{message, bt};
 
 		JOINT_CPP_WRAP_END
 	}
@@ -518,10 +663,10 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_MakeArray(Joint_Type elementType, Joint_SizeT size, Joint_ArrayHandle* outHandle)
+	Joint_Error Joint_MakeArray(Joint_Type elementType, Joint_SizeT size, Joint_ArrayHandle* outArray)
 	{
 		JOINT_CPP_WRAP_BEGIN
-		*outHandle = new Joint_Array(elementType, size);
+		*outArray = new Joint_Array(elementType, size);
 		JOINT_CPP_WRAP_END
 	}
 
