@@ -48,6 +48,16 @@ namespace binding
 	}
 
 
+	Joint_Error Binding::LoadModuleNew(void* bindingUserData, Joint_ManifestHandle moduleManifest, Joint_ModuleHandleInternal* outModule)
+	{
+		JOINT_CPP_WRAP_BEGIN
+		ModuleManifest m;
+		joint::devkit::ManifestReader::Read(moduleManifest, m);
+		*outModule = new Module(m.GetModuleName());
+		JOINT_CPP_WRAP_END
+	}
+
+
 	Joint_Error Binding::UnloadModule(void* bindingUserData, Joint_ModuleHandleInternal module)
 	{
 		JOINT_CPP_WRAP_BEGIN

@@ -57,6 +57,24 @@ namespace binding
 	}
 
 
+	Joint_Error Binding::LoadModuleNew(void* bindingUserData, Joint_ManifestHandle moduleManifest, Joint_ModuleHandleInternal* outModule)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		ModuleManifest m;
+		joint::devkit::ManifestReader::Read(moduleManifest, m);
+
+		auto class_name = m.GetClassName();
+		auto jars = m.GetJars();
+
+		std::string jar_path = "";
+
+		*outModule = new Module(jar_path, class_name);
+
+		JOINT_CPP_WRAP_END
+	}
+
+
 	Joint_Error Binding::UnloadModule(void* bindingUserData, Joint_ModuleHandleInternal module)
 	{
 		JOINT_CPP_WRAP_BEGIN

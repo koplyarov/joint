@@ -3,6 +3,7 @@
 
 
 #include <joint/devkit/Logger.hpp>
+#include <joint/devkit/ManifestReader.hpp>
 
 #include <string>
 
@@ -15,6 +16,23 @@ namespace joint {
 namespace python {
 namespace binding
 {
+
+	class ModuleManifest : public devkit::ModuleManifestBase
+	{
+	private:
+		std::string     _moduleName;
+
+	public:
+		std::string GetModuleName() const { return _moduleName; }
+
+		template < typename Archive_ >
+		void Deserialize(const Archive_& ar)
+		{
+			devkit::ModuleManifestBase::Deserialize(ar);
+			ar.Deserialize("module", _moduleName);
+		}
+	};
+
 
 	class Module
 	{

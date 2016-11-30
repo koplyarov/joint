@@ -4,6 +4,7 @@
 
 #include <joint/devkit/Holder.hpp>
 #include <joint/devkit/Logger.hpp>
+#include <joint/devkit/ManifestReader.hpp>
 
 #include <string>
 
@@ -14,6 +15,25 @@ namespace joint {
 namespace java {
 namespace binding
 {
+
+	class ModuleManifest : public devkit::ModuleManifestBase
+	{
+	private:
+		std::string                 _className;
+		std::vector<std::string>    _jars;
+
+	public:
+		std::string GetClassName() const { return _className; }
+		std::vector<std::string> GetJars() const { return _jars; }
+
+		template < typename Archive_ >
+		void Deserialize(const Archive_& ar)
+		{
+			devkit::ModuleManifestBase::Deserialize(ar);
+			ar.Deserialize("class", _className).Deserialize("jars", _jars);
+		}
+	};
+
 
 	class Module
 	{

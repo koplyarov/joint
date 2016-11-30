@@ -3,6 +3,7 @@
 #include <joint/devkit/CppWrappers.hpp>
 #include <joint/devkit/Holder.hpp>
 #include <joint/devkit/Logger.hpp>
+#include <joint/devkit/ManifestReader.hpp>
 
 #include <map>
 #include <memory>
@@ -15,6 +16,7 @@
 
 JOINT_DEVKIT_LOGGER("Joint")
 
+using namespace joint;
 using namespace joint::devkit;
 
 extern "C"
@@ -87,6 +89,25 @@ extern "C"
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 
 		return Joint_LoadModule(g_bindings.GetBinding(bindingName), moduleName, outModule);
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_LoadModuleNew2(Joint_ManifestHandle moduleManifest, Joint_ModuleHandle* outModule)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(moduleManifest != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+
+		Joint_Error ret = Joint_Init();
+		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+
+		ModuleManifestBase m;
+		joint::devkit::ManifestReader::Read(moduleManifest, m);
+		auto binding_name = m.GetBindingName();
+
+		return Joint_LoadModuleNew(g_bindings.GetBinding(binding_name), moduleManifest, outModule);
 
 		JOINT_CPP_WRAP_END
 	}

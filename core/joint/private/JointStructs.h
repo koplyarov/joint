@@ -39,9 +39,8 @@ extern "C"
 	};
 
 
-	struct Joint_ModuleManifest
+	struct Joint_Manifest
 	{
-		std::string          bindingName;
 		Joint_ManifestNode   rootNode;
 	};
 

@@ -19,6 +19,7 @@ extern "C"
 
 	JOINT_LOADER_API Joint_Error Joint_Init();
 	JOINT_LOADER_API Joint_Error Joint_LoadModuleByName(const char* bindingName, const char* moduleName, Joint_ModuleHandle* outModule);
+	JOINT_LOADER_API Joint_Error Joint_LoadModuleNew2(Joint_ManifestHandle moduleManifest, Joint_ModuleHandle* outModule);
 
 }
 

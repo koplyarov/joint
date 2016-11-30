@@ -154,16 +154,31 @@ namespace devkit
 		}
 	}
 
+	class ModuleManifestBase
+	{
+	private:
+		std::string     _bindingName;
+
+	public:
+		std::string GetBindingName() const { return _bindingName; }
+
+		template < typename Archive_ >
+		void Deserialize(const Archive_& ar)
+		{ ar.Deserialize("binding", _bindingName); }
+	};
+
 	class ManifestReader
 	{
 	public:
 		template < typename T_ >
-		static void Read(Joint_ModuleManifestHandle manifest, T_& object)
+		static void Read(Joint_ManifestHandle manifest, T_& object)
 		{
+			using namespace detail_ManifestReader;
+
 			Joint_ManifestNodeHandle root_node;
 			DETAIL_JOINT_DEVKIT_JOINT_CALL( Joint_GetManifestRootNode(manifest, &root_node) );
 
-			detail_ManifestReader::ManifestNodeReader<T_>::ReadNode(root_node, object);
+			ManifestNodeReader<T_>::ReadNode(root_node, object);
 		}
 	};
 

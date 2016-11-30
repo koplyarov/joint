@@ -1,8 +1,9 @@
 #include <binding/Binding.hpp>
 
 #include <joint/Joint.h>
-#include <joint/devkit/Holder.hpp>
 #include <joint/devkit/CppWrappers.hpp>
+#include <joint/devkit/Holder.hpp>
+#include <joint/devkit/ManifestReader.hpp>
 
 #include <memory>
 #include <string.h>
@@ -18,6 +19,23 @@ namespace joint {
 namespace cpp {
 namespace binding
 {
+
+	class ModuleManifest : public devkit::ModuleManifestBase
+	{
+	private:
+		std::string     _libraryName;
+
+	public:
+		std::string GetLibraryName() const { return _libraryName; }
+
+		template < typename Archive_ >
+		void Deserialize(const Archive_& ar)
+		{
+			devkit::ModuleManifestBase::Deserialize(ar);
+			ar.Deserialize("library", _libraryName);
+		}
+	};
+
 
 	Binding::Binding()
 	{ GetLogger().Debug() << "Created"; }
@@ -39,6 +57,16 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 		*outModule = new DynamicLibrary(moduleName);
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Binding::LoadModuleNew(void* bindingUserData, Joint_ManifestHandle moduleManifest, Joint_ModuleHandleInternal* outModule)
+	{
+		JOINT_CPP_WRAP_BEGIN
+		ModuleManifest m;
+		joint::devkit::ManifestReader::Read(moduleManifest, m);
+		*outModule = new DynamicLibrary(m.GetLibraryName());
 		JOINT_CPP_WRAP_END
 	}
 

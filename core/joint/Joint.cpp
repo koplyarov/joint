@@ -185,6 +185,7 @@ extern "C"
 		JOINT_CHECK(desc.castObject != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(desc.getRootObject != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(desc.loadModule != nullptr, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(desc.loadModuleNew != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(desc.unloadModule != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(desc.deinitBinding != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 
@@ -228,29 +229,23 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_ReadModuleManifestFromFile(const char* path, Joint_ModuleManifestHandle* outManifest)
+	Joint_Error Joint_ReadManifestFromFile(const char* path, Joint_ManifestHandle* outManifest)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
 		JOINT_CHECK(outManifest, JOINT_ERROR_INVALID_PARAMETER);
 
-		GetLogger().Info() << "ReadModuleManifestFromFile(path: " << (path ? path : "null") << ")";
+		GetLogger().Info() << "ReadManifestFromFile(path: " << (path ? path : "null") << ")";
 		JsonNode n = JsonParser::Parse(path);
-		GetLogger().Debug() << "Module manifest: " << n;
+		GetLogger().Debug() << "Manifest: " << n;
 
-		JOINT_CHECK(n.GetType() == JsonNode::Type::Object, JOINT_ERROR_INVALID_MANIFEST);
-
-		auto binding_name_iter = n.AsObject().find("binding");
-		JOINT_CHECK(binding_name_iter != n.AsObject().end(), JOINT_ERROR_INVALID_MANIFEST);
-		JOINT_CHECK(binding_name_iter->second.GetType() == JsonNode::Type::String, JOINT_ERROR_INVALID_MANIFEST);
-
-		*outManifest = new Joint_ModuleManifest{binding_name_iter->second.AsString(), std::move(n)};
+		*outManifest = new Joint_Manifest{std::move(n)};
 
 		JOINT_CPP_WRAP_END
 	}
 
 
-	void Joint_DeleteManifest(Joint_ModuleManifestHandle handle)
+	void Joint_DeleteManifest(Joint_ManifestHandle handle)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
@@ -261,7 +256,7 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_GetManifestRootNode(Joint_ModuleManifestHandle manifest, Joint_ManifestNodeHandle* outNode)
+	Joint_Error Joint_GetManifestRootNode(Joint_ManifestHandle manifest, Joint_ManifestNodeHandle* outNode)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
@@ -374,7 +369,7 @@ extern "C"
 		JOINT_CHECK(node, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(outNode, JOINT_ERROR_INVALID_PARAMETER);
 
-		*outNode = static_cast<Joint_ManifestNodeHandle>(const_cast<JsonNode*>(&node->AsArray().at(index)));
+		*outNode = static_cast<Joint_ManifestNodeHandle>(&node->AsArray().at(index));
 
 		JOINT_CPP_WRAP_END
 	}
@@ -405,6 +400,30 @@ extern "C"
 
 		Joint_ModuleHandleInternal internal = JOINT_NULL_HANDLE;
 		Joint_Error ret = binding->desc.loadModule(binding->userData, moduleName, &internal);
+		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
+
+		*outModule = new Joint_Module(internal, binding);
+
+		GetLogger().Debug() << "  LoadModule.outModule: " << *outModule;
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	Joint_Error Joint_LoadModuleNew(Joint_BindingHandle binding, Joint_ManifestHandle moduleManifest, Joint_ModuleHandle* outModule)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(binding != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(moduleManifest != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outModule, JOINT_ERROR_INVALID_PARAMETER);
+
+		GetLogger().Info() << "LoadModule(binding: " << binding << " (userData: " << (binding ? binding->userData : NULL)
+			<< "), moduleManifest: \"" << moduleManifest->rootNode << "\")";
+
+		Joint_ModuleHandleInternal internal = JOINT_NULL_HANDLE;
+		Joint_Error ret = binding->desc.loadModuleNew(binding->userData, moduleManifest, &internal);
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
 
