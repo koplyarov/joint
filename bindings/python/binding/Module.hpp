@@ -39,8 +39,8 @@ namespace binding
 		JOINT_DEVKIT_LOGGER("Joint.Python.Module")
 
 	private:
-		PyObjectHolder	_pyModule;
-		std::string		_moduleName;
+		PyObjectHolder  _pyModule;
+		std::string     _moduleName;
 
 	public:
 		Module(const std::string& moduleName);

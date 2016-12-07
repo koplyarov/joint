@@ -6,9 +6,10 @@ class PythonGenerator:
         self.semanticGraph = semanticGraph
 
     def generate(self,):
-        yield 'import sys'
+        yield 'import atexit'
         yield 'import pyjoint'
-        yield 'from functools import partial'
+        yield 'import sys'
+        yield ''
         yield 'if sys.version_info >= (3, 0):'
         yield '\timport enum'
         yield 'else:'
@@ -50,6 +51,14 @@ class PythonGenerator:
                     yield l
                 yield ''
             yield ''
+
+        yield '@atexit.register'
+        yield 'def _clearDescriptors():'
+        for p in self.semanticGraph.packages:
+            yield '\t########## {} ##########'.format(p.fullname)
+            for ifc in p.interfaces:
+                yield '\t{}.descriptor = None'.format(self._mangleType(ifc))
+        yield '\tpass'
 
     def _generatePackage(self, p):
         if p.enums:

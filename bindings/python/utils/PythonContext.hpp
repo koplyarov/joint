@@ -11,8 +11,10 @@ namespace python
 
 	class PythonContext
 	{
+		JOINT_DEVKIT_LOGGER("Joint.Python.PythonContext");
+
 	private:
-		bool	_needFinalize;
+		bool    _needFinalize;
 
 	public:
 		PythonContext()
