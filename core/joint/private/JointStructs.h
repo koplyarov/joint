@@ -33,6 +33,10 @@ extern "C"
 
 	struct Joint_ManifestNode : public joint::JsonNode
 	{
+		Joint_ManifestNode(Joint_ManifestNode&& other)
+			: joint::JsonNode(std::move(other))
+		{ }
+
 		Joint_ManifestNode(joint::JsonNode&& other)
 			: joint::JsonNode(std::move(other))
 		{ }
