@@ -62,12 +62,12 @@ namespace binding
 		JOINT_CPP_WRAP_BEGIN
 
 		ModuleManifest m;
-		joint::devkit::ManifestReader::Read(moduleManifest, m);
+		ManifestReader::Read(moduleManifest, m);
 
 		auto class_name = m.GetClassName();
 		auto jars = m.GetJars();
 
-		std::string jar_path = "";
+		std::string jar_path = ManifestReader::GetLocation(moduleManifest);
 
 		*outModule = new Module(jar_path, class_name);
 

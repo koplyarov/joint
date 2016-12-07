@@ -41,7 +41,8 @@ extern "C"
 
 	struct Joint_Manifest
 	{
-		Joint_ManifestNode   rootNode;
+		const Joint_ManifestNode   rootNode;
+		const std::string          location;
 	};
 
 

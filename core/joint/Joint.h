@@ -225,6 +225,7 @@ extern "C" {
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_ReadManifestFromFile(const char* path, Joint_ManifestHandle* outManifest);
 	JOINT_API void Joint_DeleteManifest(Joint_ManifestHandle handle);
 
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetManifestLocation(Joint_ManifestHandle manifest, const char** outLocation);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetManifestRootNode(Joint_ManifestHandle manifest, Joint_ManifestNodeHandle* outNode);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetManifestNodeType(Joint_ManifestNodeHandle node, Joint_ManifestNodeType* outType);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetManifestNodeBooleanValue(Joint_ManifestNodeHandle node, Joint_Bool* outVal);

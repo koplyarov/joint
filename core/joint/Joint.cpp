@@ -239,7 +239,7 @@ extern "C"
 		JsonNode n = JsonParser::Parse(path);
 		GetLogger().Debug() << "Manifest: " << n;
 
-		*outManifest = new Joint_Manifest{std::move(n)};
+		*outManifest = new Joint_Manifest{std::move(n), path};
 
 		JOINT_CPP_WRAP_END
 	}
@@ -253,6 +253,19 @@ extern "C"
 			delete handle;
 
 		JOINT_CPP_WRAP_END_VOID
+	}
+
+
+	Joint_Error Joint_GetManifestLocation(Joint_ManifestHandle manifest, const char** outLocation)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(manifest, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outLocation, JOINT_ERROR_INVALID_PARAMETER);
+
+		*outLocation = manifest->location.c_str();
+
+		JOINT_CPP_WRAP_END
 	}
 
 

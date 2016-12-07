@@ -180,6 +180,16 @@ namespace devkit
 
 			ManifestNodeReader<T_>::ReadNode(root_node, object);
 		}
+
+		static std::string GetLocation(Joint_ManifestHandle manifest)
+		{
+			using namespace detail_ManifestReader;
+
+			const char* location = nullptr;
+			DETAIL_JOINT_DEVKIT_JOINT_CALL( Joint_GetManifestLocation(manifest, &location) );
+			JOINT_CHECK(location, JOINT_ERROR_INVALID_MANIFEST);
+			return location;
+		}
 	};
 
 }}
