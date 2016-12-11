@@ -53,15 +53,7 @@ namespace binding
 	}
 
 
-	Joint_Error Binding::LoadModule(void* bindingUserData, const char* moduleName, Joint_ModuleHandleInternal* outModule)
-	{
-		JOINT_CPP_WRAP_BEGIN
-		*outModule = new DynamicLibrary(moduleName);
-		JOINT_CPP_WRAP_END
-	}
-
-
-	Joint_Error Binding::LoadModuleNew(void* bindingUserData, Joint_ManifestHandle moduleManifest, Joint_ModuleHandleInternal* outModule)
+	Joint_Error Binding::LoadModule(void* bindingUserData, Joint_ManifestHandle moduleManifest, Joint_ModuleHandleInternal* outModule)
 	{
 		JOINT_CPP_WRAP_BEGIN
 		ModuleManifest m;

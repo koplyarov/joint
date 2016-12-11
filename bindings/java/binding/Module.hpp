@@ -43,7 +43,7 @@ namespace binding
 		JClassGlobalRef     _cls;
 
 	public:
-		Module(const std::string& jarPath, const std::string& className);
+		Module(const ModuleManifest& manifest, const std::string& location);
 		~Module();
 
 		const JClassGlobalRef& GetClass() const { return _cls; }

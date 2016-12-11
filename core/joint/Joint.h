@@ -196,8 +196,7 @@ extern "C" {
 	typedef Joint_Error Joint_ReleaseObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal object);
 	typedef Joint_Error Joint_InvokeMethod_Func(Joint_ModuleHandle module, void* bindingUserData, Joint_ModuleHandleInternal moduleInt, Joint_ObjectHandleInternal obj, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
 	typedef Joint_Error Joint_CastObject_Func(void* bindingUserData, Joint_ModuleHandleInternal module, Joint_ObjectHandleInternal obj, Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, Joint_ObjectHandleInternal* outRetValue);
-	typedef Joint_Error Joint_LoadModule_Func(void* bindingUserData, const char* moduleName, Joint_ModuleHandleInternal* outModule);
-	typedef Joint_Error Joint_LoadModuleNew_Func(void* bindingUserData, Joint_ManifestHandle moduleManifest, Joint_ModuleHandleInternal* outModule);
+	typedef Joint_Error Joint_LoadModule_Func(void* bindingUserData, Joint_ManifestHandle moduleManifest, Joint_ModuleHandleInternal* outModule);
 	typedef Joint_Error Joint_UnloadModule_Func(void* bindingUserData, Joint_ModuleHandleInternal module);
 	typedef Joint_Error Joint_DeinitBinding_Func(void* bindingUserData);
 
@@ -208,7 +207,6 @@ extern "C" {
 		Joint_CastObject_Func*      castObject;
 		Joint_GetRootObject_Func*   getRootObject;
 		Joint_LoadModule_Func*      loadModule;
-		Joint_LoadModuleNew_Func*   loadModuleNew;
 		Joint_UnloadModule_Func*    unloadModule;
 		Joint_DeinitBinding_Func*   deinitBinding;
 
@@ -236,8 +234,7 @@ extern "C" {
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetManifestNodeArrayElement(Joint_ManifestNodeHandle node, Joint_SizeT index, Joint_ManifestNodeHandle* outNode);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_GetManifestNodeObjectElementByKey(Joint_ManifestNodeHandle node, const char* key, Joint_ManifestNodeHandle* outValue);
 
-	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_LoadModule(Joint_BindingHandle binding, const char* moduleName, Joint_ModuleHandle* outModule);
-	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_LoadModuleNew(Joint_BindingHandle binding, Joint_ManifestHandle moduleManifest, Joint_ModuleHandle* outModule);
+	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_LoadModuleInternal(Joint_BindingHandle binding, Joint_ManifestHandle moduleManifest, Joint_ModuleHandle* outModule);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_MakeModule(Joint_BindingHandle binding, Joint_ModuleHandleInternal internal, Joint_ModuleHandle* outModule);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_IncRefModule(Joint_ModuleHandle handle);
 	JOINT_API JOINT_WARN_UNUSED_RESULT(Joint_Error) Joint_DecRefModule(Joint_ModuleHandle handle);

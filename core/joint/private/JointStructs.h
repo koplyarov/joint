@@ -49,6 +49,15 @@ extern "C"
 		const std::string          location;
 	};
 
+	std::ostream& operator << (std::ostream& s, const Joint_ManifestHandle m)
+	{
+		if (!m)
+			s << "null";
+		else
+			s << "{ location: " << m->location << ", root: " << m->rootNode << " }";
+		return s;
+	}
+
 
 	struct Joint_Module
 	{

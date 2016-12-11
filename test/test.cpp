@@ -21,14 +21,13 @@
 
 int main(int argc, const char* argv[])
 {
-	if (argc != 3)
+	if (argc != 2)
 	{
-		std::cerr << "Usage: " << argv[0] << " <binding> <module>" << std::endl;
+		std::cerr << "Usage: " << argv[0] << " <module manifest>" << std::endl;
 		return 1;
 	}
-	g_bindingName = argv[1];
-	g_moduleName = argv[2];
-	std::cerr << "Binding: " << g_bindingName << ", module: " << g_moduleName << std::endl;
+	g_moduleManifest = argv[1];
+	std::cerr << "Module manifest: " << g_moduleManifest << std::endl;
 
 	try
 	{ test::RunAllTests(); }

@@ -6,7 +6,7 @@ VG() {
 
 export PYTHONPATH="`pwd`/test/python:`pwd`/build/bin"
 clear
-VG cpp tests-cpp
-VG cpp tests-c
-VG python Tests
-./build/bin/joint-test java file://`pwd`/build/bin/tests.jar:test.Tests
+VG build/bin/cpp/Tests/Tests.jm
+VG build/bin/c/Tests/Tests.jm
+VG build/bin/python/Tests/Tests.jm
+./build/bin/joint-test build/bin/java/Tests/Tests.jm

@@ -40,36 +40,14 @@ namespace binding
 	}
 
 
-	Joint_Error Binding::LoadModule(void* bindingUserData, const char* moduleName, Joint_ModuleHandleInternal* outModule)
-	{
-		JOINT_CPP_WRAP_BEGIN
-
-		std::string module_name_str(moduleName);
-		size_t delim = module_name_str.rfind(':');
-		JOINT_CHECK(delim != std::string::npos, JOINT_ERROR_INVALID_PARAMETER);
-		std::string jar_path = module_name_str.substr(0, delim);
-		std::string class_name = module_name_str.substr(delim + 1);
-
-		std::unique_ptr<Module> m(new Module(jar_path, class_name));
-		*outModule = m.release();
-
-		JOINT_CPP_WRAP_END
-	}
-
-
-	Joint_Error Binding::LoadModuleNew(void* bindingUserData, Joint_ManifestHandle moduleManifest, Joint_ModuleHandleInternal* outModule)
+	Joint_Error Binding::LoadModule(void* bindingUserData, Joint_ManifestHandle moduleManifest, Joint_ModuleHandleInternal* outModule)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
 		ModuleManifest m;
 		ManifestReader::Read(moduleManifest, m);
 
-		auto class_name = m.GetClassName();
-		auto jars = m.GetJars();
-
-		std::string jar_path = ManifestReader::GetLocation(moduleManifest);
-
-		*outModule = new Module(jar_path, class_name);
+		*outModule = new Module(m, ManifestReader::GetLocation(moduleManifest));
 
 		JOINT_CPP_WRAP_END
 	}

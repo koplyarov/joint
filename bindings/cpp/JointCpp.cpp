@@ -21,7 +21,6 @@ extern "C"
 		binding_desc.name            = "cpp";
 		binding_desc.deinitBinding   = &Binding::Deinit;
 		binding_desc.loadModule      = &Binding::LoadModule;
-		binding_desc.loadModuleNew   = &Binding::LoadModuleNew;
 		binding_desc.unloadModule    = &Binding::UnloadModule;
 		binding_desc.getRootObject   = &Binding::GetRootObject;
 		binding_desc.invokeMethod    = &Binding::InvokeMethod;

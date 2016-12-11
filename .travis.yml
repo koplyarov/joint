@@ -24,6 +24,6 @@ before_install:
 
 script: 
   - ( mkdir build && cd build && CC="$COMPILER" CXX="$COMPILERXX" cmake -DJOINT_TREAT_WARNINGS_AS_ERRORS=TRUE -DJOINT_VALGRIND=TRUE .. && make )
-  - valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test cpp tests-c
-  - valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test cpp tests-cpp
-  - PYTHONPATH="`pwd`/test/python:`pwd`/build/bin" valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test python Tests
+  - valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test build/bin/c/Tests/Tests.jm
+  - valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test build/bin/cpp/Tests/Tests.jm
+  - PYTHONPATH="`pwd`/test/python:`pwd`/build/bin" valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test build/bin/python/Tests/Tests.jm

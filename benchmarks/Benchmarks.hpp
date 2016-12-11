@@ -27,16 +27,16 @@ namespace benchmarks
 		Benchmarks()
 			: BenchmarksClass("basic")
 		{
-			AddBenchmark<std::string, std::string>("invokeNative", &Benchmarks::InvokeVoidNative, {"binding", "module"});
-			AddBenchmark<std::string, std::string>("invoke", &Benchmarks::InvokeVoid, {"binding", "module"});
-			AddBenchmark<std::string, std::string>("invokeOutgoing", &Benchmarks::InvokeVoidOutgoing, {"binding", "module"});
+			AddBenchmark<std::string>("invokeNative", &Benchmarks::InvokeVoidNative, {"module"});
+			AddBenchmark<std::string>("invoke", &Benchmarks::InvokeVoid, {"module"});
+			AddBenchmark<std::string>("invokeOutgoing", &Benchmarks::InvokeVoidOutgoing, {"module"});
 		}
 
 	private:
-		static void InvokeVoidNative(BenchmarkContext& context, const std::string& binding, const std::string& module)
+		static void InvokeVoidNative(BenchmarkContext& context, const std::string& moduleManifest)
 		{
 			const auto n = context.GetIterationsCount();
-			BenchmarkCtx ctx(binding, module);
+			BenchmarkCtx ctx(moduleManifest);
 			auto b = ctx.CreateBenchmarks();
 
 			context.WarmUpAndProfile("void_void", n, [&]{ b->MeasureNativeVoidToVoid(n); });
@@ -51,10 +51,10 @@ namespace benchmarks
 			context.WarmUpAndProfile("string100_void", n, [&]{ b->MeasureNativeVoidToString100(n); });
 		}
 
-		static void InvokeVoid(BenchmarkContext& context, const std::string& binding, const std::string& module)
+		static void InvokeVoid(BenchmarkContext& context, const std::string& moduleManifest)
 		{
 			const auto n = context.GetIterationsCount();
-			BenchmarkCtx ctx(binding, module);
+			BenchmarkCtx ctx(moduleManifest);
 			auto b = ctx.CreateBenchmarks();
 
 			context.WarmUpAndProfile("void_void", n, [&]{ for (auto i = 0; i < n; ++i) b->VoidToVoid(); });
@@ -71,10 +71,10 @@ namespace benchmarks
 			context.WarmUpAndProfile("string100_void", n, [&]{ for (auto i = 0; i < n; ++i) b->VoidToString100(); });
 		}
 
-		static void InvokeVoidOutgoing(BenchmarkContext& context, const std::string& binding, const std::string& module)
+		static void InvokeVoidOutgoing(BenchmarkContext& context, const std::string& moduleManifest)
 		{
 			const auto n = context.GetIterationsCount();
-			BenchmarkCtx ctx(binding, module);
+			BenchmarkCtx ctx(moduleManifest);
 			auto b = ctx.CreateBenchmarks();
 			auto invokable = ctx.CreateLocalInvokable();
 

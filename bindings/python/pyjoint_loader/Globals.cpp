@@ -28,7 +28,7 @@ namespace pyjoint_loader
 		PyObjectHolder py_joint_module_type(PY_OBJ_CHECK(PyObject_GetAttrString(py_module, "Module")));
 
 		Joint_ModuleHandle module_handle = JOINT_NULL_HANDLE;
-		Joint_Error ret = Joint_LoadModuleByName(binding_name, joint_module_name, &module_handle);
+		Joint_Error ret = JOINT_ERROR_NOT_IMPLEMENTED; // Joint_LoadModuleByName(binding_name, joint_module_name, &module_handle);
 		NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_LoadModuleByName failed: ") + Joint_ErrorToString(ret)).c_str());
 
 		PyObjectHolder py_module_handle(PY_OBJ_CHECK(PyCapsule_New(module_handle, "Joint.Module", NULL)));

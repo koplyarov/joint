@@ -185,7 +185,6 @@ extern "C"
 		JOINT_CHECK(desc.castObject != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(desc.getRootObject != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(desc.loadModule != nullptr, JOINT_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(desc.loadModuleNew != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(desc.unloadModule != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(desc.deinitBinding != nullptr, JOINT_ERROR_INVALID_PARAMETER);
 
@@ -237,9 +236,14 @@ extern "C"
 
 		GetLogger().Info() << "ReadManifestFromFile(path: " << (path ? path : "null") << ")";
 		JsonNode n = JsonParser::Parse(path);
-		GetLogger().Debug() << "Manifest: " << n;
 
-		*outManifest = new Joint_Manifest{std::move(n), path};
+		std::string path_str(path);
+		size_t last_slash = path_str.find_last_of("/\\");
+
+		std::string location = (last_slash == std::string::npos) ? "." : path_str.substr(0, last_slash);
+
+		*outManifest = new Joint_Manifest{std::move(n), std::move(location)};
+		GetLogger().Debug() << "Manifest: " << *outManifest;
 
 		JOINT_CPP_WRAP_END
 	}
@@ -401,30 +405,7 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_LoadModule(Joint_BindingHandle binding, const char* moduleName, Joint_ModuleHandle* outModule)
-	{
-		JOINT_CPP_WRAP_BEGIN
-
-		GetLogger().Info() << "LoadModule(binding: " << binding << " (userData: " << (binding ? binding->userData : NULL) << "), moduleName: \"" << moduleName << "\")";
-
-		JOINT_CHECK(binding != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(moduleName, JOINT_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(outModule, JOINT_ERROR_INVALID_PARAMETER);
-
-		Joint_ModuleHandleInternal internal = JOINT_NULL_HANDLE;
-		Joint_Error ret = binding->desc.loadModule(binding->userData, moduleName, &internal);
-		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
-		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
-
-		*outModule = new Joint_Module(internal, binding);
-
-		GetLogger().Debug() << "  LoadModule.outModule: " << *outModule;
-
-		JOINT_CPP_WRAP_END
-	}
-
-
-	Joint_Error Joint_LoadModuleNew(Joint_BindingHandle binding, Joint_ManifestHandle moduleManifest, Joint_ModuleHandle* outModule)
+	Joint_Error Joint_LoadModuleInternal(Joint_BindingHandle binding, Joint_ManifestHandle moduleManifest, Joint_ModuleHandle* outModule)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
@@ -436,7 +417,7 @@ extern "C"
 			<< "), moduleManifest: \"" << moduleManifest->rootNode << "\")";
 
 		Joint_ModuleHandleInternal internal = JOINT_NULL_HANDLE;
-		Joint_Error ret = binding->desc.loadModuleNew(binding->userData, moduleManifest, &internal);
+		Joint_Error ret = binding->desc.loadModule(binding->userData, moduleManifest, &internal);
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 		JOINT_CHECK(internal, JOINT_ERROR_IMPLEMENTATION_ERROR);
 

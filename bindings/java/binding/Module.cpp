@@ -15,29 +15,36 @@ namespace binding
 	using namespace devkit;
 
 
-	Module::Module(const std::string& jarPath, const std::string& className)
+	Module::Module(const ModuleManifest& manifest, const std::string& location)
 		: _cls()
 	{
 		auto jvm = JointJavaContext::GetJvm();
 		auto env = GetJavaEnv(jvm);
 
-		auto url_string = JStringLocalRef::StealLocal(env, JAVA_CALL(env->NewStringUTF(jarPath.c_str())));
-		auto class_name_string = JStringLocalRef::StealLocal(env, JAVA_CALL(env->NewStringUTF(className.c_str())));
+		const auto& jjc = JointJavaContext::ConstInstance();
 
-		auto URL_cls = JClassLocalRef::StealLocal(env, JAVA_CALL(env->FindClass("java/net/URL")));
-		jmethodID URL_ctor_id = JAVA_CALL(env->GetMethodID(URL_cls.Get(), "<init>", "(Ljava/lang/String;)V"));
-		auto url = JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(URL_cls.Get(), URL_ctor_id, url_string.Get())));
+		////////////////////////////////////////////////////////////////////////////////
 
-		auto urls = JObjArrayLocalRef::StealLocal(env, JAVA_CALL(env->NewObjectArray(1, URL_cls.Get(), url.Get())));
+		auto jars = manifest.GetJars();
+		auto class_name_string = JStringLocalRef::StealLocal(env, JAVA_CALL(env->NewStringUTF(manifest.GetClassName().c_str())));
+		auto urls = JObjArrayLocalRef::StealLocal(env, JAVA_CALL(env->NewObjectArray(jars.size(), jjc.URL_cls.Get(), nullptr)));
 
-		auto URLClassLoader_cls = JClassLocalRef::StealLocal(env, JAVA_CALL(env->FindClass("java/net/URLClassLoader")));
-		jmethodID URLClassLoader_ctor_id = JAVA_CALL(env->GetMethodID(URLClassLoader_cls.Get(), "<init>", "([Ljava/net/URL;)V"));
-		jmethodID loadClass_id = JAVA_CALL(env->GetMethodID(URLClassLoader_cls.Get(), "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;"));
+		for (size_t i = 0; i < jars.size(); ++i)
+		{
+			std::string jar_path = location + "/" + jars[i];
 
-		auto class_loader = JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(URLClassLoader_cls.Get(), URLClassLoader_ctor_id, urls.Get())));
+			auto url_string = JStringLocalRef::StealLocal(env, JAVA_CALL(env->NewStringUTF(jar_path.c_str())));
+			auto file = JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(jjc.File_cls.Get(), jjc.File_ctor_id, url_string.Get())));
+			auto uri = JObjLocalRef::StealLocal(env, JAVA_CALL(env->CallObjectMethod(file.Get(), jjc.File_toURI_id)));
+			auto url = JObjLocalRef::StealLocal(env, JAVA_CALL(env->CallObjectMethod(uri.Get(), jjc.URI_toURL_id)));
 
-		_cls = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->CallObjectMethod(class_loader.Get(), loadClass_id, class_name_string.Get())));
-		JOINT_CHECK(_cls, StringBuilder() % "Class " % className % " not found");
+			JAVA_CALL_VOID(env->SetObjectArrayElement(urls.Get(), i, url.Get()));
+		}
+
+		auto class_loader = JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(jjc.URLClassLoader_cls.Get(), jjc.URLClassLoader_ctor_id, urls.Get())));
+
+		_cls = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->CallObjectMethod(class_loader.Get(), jjc.URLClassLoader_loadClass_id, class_name_string.Get())));
+		JOINT_CHECK(_cls, StringBuilder() % "Class " % manifest.GetClassName() % " not found");
 	}
 
 

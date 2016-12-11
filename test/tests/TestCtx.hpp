@@ -7,8 +7,7 @@
 #include <joint.cpp/Module.hpp>
 
 
-std::string g_bindingName = "cpp";
-std::string g_moduleName = "tests-c";
+std::string g_moduleManifest = "";
 
 struct TestCtx
 {
@@ -16,7 +15,7 @@ struct TestCtx
 	joint::Module			Module;
 
 	TestCtx()
-		: Module(Ctx.LoadModule(g_bindingName, g_moduleName))
+		: Module(joint::Manifest(g_moduleManifest))
 	{ }
 };
 

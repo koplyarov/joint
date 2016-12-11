@@ -33,8 +33,8 @@ namespace joint
 			::joint::Module		_module;
 
 		public:
-			BenchmarkCtx(const std::string& bindingName, const std::string& moduleName)
-				: _module(_ctx.LoadModule(bindingName, moduleName))
+			BenchmarkCtx(const std::string& moduleManifestPath)
+				: _module(_ctx.LoadModule(::joint::Manifest(moduleManifestPath)))
 			{ }
 
 			benchmarks::IBenchmarks_Ptr CreateBenchmarks() const

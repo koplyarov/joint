@@ -139,6 +139,11 @@ namespace java
 
 #undef DETAIL_JOINT_JAVA_SIMPLE_TYPE_STUFF
 
+		JClassGlobalRef File_cls;
+		JClassGlobalRef URI_cls;
+		JClassGlobalRef URL_cls;
+		JClassGlobalRef URLClassLoader_cls;
+
 		JClassGlobalRef TypeDescriptor_cls;
 		JClassGlobalRef MethodDescriptor_cls;
 		JClassGlobalRef InterfaceDescriptor_cls;
@@ -149,6 +154,16 @@ namespace java
 		JClassGlobalRef InterfaceId_cls;
 		JClassGlobalRef JointException_cls;
 		JClassGlobalRef Array_cls;
+
+		jmethodID File_ctor_id;
+		jmethodID File_toURI_id;
+
+		jmethodID URI_toURL_id;
+
+		jmethodID URL_ctor_id;
+
+		jmethodID URLClassLoader_ctor_id;
+		jmethodID URLClassLoader_loadClass_id;
 
 		jfieldID TypeDescriptor_typeId;
 		jfieldID TypeDescriptor_interfaceChecksum;

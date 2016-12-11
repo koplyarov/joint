@@ -14,6 +14,31 @@
 namespace joint
 {
 
+	class Manifest
+	{
+	private:
+		Joint_ManifestHandle    _manifest;
+
+	public:
+		Manifest(const std::string& location)
+			: _manifest(JOINT_NULL_HANDLE)
+		{ JOINT_CALL( Joint_ReadManifestFromFile(location.c_str(), &_manifest) ); }
+
+		~Manifest()
+		{
+			if (_manifest != JOINT_NULL_HANDLE)
+				Joint_DeleteManifest(_manifest);
+		}
+
+		Joint_ManifestHandle GetHandle() const
+		{ return _manifest; }
+
+	private:
+		Manifest(const Manifest&);
+		Manifest& operator = (const Manifest&);
+	};
+
+
 	class ModuleContext
 	{
 	private:
@@ -65,9 +90,9 @@ namespace joint
 		Joint_ModuleHandle     _module;
 
 	public:
-		Module(std::string bindingName, std::string moduleName)
+		Module(const Manifest& manifest)
 			: _module(JOINT_NULL_HANDLE)
-		{ JOINT_CALL( Joint_LoadModuleByName(bindingName.c_str(), moduleName.c_str(), &_module) ); }
+		{ JOINT_CALL( Joint_LoadModule(manifest.GetHandle(), &_module) ); }
 
 		Module(Joint_ModuleHandle module = JOINT_NULL_HANDLE) : _module(module) { }
 		Module(const Module& other) : _module(other._module) { JOINT_CALL( Joint_IncRefModule(_module) ); }
@@ -137,13 +162,6 @@ namespace joint
 
 		void Swap(Binding& other)
 		{ std::swap(_binding, other._binding); }
-
-		Module LoadModule(const std::string& moduleName) const
-		{
-			Joint_ModuleHandle module;
-			JOINT_CALL( Joint_LoadModule(_binding, moduleName.c_str(), &module) );
-			return Module(module);
-		}
 	};
 
 
@@ -170,8 +188,8 @@ namespace joint
 
 		ModuleContext GetMainModule() const { return _mainModule; }
 
-		Module LoadModule(std::string bindingName, std::string moduleName)
-		{ return Module(bindingName, moduleName); }
+		Module LoadModule(const Manifest& manifest)
+		{ return Module(manifest); }
 
 		template < typename Interface_, typename ComponentType_ >
 		Ptr<Interface_> MakeComponentProxy(const ComponentImplPtr<ComponentType_>& component)

@@ -49,6 +49,11 @@ namespace java
 
 #undef DETAIL_JOINT_JAVA_INIT_SIMPLE_TYPE_STUFF
 
+		File_cls = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("java/io/File")));
+		URI_cls = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("java/net/URI")));
+		URL_cls = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("java/net/URL")));
+		URLClassLoader_cls = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("java/net/URLClassLoader")));
+
 		TypeDescriptor_cls                   = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/TypeDescriptor")));
 		MethodDescriptor_cls                 = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/MethodDescriptor")));
 		InterfaceDescriptor_cls              = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/InterfaceDescriptor")));
@@ -59,6 +64,16 @@ namespace java
 		InterfaceId_cls                      = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/InterfaceId")));
 		JointException_cls                   = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/JointException")));
 		Array_cls                            = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/Array")));
+
+		File_ctor_id                         = JAVA_CALL(env->GetMethodID(File_cls.Get(), "<init>", "(Ljava/lang/String;)V"));
+		File_toURI_id                        = JAVA_CALL(env->GetMethodID(File_cls.Get(), "toURI", "()Ljava/net/URI;"));
+
+		URI_toURL_id                         = JAVA_CALL(env->GetMethodID(URI_cls.Get(), "toURL", "()Ljava/net/URL;"));
+
+		URL_ctor_id                          = JAVA_CALL(env->GetMethodID(URL_cls.Get(), "<init>", "(Ljava/lang/String;)V"));
+
+		URLClassLoader_ctor_id               = JAVA_CALL(env->GetMethodID(URLClassLoader_cls.Get(), "<init>", "([Ljava/net/URL;)V"));
+		URLClassLoader_loadClass_id          = JAVA_CALL(env->GetMethodID(URLClassLoader_cls.Get(), "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;"));
 
 		TypeDescriptor_typeId                = JAVA_CALL(env->GetFieldID(TypeDescriptor_cls.Get(), "typeId", "I"));
 		TypeDescriptor_interfaceChecksum     = JAVA_CALL(env->GetFieldID(TypeDescriptor_cls.Get(), "interfaceChecksum", "I"));

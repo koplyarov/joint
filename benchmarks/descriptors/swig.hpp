@@ -4,6 +4,7 @@
 
 #include <joint/devkit/JointException.hpp>
 #include <joint/devkit/Logger.hpp>
+#include <joint/devkit/ManifestReader.hpp>
 #include <joint/devkit/StringBuilder.hpp>
 
 #include <jni.h>
@@ -68,12 +69,15 @@ namespace swig
 				jclass    SwigBenchmarks_cls;
 
 			public:
-				static Jvm& Instance(const std::string& module)
+				static Jvm& Instance(const std::string& jar, const std::string& className)
 				{
-					static std::string m = module;
-					JOINT_CHECK(m == module, "Java module mismatch!");
+					static std::string jar_static = jar;
+					JOINT_CHECK(jar_static == jar, "Java configuration mismatch!");
 
-					static Jvm inst(module);
+					static std::string class_name_static = className;
+					JOINT_CHECK(class_name_static == className, "Java configuration mismatch!");
+
+					static Jvm inst(jar, className);
 					return inst;
 				}
 
@@ -86,16 +90,11 @@ namespace swig
 				}
 
 			private:
-				Jvm(const std::string& module)
+				Jvm(const std::string& jar, const std::string& className)
 				{
 					using namespace ::joint::devkit;
 
-					size_t delim = module.rfind(':');
-					JOINT_CHECK(delim != std::string::npos, JOINT_ERROR_INVALID_PARAMETER);
-					std::string jar_path = module.substr(0, delim);
-					std::string class_name = module.substr(delim + 1);
-
-					std::string class_path_opt = "-Djava.class.path=" + jar_path;
+					std::string class_path_opt = "-Djava.class.path=" + jar;
 					std::string lib_path_opt = "-Djava.library.path=/home/koplyarov/work/joint/build/bin";
 					JavaVMOption opt[] = {
 						{ const_cast<char*>(class_path_opt.c_str()), nullptr },
@@ -114,7 +113,7 @@ namespace swig
 					JOINT_CHECK(ret == 0, StringBuilder() % "JNI_CreateJavaVM failed: " % ret);
 					JOINT_CHECK(jvm, "JNI_CreateJavaVM failed!");
 
-					auto s = SWIG_JAVA_CALL(env->FindClass(class_name.c_str()));
+					auto s = SWIG_JAVA_CALL(env->FindClass(className.c_str()));
 					SwigBenchmarks_cls = SWIG_JAVA_CALL((jclass)env->NewGlobalRef((jobject)s));
 					env->DeleteLocalRef(s);
 				}
@@ -127,35 +126,72 @@ namespace swig
 				}
 			};
 
+			struct PyModuleManifest : public ::joint::devkit::ModuleManifestBase
+			{
+				std::string     ModuleName;
+
+				template < typename Archive_ >
+				void Deserialize(const Archive_& ar)
+				{ ar.Deserialize("module", ModuleName); }
+			};
+
+			struct JavaModuleManifest : public ::joint::devkit::ModuleManifestBase
+			{
+				std::string                 Jar;
+				std::string                 ClassName;
+
+				template < typename Archive_ >
+				void Deserialize(const Archive_& ar)
+				{ ar.Deserialize("class", ClassName).Deserialize("jar", Jar); }
+			};
+
 		private:
-			std::string _module;
-			PyObject*   _pyBenchmarks = nullptr;
-			jobject     _javaBenchmarks = nullptr;
+			std::string         _jar;
+			std::string         _className;
+			PyObject*           _pyBenchmarks = nullptr;
+			jobject             _javaBenchmarks = nullptr;
 
 		public:
-			BenchmarkCtx(const std::string& bindingName, const std::string& moduleName)
-				: _module(moduleName)
+			BenchmarkCtx(const std::string& moduleManifestPath)
 			{
 				using namespace ::joint::devkit;
 
-				if (bindingName == "python")
+				Joint_ManifestHandle m;
+				Joint_Error err = Joint_ReadManifestFromFile(moduleManifestPath.c_str(), &m);
+				JOINT_CHECK(err == JOINT_ERROR_NONE, err);
+
+				auto sg = ScopeExit([&]{ Joint_DeleteManifest(m); });
+
+				ModuleManifestBase md;
+				ManifestReader::Read(m, md);
+				auto binding_name = md.GetBindingName();
+
+				if (binding_name == "python")
 				{
+					PyModuleManifest md;
+					ManifestReader::Read(m, md);
+
 					Py_Initialize();
-					PyObject* py_module_name = PyUnicode_FromString(moduleName.c_str());
+					PyObject* py_module_name = PyUnicode_FromString(md.ModuleName.c_str());
 					PyObject* py_module = PyImport_Import(py_module_name);
 					if (!py_module)
-						throw std::runtime_error("Could not import " + moduleName);
+						throw std::runtime_error("Could not import " + md.ModuleName);
 					const char* getter_name = "GetBenchmarks";
 					PyObject* py_getter = PyObject_GetAttrString(py_module, getter_name);
 					if (!py_getter)
-						throw std::runtime_error("Could not find " + std::string(getter_name) + " function in " + moduleName);
+						throw std::runtime_error("Could not find " + std::string(getter_name) + " function in " + md.ModuleName);
 					_pyBenchmarks = PyObject_CallObject(py_getter, nullptr);
 					if (!_pyBenchmarks)
 						throw std::runtime_error("Could not get benchmarks object!");
 				}
-				else if (bindingName == "java")
+				else if (binding_name == "java")
 				{
-					auto& jctx = Jvm::Instance(_module);
+					JavaModuleManifest md;
+					ManifestReader::Read(m, md);
+					_jar = md.Jar;
+					_className = md.ClassName;
+
+					auto& jctx = Jvm::Instance(_jar, _className);
 					auto env = jctx.GetEnv();
 
 					jmethodID ctor = SWIG_JAVA_CALL(env->GetMethodID(jctx.SwigBenchmarks_cls, "<init>", "()V"));
@@ -178,7 +214,7 @@ namespace swig
 
 				if (_javaBenchmarks)
 				{
-					auto env = Jvm::Instance(_module).GetEnv();
+					auto env = Jvm::Instance(_jar, _className).GetEnv();
 
 					env->DeleteGlobalRef(_javaBenchmarks);
 				}

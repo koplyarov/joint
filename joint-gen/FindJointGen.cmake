@@ -58,7 +58,7 @@ if (JOINT_GEN_FOUND)
 
 
 	macro(JOINT_MAKE_MODULE_PACKAGE TARGET_NAME)
-		cmake_parse_arguments(_JOINT_MMP "" "PACKAGE_DIR;MANIFEST" "DIRECTORY" ${ARGN})
+		cmake_parse_arguments(_JOINT_MMP "" "PACKAGE_DIR;MANIFEST" "DEPENDS" ${ARGN})
 
 		__joint_private_rel_to_abs(_JOINT_MMP_MANIFEST_ABS ${_JOINT_MMP_MANIFEST} ${CMAKE_CURRENT_SOURCE_DIR})
 		__joint_private_rel_to_abs(_JOINT_${TARGET_NAME}_PACKAGE_DIR ${_JOINT_MMP_PACKAGE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
@@ -71,6 +71,10 @@ if (JOINT_GEN_FOUND)
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${_JOINT_MMP_MANIFEST_ABS} ${_JOINT_MMP_PACKAGE_DIR}/${_JOINT_MMP_MANIFEST}
 			DEPENDS ${_JOINT_MMP_MANIFEST}
 		)
+
+		foreach(D ${_JOINT_MMP_DEPENDS})
+			add_dependencies(${TARGET_NAME} ${D})
+		endforeach()
 	endmacro(JOINT_MAKE_MODULE_PACKAGE)
 
 

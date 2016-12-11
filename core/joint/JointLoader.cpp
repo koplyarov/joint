@@ -81,20 +81,7 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_LoadModuleByName(const char* bindingName, const char* moduleName, Joint_ModuleHandle* outModule)
-	{
-		JOINT_CPP_WRAP_BEGIN
-
-		Joint_Error ret = Joint_Init();
-		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
-
-		return Joint_LoadModule(g_bindings.GetBinding(bindingName), moduleName, outModule);
-
-		JOINT_CPP_WRAP_END
-	}
-
-
-	Joint_Error Joint_LoadModuleNew2(Joint_ManifestHandle moduleManifest, Joint_ModuleHandle* outModule)
+	Joint_Error Joint_LoadModule(Joint_ManifestHandle moduleManifest, Joint_ModuleHandle* outModule)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
@@ -104,10 +91,10 @@ extern "C"
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 
 		ModuleManifestBase m;
-		joint::devkit::ManifestReader::Read(moduleManifest, m);
+		ManifestReader::Read(moduleManifest, m);
 		auto binding_name = m.GetBindingName();
 
-		return Joint_LoadModuleNew(g_bindings.GetBinding(binding_name), moduleManifest, outModule);
+		return Joint_LoadModuleInternal(g_bindings.GetBinding(binding_name), moduleManifest, outModule);
 
 		JOINT_CPP_WRAP_END
 	}

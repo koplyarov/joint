@@ -25,12 +25,13 @@ joint_generate_adapters(java ${CMAKE_CURRENT_BINARY_DIR}/Adapters.java
 	../idl/IArrayTests.idl
 )
 
-#joint_make_module_package(tests-component-java
-	#PACKAGE_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/java/Tests
-	#MANIFEST Tests.jm
-#)
+joint_make_module_package(tests-component-java
+	PACKAGE_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/java/Tests
+	MANIFEST Tests.jm
+	DEPENDS tests
+)
 
-#joint_add_module_content(tests-component-java
-	#DIRECTORY .
-	#FILES ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/tests.jar
-#)
+joint_add_module_content(tests-component-java
+	DIRECTORY .
+	FILES ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/tests.jar
+)
