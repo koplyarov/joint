@@ -53,15 +53,6 @@ extern "C"
 		{ }
 	};
 
-	std::ostream& operator << (std::ostream& s, const Joint_ManifestHandle m)
-	{
-		if (!m)
-			s << "null";
-		else
-			s << "{ location: " << m->location << ", root: " << m->rootNode << " }";
-		return s;
-	}
-
 
 	struct Joint_Module
 	{
@@ -102,6 +93,16 @@ extern "C"
 		std::vector<Joint_StackFrameData>  backtrace;
 	};
 
+}
+
+
+std::ostream& operator << (std::ostream& s, const Joint_ManifestHandle m)
+{
+	if (!m)
+		s << "null";
+	else
+		s << "{ location: " << m->location << ", root: " << m->rootNode << " }";
+	return s;
 }
 
 
