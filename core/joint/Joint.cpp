@@ -242,7 +242,7 @@ extern "C"
 
 		std::string location = (last_slash == std::string::npos) ? "." : path_str.substr(0, last_slash);
 
-		*outManifest = new Joint_Manifest{std::move(n), std::move(location)};
+		*outManifest = new Joint_Manifest(std::move(n), std::move(location));
 		GetLogger().Debug() << "Manifest: " << *outManifest;
 
 		JOINT_CPP_WRAP_END

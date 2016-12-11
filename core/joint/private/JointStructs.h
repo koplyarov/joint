@@ -47,6 +47,10 @@ extern "C"
 	{
 		const Joint_ManifestNode   rootNode;
 		const std::string          location;
+
+		Joint_Manifest(Joint_ManifestNode&& rootNode, std::string location)
+			: rootNode(std::move(rootNode)), location(std::move(location))
+		{ }
 	};
 
 	std::ostream& operator << (std::ostream& s, const Joint_ManifestHandle m)
