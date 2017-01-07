@@ -219,10 +219,11 @@ class SemanticGraphBuilder:
             parsed_files.append(self._idlParser.parseFile(f))
 
         for ast in parsed_files:
+            package_name_list = list(ast['package'])
             try:
-                pkg = semanticsGraph.findPackage(ast['package'])
+                pkg = semanticsGraph.findPackage(package_name_list)
             except LookupError:
-                pkg = Package(ast['package'])
+                pkg = Package(package_name_list)
                 semanticsGraph.packages.append(pkg)
             for t_ast in ast['types']:
                 if t_ast['kind'] == 'interface':
@@ -238,7 +239,8 @@ class SemanticGraphBuilder:
                         ifc.bases.append(semanticsGraph.findType(['joint'], 'IObject'))
 
         for ast in parsed_files:
-            pkg = semanticsGraph.findPackage(ast['package'])
+            package_name_list = list(ast['package'])
+            pkg = semanticsGraph.findPackage(package_name_list)
             for t_ast in ast['types']:
                 if t_ast['kind'] == 'interface':
                     ifc = pkg.findType(t_ast['name'])
