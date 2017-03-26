@@ -15,17 +15,12 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/joint-gen/")
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-
 include_directories(${CMAKE_SOURCE_DIR}/core)
 include_directories(${CMAKE_SOURCE_DIR}/devkit)
 
 add_subdirectory(joint-gen)
 add_subdirectory(core)
-add_subdirectory(bindings/python)
-add_subdirectory(bindings/cpp)
-add_subdirectory(bindings/java)
+add_subdirectory(bindings)
 add_subdirectory(test)
 add_subdirectory(benchmarks)
 

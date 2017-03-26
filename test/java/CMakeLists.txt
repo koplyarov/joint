@@ -9,11 +9,13 @@ add_jar(tests
 	SOURCES
 		Tests.java
 		${CMAKE_CURRENT_BINARY_DIR}/Adapters.java
+	INCLUDE_JARS
+		${CMAKE_BINARY_DIR}/bin/joint.jar
     OUTPUT_DIR
 		${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
 
-add_dependencies(tests joint-java)
+#add_dependencies(tests joint-java)
 
 joint_generate_adapters(java ${CMAKE_CURRENT_BINARY_DIR}/Adapters.java
 	../idl/IBasicTests.idl
@@ -26,12 +28,12 @@ joint_generate_adapters(java ${CMAKE_CURRENT_BINARY_DIR}/Adapters.java
 )
 
 joint_make_module_package(tests-component-java
-	PACKAGE_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/java/Tests
+	PACKAGE_DIR ${JOINT_MODULE_OUTPUT_DIRECTORY}/java/Tests
 	MANIFEST Tests.jm
 	DEPENDS tests
 )
 
 joint_add_module_content(tests-component-java
 	DIRECTORY .
-	FILES ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/tests.jar
+	FILES ${CMAKE_CURRENT_BINARY_DIR}/tests.jar
 )

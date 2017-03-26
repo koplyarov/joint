@@ -32,7 +32,7 @@ add_library(tests-cpp SHARED Tests.cpp Tests_adapters.hpp)
 target_link_libraries(tests-cpp joint ${CMAKE_THREAD_LIBS_INIT})
 
 joint_make_module_package(tests-component-cpp
-	PACKAGE_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/cpp/Tests
+	PACKAGE_DIR ${JOINT_MODULE_OUTPUT_DIRECTORY}/cpp/Tests
 	MANIFEST Tests.jm
 )
 

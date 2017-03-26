@@ -27,7 +27,7 @@ add_library(tests-c SHARED Tests.c Tests_adapters.h)
 target_link_libraries(tests-c joint)
 
 joint_make_module_package(tests-component-c
-	PACKAGE_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/c/Tests
+	PACKAGE_DIR ${JOINT_MODULE_OUTPUT_DIRECTORY}/c/Tests
 	MANIFEST Tests.jm
 )
 

@@ -1,5 +1,7 @@
 project(joint-java)
 
+set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin)
+
 find_package(Threads)
 find_package(JNI REQUIRED)
 find_package(Java REQUIRED)

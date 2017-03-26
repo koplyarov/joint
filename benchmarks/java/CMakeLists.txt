@@ -9,6 +9,8 @@ add_jar(benchmarks-java
 	SOURCES
 		Benchmarks.java
 		${CMAKE_CURRENT_BINARY_DIR}/Adapters.java
+	INCLUDE_JARS
+		${CMAKE_BINARY_DIR}/bin/joint.jar
     OUTPUT_DIR
 		${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
