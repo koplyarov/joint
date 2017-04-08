@@ -2,9 +2,7 @@
 *.swo
 *.swp
 /.buildSettings
-/benchmarks/python/Benchmarks_adapters.py
 /build
 /test/java/Adapters.java
-/test/python/Tests_adapters.py
 tags
 types_*.taghl

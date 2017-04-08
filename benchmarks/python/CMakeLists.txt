@@ -1,4 +1,4 @@
-joint_generate_adapters(python ${CMAKE_CURRENT_SOURCE_DIR}/Benchmarks_adapters.py ../idl/IBenchmarks.idl)
+joint_generate_adapters(python Benchmarks_adapters.py ../idl/IBenchmarks.idl)
 
-add_custom_target(benchmarks-adapters-py ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Benchmarks_adapters.py)
+add_custom_target(benchmarks-adapters-py ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Benchmarks_adapters.py)
 

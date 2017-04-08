@@ -1,6 +1,6 @@
 project(test-python)
 
-joint_generate_adapters(python ${CMAKE_CURRENT_SOURCE_DIR}/Tests_adapters.py
+joint_generate_adapters(python Tests_adapters.py
 	../idl/IBasicTests.idl
 	../idl/IObjectTests.idl
 	../idl/IEnumTests.idl
@@ -12,7 +12,7 @@ joint_generate_adapters(python ${CMAKE_CURRENT_SOURCE_DIR}/Tests_adapters.py
 	../idl/IArrayTests.idl
 )
 
-add_custom_target(test-adapters-py ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/Tests_adapters.py)
+add_custom_target(test-adapters-py ALL DEPENDS Tests_adapters.py)
 
 joint_make_module_package(tests-component-py
 	PACKAGE_DIR ${JOINT_MODULE_OUTPUT_DIRECTORY}/python/Tests
@@ -22,5 +22,5 @@ joint_make_module_package(tests-component-py
 
 joint_add_module_content(tests-component-py
 	DIRECTORY Package
-	FILES __init__.py Component.py ${CMAKE_CURRENT_SOURCE_DIR}/Tests_adapters.py
+	FILES __init__.py Component.py ${CMAKE_CURRENT_BINARY_DIR}/Tests_adapters.py
 )
