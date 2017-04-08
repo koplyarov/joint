@@ -23,10 +23,10 @@ namespace cpp
 		HMODULE    _handle;
 
 	public:
-		Impl(const std::string& name)
+		Impl(const std::string& searchPath, const std::string& name)
 		{
 			// TODO: add unicode support
-			_handle = LoadLibraryA((name + ".dll").c_str());
+			_handle = LoadLibraryA((searchPath + "/" + name + ".dll").c_str());
 			JOINT_CHECK(_handle != nullptr, devkit::StringBuilder() % "dlopen failed: " % GetWinErrorMessage(GetLastError()));
 		}
 
@@ -67,9 +67,9 @@ namespace cpp
 		void*    _handle;
 
 	public:
-		Impl(const std::string& name)
+		Impl(const std::string& searchPath, const std::string& name)
 		{
-			_handle = dlopen(("lib" + name + ".so").c_str(), RTLD_NOW | RTLD_DEEPBIND);
+			_handle = dlopen((searchPath + "/lib" + name + ".so").c_str(), RTLD_NOW | RTLD_DEEPBIND);
 			JOINT_CHECK(_handle != nullptr, devkit::StringBuilder() % "dlopen failed: " % dlerror());
 		}
 
@@ -86,8 +86,8 @@ namespace cpp
 #endif
 
 
-	DynamicLibrary::DynamicLibrary(const std::string& name)
-		: _impl(new Impl(name))
+	DynamicLibrary::DynamicLibrary(const std::string& searchPath, const std::string& name)
+		: _impl(new Impl(searchPath, name))
 	{ }
 
 

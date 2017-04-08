@@ -20,7 +20,10 @@ namespace cpp {
 namespace binding
 {
 
-	class ModuleManifest : public devkit::ModuleManifestBase
+	using namespace devkit;
+
+
+	class ModuleManifest : public ModuleManifestBase
 	{
 	private:
 		std::string     _libraryName;
@@ -31,7 +34,7 @@ namespace binding
 		template < typename Archive_ >
 		void Deserialize(const Archive_& ar)
 		{
-			devkit::ModuleManifestBase::Deserialize(ar);
+			ModuleManifestBase::Deserialize(ar);
 			ar.Deserialize("library", _libraryName);
 		}
 	};
@@ -57,8 +60,8 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 		ModuleManifest m;
-		joint::devkit::ManifestReader::Read(moduleManifest, m);
-		*outModule = new DynamicLibrary(m.GetLibraryName());
+		ManifestReader::Read(moduleManifest, m);
+		*outModule = new DynamicLibrary(ManifestReader::GetLocation(moduleManifest), m.GetLibraryName());
 		JOINT_CPP_WRAP_END
 	}
 

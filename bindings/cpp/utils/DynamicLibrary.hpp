@@ -22,7 +22,7 @@ namespace cpp
 		std::unique_ptr<Impl>    _impl;
 
 	public:
-		DynamicLibrary(const std::string& name);
+		DynamicLibrary(const std::string& searchPath, const std::string& name);
 		~DynamicLibrary();
 
 		template < typename Signature_ >
