@@ -43,7 +43,7 @@ namespace binding
 		std::string     _moduleName;
 
 	public:
-		Module(const std::string& moduleName);
+		Module(const std::string& location, const std::string& moduleName);
 		~Module();
 
 		PyObjectHolder InvokeFunction(const std::string& functionName, const PyObjectHolder& jointModule);

@@ -1,7 +1,6 @@
 import gc
+from .Tests_adapters import *
 import pyjoint
-from Tests_adapters import *
-
 
 class SomeObject(test_ISomeObject):
     def __init__(self):

@@ -21,6 +21,6 @@ joint_make_module_package(tests-component-py
 )
 
 joint_add_module_content(tests-component-py
-	DIRECTORY .
-	FILES Tests.py ${CMAKE_CURRENT_SOURCE_DIR}/Tests_adapters.py
+	DIRECTORY Package
+	FILES __init__.py Component.py ${CMAKE_CURRENT_SOURCE_DIR}/Tests_adapters.py
 )

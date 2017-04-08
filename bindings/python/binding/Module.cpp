@@ -16,19 +16,27 @@ namespace python {
 namespace binding
 {
 
-	Module::Module(const std::string& moduleName)
+	Module::Module(const std::string& location, const std::string& moduleName)
 		: _moduleName(moduleName)
 	{
 #if PY_VERSION_HEX >= 0x03000000
 		wchar_t* argv[1];
 		PySys_SetArgv(0, argv);
+
+		PyObjectHolder py_importlib_name(PY_OBJ_CHECK(PyUnicode_FromString("importlib")));
+		PyObjectHolder py_importlib(PY_OBJ_CHECK(PyImport_Import(py_importlib_name)));
+		PyObjectHolder py_find_loader(PY_OBJ_CHECK(PyObject_GetAttrString(py_importlib, "find_loader")));
+		PyObjectHolder py_find_loader_params(PY_OBJ_CHECK(Py_BuildValue("(s(s))", _moduleName.c_str(), location.c_str())));
+		PyObjectHolder py_loader(PY_OBJ_CHECK(PyObject_CallObject(py_find_loader, py_find_loader_params)));
+		_pyModule.Reset(PY_OBJ_CHECK(PyObject_CallMethod(py_loader, "load_module", "s", _moduleName.c_str())));
 #else
 		char* argv[1];
 		PySys_SetArgv(0, argv);
+		JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
+		//import imp
+		//m_info = imp.find_module('Package', ['/home/koplyarov/work/joint/build/bin/python/Tests'])
+		//m = imp.load_module(*tuple(['Package'] + list(m_info)))
 #endif
-
-		PyObjectHolder py_module_name(PY_OBJ_CHECK(PyUnicode_FromString(moduleName.c_str())));
-		_pyModule.Reset(PY_OBJ_CHECK_MSG(PyImport_Import(py_module_name), "Could not import python module " + moduleName));
 
 		GetLogger().Debug() << "Loaded python module " << _moduleName;
 	}
