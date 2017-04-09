@@ -32,10 +32,14 @@ namespace binding
 #else
 		char* argv[1];
 		PySys_SetArgv(0, argv);
-		JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
-		//import imp
-		//m_info = imp.find_module('Package', ['/home/koplyarov/work/joint/build/bin/python/Tests'])
-		//m = imp.load_module(*tuple(['Package'] + list(m_info)))
+		PyObjectHolder py_imp_name(PY_OBJ_CHECK(PyUnicode_FromString("imp")));
+		PyObjectHolder py_imp(PY_OBJ_CHECK(PyImport_Import(py_imp_name)));
+		PyObjectHolder py_find_module(PY_OBJ_CHECK(PyObject_GetAttrString(py_imp, "find_module")));
+		PyObjectHolder py_find_module_params(PY_OBJ_CHECK(Py_BuildValue("(s[s])", _moduleName.c_str(), location.c_str())));
+		PyObjectHolder py_module_info(PY_OBJ_CHECK(PyObject_CallObject(py_find_module, py_find_module_params)));
+		_pyModule.Reset(PY_OBJ_CHECK(PyObject_CallMethod(py_imp, const_cast<char*>("load_module"), const_cast<char*>("sOOO"),
+			_moduleName.c_str(), PY_OBJ_CHECK(PyTuple_GetItem(py_module_info, 0)),
+			PY_OBJ_CHECK(PyTuple_GetItem(py_module_info, 1)), PY_OBJ_CHECK(PyTuple_GetItem(py_module_info, 2)))));
 #endif
 
 		GetLogger().Debug() << "Loaded python module " << _moduleName;
