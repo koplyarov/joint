@@ -5,7 +5,7 @@
 #include <joint.cpp/Array.hpp>
 #include <joint.cpp/detail/JointCall.hpp>
 #include <Tests_adapters.hpp>
-#include <test/core/Tests.hpp>
+#include <test/Tests.hpp>
 #include <test/tests/TestCtx.hpp>
 #include <test/tests/StarterTests.hpp>
 #include <test/tests/BasicTests.hpp>

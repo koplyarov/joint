@@ -1,3 +1,6 @@
 [submodule "benchmarks/core"]
 	path = benchmarks/core
 	url = https://github.com/koplyarov/benchmarks.git
+[submodule "test/core"]
+	path = test/core
+	url = https://github.com/koplyarov/test.git
