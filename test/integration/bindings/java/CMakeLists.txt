@@ -18,13 +18,13 @@ add_jar(tests
 #add_dependencies(tests joint-java)
 
 joint_generate_adapters(java ${CMAKE_CURRENT_BINARY_DIR}/Adapters.java
-	../idl/IBasicTests.idl
-	../idl/IObjectTests.idl
-	../idl/IEnumTests.idl
-	../idl/ICastTests.idl
-	../idl/IExceptionTests.idl
-	../idl/IStructTests.idl
-	../idl/IArrayTests.idl
+	${IDL_DIR}/IBasicTests.idl
+	${IDL_DIR}/IEnumTests.idl
+	${IDL_DIR}/IObjectTests.idl
+	${IDL_DIR}/ICastTests.idl
+	${IDL_DIR}/IExceptionTests.idl
+	${IDL_DIR}/IStructTests.idl
+	${IDL_DIR}/IArrayTests.idl
 )
 
 joint_make_module_package(tests-component-java

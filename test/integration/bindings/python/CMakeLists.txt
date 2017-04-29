@@ -1,15 +1,15 @@
 project(test-python)
 
 joint_generate_adapters(python Tests_adapters.py
-	../idl/IBasicTests.idl
-	../idl/IObjectTests.idl
-	../idl/IEnumTests.idl
-	../idl/ILifetimeTests.idl
-	../idl/ICastTests.idl
-	../idl/IExceptionTests.idl
-	../idl/IInterfaceChecksumTests.idl
-	../idl/IStructTests.idl
-	../idl/IArrayTests.idl
+	${IDL_DIR}/IBasicTests.idl
+	${IDL_DIR}/IEnumTests.idl
+	${IDL_DIR}/IObjectTests.idl
+	${IDL_DIR}/ILifetimeTests.idl
+	${IDL_DIR}/ICastTests.idl
+	${IDL_DIR}/IExceptionTests.idl
+	${IDL_DIR}/IInterfaceChecksumTests.idl
+	${IDL_DIR}/IStructTests.idl
+	${IDL_DIR}/IArrayTests.idl
 )
 
 add_custom_target(test-adapters-py ALL DEPENDS Tests_adapters.py)

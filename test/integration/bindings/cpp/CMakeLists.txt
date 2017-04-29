@@ -17,15 +17,15 @@ endif()
 ################################################################################
 
 joint_generate_adapters(c++ Tests_adapters.hpp
-	../idl/IBasicTests.idl
-	../idl/IEnumTests.idl
-	../idl/IObjectTests.idl
-	../idl/ILifetimeTests.idl
-	../idl/ICastTests.idl
-	../idl/IExceptionTests.idl
-	../idl/IInterfaceChecksumTests.idl
-	../idl/IStructTests.idl
-	../idl/IArrayTests.idl
+	${IDL_DIR}/IBasicTests.idl
+	${IDL_DIR}/IEnumTests.idl
+	${IDL_DIR}/IObjectTests.idl
+	${IDL_DIR}/ILifetimeTests.idl
+	${IDL_DIR}/ICastTests.idl
+	${IDL_DIR}/IExceptionTests.idl
+	${IDL_DIR}/IInterfaceChecksumTests.idl
+	${IDL_DIR}/IStructTests.idl
+	${IDL_DIR}/IArrayTests.idl
 )
 
 add_library(tests-cpp SHARED Tests.cpp Tests_adapters.hpp)

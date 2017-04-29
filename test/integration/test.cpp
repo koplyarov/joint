@@ -6,17 +6,17 @@
 #include <joint.cpp/detail/JointCall.hpp>
 #include <Tests_adapters.hpp>
 #include <test/Tests.hpp>
-#include <test/tests/TestCtx.hpp>
-#include <test/tests/StarterTests.hpp>
-#include <test/tests/BasicTests.hpp>
-#include <test/tests/CastTests.hpp>
-#include <test/tests/EnumTests.hpp>
-#include <test/tests/ExceptionTests.hpp>
-//#include <test/tests/InterfaceChecksumTests.hpp>
-#include <test/tests/LifetimeTests.hpp>
-#include <test/tests/ObjectTests.hpp>
-#include <test/tests/StructTests.hpp>
-#include <test/tests/ArrayTests.hpp>
+#include <tests/TestCtx.hpp>
+#include <tests/StarterTests.hpp>
+#include <tests/BasicTests.hpp>
+#include <tests/CastTests.hpp>
+#include <tests/EnumTests.hpp>
+#include <tests/ExceptionTests.hpp>
+//#include <tests/InterfaceChecksumTests.hpp>
+#include <tests/LifetimeTests.hpp>
+#include <tests/ObjectTests.hpp>
+#include <tests/StructTests.hpp>
+#include <tests/ArrayTests.hpp>
 
 
 int main(int argc, const char* argv[])
