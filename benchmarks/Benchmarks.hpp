@@ -22,72 +22,67 @@ namespace benchmarks
 	class Benchmarks : public BenchmarksClass
 	{
 		using BenchmarkCtx = typename Desc_::BenchmarkCtx;
+		using BenchmarksPtr = typename Desc_::BenchmarksPtr;
 
 	public:
 		Benchmarks()
 			: BenchmarksClass("basic")
 		{
-			AddBenchmark<std::string>("invokeNative", &Benchmarks::InvokeVoidNative, {"module"});
-			AddBenchmark<std::string>("invoke", &Benchmarks::InvokeVoid, {"module"});
-			AddBenchmark<std::string>("invokeOutgoing", &Benchmarks::InvokeVoidOutgoing, {"module"});
+			using namespace std;
+			using namespace std::placeholders;
+
+			using i64 = int64_t;
+			using C = BenchmarkCtx;
+			using B = BenchmarksPtr;
+
+			AddSimpleBenchmark("invokeNative_void_void", [](C& ctx, i64 n, B b){ b->MeasureNativeVoidToVoid(n); });
+			AddSimpleBenchmark("invokeNative_void_i32", [](C& ctx, i64 n, B b){ b->MeasureNativeVoidToI32(n); });
+			AddSimpleBenchmark("invokeNative_i32_void", [](C& ctx, i64 n, B b){ b->MeasureNativeI32ToVoid(n); });
+			AddSimpleBenchmark("invokeNative_void_string3", [](C& ctx, i64 n, B b){ b->MeasureNativeVoidToString3(n); });
+			AddSimpleBenchmark("invokeNative_string3_void", [](C& ctx, i64 n, B b){ b->MeasureNativeString3ToVoid(n); });
+			AddSimpleBenchmark("invokeNative_void_string100", [](C& ctx, i64 n, B b){ b->MeasureNativeVoidToString100(n); });
+			AddSimpleBenchmark("invokeNative_string100_void", [](C& ctx, i64 n, B b){ b->MeasureNativeString100ToVoid(n); });
+
+			AddSimpleBenchmark("invoke_void_void", [](C& ctx, i64 n, B b){ for (auto i = 0; i < n; ++i) b->VoidToVoid(); });
+
+			AddSimpleBenchmark("invoke_void_i32", [](C& ctx, i64 n, B b){ for (auto i = 0; i < n; ++i) b->I32ToVoid(0); });
+			AddSimpleBenchmark("invoke_i32_void", [](C& ctx, i64 n, B b){ for (auto i = 0; i < n; ++i) b->VoidToI32(); });
+
+			std::string string3("abc");
+			AddSimpleBenchmark("invoke_void_string3", [=](C& ctx, i64 n, B b){ for (auto i = 0; i < n; ++i) b->StringToVoid(string3); });
+			AddSimpleBenchmark("invoke_string3_void", [=](C& ctx, i64 n, B b){ for (auto i = 0; i < n; ++i) b->VoidToString3(); });
+
+			std::string string100("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
+			AddSimpleBenchmark("invoke_void_string100", [=](C& ctx, i64 n, B b){ for (auto i = 0; i < n; ++i) b->StringToVoid(string100); });
+			AddSimpleBenchmark("invoke_string100_void", [=](C& ctx, i64 n, B b){ for (auto i = 0; i < n; ++i) b->VoidToString100(); });
+
+			AddSimpleBenchmark("invokeOutgoing_void_void", [](C& ctx, i64 n, B b){ b->MeasureOutgoingVoidToVoid(ctx.CreateLocalInvokable(), n); });
+
+			AddSimpleBenchmark("invokeOutgoing_void_i32", [](C& ctx, i64 n, B b){ b->MeasureOutgoingI32ToVoid(ctx.CreateLocalInvokable(), n); });
+			AddSimpleBenchmark("invokeOutgoing_i32_void", [](C& ctx, i64 n, B b){ b->MeasureOutgoingVoidToI32(ctx.CreateLocalInvokable(), n); });
+
+			AddSimpleBenchmark("invokeOutgoing_void_string3", [](C& ctx, i64 n, B b){ b->MeasureOutgoingString3ToVoid(ctx.CreateLocalInvokable(), n); });
+			AddSimpleBenchmark("invokeOutgoing_string3_void", [](C& ctx, i64 n, B b){ b->MeasureOutgoingVoidToString3(ctx.CreateLocalInvokable(), n); });
+
+			AddSimpleBenchmark("invokeOutgoing_void_string100", [](C& ctx, i64 n, B b){ b->MeasureOutgoingString100ToVoid(ctx.CreateLocalInvokable(), n); });
+			AddSimpleBenchmark("invokeOutgoing_string100_void", [](C& ctx, i64 n, B b){ b->MeasureOutgoingVoidToString100(ctx.CreateLocalInvokable(), n); });
 		}
 
 	private:
-		static void InvokeVoidNative(BenchmarkContext& context, const std::string& moduleManifest)
+		template < typename Func_ >
+		void AddSimpleBenchmark(const std::string& name, const Func_& func)
+		{ AddBenchmark<std::string>(name, MakeSimple(func), {"module"}); }
+
+		template < typename Func_ >
+		static std::function<void(BenchmarkContext& context, const std::string& moduleManifest)> MakeSimple(const Func_& func)
 		{
-			const auto n = context.GetIterationsCount();
-			BenchmarkCtx ctx(moduleManifest);
-			auto b = ctx.CreateBenchmarks();
+			return [func](BenchmarkContext& context, const std::string& moduleManifest) {
+				const auto n = context.GetIterationsCount();
+				BenchmarkCtx ctx(moduleManifest);
+				auto b = ctx.CreateBenchmarks();
 
-			context.WarmUpAndProfile("void_void", n, [&]{ b->MeasureNativeVoidToVoid(n); });
-
-			context.WarmUpAndProfile("void_i32", n, [&]{ b->MeasureNativeI32ToVoid(n); });
-			context.WarmUpAndProfile("i32_void", n, [&]{ b->MeasureNativeVoidToI32(n); });
-
-			context.WarmUpAndProfile("void_string3", n, [&]{ b->MeasureNativeString3ToVoid(n); });
-			context.WarmUpAndProfile("string3_void", n, [&]{ b->MeasureNativeVoidToString3(n); });
-
-			context.WarmUpAndProfile("void_string100", n, [&]{ b->MeasureNativeString100ToVoid(n); });
-			context.WarmUpAndProfile("string100_void", n, [&]{ b->MeasureNativeVoidToString100(n); });
-		}
-
-		static void InvokeVoid(BenchmarkContext& context, const std::string& moduleManifest)
-		{
-			const auto n = context.GetIterationsCount();
-			BenchmarkCtx ctx(moduleManifest);
-			auto b = ctx.CreateBenchmarks();
-
-			context.WarmUpAndProfile("void_void", n, [&]{ for (auto i = 0; i < n; ++i) b->VoidToVoid(); });
-
-			context.WarmUpAndProfile("void_i32", n, [&]{ for (auto i = 0; i < n; ++i) b->I32ToVoid(0); });
-			context.WarmUpAndProfile("i32_void", n, [&]{ for (auto i = 0; i < n; ++i) b->VoidToI32(); });
-
-			std::string string3("abc");
-			context.WarmUpAndProfile("void_string3", n, [&]{ for (auto i = 0; i < n; ++i) b->StringToVoid(string3); });
-			context.WarmUpAndProfile("string3_void", n, [&]{ for (auto i = 0; i < n; ++i) b->VoidToString3(); });
-
-			std::string string100("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
-			context.WarmUpAndProfile("void_string100", n, [&]{ for (auto i = 0; i < n; ++i) b->StringToVoid(string100); });
-			context.WarmUpAndProfile("string100_void", n, [&]{ for (auto i = 0; i < n; ++i) b->VoidToString100(); });
-		}
-
-		static void InvokeVoidOutgoing(BenchmarkContext& context, const std::string& moduleManifest)
-		{
-			const auto n = context.GetIterationsCount();
-			BenchmarkCtx ctx(moduleManifest);
-			auto b = ctx.CreateBenchmarks();
-			auto invokable = ctx.CreateLocalInvokable();
-
-			context.WarmUpAndProfile("void_void", n, [&]{ b->MeasureOutgoingVoidToVoid(invokable, n); });
-
-			context.WarmUpAndProfile("void_i32", n, [&]{ b->MeasureOutgoingI32ToVoid(invokable, n); });
-			context.WarmUpAndProfile("i32_void", n, [&]{ b->MeasureOutgoingVoidToI32(invokable, n); });
-
-			context.WarmUpAndProfile("void_string3", n, [&]{ b->MeasureOutgoingString3ToVoid(invokable, n); });
-			context.WarmUpAndProfile("string3_void", n, [&]{ b->MeasureOutgoingVoidToString3(invokable, n); });
-
-			context.WarmUpAndProfile("void_string100", n, [&]{ b->MeasureOutgoingString100ToVoid(invokable, n); });
-			context.WarmUpAndProfile("string100_void", n, [&]{ b->MeasureOutgoingVoidToString100(invokable, n); });
+				context.WarmUpAndProfile("main", n, [&]{ func(ctx, n, b); });
+			};
 		}
 	};
 

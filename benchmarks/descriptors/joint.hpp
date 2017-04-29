@@ -26,6 +26,8 @@ namespace joint
 			std::string VoidToString100() { return "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"; }
 		};
 
+		using BenchmarksPtr = benchmarks::IBenchmarks_Ptr;
+
 		class BenchmarkCtx
 		{
 		private:
@@ -36,6 +38,9 @@ namespace joint
 			BenchmarkCtx(const std::string& moduleManifestPath)
 				: _module(_ctx.LoadModule(::joint::Manifest(moduleManifestPath)))
 			{ }
+
+			BenchmarkCtx(const BenchmarkCtx&) = delete;
+			BenchmarkCtx& operator = (const BenchmarkCtx&) = delete;
 
 			benchmarks::IBenchmarks_Ptr CreateBenchmarks() const
 			{ return _module.GetRootObject<benchmarks::IBenchmarks>("GetBenchmarks"); }

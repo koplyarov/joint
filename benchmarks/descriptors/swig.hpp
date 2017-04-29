@@ -58,6 +58,8 @@ namespace swig
 			std::string VoidToString100() { return "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"; }
 		};
 
+		using BenchmarksPtr = IBenchmarks*;
+
 		class BenchmarkCtx
 		{
 			class Jvm
@@ -201,6 +203,9 @@ namespace swig
 				else
 					throw std::runtime_error("Binding not supported!");
 			}
+
+			BenchmarkCtx(const BenchmarkCtx&) = delete;
+			BenchmarkCtx& operator = (const BenchmarkCtx&) = delete;
 
 			~BenchmarkCtx()
 			{
