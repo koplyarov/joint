@@ -25,6 +25,17 @@ if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PythonLibs_FOUND AND JNI
 
 	################################################################################
 
+	find_package(JointGen)
+
+	add_subdirectory(python)
+	add_subdirectory(cpp)
+	add_subdirectory(c)
+	add_subdirectory(java)
+
+	################################################################################
+
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+
 	include(${SWIG_USE_FILE})
 	set(swig_SRCS swig/ISwigBenchmarks.i)
 
@@ -63,13 +74,6 @@ if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PythonLibs_FOUND AND JNI
 	add_dependencies(benchmarks-java-swig swig_benchmarks_wrappers_java)
 
 	################################################################################
-
-	find_package(JointGen)
-
-	add_subdirectory(python)
-	add_subdirectory(cpp)
-	add_subdirectory(c)
-	add_subdirectory(java)
 
 	include_directories(${PYTHON_INCLUDE_DIRS})
 	include_directories(${JNI_INCLUDE_DIRS})
