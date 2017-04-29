@@ -1,5 +1,5 @@
 {
 	"binding": "java",
-	"jar": "build/benchmarks/benchmarks-java-swig.jar",
+	"jar": "build/bin/benchmarks-java-swig.jar",
 	"class": "SwigBenchmarks"
 }
