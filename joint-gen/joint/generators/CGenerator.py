@@ -100,7 +100,7 @@ class CGenerator:
 
     def _generateClasses(self, ifc):
         mangled_ifc = self._mangleType(ifc)
-        yield 'Joint_InterfaceChecksum {}__checksum = {};'.format(mangled_ifc, hex(ifc.checksum))
+        yield 'JointCore_InterfaceChecksum {}__checksum = {};'.format(mangled_ifc, hex(ifc.checksum))
         yield 'const char* {}__id = "{}";'.format(mangled_ifc, ifc.fullname)
         yield ''
         yield 'typedef struct {n}_s* {n};'.format(n=mangled_ifc)

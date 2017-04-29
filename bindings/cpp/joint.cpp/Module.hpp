@@ -92,7 +92,7 @@ namespace joint
 	public:
 		Module(const Manifest& manifest)
 			: _module(JOINT_NULL_HANDLE)
-		{ JOINT_CALL( Joint_LoadModule(manifest.GetHandle(), &_module) ); }
+		{ JOINT_CALL( JointCore_LoadModule(manifest.GetHandle(), &_module) ); }
 
 		Module(Joint_ModuleHandle module = JOINT_NULL_HANDLE) : _module(module) { }
 		Module(const Module& other) : _module(other._module) { JOINT_CALL( Joint_IncRefModule(_module) ); }

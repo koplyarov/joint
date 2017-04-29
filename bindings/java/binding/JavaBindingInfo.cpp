@@ -11,7 +11,7 @@ namespace java
 	{ return JointJavaContext::TypeDescriptor(typeNode.Weak()).GetId(); }
 
 
-	Joint_InterfaceChecksum JavaBindingInfo::GetInterfaceChecksum(JObjTempRef typeNode) const
+	JointCore_InterfaceChecksum JavaBindingInfo::GetInterfaceChecksum(JObjTempRef typeNode) const
 	{ return JointJavaContext::TypeDescriptor(typeNode.Weak()).GetInterfaceChecksum(); }
 
 

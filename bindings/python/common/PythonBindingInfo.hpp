@@ -29,7 +29,7 @@ namespace python
 		PythonBindingInfo(std::vector<PyObject*>& objects);
 
 		Joint_TypeId GetJointTypeId(PyObject* typeNode) const;
-		Joint_InterfaceChecksum GetInterfaceChecksum(PyObject* typeNode) const;
+		JointCore_InterfaceChecksum GetInterfaceChecksum(PyObject* typeNode) const;
 
 		PyObjectHolder GetArrayUserData(PyObject* typeNode) const;
 		PyObjectHolder GetObjectUserData(PyObject* typeNode) const;

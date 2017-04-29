@@ -50,7 +50,7 @@ namespace devkit
 				DETAIL_JOINT_DEVKIT_JOINT_CALL( Joint_GetManifestNodeType(node, &type) );
 				JOINT_CHECK(type == JOINT_MANIFEST_NODE_BOOLEAN, JOINT_ERROR_INVALID_MANIFEST);
 
-				Joint_Bool real_value;
+				JointCore_Bool real_value;
 				DETAIL_JOINT_DEVKIT_JOINT_CALL( Joint_GetManifestNodeBooleanValue(node, &real_value) );
 				value = static_cast<bool>(real_value);
 			}

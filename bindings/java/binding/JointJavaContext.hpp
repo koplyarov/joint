@@ -59,7 +59,7 @@ namespace java
 			using WrapperBase::WrapperBase;
 
 			Joint_TypeId GetId() const;
-			Joint_InterfaceChecksum GetInterfaceChecksum() const;
+			JointCore_InterfaceChecksum GetInterfaceChecksum() const;
 			JClassLocalRef GetProxyClass() const;
 			std::string GetMangledTypeName() const;
 			std::string GetStructCtorSignature() const;

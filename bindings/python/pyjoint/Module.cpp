@@ -150,7 +150,7 @@ namespace pyjoint
 		PyObject* type = PY_OBJ_CHECK(PyTuple_GetItem(args, 1));
 
 		PyObjectHolder py_checksum(PY_OBJ_CHECK(PyObject_GetAttrString(interface, "interfaceChecksum")));
-		Joint_InterfaceChecksum checksum = FromPyLong<Joint_InterfaceChecksum>(py_checksum);
+		JointCore_InterfaceChecksum checksum = FromPyLong<JointCore_InterfaceChecksum>(py_checksum);
 
 		auto args_count = tuple_size - 2;
 		PyObjectHolder py_args(PY_OBJ_CHECK(PyTuple_New(args_count)));

@@ -15,7 +15,7 @@ namespace pyjoint
 	{
 		PyObject_HEAD
 		Joint_ObjectHandle obj;
-		Joint_InterfaceChecksum checksum;
+		JointCore_InterfaceChecksum checksum;
 		PyObject* ifcDesc;
 	};
 

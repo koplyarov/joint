@@ -3,22 +3,18 @@
 
 #include <joint/Joint.h>
 
-#ifdef _MSC_VER
-#	ifdef joint_loader_EXPORTS
-#		define JOINT_LOADER_API __declspec(dllexport)
-#	else
-#		define JOINT_LOADER_API __declspec(dllimport)
-#	endif
+#ifdef joint_loader_EXPORTS
+#	define JOINT_LOADER_API JOINT_CORE_EXPORT
 #else
-#	define JOINT_LOADER_API
+#	define JOINT_LOADER_API JOINT_CORE_IMPORT
 #endif
 
 
 extern "C"
 {
 
-	JOINT_LOADER_API Joint_Error Joint_Init();
-	JOINT_LOADER_API Joint_Error Joint_LoadModule(Joint_ManifestHandle moduleManifest, Joint_ModuleHandle* outModule);
+	JOINT_LOADER_API JOINT_CORE_WARN_UNUSED_RESULT(Joint_Error) JointCore_InitLoader();
+	JOINT_LOADER_API JOINT_CORE_WARN_UNUSED_RESULT(Joint_Error) JointCore_LoadModule(Joint_ManifestHandle moduleManifest, Joint_ModuleHandle* outModule);
 
 }
 

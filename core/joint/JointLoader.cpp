@@ -47,7 +47,7 @@ extern "C"
 	static Bindings g_bindings;
 
 
-	Joint_Error Joint_Init()
+	Joint_Error JointCore_InitLoader()
 	{
 		JOINT_CPP_WRAP_BEGIN
 
@@ -81,13 +81,13 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_LoadModule(Joint_ManifestHandle moduleManifest, Joint_ModuleHandle* outModule)
+	Joint_Error JointCore_LoadModule(Joint_ManifestHandle moduleManifest, Joint_ModuleHandle* outModule)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
 		JOINT_CHECK(moduleManifest != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
 
-		Joint_Error ret = Joint_Init();
+		Joint_Error ret = JointCore_InitLoader();
 		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
 
 		ModuleManifestBase m;

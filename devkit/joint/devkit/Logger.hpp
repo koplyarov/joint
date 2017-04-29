@@ -21,10 +21,10 @@ namespace devkit
 		{
 			struct Impl
 			{
-				const char*					_name;
-				Joint_LogLevel				_logLevel;
-				bool						_constructed;
-				StorageFor<StringBuilder>	_stringBuilder;
+				const char*                 _name;
+				Joint_LogLevel              _logLevel;
+				bool                        _constructed;
+				StorageFor<StringBuilder>   _stringBuilder;
 
 				Impl(const char* name, Joint_LogLevel logLevel)
 					: _name(name), _logLevel(logLevel), _constructed(false)
@@ -57,41 +57,41 @@ namespace devkit
 			using ImplStorage = StorageFor<Impl>;
 
 		private:
-			bool			_nop;
-			ImplStorage		_impl;
+			bool           _nop;
+			ImplStorage    _impl;
 
 		public:
 			Stream(const char* name, Joint_LogLevel logLevel)
 				: _nop(logLevel < Joint_GetLogLevel())
 			{
-				if (JOINT_UNLIKELY(!_nop))
+				if (JOINT_CORE_UNLIKELY(!_nop))
 					_impl.Construct(name, logLevel);
 			}
 
 			Stream(Stream&& other)
 				: _nop(other._nop)
 			{
-				if (JOINT_UNLIKELY(!_nop))
+				if (JOINT_CORE_UNLIKELY(!_nop))
 					_impl.Construct(std::move(*other._impl));
 			}
 
 			~Stream()
 			{
-				if (JOINT_UNLIKELY(!_nop))
+				if (JOINT_CORE_UNLIKELY(!_nop))
 					_impl.Destruct();
 			}
 
 			template < typename T_ >
 			Stream& operator << (T_&& val)
 			{
-				if (JOINT_UNLIKELY(!_nop))
+				if (JOINT_CORE_UNLIKELY(!_nop))
 					_impl->Write(std::forward<T_>(val));
 				return *this;
 			}
 		};
 
 	private:
-		const char*		_name;
+		const char*    _name;
 
 	public:
 		NamedLogger(const char* name)

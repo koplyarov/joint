@@ -110,7 +110,7 @@ namespace joint
 			const JointC_Accessor* GetAccessor() const
 			{ return &_accessor; }
 
-			Joint_Error GetAccessorById(Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, const JointC_Accessor** outAccessor)
+			Joint_Error GetAccessorById(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, const JointC_Accessor** outAccessor)
 			{
 				Joint_Error ret = AccessorType::InheritsInterface(interfaceId, checksum);
 				if (ret == JOINT_ERROR_NONE || ret == JOINT_ERROR_INVALID_INTERFACE_CHECKSUM)
@@ -131,7 +131,7 @@ namespace joint
 			void Init(void* component)
 			{ }
 
-			Joint_Error GetAccessorById(Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, const JointC_Accessor** outAccessor)
+			Joint_Error GetAccessorById(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, const JointC_Accessor** outAccessor)
 			{ return JOINT_ERROR_CAST_FAILED; }
 		};
 	}
@@ -197,7 +197,7 @@ namespace joint
 			return JOINT_ERROR_NONE;
 		}
 
-		static Joint_Error CastObject(void* component, Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, const JointC_Accessor** outAccessor)
+		static Joint_Error CastObject(void* component, JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, const JointC_Accessor** outAccessor)
 		{
 			ComponentWrapper* inst = reinterpret_cast<ComponentWrapper*>(component);
 			Joint_Error ret = inst->_accessors.GetAccessorById(interfaceId, checksum, outAccessor);

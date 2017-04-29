@@ -49,4 +49,4 @@ if exists('g:c_std_includes') && exists('g:cpp_std_includes') && exists('g:platf
 	let g:include_priorities = [ 'joint/.*', 'benchmarks/.*', 'cxxtest/.*', g:platform_includes, 'boost/.*', g:cpp_std_includes, g:c_std_includes ]
 end
 
-match Error /^.*\S *\zs\t\+/
+match Error /^\(#\)\@!.*\S *\zs\t\+/

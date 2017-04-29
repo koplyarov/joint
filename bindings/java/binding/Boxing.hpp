@@ -117,13 +117,13 @@ namespace java
 				return res; \
 			}
 
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Boolean, Joint_Bool, jboolean, BooleanField)
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Byte,    int8_t,     jbyte,    ByteField)
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Short,   int16_t,    jshort,   ShortField)
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Integer, int32_t,    jint,     IntField)
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Long,    int64_t,    jlong,    LongField)
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Float,   float,      jfloat,   FloatField)
-		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Double,  double,     jdouble,  DoubleField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Boolean, JointCore_Bool, jboolean, BooleanField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Byte,    int8_t,         jbyte,    ByteField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Short,   int16_t,        jshort,   ShortField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Integer, int32_t,        jint,     IntField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Long,    int64_t,        jlong,    LongField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Float,   float,          jfloat,   FloatField)
+		DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING(Double,  double,         jdouble,  DoubleField)
 
 #undef DETAIL_JOINT_JAVA_SIMPLE_TYPE_BOXING
 

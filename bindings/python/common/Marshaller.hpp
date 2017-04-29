@@ -50,7 +50,7 @@ namespace python
 	class PythonMarshaller
 	{
 	public:
-		PyObjectHolder FromJointBool(Joint_Bool val) const   { return PyObjectHolder(PY_OBJ_CHECK(PyBool_FromLong(val))); }
+		PyObjectHolder FromJointBool(JointCore_Bool val) const   { return PyObjectHolder(PY_OBJ_CHECK(PyBool_FromLong(val))); }
 		PyObjectHolder FromJointU8(uint8_t val) const        { return PyObjectHolder(PY_OBJ_CHECK(PyLong_FromLong(val))); }
 		PyObjectHolder FromJointI8(int8_t val) const         { return PyObjectHolder(PY_OBJ_CHECK(PyLong_FromLong(val))); }
 		PyObjectHolder FromJointU16(uint16_t val) const      { return PyObjectHolder(PY_OBJ_CHECK(PyLong_FromLong(val))); }
@@ -70,7 +70,7 @@ namespace python
 			return PyObjectHolder(PY_OBJ_CHECK(PyObject_CallObject(enumType, enum_params)));
 		}
 
-		PyObjectHolder FromJointObj(devkit::ValueDirection dir, Joint_ObjectHandle val, PyObject* proxyType, Joint_InterfaceChecksum checksum) const
+		PyObjectHolder FromJointObj(devkit::ValueDirection dir, Joint_ObjectHandle val, PyObject* proxyType, JointCore_InterfaceChecksum checksum) const
 		{
 			using namespace devkit;
 
@@ -142,17 +142,17 @@ namespace python
 		PyObjectHolder MakeStruct(const ParamsArray& params, const PyObjectHolder& structType) const
 		{ return PyObjectHolder(PY_OBJ_CHECK(PyObject_CallObject(structType, params.GetTuple()))); }
 
-		Joint_Bool ToJointBool(PyObject* val) const  { return AsBool(val); }
-		uint8_t    ToJointU8(PyObject* val) const    { return FromPyLong<uint8_t>(val); }
-		int8_t     ToJointI8(PyObject* val) const    { return FromPyLong<int8_t>(val); }
-		uint16_t   ToJointU16(PyObject* val) const   { return FromPyLong<uint16_t>(val); }
-		int16_t    ToJointI16(PyObject* val) const   { return FromPyLong<int16_t>(val); }
-		uint32_t   ToJointU32(PyObject* val) const   { return FromPyLong<uint32_t>(val); }
-		int32_t    ToJointI32(PyObject* val) const   { return FromPyLong<int32_t>(val); }
-		uint64_t   ToJointU64(PyObject* val) const   { return FromPyLong<uint64_t>(val); }
-		int64_t    ToJointI64(PyObject* val) const   { return FromPyLong<int64_t>(val); }
-		float      ToJointF32(PyObject* val) const   { return FromPyFloat<float>(val); }
-		double     ToJointF64(PyObject* val) const   { return FromPyFloat<double>(val); }
+		JointCore_Bool ToJointBool(PyObject* val) const  { return AsBool(val); }
+		uint8_t        ToJointU8(PyObject* val) const    { return FromPyLong<uint8_t>(val); }
+		int8_t         ToJointI8(PyObject* val) const    { return FromPyLong<int8_t>(val); }
+		uint16_t       ToJointU16(PyObject* val) const   { return FromPyLong<uint16_t>(val); }
+		int16_t        ToJointI16(PyObject* val) const   { return FromPyLong<int16_t>(val); }
+		uint32_t       ToJointU32(PyObject* val) const   { return FromPyLong<uint32_t>(val); }
+		int32_t        ToJointI32(PyObject* val) const   { return FromPyLong<int32_t>(val); }
+		uint64_t       ToJointU64(PyObject* val) const   { return FromPyLong<uint64_t>(val); }
+		int64_t        ToJointI64(PyObject* val) const   { return FromPyLong<int64_t>(val); }
+		float          ToJointF32(PyObject* val) const   { return FromPyFloat<float>(val); }
+		double         ToJointF64(PyObject* val) const   { return FromPyFloat<double>(val); }
 
 		int32_t ToJointEnum(PyObject* val, const PyObjectHolder& enumType) const
 		{

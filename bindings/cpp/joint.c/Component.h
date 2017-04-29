@@ -6,6 +6,7 @@
 
 #include <joint.c/Accessor.h>
 #include <joint.c/detail/Preprocessor.h>
+#include <joint.c/detail/Types.h>
 
 #include <stdlib.h>
 
@@ -72,7 +73,7 @@
 		} \
 		return JOINT_ERROR_NONE; \
 	} \
-	static Joint_Error Detail__##C##__Cast(void* componentWrapper, Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, const JointC_Accessor** outAccessor) \
+	static Joint_Error Detail__##C##__Cast(void* componentWrapper, JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, const JointC_Accessor** outAccessor) \
 	{ \
 		C##__wrapper* w = (C##__wrapper*)componentWrapper; \
 		if (0) ;\

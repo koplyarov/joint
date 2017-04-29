@@ -63,7 +63,7 @@ namespace java
 			: env(env)
 		{ }
 
-		JavaVariant FromJointBool(Joint_Bool val) const   { jvalue result; result.z = val; return result; }
+		JavaVariant FromJointBool(JointCore_Bool val) const   { jvalue result; result.z = val; return result; }
 		JavaVariant FromJointU8(uint8_t val) const        { jvalue result; result.b = val; return result; }
 		JavaVariant FromJointI8(int8_t val) const         { jvalue result; result.b = val; return result; }
 		JavaVariant FromJointU16(uint16_t val) const      { jvalue result; result.s = val; return result; }
@@ -89,7 +89,7 @@ namespace java
 			return result;
 		}
 
-		JavaVariant FromJointObj(devkit::ValueDirection dir, Joint_ObjectHandle val, const JavaBindingInfo::ObjectUserData& proxyType, Joint_InterfaceChecksum checksum) const
+		JavaVariant FromJointObj(devkit::ValueDirection dir, Joint_ObjectHandle val, const JavaBindingInfo::ObjectUserData& proxyType, JointCore_InterfaceChecksum checksum) const
 		{
 			jvalue result;
 			if (val == JOINT_NULL_HANDLE)
@@ -157,17 +157,17 @@ namespace java
 			return result;
 		}
 
-		Joint_Bool ToJointBool(jvalue val) const  { return val.z; }
-		uint8_t    ToJointU8(jvalue val) const    { return val.b; }
-		int8_t     ToJointI8(jvalue val) const    { return val.b; }
-		uint16_t   ToJointU16(jvalue val) const   { return val.s; }
-		int16_t    ToJointI16(jvalue val) const   { return val.s; }
-		uint32_t   ToJointU32(jvalue val) const   { return val.i; }
-		int32_t    ToJointI32(jvalue val) const   { return val.i; }
-		uint64_t   ToJointU64(jvalue val) const   { return val.j; }
-		int64_t    ToJointI64(jvalue val) const   { return val.j; }
-		float      ToJointF32(jvalue val) const   { return val.f; }
-		double     ToJointF64(jvalue val) const   { return val.d; }
+		JointCore_Bool ToJointBool(jvalue val) const  { return val.z; }
+		uint8_t        ToJointU8(jvalue val) const    { return val.b; }
+		int8_t         ToJointI8(jvalue val) const    { return val.b; }
+		uint16_t       ToJointU16(jvalue val) const   { return val.s; }
+		int16_t        ToJointI16(jvalue val) const   { return val.s; }
+		uint32_t       ToJointU32(jvalue val) const   { return val.i; }
+		int32_t        ToJointI32(jvalue val) const   { return val.i; }
+		uint64_t       ToJointU64(jvalue val) const   { return val.j; }
+		int64_t        ToJointI64(jvalue val) const   { return val.j; }
+		float          ToJointF32(jvalue val) const   { return val.f; }
+		double         ToJointF64(jvalue val) const   { return val.d; }
 
 		int32_t ToJointEnum(jvalue val, const JavaBindingInfo::EnumUserData& enumType) const
 		{

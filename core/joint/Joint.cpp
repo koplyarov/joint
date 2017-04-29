@@ -17,7 +17,7 @@
 #include <stdarg.h>
 
 
-#if JOINT_PLATFORM_POSIX
+#if JOINT_CORE_PLATFORM_POSIX
 #	include <dlfcn.h>
 #	include <unistd.h>
 #endif
@@ -34,7 +34,7 @@ static void DefaultLogCallback(Joint_LogLevel logLevel, const char* subsystem, c
 {
 	const char* alignment = "        ";
 	const char* log_level_str = Joint_LogLevelToString(logLevel);
-#if JOINT_PLATFORM_POSIX
+#if JOINT_CORE_PLATFORM_POSIX
 	if (isatty(2))
 	{
 		const char* subsystem_ns_color = "\33[0;32m";
@@ -309,14 +309,14 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_GetManifestNodeBooleanValue(Joint_ManifestNodeHandle node, Joint_Bool* outVal)
+	Joint_Error Joint_GetManifestNodeBooleanValue(Joint_ManifestNodeHandle node, JointCore_Bool* outVal)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
 		JOINT_CHECK(node, JOINT_ERROR_INVALID_PARAMETER);
 		JOINT_CHECK(outVal, JOINT_ERROR_INVALID_PARAMETER);
 
-		*outVal = (Joint_Bool)node->AsBoolean();
+		*outVal = (JointCore_Bool)node->AsBoolean();
 
 		JOINT_CPP_WRAP_END
 	}
@@ -557,7 +557,7 @@ extern "C"
 	}
 
 
-	Joint_Error Joint_CastObject(Joint_ObjectHandle handle, Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum, Joint_ObjectHandle* outObject)
+	Joint_Error Joint_CastObject(Joint_ObjectHandle handle, JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, Joint_ObjectHandle* outObject)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
@@ -742,7 +742,7 @@ extern "C"
 	}
 
 
-#ifdef JOINT_PLATFORM_POSIX
+#ifdef JOINT_CORE_PLATFORM_POSIX
 	const char* JointAux_GetModuleName(Joint_FunctionPtr symbol)
 	{
 		Dl_info dl_info;

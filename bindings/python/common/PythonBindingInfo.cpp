@@ -16,8 +16,8 @@ namespace python
 	{ return FromPyLong<Joint_TypeId>(PY_OBJ_CHECK(PyTuple_GetItem(typeNode, 0))); }
 
 
-	Joint_InterfaceChecksum PythonBindingInfo::GetInterfaceChecksum(PyObject* typeNode) const
-	{ return FromPyLong<Joint_InterfaceChecksum>(PY_OBJ_CHECK(PyTuple_GetItem(typeNode, 2))); }
+	JointCore_InterfaceChecksum PythonBindingInfo::GetInterfaceChecksum(PyObject* typeNode) const
+	{ return FromPyLong<JointCore_InterfaceChecksum>(PY_OBJ_CHECK(PyTuple_GetItem(typeNode, 2))); }
 
 
 	PyObjectHolder PythonBindingInfo::GetArrayUserData(PyObject* typeNode) const

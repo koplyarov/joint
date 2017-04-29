@@ -180,7 +180,7 @@ class CppGenerator:
         yield '\t{}(Joint_ObjectHandle obj) : _obj(obj) {{ }}'.format(ifc.name);
         yield ''
         yield '\tJoint_ObjectHandle _GetObjectHandle() const { return _obj; }'
-        yield '\tstatic Joint_InterfaceChecksum _GetInterfaceChecksum() {{ return {}; }}'.format(hex(ifc.checksum))
+        yield '\tstatic JointCore_InterfaceChecksum _GetInterfaceChecksum() {{ return {}; }}'.format(hex(ifc.checksum))
         yield '\tstatic const char* _GetInterfaceId() {{ return "{}"; }}'.format(ifc.fullname)
         yield ''
         for m in ifc.methods:
@@ -192,7 +192,7 @@ class CppGenerator:
         yield 'class {}_accessor'.format(ifc.name)
         yield '{'
         yield 'public:'
-        yield '\tstatic Joint_Error InheritsInterface(Joint_InterfaceId interfaceId, Joint_InterfaceChecksum checksum)'
+        yield '\tstatic Joint_Error InheritsInterface(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum)'
         yield '\t{'
         b = ifc
         while b:

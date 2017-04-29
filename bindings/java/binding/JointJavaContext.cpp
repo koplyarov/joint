@@ -140,8 +140,8 @@ namespace java
 	Joint_TypeId JointJavaContext::TypeDescriptor::GetId() const
 	{ return static_cast<Joint_TypeId>(JAVA_CALL(env->GetIntField(_obj.Get(), ConstInstance().TypeDescriptor_typeId))); }
 
-	Joint_InterfaceChecksum JointJavaContext::TypeDescriptor::GetInterfaceChecksum() const
-	{ return static_cast<Joint_InterfaceChecksum>(JAVA_CALL(env->GetIntField(_obj.Get(), ConstInstance().TypeDescriptor_interfaceChecksum))); }
+	JointCore_InterfaceChecksum JointJavaContext::TypeDescriptor::GetInterfaceChecksum() const
+	{ return static_cast<JointCore_InterfaceChecksum>(JAVA_CALL(env->GetIntField(_obj.Get(), ConstInstance().TypeDescriptor_interfaceChecksum))); }
 
 	JClassLocalRef JointJavaContext::TypeDescriptor::GetProxyClass() const
 	{ return JClassLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(_obj.Get(), ConstInstance().TypeDescriptor_proxyClass))); }
