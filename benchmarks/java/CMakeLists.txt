@@ -16,3 +16,14 @@ add_jar(benchmarks-java
 )
 
 add_dependencies(benchmarks-java joint-java)
+
+joint_make_module_package(benchmarks-component-java
+	PACKAGE_DIR ${JOINT_MODULE_OUTPUT_DIRECTORY}/java/Benchmarks
+	MANIFEST Benchmarks.jm
+	DEPENDS benchmarks-java
+)
+
+joint_add_module_content(benchmarks-component-java
+	DIRECTORY .
+	FILES ${CMAKE_CURRENT_BINARY_DIR}/benchmarks-java.jar
+)

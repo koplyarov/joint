@@ -13,3 +13,13 @@ joint_generate_adapters(c Benchmarks_adapters.h ../idl/IBenchmarks.idl)
 
 add_library(benchmarks-c SHARED Benchmarks.c OtherTranslationUnit.c Benchmarks_adapters.h)
 target_link_libraries(benchmarks-c joint)
+
+joint_make_module_package(benchmarks-component-c
+	PACKAGE_DIR ${JOINT_MODULE_OUTPUT_DIRECTORY}/c/Benchmarks
+	MANIFEST Benchmarks.jm
+)
+
+joint_add_module_content(benchmarks-component-c
+	DIRECTORY .
+	LIBRARIES benchmarks-c
+)
