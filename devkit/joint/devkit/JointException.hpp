@@ -26,7 +26,7 @@ namespace joint
 #define JOINT_CHECK_NOTHROW(Expr_, ...) do { if (!(Expr_)) { GetLogger().Error() << "JOINT_CHECK failed: " #Expr_ " in function " << __func__ << " at " << JOINT_SOURCE_LOCATION << ", returning " << (__VA_ARGS__); return (__VA_ARGS__); } } while (false)
 
 #define JOINT_TERMINATE(Msg_) JOINT_TERMINATE_EX(LoggerName, Msg_)
-#define JOINT_TERMINATE_EX(LoggerName_, Msg_) do { Joint_Log(JOINT_LOGLEVEL_ERROR, LoggerName_, "JOINT_TERMINATE: %s in function %s at %s", #Msg_, __func__, JOINT_SOURCE_LOCATION); std::terminate(); } while (false)
+#define JOINT_TERMINATE_EX(LoggerName_, Msg_) do { Joint_Log(JOINT_CORE_LOGLEVEL_ERROR, LoggerName_, "JOINT_TERMINATE: %s in function %s at %s", #Msg_, __func__, JOINT_SOURCE_LOCATION); std::terminate(); } while (false)
 
 #if JOINT_DEBUG
 #	define JOINT_ASSERT_EX(LoggerName_, ...) do { if (!(__VA_ARGS__)) JOINT_TERMINATE_EX(LoggerName_, "JOINT_ASSERT failed: " #__VA_ARGS__); } while (false)
@@ -38,18 +38,18 @@ namespace joint
 	class JointException : public std::exception
 	{
 	private:
-		Joint_Error		_err;
+		JointCore_Error		_err;
 
 	public:
-		JointException(Joint_Error err) : _err(err) { }
-		virtual const char* what() const throw() { return Joint_ErrorToString(_err); }
+		JointException(JointCore_Error err) : _err(err) { }
+		virtual const char* what() const throw() { return JointCore_ErrorToString(_err); }
 		virtual ~JointException() throw() { }
 
-		Joint_Error GetError() const { return _err; }
+		JointCore_Error GetError() const { return _err; }
 	};
 
 
-	inline JointException MakeException(Joint_Error err) { return JointException(err); }
+	inline JointException MakeException(JointCore_Error err) { return JointException(err); }
 
 	template < typename T_, typename Enabler_ = typename std::enable_if<std::is_base_of<std::exception, T_>::value>::type >
 	T_ MakeException(T_&& ex) { return ex; }

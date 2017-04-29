@@ -110,7 +110,7 @@ namespace pyjoint
 		auto method_id = FromPyLong<int>(PY_OBJ_CHECK(PyTuple_GetItem(args, 0)));
 		const auto& method_desc = ifc_desc->GetDescriptor().GetMethod(method_id);
 
-		StackStorage<Joint_Parameter, 64> params_storage;
+		StackStorage<JointCore_Parameter, 64> params_storage;
 
 		auto params_count = tuple_size - 1;
 		auto params = params_storage.Make(params_count);
@@ -122,62 +122,62 @@ namespace pyjoint
 			PyObject* py_param = PyTuple_GetItem(args, i + 1);
 
 			const auto& t = method_desc.GetParamType(i);
-			Joint_Value v = ValueMarshaller::ToJoint(ValueDirection::Parameter, t, py_param, PythonMarshaller(), alloc);
-			params[i] = Joint_Parameter{v, t.GetJointType()};
+			JointCore_Value v = ValueMarshaller::ToJoint(ValueDirection::Parameter, t, py_param, PythonMarshaller(), alloc);
+			params[i] = JointCore_Parameter{v, t.GetJointType()};
 		}
 
-		Joint_Type ret_type = method_desc.GetRetType().GetJointType();
-		Joint_RetValue ret_value;
-		Joint_Error ret = Joint_InvokeMethod(self->obj, method_id, params, params_count, ret_type, &ret_value);
-		NATIVE_CHECK(ret == JOINT_ERROR_NONE || ret == JOINT_ERROR_EXCEPTION, (std::string("Joint_InvokeMethod failed: ") + Joint_ErrorToString(ret)).c_str());
+		JointCore_Type ret_type = method_desc.GetRetType().GetJointType();
+		JointCore_RetValue ret_value;
+		JointCore_Error ret = Joint_InvokeMethod(self->obj, method_id, params, params_count, ret_type, &ret_value);
+		NATIVE_CHECK(ret == JOINT_CORE_ERROR_NONE || ret == JOINT_CORE_ERROR_EXCEPTION, (std::string("Joint_InvokeMethod failed: ") + JointCore_ErrorToString(ret)).c_str());
 
 		PyObjectHolder result;
 
-		if (ret == JOINT_ERROR_NONE)
+		if (ret == JOINT_CORE_ERROR_NONE)
 		{
 			auto sg(ScopeExit([&]{
-				Joint_Error ret = ret_value.releaseValue(ret_type, ret_value.result.value);
-				if (ret != JOINT_ERROR_NONE)
-					GetLogger().Error() << "Joint_RetValue::releaseValue failed: " << ret;
+				JointCore_Error ret = ret_value.releaseValue(ret_type, ret_value.result.value);
+				if (ret != JOINT_CORE_ERROR_NONE)
+					GetLogger().Error() << "JointCore_RetValue::releaseValue failed: " << ret;
 			}));
 
-			if (ret_type.id == JOINT_TYPE_VOID)
+			if (ret_type.id == JOINT_CORE_TYPE_VOID)
 			{ Py_RETURN_NONE; }
 
 			result = ValueMarshaller::FromJoint<PyObjectHolder>(ValueDirection::Return, method_desc.GetRetType(), ret_value.result.value, PythonMarshaller());
 		}
-		else if (ret == JOINT_ERROR_EXCEPTION)
+		else if (ret == JOINT_CORE_ERROR_EXCEPTION)
 		{
 			auto sg(ScopeExit([&]{ Joint_ReleaseException(ret_value.result.ex); }));
 
-			Joint_SizeT buf_size = 0;
+			JointCore_SizeT buf_size = 0;
 			StackStorage<char, 256> buf_storage;
 
 			auto ex = ret_value.result.ex;
 
-			Joint_Error ret = Joint_GetExceptionMessageSize(ex, &buf_size);
-			if (ret != JOINT_ERROR_NONE)
+			JointCore_Error ret = Joint_GetExceptionMessageSize(ex, &buf_size);
+			if (ret != JOINT_CORE_ERROR_NONE)
 			{
-				Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.Python", "Joint_GetExceptionMessageSize failed: ", Joint_ErrorToString(ret));
+				Joint_Log(JOINT_CORE_LOGLEVEL_ERROR, "Joint.Python", "Joint_GetExceptionMessageSize failed: ", JointCore_ErrorToString(ret));
 				throw std::runtime_error("Could not obtain joint exception message!");
 			}
 
 			char* buf = buf_storage.Make(buf_size);
 			ret = Joint_GetExceptionMessage(ex, buf, buf_size);
-			if (ret != JOINT_ERROR_NONE)
+			if (ret != JOINT_CORE_ERROR_NONE)
 			{
-				Joint_Log(JOINT_LOGLEVEL_ERROR, "Joint.Python", "Joint_GetExceptionMessage failed: %s", Joint_ErrorToString(ret));
+				Joint_Log(JOINT_CORE_LOGLEVEL_ERROR, "Joint.Python", "Joint_GetExceptionMessage failed: %s", JointCore_ErrorToString(ret));
 				throw std::runtime_error("Could not obtain joint exception message!");
 			}
 
 			PyObjectHolder py_ex(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&JointException_type, NULL)));
 			reinterpret_cast<JointException*>(py_ex.Get())->jointMessage = new std::string(buf);
 
-			Joint_SizeT bt_size = 0;
+			JointCore_SizeT bt_size = 0;
 			ret = Joint_GetExceptionBacktraceSize(ex, &bt_size);
-			if (ret != JOINT_ERROR_NONE)
+			if (ret != JOINT_CORE_ERROR_NONE)
 			{
-				Joint_Log(JOINT_LOGLEVEL_WARNING, "Joint.Python", "Joint_GetExceptionBacktraceSize failed: %s", Joint_ErrorToString(ret));
+				Joint_Log(JOINT_CORE_LOGLEVEL_WARNING, "Joint.Python", "Joint_GetExceptionBacktraceSize failed: %s", JointCore_ErrorToString(ret));
 				PyErr_SetObject((PyObject*)&JointException_type, py_ex);
 				return NULL;
 			}
@@ -186,13 +186,13 @@ namespace pyjoint
 			bt.reserve(bt_size);
 			std::vector<PyObjectHolder> py_frames;
 
-			for (Joint_SizeT i = 0; i < bt_size; ++i)
+			for (JointCore_SizeT i = 0; i < bt_size; ++i)
 			{
-				Joint_StackFrame sf;
+				JointCore_StackFrame sf;
 				ret = Joint_GetExceptionBacktraceEntry(ex, i, &sf);
-				if (ret != JOINT_ERROR_NONE)
+				if (ret != JOINT_CORE_ERROR_NONE)
 				{
-					Joint_Log(JOINT_LOGLEVEL_WARNING, "Joint.Python", "Joint_GetExceptionBacktraceEntry failed: %s", Joint_ErrorToString(ret));
+					Joint_Log(JOINT_CORE_LOGLEVEL_WARNING, "Joint.Python", "Joint_GetExceptionBacktraceEntry failed: %s", JointCore_ErrorToString(ret));
 					continue;
 				}
 
@@ -205,7 +205,7 @@ namespace pyjoint
 			return NULL;
 		}
 		else
-			NATIVE_THROW((std::string("Joint_InvokeMethod failed: ") + Joint_ErrorToString(ret)).c_str());
+			NATIVE_THROW((std::string("Joint_InvokeMethod failed: ") + JointCore_ErrorToString(ret)).c_str());
 
 		PYJOINT_CPP_WRAP_END(result.Release(), NULL)
 	}

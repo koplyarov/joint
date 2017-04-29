@@ -24,7 +24,7 @@ extern "C"
 
 	class Bindings
 	{
-		using BindingHolder = Holder<Joint_BindingHandle>;
+		using BindingHolder = Holder<JointCore_BindingHandle>;
 		using BindingsMap = std::map<std::string, BindingHolder>;
 
 	private:
@@ -34,10 +34,10 @@ extern "C"
 		void AddBinding(std::string name, BindingHolder binding)
 		{ _bindings.emplace(name, std::move(binding)); }
 
-		Joint_BindingHandle GetBinding(const std::string& name)
+		JointCore_BindingHandle GetBinding(const std::string& name)
 		{
 			auto it = _bindings.find(name);
-			JOINT_CHECK(it != _bindings.end(), JOINT_ERROR_NO_SUCH_BINDING);
+			JOINT_CHECK(it != _bindings.end(), JOINT_CORE_ERROR_NO_SUCH_BINDING);
 			return it->second.Get();
 		}
 	};
@@ -47,7 +47,7 @@ extern "C"
 	static Bindings g_bindings;
 
 
-	Joint_Error JointCore_InitLoader()
+	JointCore_Error JointCore_InitLoader()
 	{
 		JOINT_CPP_WRAP_BEGIN
 
@@ -55,40 +55,40 @@ extern "C"
 			[&]() {
 				GetLogger().Info() << "Init";
 
-				auto release_binding = [](Joint_BindingHandle b) {
-							Joint_Error ret = Joint_DecRefBinding(b);
-							if (ret != JOINT_ERROR_NONE)
+				auto release_binding = [](JointCore_BindingHandle b) {
+							JointCore_Error ret = Joint_DecRefBinding(b);
+							if (ret != JOINT_CORE_ERROR_NONE)
 								GetLogger().Info() << "Joint_ReleaseBinding failed: " << ret;
 						};
 
-				static Joint_BindingHandle python_binding;
-				Joint_Error ret = JointPython_MakeBinding(&python_binding);
-				JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
-				g_bindings.AddBinding("python", Holder<Joint_BindingHandle>(python_binding, release_binding));
+				static JointCore_BindingHandle python_binding;
+				JointCore_Error ret = JointPython_MakeBinding(&python_binding);
+				JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
+				g_bindings.AddBinding("python", Holder<JointCore_BindingHandle>(python_binding, release_binding));
 
-				static Joint_BindingHandle cpp_binding;
+				static JointCore_BindingHandle cpp_binding;
 				ret = JointCpp_MakeBinding(&cpp_binding);
-				JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
-				g_bindings.AddBinding("cpp", Holder<Joint_BindingHandle>(cpp_binding, release_binding));
+				JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
+				g_bindings.AddBinding("cpp", Holder<JointCore_BindingHandle>(cpp_binding, release_binding));
 
-				static Joint_BindingHandle java_binding;
+				static JointCore_BindingHandle java_binding;
 				ret = JointJava_MakeBinding(&java_binding);
-				JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
-				g_bindings.AddBinding("java", Holder<Joint_BindingHandle>(java_binding, release_binding));
+				JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
+				g_bindings.AddBinding("java", Holder<JointCore_BindingHandle>(java_binding, release_binding));
 			});
 
 		JOINT_CPP_WRAP_END
 	}
 
 
-	Joint_Error JointCore_LoadModule(Joint_ManifestHandle moduleManifest, Joint_ModuleHandle* outModule)
+	JointCore_Error JointCore_LoadModule(JointCore_ManifestHandle moduleManifest, JointCore_ModuleHandle* outModule)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		JOINT_CHECK(moduleManifest != JOINT_NULL_HANDLE, JOINT_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(moduleManifest != JOINT_CORE_NULL_HANDLE, JOINT_CORE_ERROR_INVALID_PARAMETER);
 
-		Joint_Error ret = JointCore_InitLoader();
-		JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+		JointCore_Error ret = JointCore_InitLoader();
+		JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
 
 		ModuleManifestBase m;
 		ManifestReader::Read(moduleManifest, m);

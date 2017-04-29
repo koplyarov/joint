@@ -43,15 +43,15 @@ namespace pyjoint
 		JointCore_InterfaceChecksum checksum = FromPyLong<JointCore_InterfaceChecksum>(py_checksum);
 		auto interface_id = Utf8FromPyUnicode(py_interface_id);
 
-		Joint_ObjectHandle casted_obj;
-		Joint_Error ret = Joint_CastObject(proxy->obj, interface_id.GetContent(), checksum, &casted_obj);
-		if (ret == JOINT_ERROR_CAST_FAILED)
+		JointCore_ObjectHandle casted_obj;
+		JointCore_Error ret = Joint_CastObject(proxy->obj, interface_id.GetContent(), checksum, &casted_obj);
+		if (ret == JOINT_CORE_ERROR_CAST_FAILED)
 		{
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
 
-		NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_CastObject failed: ") + Joint_ErrorToString(ret)).c_str());
+		NATIVE_CHECK(ret == JOINT_CORE_ERROR_NONE, (std::string("Joint_CastObject failed: ") + JointCore_ErrorToString(ret)).c_str());
 
 		PyObjectHolder py_proxy_type(PY_OBJ_CHECK(PyObject_GetAttrString(py_interface, "proxy")));
 		PyObjectHolder result(PY_OBJ_CHECK_MSG(PyObject_CallObject(py_proxy_type, nullptr), std::string("Could not create ") + interface_id.GetContent() + " proxy"));

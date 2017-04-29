@@ -27,7 +27,7 @@ namespace binding
 	}
 
 
-	Joint_Error Object::InvokeMethod(size_t index, joint::ArrayView<const Joint_Parameter> params, Joint_Type retType, Joint_RetValue* outRetValue)
+	JointCore_Error Object::InvokeMethod(size_t index, joint::ArrayView<const JointCore_Parameter> params, JointCore_Type retType, JointCore_RetValue* outRetValue)
 	{
 		PyObject* py_function = PY_OBJ_CHECK_MSG((PyTuple_GetItem(_methods, index)), "Could not find method with id " + std::to_string(index));
 		auto ifc_desc = CastPyObject<pyjoint::InterfaceDescriptor>(_interfaceDesc, &pyjoint::InterfaceDescriptor_type);
@@ -84,43 +84,43 @@ namespace binding
 			std::vector<devkit::StackFrameData> bt;
 			GetPythonErrorBacktrace(traceback, bt);
 
-			std::vector<Joint_StackFrame> c_bt;
+			std::vector<JointCore_StackFrame> c_bt;
 			c_bt.reserve(bt.size() + (ex && ex->backtrace ? ex->backtrace->size() : 0));
 
 			auto tr_f = [](const devkit::StackFrameData& sf) {
-					return Joint_StackFrame{sf.GetModule().c_str(), sf.GetFilename().c_str(), sf.GetLine(), sf.GetCode().c_str(), sf.GetFunction().c_str()};
+					return JointCore_StackFrame{sf.GetModule().c_str(), sf.GetFilename().c_str(), sf.GetLine(), sf.GetCode().c_str(), sf.GetFunction().c_str()};
 				};
 
 			if (ex && ex->backtrace)
 				std::transform(ex->backtrace->begin(), ex->backtrace->end(), std::back_inserter(c_bt), tr_f);
 			std::transform(bt.rbegin(), bt.rend(), std::back_inserter(c_bt), tr_f);
 
-			Joint_ExceptionHandle joint_ex;
-			Joint_Error ret = Joint_MakeException(msg.c_str(), c_bt.data(), c_bt.size(), &joint_ex);
-			JOINT_CHECK(ret == JOINT_ERROR_NONE, std::string("Joint_MakeException failed: ") + Joint_ErrorToString(ret));
+			JointCore_ExceptionHandle joint_ex;
+			JointCore_Error ret = Joint_MakeException(msg.c_str(), c_bt.data(), c_bt.size(), &joint_ex);
+			JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, std::string("Joint_MakeException failed: ") + JointCore_ErrorToString(ret));
 			outRetValue->releaseValue = &Object::ReleaseRetValue;
 			outRetValue->result.ex = joint_ex;
 
-			return JOINT_ERROR_EXCEPTION;
+			return JOINT_CORE_ERROR_EXCEPTION;
 		}
 
 		RetValueAllocator alloc;
-		if (retType.id != JOINT_TYPE_VOID)
+		if (retType.id != JOINT_CORE_TYPE_VOID)
 			outRetValue->result.value = ValueMarshaller::ToJoint(ValueDirection::Return, m_desc.GetRetType(), py_res, PythonMarshaller(), alloc);
 		outRetValue->releaseValue = &Object::ReleaseRetValue;
-		return JOINT_ERROR_NONE;
+		return JOINT_CORE_ERROR_NONE;
 	}
 
 
-	Joint_Error Object::ReleaseRetValue(Joint_Type type, Joint_Value value)
+	JointCore_Error Object::ReleaseRetValue(JointCore_Type type, JointCore_Value value)
 	{
 		JOINT_CPP_WRAP_BEGIN
 		switch(type.id)
 		{
-		case JOINT_TYPE_UTF8:
+		case JOINT_CORE_TYPE_UTF8:
 			delete[] value.utf8;
 			break;
-		case JOINT_TYPE_STRUCT:
+		case JOINT_CORE_TYPE_STRUCT:
 			for (int32_t i = 0; i < type.payload.structDescriptor->membersCount; ++i)
 				ReleaseRetValue(type.payload.structDescriptor->memberTypes[i], value.members[i]);
 			delete[] value.members;

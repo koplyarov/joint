@@ -12,8 +12,8 @@ namespace python
 	{ }
 
 
-	Joint_TypeId PythonBindingInfo::GetJointTypeId(PyObject* typeNode) const
-	{ return FromPyLong<Joint_TypeId>(PY_OBJ_CHECK(PyTuple_GetItem(typeNode, 0))); }
+	JointCore_TypeId PythonBindingInfo::GetJointTypeId(PyObject* typeNode) const
+	{ return FromPyLong<JointCore_TypeId>(PY_OBJ_CHECK(PyTuple_GetItem(typeNode, 0))); }
 
 
 	JointCore_InterfaceChecksum PythonBindingInfo::GetInterfaceChecksum(PyObject* typeNode) const

@@ -46,8 +46,8 @@ static struct PyModuleDef g_module = {
 	PyMODINIT_FUNC initpyjoint_loader(void)
 #endif
 	{
-		Joint_Error ret = JointCore_InitLoader();
-		if (ret != JOINT_ERROR_NONE)
+		JointCore_Error ret = JointCore_InitLoader();
+		if (ret != JOINT_CORE_ERROR_NONE)
 		{
 			GetLogger().Error() << "JointCore_InitLoader failed: " << ret;
 			RETURN_ERROR;

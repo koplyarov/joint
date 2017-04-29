@@ -76,7 +76,7 @@ extern "C"
 #ifdef _MSC_VER
 	__declspec(dllexport)
 #endif
-	Joint_ObjectHandle GetBenchmarks(Joint_ModuleHandle module)
+	JointCore_ObjectHandle GetBenchmarks(JointCore_ModuleHandle module)
 	{ return Export(MakeComponent<IObject, Benchmarks>(module)); }
 
 }

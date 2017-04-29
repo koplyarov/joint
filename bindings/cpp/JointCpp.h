@@ -18,7 +18,7 @@
 
 extern "C"
 {
-	JOINT_CPP_CORE_API Joint_Error JointCpp_MakeBinding(Joint_BindingHandle* outBinding);
+	JOINT_CPP_CORE_API JointCore_Error JointCpp_MakeBinding(JointCore_BindingHandle* outBinding);
 }
 
 #endif

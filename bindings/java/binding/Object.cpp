@@ -33,7 +33,7 @@ namespace binding
 	{ }
 
 
-	Joint_Error Object::InvokeMethod(size_t index, joint::ArrayView<const Joint_Parameter> params, Joint_Type retType, Joint_RetValue* outRetValue)
+	JointCore_Error Object::InvokeMethod(size_t index, joint::ArrayView<const JointCore_Parameter> params, JointCore_Type retType, JointCore_RetValue* outRetValue)
 	{
 		const auto& m_desc = _nativeInterfaceDesc->GetMethod(index);
 
@@ -56,73 +56,73 @@ namespace binding
 		jmethodID j_method = m_desc.GetUserData().Id;
 		switch (m_desc.GetRetType().GetJointType().id)
 		{
-		case JOINT_TYPE_VOID:
+		case JOINT_CORE_TYPE_VOID:
 			env->CallVoidMethodA(_obj.Get(), j_method, jparams);
 			break;
-		case JOINT_TYPE_BOOL:
+		case JOINT_CORE_TYPE_BOOL:
 			j_res.z = env->CallBooleanMethodA(_obj.Get(), j_method, jparams);
 			break;
-		case JOINT_TYPE_U8:
-		case JOINT_TYPE_I8:
+		case JOINT_CORE_TYPE_U8:
+		case JOINT_CORE_TYPE_I8:
 			j_res.b = env->CallByteMethodA(_obj.Get(), j_method, jparams);
 			break;
-		case JOINT_TYPE_U16:
-		case JOINT_TYPE_I16:
+		case JOINT_CORE_TYPE_U16:
+		case JOINT_CORE_TYPE_I16:
 			j_res.s = env->CallShortMethodA(_obj.Get(), j_method, jparams);
 			break;
-		case JOINT_TYPE_U32:
-		case JOINT_TYPE_I32:
+		case JOINT_CORE_TYPE_U32:
+		case JOINT_CORE_TYPE_I32:
 			j_res.i = env->CallIntMethodA(_obj.Get(), j_method, jparams);
 			break;
-		case JOINT_TYPE_U64:
-		case JOINT_TYPE_I64:
+		case JOINT_CORE_TYPE_U64:
+		case JOINT_CORE_TYPE_I64:
 			j_res.j = env->CallLongMethodA(_obj.Get(), j_method, jparams);
 			break;
-		case JOINT_TYPE_F32:
+		case JOINT_CORE_TYPE_F32:
 			j_res.f = env->CallFloatMethodA(_obj.Get(), j_method, jparams);
 			break;
-		case JOINT_TYPE_F64:
+		case JOINT_CORE_TYPE_F64:
 			j_res.d = env->CallDoubleMethodA(_obj.Get(), j_method, jparams);
 			break;
-		case JOINT_TYPE_UTF8:
-		case JOINT_TYPE_ENUM:
-		case JOINT_TYPE_OBJ:
-		case JOINT_TYPE_STRUCT:
-		case JOINT_TYPE_ARRAY:
+		case JOINT_CORE_TYPE_UTF8:
+		case JOINT_CORE_TYPE_ENUM:
+		case JOINT_CORE_TYPE_OBJ:
+		case JOINT_CORE_TYPE_STRUCT:
+		case JOINT_CORE_TYPE_ARRAY:
 			j_res.l = env->CallObjectMethodA(_obj.Get(), j_method, jparams);
 			break;
 		default:
-			JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
+			JOINT_THROW(JOINT_CORE_ERROR_NOT_IMPLEMENTED);
 		}
 
 		outRetValue->releaseValue = &Object::ReleaseRetValue;
 		if (!env->ExceptionCheck())
 		{
-			if (m_desc.GetRetType().GetJointType().id != JOINT_TYPE_VOID)
+			if (m_desc.GetRetType().GetJointType().id != JOINT_CORE_TYPE_VOID)
 			{
 				RetValueAllocator alloc;
 				outRetValue->result.value = ValueMarshaller::ToJoint(ValueDirection::Return, m_desc.GetRetType(), j_res, JavaMarshaller(env), alloc);
 			}
 
-			return JOINT_ERROR_NONE;
+			return JOINT_CORE_ERROR_NONE;
 		}
 		else
 		{
 			outRetValue->result.ex = GetJavaExceptionInfo(env).MakeJointException().Release();
-			return JOINT_ERROR_EXCEPTION;
+			return JOINT_CORE_ERROR_EXCEPTION;
 		}
 	}
 
 
-	Joint_Error Object::ReleaseRetValue(Joint_Type type, Joint_Value value)
+	JointCore_Error Object::ReleaseRetValue(JointCore_Type type, JointCore_Value value)
 	{
 		JOINT_CPP_WRAP_BEGIN
 		switch(type.id)
 		{
-		case JOINT_TYPE_UTF8:
+		case JOINT_CORE_TYPE_UTF8:
 			delete[] value.utf8;
 			break;
-		case JOINT_TYPE_STRUCT:
+		case JOINT_CORE_TYPE_STRUCT:
 			for (int32_t i = 0; i < type.payload.structDescriptor->membersCount; ++i)
 				ReleaseRetValue(type.payload.structDescriptor->memberTypes[i], value.members[i]);
 			delete[] value.members;

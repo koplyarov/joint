@@ -5,7 +5,7 @@
 extern "C"
 {
 
-	Joint_Error JointPython_MakeBinding(Joint_BindingHandle* outBinding)
+	JointCore_Error JointPython_MakeBinding(JointCore_BindingHandle* outBinding)
 	{ return JointPythonCore_MakeBinding(outBinding); }
 
 }

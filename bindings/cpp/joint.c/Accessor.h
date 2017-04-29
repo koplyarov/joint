@@ -9,10 +9,10 @@ typedef struct JointC_Accessor_s JointC_Accessor;
 
 typedef struct
 {
-	Joint_Error (*AddRef)(void* component);
-	Joint_Error (*Release)(void* component);
-	Joint_Error (*CastObject)(void* component, JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, const JointC_Accessor** outAccessor);
-	Joint_Error (*InvokeMethod)(void* component, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);
+	JointCore_Error (*AddRef)(void* component);
+	JointCore_Error (*Release)(void* component);
+	JointCore_Error (*CastObject)(void* component, JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, const JointC_Accessor** outAccessor);
+	JointCore_Error (*InvokeMethod)(void* component, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue);
 } JointC_AccessorVTable;
 
 

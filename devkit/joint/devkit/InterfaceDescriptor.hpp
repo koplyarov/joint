@@ -35,7 +35,7 @@ namespace devkit
 	private:
 		MembersArray                     _members;
 		std::unique_ptr<TypeDescriptor>  _arrayElementType;
-		Joint_Type                       _jointType;
+		JointCore_Type                       _jointType;
 		size_t                           _membersCount = 0;
 		std::unique_ptr<ArrayUserData>   _arrayUserData;
 		std::unique_ptr<ObjectUserData>  _objectUserData;
@@ -44,12 +44,12 @@ namespace devkit
 
 	public:
 		TypeDescriptor()
-		{ _jointType.id = JOINT_TYPE_VOID; }
+		{ _jointType.id = JOINT_CORE_TYPE_VOID; }
 
 		template < typename NodeType_, typename DataObtainer_ >
 		TypeDescriptor(const NodeType_& node, const DataObtainer_& dataObtainer)
 		{
-			_jointType.id = JOINT_TYPE_VOID;
+			_jointType.id = JOINT_CORE_TYPE_VOID;
 			Init(node, dataObtainer);
 		}
 
@@ -59,19 +59,19 @@ namespace devkit
 			_jointType.id = dataObtainer.GetJointTypeId(node);
 			switch (_jointType.id)
 			{
-			case JOINT_TYPE_ENUM:
+			case JOINT_CORE_TYPE_ENUM:
 				_enumUserData.reset(new EnumUserData(dataObtainer.GetEnumUserData(node)));
 				break;
-			case JOINT_TYPE_STRUCT:
+			case JOINT_CORE_TYPE_STRUCT:
 				{
 					_structUserData.reset(new StructUserData(dataObtainer.GetStructUserData(node)));
 					auto members = dataObtainer.GetMembersNodes(node);
-					auto sd = new Joint_StructDescriptor;
+					auto sd = new JointCore_StructDescriptor;
 					_jointType.payload.structDescriptor = sd;
 
 					_membersCount = members.GetCount();
 					sd->membersCount = _membersCount;
-					sd->memberTypes = new Joint_Type[_membersCount];
+					sd->memberTypes = new JointCore_Type[_membersCount];
 					_members.Reset(new MemberInfo[_membersCount]);
 
 					for (size_t i = 0; i < _membersCount; ++i)
@@ -82,11 +82,11 @@ namespace devkit
 					}
 				}
 				break;
-			case JOINT_TYPE_OBJ:
+			case JOINT_CORE_TYPE_OBJ:
 				_objectUserData.reset(new ObjectUserData(dataObtainer.GetObjectUserData(node)));
 				_jointType.payload.interfaceChecksum = dataObtainer.GetInterfaceChecksum(node);
 				break;
-			case JOINT_TYPE_ARRAY:
+			case JOINT_CORE_TYPE_ARRAY:
 				_arrayElementType.reset(new TypeDescriptor);
 				_arrayElementType->Init(dataObtainer.GetArrayElementTypeNode(node), dataObtainer);
 				_arrayUserData.reset(new ArrayUserData(dataObtainer.GetArrayUserData(node)));
@@ -99,7 +99,7 @@ namespace devkit
 
 		~TypeDescriptor()
 		{
-			if (_jointType.id == JOINT_TYPE_STRUCT)
+			if (_jointType.id == JOINT_CORE_TYPE_STRUCT)
 			{
 				auto sd = _jointType.payload.structDescriptor;
 				delete[] sd->memberTypes;
@@ -112,8 +112,8 @@ namespace devkit
 		TypeDescriptor(const TypeDescriptor&) = delete;
 		TypeDescriptor& operator = (const TypeDescriptor&) = delete;
 
-		Joint_Type& GetJointType() { return _jointType; }
-		const Joint_Type& GetJointType() const { return _jointType; }
+		JointCore_Type& GetJointType() { return _jointType; }
+		const JointCore_Type& GetJointType() const { return _jointType; }
 		const MemberInfo& GetMemberInfo(size_t index) const
 		{
 			if (index >= _membersCount)

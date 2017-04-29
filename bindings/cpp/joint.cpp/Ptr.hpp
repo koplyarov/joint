@@ -25,7 +25,7 @@ namespace joint
 			: _raw()
 		{ }
 
-		explicit Ptr(Joint_ObjectHandle obj)
+		explicit Ptr(JointCore_ObjectHandle obj)
 			: _raw(obj)
 		{ }
 
@@ -65,7 +65,7 @@ namespace joint
 		}
 
 		explicit operator bool() const
-		{ return _raw._GetObjectHandle() != JOINT_NULL_HANDLE; }
+		{ return _raw._GetObjectHandle() != JOINT_CORE_NULL_HANDLE; }
 
 		//T_* Get() { return &_raw; }
 		T_* Get() const { return &_raw; }
@@ -84,14 +84,14 @@ namespace joint
 		if (!src)
 			return Ptr<Dst_>();
 
-		Joint_ObjectHandle result_handle;
-		Joint_Error ret = Joint_CastObject(src->_GetObjectHandle(), Dst_::_GetInterfaceId(), Dst_::_GetInterfaceChecksum(), &result_handle);
-		if (ret == JOINT_ERROR_NONE)
+		JointCore_ObjectHandle result_handle;
+		JointCore_Error ret = Joint_CastObject(src->_GetObjectHandle(), Dst_::_GetInterfaceId(), Dst_::_GetInterfaceChecksum(), &result_handle);
+		if (ret == JOINT_CORE_ERROR_NONE)
 			return Ptr<Dst_>(Dst_(result_handle));
-		else if (ret == JOINT_ERROR_CAST_FAILED)
+		else if (ret == JOINT_CORE_ERROR_CAST_FAILED)
 			return Ptr<Dst_>();
 		else
-			throw std::runtime_error(std::string("Joint_CastObject failed: ") + Joint_ErrorToString(ret));
+			throw std::runtime_error(std::string("Joint_CastObject failed: ") + JointCore_ErrorToString(ret));
 	}
 
 }

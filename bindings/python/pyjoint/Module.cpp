@@ -73,7 +73,7 @@ namespace pyjoint
 		PYJOINT_CPP_WRAP_BEGIN
 
 		Module* self = PY_OBJ_CHECK((Module*)type->tp_alloc(type, 0));
-		self->handle = JOINT_NULL_HANDLE;
+		self->handle = JOINT_CORE_NULL_HANDLE;
 
 		PYJOINT_CPP_WRAP_END((PyObject*)self, NULL)
 	}
@@ -86,7 +86,7 @@ namespace pyjoint
 		PyObject* py_module_handle;
 		PYTHON_CHECK(PyArg_ParseTuple(args, "O", &py_module_handle), "Could not parse arguments");
 		NATIVE_CHECK(PyCapsule_IsValid(py_module_handle, "Joint.Module"), "Could not unwrap joint module handle");
-		Joint_ModuleHandle handle = reinterpret_cast<Joint_ModuleHandle>(PyCapsule_GetPointer(py_module_handle, "Joint.Module"));
+		JointCore_ModuleHandle handle = reinterpret_cast<JointCore_ModuleHandle>(PyCapsule_GetPointer(py_module_handle, "Joint.Module"));
 		reinterpret_cast<Module*>(self)->handle = handle;
 
 		PYJOINT_CPP_WRAP_END(0, -1, Py_DECREF(self);)
@@ -100,10 +100,10 @@ namespace pyjoint
 		auto m = reinterpret_cast<Module*>(self);
 		if (m && m->handle)
 		{
-			Joint_Error ret = Joint_DecRefModule(m->handle);
-			if (ret != JOINT_ERROR_NONE)
+			JointCore_Error ret = Joint_DecRefModule(m->handle);
+			if (ret != JOINT_CORE_ERROR_NONE)
 				GetLogger().Error() << "Joint_DecRefModule failed: " << ret;
-			m->handle = JOINT_NULL_HANDLE;
+			m->handle = JOINT_CORE_NULL_HANDLE;
 		}
 
 		Py_TYPE(self)->tp_free(self);
@@ -122,9 +122,9 @@ namespace pyjoint
 		const char* getter_name;
 		PYTHON_CHECK(PyArg_ParseTuple(args, "s", &getter_name), "Could not parse arguments");
 
-		Joint_ObjectHandle obj;
-		Joint_Error ret = Joint_GetRootObject(m->handle, getter_name, &obj);
-		NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_GetRootObject failed: ") + Joint_ErrorToString(ret)).c_str());
+		JointCore_ObjectHandle obj;
+		JointCore_Error ret = Joint_GetRootObject(m->handle, getter_name, &obj);
+		NATIVE_CHECK(ret == JOINT_CORE_ERROR_NONE, (std::string("Joint_GetRootObject failed: ") + JointCore_ErrorToString(ret)).c_str());
 
 		NATIVE_THROW("Not implemented!");
 		PyObjectHolder py_obj;
@@ -170,10 +170,10 @@ namespace pyjoint
 		PyObjectHolder accessor_ctor_args(PY_OBJ_CHECK(Py_BuildValue("(O)", (PyObject*)component_impl)));
 		PyObjectHolder accessor(PY_OBJ_CHECK(PyObject_CallObject(accessor_type, accessor_ctor_args)));
 
-		Joint_ObjectHandleInternal obj_internal = new binding::Object(accessor);
-		Joint_ObjectHandle obj = JOINT_NULL_HANDLE;
-		Joint_Error ret = Joint_CreateObject(m->handle, obj_internal, &obj);
-		NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_CreateObject failed: ") + Joint_ErrorToString(ret)).c_str());
+		JointCore_ObjectHandleInternal obj_internal = new binding::Object(accessor);
+		JointCore_ObjectHandle obj = JOINT_CORE_NULL_HANDLE;
+		JointCore_Error ret = Joint_CreateObject(m->handle, obj_internal, &obj);
+		NATIVE_CHECK(ret == JOINT_CORE_ERROR_NONE, (std::string("Joint_CreateObject failed: ") + JointCore_ErrorToString(ret)).c_str());
 
 		PyObjectHolder proxy_type(PY_OBJ_CHECK(PyObject_GetAttrString(interface, "proxy")));
 		PyObjectHolder proxy(PY_OBJ_CHECK(PyObject_CallObject(proxy_type, nullptr)));

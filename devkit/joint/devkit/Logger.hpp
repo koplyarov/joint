@@ -22,11 +22,11 @@ namespace devkit
 			struct Impl
 			{
 				const char*                 _name;
-				Joint_LogLevel              _logLevel;
+				JointCore_LogLevel              _logLevel;
 				bool                        _constructed;
 				StorageFor<StringBuilder>   _stringBuilder;
 
-				Impl(const char* name, Joint_LogLevel logLevel)
+				Impl(const char* name, JointCore_LogLevel logLevel)
 					: _name(name), _logLevel(logLevel), _constructed(false)
 				{ }
 
@@ -61,7 +61,7 @@ namespace devkit
 			ImplStorage    _impl;
 
 		public:
-			Stream(const char* name, Joint_LogLevel logLevel)
+			Stream(const char* name, JointCore_LogLevel logLevel)
 				: _nop(logLevel < Joint_GetLogLevel())
 			{
 				if (JOINT_CORE_UNLIKELY(!_nop))
@@ -100,10 +100,10 @@ namespace devkit
 
 		const char* GetName() const { return _name; }
 
-		Stream Debug() const   { return Stream(_name, JOINT_LOGLEVEL_DEBUG); }
-		Stream Info() const    { return Stream(_name, JOINT_LOGLEVEL_INFO); }
-		Stream Warning() const { return Stream(_name, JOINT_LOGLEVEL_WARNING); }
-		Stream Error() const   { return Stream(_name, JOINT_LOGLEVEL_ERROR); }
+		Stream Debug() const   { return Stream(_name, JOINT_CORE_LOGLEVEL_DEBUG); }
+		Stream Info() const    { return Stream(_name, JOINT_CORE_LOGLEVEL_INFO); }
+		Stream Warning() const { return Stream(_name, JOINT_CORE_LOGLEVEL_WARNING); }
+		Stream Error() const   { return Stream(_name, JOINT_CORE_LOGLEVEL_ERROR); }
 	};
 
 #define JOINT_DEVKIT_LOGGER(Name_) static ::joint::devkit::NamedLogger GetLogger() { return ::joint::devkit::NamedLogger(Name_); }

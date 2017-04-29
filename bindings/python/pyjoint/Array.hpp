@@ -14,7 +14,7 @@ namespace pyjoint
 	{
 		PyObject_HEAD
 		PyObject*             elementTypeDesc;
-		Joint_ArrayHandle     handle;
+		JointCore_ArrayHandle     handle;
 	};
 
 

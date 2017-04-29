@@ -17,18 +17,18 @@ namespace devkit
 	private:
 		std::string      _module;
 		std::string      _filename;
-		Joint_SizeT      _line;
+		JointCore_SizeT      _line;
 		std::string      _code;
 		std::string      _function;
 
 	public:
-		StackFrameData(std::string module, std::string filename, Joint_SizeT line, std::string code, std::string function)
+		StackFrameData(std::string module, std::string filename, JointCore_SizeT line, std::string code, std::string function)
 			: _module(std::move(module)), _filename(std::move(filename)), _line(line), _code(std::move(code)), _function(std::move(function))
 		{ }
 
 		const std::string&  GetModule() const { return _module; }
 		const std::string&  GetFilename() const { return _filename; }
-		Joint_SizeT         GetLine() const { return _line; }
+		JointCore_SizeT         GetLine() const { return _line; }
 		const std::string&  GetCode() const { return _code; }
 		const std::string&  GetFunction() const { return _function; }
 

@@ -43,20 +43,20 @@ namespace detail
 #endif
 
 
-	inline Joint_Error _ReleaseRetValue(Joint_Type type, Joint_Value value)
+	inline JointCore_Error _ReleaseRetValue(JointCore_Type type, JointCore_Value value)
 	{
 		switch (type.id)
 		{
-		case JOINT_TYPE_UTF8:
+		case JOINT_CORE_TYPE_UTF8:
 			delete[] value.utf8;
-			return JOINT_ERROR_NONE;
-		case JOINT_TYPE_STRUCT:
+			return JOINT_CORE_ERROR_NONE;
+		case JOINT_CORE_TYPE_STRUCT:
 			for (int32_t i = 0; i < type.payload.structDescriptor->membersCount; ++i)
 				_ReleaseRetValue(type.payload.structDescriptor->memberTypes[i], value.members[i]);
 			delete[] value.members;
-			return JOINT_ERROR_NONE;
+			return JOINT_CORE_ERROR_NONE;
 		default:
-			return JOINT_ERROR_NONE;
+			return JOINT_CORE_ERROR_NONE;
 		}
 	}
 
@@ -92,7 +92,7 @@ namespace detail
 	};
 
 	template < typename ComponentImpl_, typename ExceptionType_ >
-	Joint_Error WrapCppException(const ExceptionType_& ex, Joint_RetValue* outRetValue, const char* methodName)
+	JointCore_Error WrapCppException(const ExceptionType_& ex, JointCore_RetValue* outRetValue, const char* methodName)
 	{
         outRetValue->releaseValue = &::joint::detail::_ReleaseRetValue;
 
@@ -102,21 +102,21 @@ namespace detail
 		std::stringstream function_ss;
 		function_ss << methodName << " of a C++ component";
 		function_ss << " " << Demangle(typeid(ComponentImpl_).name());
-		bt.push_back(JointCppStackFrame(JointAux_GetModuleName((Joint_FunctionPtr)&WrapCppException<ComponentImpl_, ExceptionType_>), "", 0, "", function_ss.str()));
+		bt.push_back(JointCppStackFrame(JointAux_GetModuleName((JointCore_FunctionPtr)&WrapCppException<ComponentImpl_, ExceptionType_>), "", 0, "", function_ss.str()));
 
-		std::vector<Joint_StackFrame> c_bt;
+		std::vector<JointCore_StackFrame> c_bt;
 		c_bt.reserve(bt.size());
 		std::transform(bt.begin(), bt.end(), std::back_inserter(c_bt), [](const JointCppStackFrame& sf) {
-				return Joint_StackFrame{sf.GetModule().c_str(), sf.GetFilename().c_str(), sf.GetLine(), sf.GetCode().c_str(), sf.GetFunction().c_str()};
+				return JointCore_StackFrame{sf.GetModule().c_str(), sf.GetFilename().c_str(), sf.GetLine(), sf.GetCode().c_str(), sf.GetFunction().c_str()};
 			});
 
-		Joint_ExceptionHandle joint_ex;
-		Joint_Error ret = Joint_MakeException(msg.c_str(), c_bt.data(), c_bt.size(), &joint_ex);
-		if (ret != JOINT_ERROR_NONE)
+		JointCore_ExceptionHandle joint_ex;
+		JointCore_Error ret = Joint_MakeException(msg.c_str(), c_bt.data(), c_bt.size(), &joint_ex);
+		if (ret != JOINT_CORE_ERROR_NONE)
 			return ret;
 
 		outRetValue->result.ex = joint_ex;
-		return JOINT_ERROR_EXCEPTION;
+		return JOINT_CORE_ERROR_EXCEPTION;
 	}
 
 }}

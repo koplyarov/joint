@@ -20,9 +20,9 @@ JNIEXPORT jlong JNICALL Java_org_joint_Array_initNative(JNIEnv* env, jclass cls,
 	JNI_WRAP_CPP_BEGIN
 	TypeDescriptor<JavaBindingInfo> td(JObjTempRef(env, typeDescriptor), JavaBindingInfo());
 
-	Joint_ArrayHandle handle = JOINT_NULL_HANDLE;
-	Joint_Error ret = Joint_MakeArray(td.GetJointType(), NoOverflowCast<Joint_SizeT>(size), &handle);
-	JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+	JointCore_ArrayHandle handle = JOINT_CORE_NULL_HANDLE;
+	JointCore_Error ret = Joint_MakeArray(td.GetJointType(), NoOverflowCast<JointCore_SizeT>(size), &handle);
+	JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
 
 	JNI_WRAP_CPP_END(reinterpret_cast<jlong>(handle), 0)
 }
@@ -32,7 +32,7 @@ JNIEXPORT void JNICALL Java_org_joint_Array_deinitNative(JNIEnv* env, jclass cls
 {
 	JNI_WRAP_CPP_BEGIN
 
-	auto handle = reinterpret_cast<Joint_ArrayHandle>(handleLong);
+	auto handle = reinterpret_cast<JointCore_ArrayHandle>(handleLong);
 	Joint_DecRefArray(handle);
 
 	JNI_WRAP_CPP_END_VOID()
@@ -43,11 +43,11 @@ JNIEXPORT jobject JNICALL Java_org_joint_Array_doGet(JNIEnv* env, jclass cls, jo
 {
 	JNI_WRAP_CPP_BEGIN
 
-	auto handle = reinterpret_cast<Joint_ArrayHandle>(handleLong);
+	auto handle = reinterpret_cast<JointCore_ArrayHandle>(handleLong);
 
-	Joint_Value value;
-	Joint_Error ret = Joint_ArrayGet(handle, NoOverflowCast<Joint_SizeT>(index), &value);
-	JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+	JointCore_Value value;
+	JointCore_Error ret = Joint_ArrayGet(handle, NoOverflowCast<JointCore_SizeT>(index), &value);
+	JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
 
 	TypeDescriptor<JavaBindingInfo> td(JObjTempRef(env, typeDescriptor), JavaBindingInfo());
 	jvalue v = ValueMarshaller::FromJoint<jvalue>(ValueDirection::Return, td, value, JavaMarshaller(env));
@@ -60,6 +60,6 @@ JNIEXPORT jobject JNICALL Java_org_joint_Array_doGet(JNIEnv* env, jclass cls, jo
 JNIEXPORT void JNICALL Java_org_joint_Array_doSet(JNIEnv* env, jclass cls, jlong handle, jlong index, jobject value)
 {
 	JNI_WRAP_CPP_BEGIN
-	JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
+	JOINT_THROW(JOINT_CORE_ERROR_NOT_IMPLEMENTED);
 	JNI_WRAP_CPP_END_VOID()
 }

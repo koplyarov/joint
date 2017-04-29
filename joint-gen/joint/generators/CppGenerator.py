@@ -87,7 +87,7 @@ class CppGenerator:
         yield '\tstd::string ToString() const;'
         yield ''
 
-        yield '\tstatic {} _FromJointMembers(Joint_Value* members)'.format(s.name)
+        yield '\tstatic {} _FromJointMembers(JointCore_Value* members)'.format(s.name)
         yield '\t{'
         for m in s.members:
             if isinstance(m.type, Interface):
@@ -100,7 +100,7 @@ class CppGenerator:
         yield '\tstatic const size_t _MembersCount = {};'.format(len(s.members))
         yield '\tstatic const size_t _RecursiveMembersCount = _MembersCount{};'.format(''.join(' + {}::_RecursiveMembersCount'.format(m.type.name) for m in s.members if isinstance(m.type, Struct)))
         yield ''
-        yield '\tvoid _FillMembers(Joint_Value* members) const'
+        yield '\tvoid _FillMembers(JointCore_Value* members) const'
         yield '\t{'
         substruct_offset = ' + _MembersCount'
         for i,m in enumerate(s.members):
@@ -122,9 +122,9 @@ class CppGenerator:
                 yield '\t\t{}._FillMembers(members[{}].members);'.format(m.name, i)
         yield '\t}'
         yield ''
-        yield '\tstatic Joint_StructDescriptor* _GetStructDescriptor()'
+        yield '\tstatic JointCore_StructDescriptor* _GetStructDescriptor()'
         yield '\t{'
-        yield '\t\tstatic Joint_Type member_types[] = {'
+        yield '\t\tstatic JointCore_Type member_types[] = {'
         for i, m in enumerate(s.members):
             if isinstance(m.type, BuiltinType) or isinstance(m.type, Enum):
                 payload_init = ''
@@ -134,9 +134,9 @@ class CppGenerator:
                 payload_init = '{}::_GetStructDescriptor()'.format(self._mangleType(m.type))
             else:
                 raise RuntimeError('Not implemented (type: {})!'.format(m.type))
-            yield '\t\t\t{{ (Joint_TypeId){}, Joint_TypePayload({}) }}{}'.format(m.type.index, payload_init, '' if i == len(s.members) - 1 else ',')
+            yield '\t\t\t{{ (JointCore_TypeId){}, JointCore_TypePayload({}) }}{}'.format(m.type.index, payload_init, '' if i == len(s.members) - 1 else ',')
         yield '\t\t};'
-        yield '\t\tstatic Joint_StructDescriptor desc = {{ {}, member_types }};'.format(len(s.members))
+        yield '\t\tstatic JointCore_StructDescriptor desc = {{ {}, member_types }};'.format(len(s.members))
         yield '\t\treturn &desc;'
         yield '\t}'
         yield '};'
@@ -170,16 +170,16 @@ class CppGenerator:
         yield 'class {}'.format(ifc.name)
         yield '{'
         yield 'private:'
-        yield '\tJoint_ObjectHandle _obj;'
+        yield '\tJointCore_ObjectHandle _obj;'
         yield ''
         yield 'public:'
         yield '\ttypedef ::joint::TypeList<{}> BaseInterfaces;'.format(', '.join(self._mangleType(b) for b in ifc.bases))
         yield '\ttemplate <typename ComponentImpl_> using Accessor = {}_accessor<ComponentImpl_>;'.format(ifc.name)
         yield ''
-        yield '\t{}() : _obj(JOINT_NULL_HANDLE) {{ }}'.format(ifc.name);
-        yield '\t{}(Joint_ObjectHandle obj) : _obj(obj) {{ }}'.format(ifc.name);
+        yield '\t{}() : _obj(JOINT_CORE_NULL_HANDLE) {{ }}'.format(ifc.name);
+        yield '\t{}(JointCore_ObjectHandle obj) : _obj(obj) {{ }}'.format(ifc.name);
         yield ''
-        yield '\tJoint_ObjectHandle _GetObjectHandle() const { return _obj; }'
+        yield '\tJointCore_ObjectHandle _GetObjectHandle() const { return _obj; }'
         yield '\tstatic JointCore_InterfaceChecksum _GetInterfaceChecksum() {{ return {}; }}'.format(hex(ifc.checksum))
         yield '\tstatic const char* _GetInterfaceId() {{ return "{}"; }}'.format(ifc.fullname)
         yield ''
@@ -192,19 +192,19 @@ class CppGenerator:
         yield 'class {}_accessor'.format(ifc.name)
         yield '{'
         yield 'public:'
-        yield '\tstatic Joint_Error InheritsInterface(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum)'
+        yield '\tstatic JointCore_Error InheritsInterface(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum)'
         yield '\t{'
         b = ifc
         while b:
             yield '\t\tif (strcmp(interfaceId, "{}") == 0)'.format(b.fullname)
-            yield '\t\t\treturn (checksum == {}::_GetInterfaceChecksum()) ? JOINT_ERROR_NONE : JOINT_ERROR_INVALID_INTERFACE_CHECKSUM;'.format(self._mangleType(b))
+            yield '\t\t\treturn (checksum == {}::_GetInterfaceChecksum()) ? JOINT_CORE_ERROR_NONE : JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM;'.format(self._mangleType(b))
             if not b.bases:
                 break
             b = b.bases[0]
-        yield '\t\treturn JOINT_ERROR_CAST_FAILED;'
+        yield '\t\treturn JOINT_CORE_ERROR_CAST_FAILED;'
         yield '\t}'
         yield ''
-        yield '\tstatic Joint_Error InvokeMethodImpl(ComponentImpl_* componentImpl, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue);'
+        yield '\tstatic JointCore_Error InvokeMethodImpl(ComponentImpl_* componentImpl, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue);'
         yield '};'
         yield ''
         yield ''
@@ -224,21 +224,21 @@ class CppGenerator:
         yield '{} {}::{}({})'.format(self._toCppType(m.retType), ifc.name, m.name, ', '.join('{} {}'.format(self._toCppType(p.type), p.name) for p in m.params))
         yield '{'
         yield '\tusing namespace ::joint::detail;'
-        yield '\tJoint_RetValue _ret_val;'
-        yield '\tJoint_Type _ret_val_type;'
-        yield '\t_ret_val_type.id = (Joint_TypeId){};'.format(m.retType.index)
+        yield '\tJointCore_RetValue _ret_val;'
+        yield '\tJointCore_Type _ret_val_type;'
+        yield '\t_ret_val_type.id = (JointCore_TypeId){};'.format(m.retType.index)
         if isinstance(m.retType, Interface):
             yield '\t_ret_val_type.payload.interfaceChecksum = {}::_GetInterfaceChecksum();'.format(self._mangleType(m.retType))
         elif isinstance(m.retType, Struct):
             yield '\t_ret_val_type.payload.structDescriptor = {}::_GetStructDescriptor();'.format(self._mangleType(m.retType))
         if m.params:
-            yield '\tJoint_Parameter params[{}];'.format(len(m.params))
+            yield '\tJointCore_Parameter params[{}];'.format(len(m.params))
             for p in m.params:
                 param_val = self._toJointParam(p.type, p.name)
                 for l in param_val.initialization:
                     yield '\t{}'.format(l)
                 yield '\tparams[{}].value.{} = {};'.format(p.index, p.type.variantName, param_val.code)
-                yield '\tparams[{}].type.id = (Joint_TypeId){};'.format(p.index, p.type.index)
+                yield '\tparams[{}].type.id = (JointCore_TypeId){};'.format(p.index, p.type.index)
                 if isinstance(p.type, Interface):
                     yield '\tparams[{}].type.payload.interfaceChecksum = {}::_GetInterfaceChecksum();'.format(p.index, self._mangleType(p.type))
                 elif isinstance(p.type, Struct):
@@ -259,7 +259,7 @@ class CppGenerator:
         yield '\t{'
         if isinstance(m.retType, Interface):
             yield '\t\tif (retType.payload.interfaceChecksum != {}::_GetInterfaceChecksum())'.format(self._mangleType(m.retType))
-            yield '\t\t\treturn JOINT_ERROR_INVALID_INTERFACE_CHECKSUM;'
+            yield '\t\t\treturn JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM;'
         for p in m.params:
             for l in self._validateJointParam(p.type, 'params[{}].type'.format(p.index)):
                 yield '\t\t{}'.format(l)
@@ -282,7 +282,7 @@ class CppGenerator:
 
     def _generateAccessorInvokeMethod(self, ifc):
         yield 'template <typename ComponentImpl_>'
-        yield 'Joint_Error {}_accessor<ComponentImpl_>::InvokeMethodImpl(ComponentImpl_* componentImpl, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)'.format(ifc.name)
+        yield 'JointCore_Error {}_accessor<ComponentImpl_>::InvokeMethodImpl(ComponentImpl_* componentImpl, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue)'.format(ifc.name)
         yield '{'
         yield '\ttry'
         yield '\t{'
@@ -292,7 +292,7 @@ class CppGenerator:
             for l in self._generateAccessorInvokeMethodCase(ifc, m):
                 yield '\t\t{}'.format(l)
         yield '\t\tdefault:'
-        yield '\t\t\treturn JOINT_ERROR_GENERIC;'
+        yield '\t\t\treturn JOINT_CORE_ERROR_GENERIC;'
         yield '\t\t}'
         yield '\t}'
         yield '\tcatch (const ::joint::detail::JointCppException& ex)'
@@ -308,7 +308,7 @@ class CppGenerator:
         yield '\t\treturn ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, {});'.format('method_names[methodId]' if ifc.methods else '""')
         yield '\t}'
         yield '\toutRetValue->releaseValue = &::joint::detail::_ReleaseRetValue;'
-        yield '\treturn JOINT_ERROR_NONE;'
+        yield '\treturn JOINT_CORE_ERROR_NONE;'
         yield '}'
 
     def _isHeavyType(self, type):
@@ -370,7 +370,7 @@ class CppGenerator:
                 member_val = self._toJointParam(m.type, '{}.{}'.format(cppValue, m.name))
                 initialization += member_val.initialization
                 member_values.append(member_val.code);
-            initialization.append('Joint_Value {}_members[{}];'.format(mangled_value, len(type.members)))
+            initialization.append('JointCore_Value {}_members[{}];'.format(mangled_value, len(type.members)))
             for i,m in enumerate(member_values):
                 initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, type.members[i].type.variantName, m))
             return CodeWithInitialization('{}_members'.format(mangled_value), initialization)
@@ -403,7 +403,7 @@ class CppGenerator:
                 member_val = self._toJointRetValue(m.type, '{}.{}'.format(cppValue, m.name))
                 initialization += member_val.initialization
                 member_values.append(member_val.code);
-            initialization.append('Joint_Value* {}_members = new Joint_Value[{}];'.format(mangled_value, len(type.members)))
+            initialization.append('JointCore_Value* {}_members = new JointCore_Value[{}];'.format(mangled_value, len(type.members)))
             for i,m in enumerate(member_values):
                 initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, type.members[i].type.variantName, m))
             return CodeWithInitialization('{}_members'.format(mangled_value), initialization)
@@ -418,7 +418,7 @@ class CppGenerator:
             return
         elif isinstance(type, Interface):
             yield 'if ({}.payload.interfaceChecksum != {}::_GetInterfaceChecksum())'.format(jointType, self._mangleType(type))
-            yield '\treturn JOINT_ERROR_INVALID_INTERFACE_CHECKSUM;'
+            yield '\treturn JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM;'
         elif isinstance(type, Struct):
             for i,m in enumerate(type.members):
                 for l in self._validateJointParam(m.type, '{}.memberTypes[{}]'.format(jointType, i)):

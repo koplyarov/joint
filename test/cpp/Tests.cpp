@@ -82,10 +82,10 @@ public:
 		> JointInterfaces;
 
 private:
-	Joint_ModuleHandle   _module;
+	JointCore_ModuleHandle   _module;
 
 public:
-	Tests(Joint_ModuleHandle module)
+	Tests(JointCore_ModuleHandle module)
 		: _module(module)
 	{ }
 
@@ -222,7 +222,7 @@ extern "C"
 #ifdef _MSC_VER
 	__declspec(dllexport)
 #endif
-	Joint_ObjectHandle GetTests(Joint_ModuleHandle module)
+	JointCore_ObjectHandle GetTests(JointCore_ModuleHandle module)
 	{ return Export(MakeComponent<IObject, Tests>(module, module)); }
 
 }

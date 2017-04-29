@@ -21,10 +21,10 @@ namespace pyjoint
 	struct ArrayIter
 	{
 		PyObject_HEAD
-		Joint_SizeT           index;
-		Joint_SizeT           size;
+		JointCore_SizeT           index;
+		JointCore_SizeT           size;
 		PyObject*             elementTypeDesc;
-		Joint_ArrayHandle     handle;
+		JointCore_ArrayHandle     handle;
 	};
 
 	static PyObject *Array_GetIter(Array* self);
@@ -154,7 +154,7 @@ namespace pyjoint
 	{
 		PYJOINT_CPP_WRAP_BEGIN
 
-		Joint_ArrayHandle handle = JOINT_NULL_HANDLE;
+		JointCore_ArrayHandle handle = JOINT_CORE_NULL_HANDLE;
 
 		PyObject *py_type_desc = NULL, *py_arg2 = NULL;
 		PYTHON_CHECK(PyArg_ParseTuple(args, "OO", &py_type_desc, &py_arg2), "Could not parse arguments");
@@ -163,14 +163,14 @@ namespace pyjoint
 
 		if (PyCapsule_IsValid(py_arg2, "Joint.Array"))
 		{
-			handle = reinterpret_cast<Joint_ArrayHandle>(PyCapsule_GetPointer(py_arg2, "Joint.Array"));
+			handle = reinterpret_cast<JointCore_ArrayHandle>(PyCapsule_GetPointer(py_arg2, "Joint.Array"));
 		}
 		else
 		{
-			Joint_SizeT array_size = FromPyLong<Joint_SizeT>(py_arg2);
+			JointCore_SizeT array_size = FromPyLong<JointCore_SizeT>(py_arg2);
 			const auto& d = type_desc->GetDescriptor();
-			Joint_Error ret = Joint_MakeArray(d.GetJointType(), array_size, &handle);
-			NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_MakeArray failed: ") + Joint_ErrorToString(ret)).c_str());
+			JointCore_Error ret = Joint_MakeArray(d.GetJointType(), array_size, &handle);
+			NATIVE_CHECK(ret == JOINT_CORE_ERROR_NONE, (std::string("Joint_MakeArray failed: ") + JointCore_ErrorToString(ret)).c_str());
 		}
 
 		self->handle = handle;
@@ -198,9 +198,9 @@ namespace pyjoint
 	{
 		PYJOINT_CPP_WRAP_BEGIN
 
-		Joint_SizeT size;
-		Joint_Error ret = Joint_ArrayGetSize(self->handle, &size);
-		NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_ArrayGetSize failed: ") + Joint_ErrorToString(ret)).c_str());
+		JointCore_SizeT size;
+		JointCore_Error ret = Joint_ArrayGetSize(self->handle, &size);
+		NATIVE_CHECK(ret == JOINT_CORE_ERROR_NONE, (std::string("Joint_ArrayGetSize failed: ") + JointCore_ErrorToString(ret)).c_str());
 
 		PYJOINT_CPP_WRAP_END(size, -1)
 	}
@@ -209,9 +209,9 @@ namespace pyjoint
 	{
 		PYJOINT_CPP_WRAP_BEGIN
 
-		Joint_Value value;
-		Joint_Error ret = Joint_ArrayGet(self->handle, i, &value);
-		if (ret == JOINT_ERROR_INDEX_OUT_OF_RANGE)
+		JointCore_Value value;
+		JointCore_Error ret = Joint_ArrayGet(self->handle, i, &value);
+		if (ret == JOINT_CORE_ERROR_INDEX_OUT_OF_RANGE)
 		{
 			PyErr_SetString(PyExc_IndexError, "Array index out of range");
 			return NULL;
@@ -257,8 +257,8 @@ namespace pyjoint
 		if (it == NULL)
 			return NULL;
 
-		Joint_Error ret = Joint_ArrayGetSize(self->handle, &it->size);
-		NATIVE_CHECK(ret == JOINT_ERROR_NONE, (std::string("Joint_ArrayGetSize failed: ") + Joint_ErrorToString(ret)).c_str());
+		JointCore_Error ret = Joint_ArrayGetSize(self->handle, &it->size);
+		NATIVE_CHECK(ret == JOINT_CORE_ERROR_NONE, (std::string("Joint_ArrayGetSize failed: ") + JointCore_ErrorToString(ret)).c_str());
 
 		it->index = 0;
 		it->handle = self->handle;
@@ -279,7 +279,7 @@ namespace pyjoint
 		PyObject_GC_UnTrack(self);
 		Py_XDECREF(self->elementTypeDesc);
 		Joint_DecRefArray(self->handle);
-		self->handle = JOINT_NULL_HANDLE;
+		self->handle = JOINT_CORE_NULL_HANDLE;
 		PyObject_GC_Del(self);
 
 		PYJOINT_CPP_WRAP_END_VOID()
@@ -298,19 +298,19 @@ namespace pyjoint
 		PYJOINT_CPP_WRAP_BEGIN
 
 		auto handle = self->handle;
-		if (handle == JOINT_NULL_HANDLE)
+		if (handle == JOINT_CORE_NULL_HANDLE)
 			return NULL;
 
 		if (self->index >= self->size)
 		{
 			Joint_DecRefArray(self->handle);
-			self->handle = JOINT_NULL_HANDLE;
+			self->handle = JOINT_CORE_NULL_HANDLE;
 			return NULL;
 		}
 
-		Joint_Value value;
-		Joint_Error ret = Joint_ArrayGet(self->handle, self->index, &value);
-		if (ret == JOINT_ERROR_INDEX_OUT_OF_RANGE)
+		JointCore_Value value;
+		JointCore_Error ret = Joint_ArrayGet(self->handle, self->index, &value);
+		if (ret == JOINT_CORE_ERROR_INDEX_OUT_OF_RANGE)
 		{
 			PyErr_SetString(PyExc_IndexError, "Array index out of range");
 			return NULL;

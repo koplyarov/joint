@@ -31,12 +31,12 @@ namespace binding
 		Object(JNIEnv* env, JObjGlobalRef accessor);
 		~Object();
 
-		Joint_Error InvokeMethod(size_t index, joint::ArrayView<const Joint_Parameter> params, Joint_Type retType, Joint_RetValue* outRetValue);
+		JointCore_Error InvokeMethod(size_t index, joint::ArrayView<const JointCore_Parameter> params, JointCore_Type retType, JointCore_RetValue* outRetValue);
 
 		JObjWeakRef GetAccessor(JNIEnv* env) const { return _accessor.Weak(env); }
 
 	public:
-		static Joint_Error ReleaseRetValue(Joint_Type type, Joint_Value value);
+		static JointCore_Error ReleaseRetValue(JointCore_Type type, JointCore_Value value);
 	};
 
 }}}

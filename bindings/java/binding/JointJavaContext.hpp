@@ -58,7 +58,7 @@ namespace java
 		{
 			using WrapperBase::WrapperBase;
 
-			Joint_TypeId GetId() const;
+			JointCore_TypeId GetId() const;
 			JointCore_InterfaceChecksum GetInterfaceChecksum() const;
 			JClassLocalRef GetProxyClass() const;
 			std::string GetMangledTypeName() const;
@@ -88,16 +88,16 @@ namespace java
 		{
 			using WrapperBase::WrapperBase;
 
-			Joint_ObjectHandle GetHandle() const;
+			JointCore_ObjectHandle GetHandle() const;
 
-			static JObjLocalRef Make(JNIEnv* env, Joint_ObjectHandle handle);
+			static JObjLocalRef Make(JNIEnv* env, JointCore_ObjectHandle handle);
 		};
 
 		struct ModuleContext : public WrapperBase
 		{
-			Joint_ObjectHandle GetHandle() const;
+			JointCore_ObjectHandle GetHandle() const;
 
-			static JObjLocalRef Make(JNIEnv* env, Joint_ModuleHandle handle);
+			static JObjLocalRef Make(JNIEnv* env, JointCore_ModuleHandle handle);
 		};
 
 		struct InterfaceId : public WrapperBase
@@ -107,7 +107,7 @@ namespace java
 
 		struct JointException : public WrapperBase
 		{
-			static JObjLocalRef Make(JNIEnv* env, Joint_ExceptionHandle handle);
+			static JObjLocalRef Make(JNIEnv* env, JointCore_ExceptionHandle handle);
 		};
 
 		struct Array : public WrapperBase
@@ -115,9 +115,9 @@ namespace java
 			using WrapperBase::WrapperBase;
 
 			JObjLocalRef GetElementType() const;
-			Joint_ArrayHandle GetHandle() const;
+			JointCore_ArrayHandle GetHandle() const;
 
-			static JObjLocalRef Make(JNIEnv* env, JObjTempRef elementType, Joint_ArrayHandle handle);
+			static JObjLocalRef Make(JNIEnv* env, JObjTempRef elementType, JointCore_ArrayHandle handle);
 		};
 
 	private:

@@ -41,10 +41,10 @@ namespace devkit
 		};
 
 		template < >
-		struct ObjectPrinter<Joint_Error, void>
+		struct ObjectPrinter<JointCore_Error, void>
 		{
-			static void Print(std::ostream& s, Joint_Error obj)
-			{ s << Joint_ErrorToString(obj); }
+			static void Print(std::ostream& s, JointCore_Error obj)
+			{ s << JointCore_ErrorToString(obj); }
 		};
 	}
 

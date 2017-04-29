@@ -55,7 +55,7 @@ namespace java
 		};
 
 	public:
-		Joint_TypeId GetJointTypeId(JObjTempRef typeNode) const;
+		JointCore_TypeId GetJointTypeId(JObjTempRef typeNode) const;
 		JointCore_InterfaceChecksum GetInterfaceChecksum(JObjTempRef typeNode) const;
 
 		ArrayUserData GetArrayUserData(JObjTempRef typeNode) const;

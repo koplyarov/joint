@@ -30,10 +30,10 @@ namespace binding
 		PyObjectHolder GetObject() const
 		{ return _obj; }
 
-		Joint_Error InvokeMethod(size_t index, joint::ArrayView<const Joint_Parameter> params, Joint_Type retType, Joint_RetValue* outRetValue);
+		JointCore_Error InvokeMethod(size_t index, joint::ArrayView<const JointCore_Parameter> params, JointCore_Type retType, JointCore_RetValue* outRetValue);
 
 	private:
-		static Joint_Error ReleaseRetValue(Joint_Type type, Joint_Value value);
+		static JointCore_Error ReleaseRetValue(JointCore_Type type, JointCore_Value value);
 	};
 
 }}}

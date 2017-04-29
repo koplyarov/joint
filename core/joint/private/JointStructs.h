@@ -22,10 +22,10 @@ extern "C"
 	struct Joint_Binding
 	{
 		void*                       userData;
-		Joint_BindingDesc           desc;
+		JointCore_BindingDesc           desc;
 		std::atomic<int>            refCount;
 
-		Joint_Binding(void* userData, const Joint_BindingDesc& desc)
+		Joint_Binding(void* userData, const JointCore_BindingDesc& desc)
 			: userData(userData), desc(desc), refCount(1)
 		{ }
 	};
@@ -56,11 +56,11 @@ extern "C"
 
 	struct Joint_Module
 	{
-		Joint_ModuleHandleInternal  internal;
+		JointCore_ModuleHandleInternal  internal;
 		Joint_Binding*              binding;
 		std::atomic<int>            refCount;
 
-		Joint_Module(Joint_ModuleHandleInternal internal, Joint_Binding* binding)
+		Joint_Module(JointCore_ModuleHandleInternal internal, Joint_Binding* binding)
 			: internal(internal), binding(binding), refCount(1)
 		{ }
 	};
@@ -68,21 +68,21 @@ extern "C"
 
 	struct Joint_Object
 	{
-		Joint_ObjectHandleInternal  internal;
+		JointCore_ObjectHandleInternal  internal;
 		Joint_Module*               module;
 		std::atomic<int>            refCount;
 
-		Joint_Object(Joint_ObjectHandleInternal internal, Joint_Module* module)
+		Joint_Object(JointCore_ObjectHandleInternal internal, Joint_Module* module)
 			: internal(internal), module(module), refCount(1)
 		{ }
 	};
 
 
-	struct Joint_StackFrameData
+	struct JointCore_StackFrameData
 	{
 		std::string      module;
 		std::string      filename;
-		Joint_SizeT      line;
+		JointCore_SizeT      line;
 		std::string      code;
 		std::string      function;
 	};
@@ -90,13 +90,13 @@ extern "C"
 	struct Joint_Exception
 	{
 		std::string                        message;
-		std::vector<Joint_StackFrameData>  backtrace;
+		std::vector<JointCore_StackFrameData>  backtrace;
 	};
 
 }
 
 
-std::ostream& operator << (std::ostream& s, const Joint_ManifestHandle m)
+std::ostream& operator << (std::ostream& s, const JointCore_ManifestHandle m)
 {
 	if (!m)
 		s << "null";

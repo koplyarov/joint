@@ -18,13 +18,13 @@ JOINT_DEVKIT_LOGGER("Joint.Python.Core")
 extern "C"
 {
 
-	Joint_Error JointPythonCore_MakeBinding(Joint_BindingHandle* outBinding)
+	JointCore_Error JointPythonCore_MakeBinding(JointCore_BindingHandle* outBinding)
 	{
 		using namespace joint::python::binding;
 
 		GetLogger().Info() << "MakeBinding";
 
-		Joint_BindingDesc binding_desc = { };
+		JointCore_BindingDesc binding_desc = { };
 		binding_desc.name            = "python";
 		binding_desc.deinitBinding   = &Binding::Deinit;
 		binding_desc.loadModule      = &Binding::LoadModule;
@@ -36,8 +36,8 @@ extern "C"
 
 		std::unique_ptr<Binding> binding(new Binding);
 
-		Joint_Error ret = Joint_MakeBinding(binding_desc, binding.get(), outBinding);
-		if (ret != JOINT_ERROR_NONE)
+		JointCore_Error ret = Joint_MakeBinding(binding_desc, binding.get(), outBinding);
+		if (ret != JOINT_CORE_ERROR_NONE)
 			GetLogger().Error() << "Joint_MakeBinding failed: " << ret;
 		else
 			binding.release();

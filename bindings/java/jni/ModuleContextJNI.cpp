@@ -17,10 +17,10 @@ JNIEXPORT jlong JNICALL Java_org_joint_ModuleContext_doRegister(JNIEnv* env, jcl
 	JNI_CALL( env->GetJavaVM(&jvm) );
 
 	std::unique_ptr<Object> o(new Object(env, JObjGlobalRef::StealLocal(env, accessor)));
-	Joint_ObjectHandle handle = JOINT_NULL_HANDLE;
-	Joint_ModuleHandle module = (Joint_ModuleHandle)moduleHandleLong;
-	Joint_Error ret = Joint_CreateObject(module, o.get(), &handle);
-	JOINT_CHECK(ret == JOINT_ERROR_NONE, ret);
+	JointCore_ObjectHandle handle = JOINT_CORE_NULL_HANDLE;
+	JointCore_ModuleHandle module = (JointCore_ModuleHandle)moduleHandleLong;
+	JointCore_Error ret = Joint_CreateObject(module, o.get(), &handle);
+	JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
 	o.release();
 
 	JNI_WRAP_CPP_END(reinterpret_cast<jlong>(handle), 0)

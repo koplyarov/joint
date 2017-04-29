@@ -110,10 +110,10 @@ namespace joint
 			const JointC_Accessor* GetAccessor() const
 			{ return &_accessor; }
 
-			Joint_Error GetAccessorById(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, const JointC_Accessor** outAccessor)
+			JointCore_Error GetAccessorById(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, const JointC_Accessor** outAccessor)
 			{
-				Joint_Error ret = AccessorType::InheritsInterface(interfaceId, checksum);
-				if (ret == JOINT_ERROR_NONE || ret == JOINT_ERROR_INVALID_INTERFACE_CHECKSUM)
+				JointCore_Error ret = AccessorType::InheritsInterface(interfaceId, checksum);
+				if (ret == JOINT_CORE_ERROR_NONE || ret == JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM)
 				{
 					*outAccessor = &_accessor;
 					return ret;
@@ -131,8 +131,8 @@ namespace joint
 			void Init(void* component)
 			{ }
 
-			Joint_Error GetAccessorById(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, const JointC_Accessor** outAccessor)
-			{ return JOINT_ERROR_CAST_FAILED; }
+			JointCore_Error GetAccessorById(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, const JointC_Accessor** outAccessor)
+			{ return JOINT_CORE_ERROR_CAST_FAILED; }
 		};
 	}
 
@@ -182,32 +182,32 @@ namespace joint
 		void Init()
 		{ _accessors.Init(this); }
 
-		static Joint_Error AddRef(void* component)
+		static JointCore_Error AddRef(void* component)
 		{
 			ComponentWrapper* inst = reinterpret_cast<ComponentWrapper*>(component);
 			++inst->_refCount;
-			return JOINT_ERROR_NONE;
+			return JOINT_CORE_ERROR_NONE;
 		}
 
-		static Joint_Error Release(void* component)
+		static JointCore_Error Release(void* component)
 		{
 			ComponentWrapper* inst = reinterpret_cast<ComponentWrapper*>(component);
 			if (--inst->_refCount == 0)
 				delete inst;
-			return JOINT_ERROR_NONE;
+			return JOINT_CORE_ERROR_NONE;
 		}
 
-		static Joint_Error CastObject(void* component, JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, const JointC_Accessor** outAccessor)
+		static JointCore_Error CastObject(void* component, JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, const JointC_Accessor** outAccessor)
 		{
 			ComponentWrapper* inst = reinterpret_cast<ComponentWrapper*>(component);
-			Joint_Error ret = inst->_accessors.GetAccessorById(interfaceId, checksum, outAccessor);
-			if (ret == JOINT_ERROR_NONE)
+			JointCore_Error ret = inst->_accessors.GetAccessorById(interfaceId, checksum, outAccessor);
+			if (ret == JOINT_CORE_ERROR_NONE)
 				++inst->_refCount;
 			return ret;
 		}
 
 		template < typename Accessor_ >
-		static Joint_Error InvokeMethod(void* component, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue)
+		static JointCore_Error InvokeMethod(void* component, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue)
 		{
 			ComponentWrapper* inst = reinterpret_cast<ComponentWrapper*>(component);
 			return Accessor_::InvokeMethodImpl(&inst->_componentImpl, methodId, params, paramsCount, retType, outRetValue);
@@ -279,29 +279,29 @@ namespace joint
 
 
 	template < typename Interface_, typename ComponentType_ >
-	Ptr<Interface_> MakeComponentProxy(Joint_ModuleHandle module, const ComponentImplPtr<ComponentType_>& component)
+	Ptr<Interface_> MakeComponentProxy(JointCore_ModuleHandle module, const ComponentImplPtr<ComponentType_>& component)
 	{
 		ComponentWrapper<ComponentType_>::AddRef(component.GetWrapperPtr());
 		JointC_Accessor* accessor = const_cast<JointC_Accessor*>(component.GetWrapperPtr()->template GetIntefaceAccessor<Interface_>());
-		Joint_ObjectHandle obj = JOINT_NULL_HANDLE;
+		JointCore_ObjectHandle obj = JOINT_CORE_NULL_HANDLE;
 		JOINT_CALL( Joint_CreateObject(module, accessor, &obj) );
 		return Ptr<Interface_>(Interface_(obj));
 	}
 
 
 	template < typename Interface_, typename ComponentType_ >
-	Ptr<Interface_>  MakeComponent(Joint_ModuleHandle module)
+	Ptr<Interface_>  MakeComponent(JointCore_ModuleHandle module)
 	{ return MakeComponentProxy<Interface_>(module, MakeComponentWrapper<ComponentType_>()); }
 
 	template < typename Interface_, typename ComponentType_, typename Arg1_ >
-	Ptr<Interface_> MakeComponent(Joint_ModuleHandle module, const Arg1_& arg1)
+	Ptr<Interface_> MakeComponent(JointCore_ModuleHandle module, const Arg1_& arg1)
 	{ return MakeComponentProxy<Interface_>(module, MakeComponentWrapper<ComponentType_>(arg1)); }
 
 
 	template < typename Interface_ >
-	Joint_ObjectHandle Export(const Ptr<Interface_>& p)
+	JointCore_ObjectHandle Export(const Ptr<Interface_>& p)
 	{
-		Joint_ObjectHandle handle = p.Get()->_GetObjectHandle();
+		JointCore_ObjectHandle handle = p.Get()->_GetObjectHandle();
 		Joint_IncRefObject(handle);
 		return handle;
 	}

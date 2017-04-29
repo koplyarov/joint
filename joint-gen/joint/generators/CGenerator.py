@@ -72,9 +72,9 @@ class CGenerator:
         for m in s.members:
             yield '\t{} {};'.format(self._toCType(m.type), m.name)
         yield '}} {};'.format(self._mangleType(s))
-        yield 'Joint_StructDescriptor* {}__GetStructDescriptor()'.format(self._mangleType(s))
+        yield 'JointCore_StructDescriptor* {}__GetStructDescriptor()'.format(self._mangleType(s))
         yield '{'
-        yield '\tstatic Joint_Type member_types[{}];'.format(len(s.members))
+        yield '\tstatic JointCore_Type member_types[{}];'.format(len(s.members))
         for i, m in enumerate(s.members):
             if isinstance(m.type, BuiltinType) or isinstance(m.type, Enum):
                 payload_init = ''
@@ -84,10 +84,10 @@ class CGenerator:
                 payload_init = '{}::__GetStructDescriptor()'.format(self._mangleType(m.type))
             else:
                 raise RuntimeError('Not implemented (type: {})!'.format(m.type))
-            yield '\tmember_types[{}].id = (Joint_TypeId){};'.format(i, m.type.index)
+            yield '\tmember_types[{}].id = (JointCore_TypeId){};'.format(i, m.type.index)
             if payload_init:
                 yield '\tmember_types[{}].payload = {};'.format(i, payload_init)
-        yield '\tstatic Joint_StructDescriptor desc = {{ {}, member_types }};'.format(len(s.members))
+        yield '\tstatic JointCore_StructDescriptor desc = {{ {}, member_types }};'.format(len(s.members))
         yield '\treturn &desc;'
         yield '}'
         yield ''
@@ -105,7 +105,7 @@ class CGenerator:
         yield ''
         yield 'typedef struct {n}_s* {n};'.format(n=mangled_ifc)
         for m in ifc.methods:
-            yield 'Joint_Error {n}_{m}({n} _obj{p}{r}, Joint_ExceptionHandle* _ex);'.format(n=mangled_ifc, m=m.name, p=self._paramsDecl(m.params), r=self._retDecl(m.retType))
+            yield 'JointCore_Error {n}_{m}({n} _obj{p}{r}, JointCore_ExceptionHandle* _ex);'.format(n=mangled_ifc, m=m.name, p=self._paramsDecl(m.params), r=self._retDecl(m.retType))
         yield ''
         yield 'typedef struct {'
         if not ifc.bases:
@@ -140,7 +140,7 @@ class CGenerator:
         yield '\telse if (strcmp(interfaceId, {}__id) == 0) \\'.format(mangled_ifc)
         yield '\t{ \\'
         yield '\t\tif (checksum != {}__checksum) \\'.format(mangled_ifc)
-        yield '\t\t\treturn JOINT_ERROR_INVALID_INTERFACE_CHECKSUM; \\'
+        yield '\t\t\treturn JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM; \\'
         yield '\t\t*outAccessor = &DETAIL_ACCESSOR__{}(Accessors); \\'.format(mangled_ifc)
         yield '\t} \\'
         for b in ifc.bases:
@@ -149,14 +149,14 @@ class CGenerator:
         yield ''
 
     def _generateMethods(self, ifc):
-        yield 'Joint_Error JointC_CastTo__{mn}(void* obj, {mn}* result)'.format(mn=self._mangleType(ifc))
+        yield 'JointCore_Error JointC_CastTo__{mn}(void* obj, {mn}* result)'.format(mn=self._mangleType(ifc))
         yield '{'
-        yield '\tJoint_Error ret = JOINT_ERROR_NONE;'
+        yield '\tJointCore_Error ret = JOINT_CORE_ERROR_NONE;'
         yield '\tif (!obj)'
-        yield '\t\t*result = JOINT_NULL_HANDLE;'
+        yield '\t\t*result = JOINT_CORE_NULL_HANDLE;'
         yield '\telse'
-        yield '\t\tret = Joint_CastObject((Joint_ObjectHandle)obj, {mn}__id, {mn}__checksum, (Joint_ObjectHandle*)result);'.format(mn=self._mangleType(ifc))
-        yield '\treturn ret == JOINT_ERROR_CAST_FAILED ? JOINT_ERROR_NONE : ret;'
+        yield '\t\tret = Joint_CastObject((JointCore_ObjectHandle)obj, {mn}__id, {mn}__checksum, (JointCore_ObjectHandle*)result);'.format(mn=self._mangleType(ifc))
+        yield '\treturn ret == JOINT_CORE_ERROR_CAST_FAILED ? JOINT_CORE_ERROR_NONE : ret;'
         yield '}'
         for m in ifc.methods:
             for l in self._generateMethodDefinition(ifc, m):
@@ -167,31 +167,31 @@ class CGenerator:
 
     def _generateMethodDefinition(self, ifc, m):
         mangled_ifc = self._mangleType(ifc)
-        yield 'Joint_Error {n}_{m}({n} _obj{p}{r}, Joint_ExceptionHandle* _ex)'.format(n=mangled_ifc, m=m.name, p=self._paramsDecl(m.params), r=self._retDecl(m.retType))
+        yield 'JointCore_Error {n}_{m}({n} _obj{p}{r}, JointCore_ExceptionHandle* _ex)'.format(n=mangled_ifc, m=m.name, p=self._paramsDecl(m.params), r=self._retDecl(m.retType))
         yield '{'
-        yield '\tJoint_RetValue _ret_val;'
-        yield '\tJoint_Type _ret_val_type;'
-        yield '\t_ret_val_type.id = (Joint_TypeId){};'.format(m.retType.index)
+        yield '\tJointCore_RetValue _ret_val;'
+        yield '\tJointCore_Type _ret_val_type;'
+        yield '\t_ret_val_type.id = (JointCore_TypeId){};'.format(m.retType.index)
         if isinstance(m.retType, Interface):
             yield '\t_ret_val_type.payload.interfaceChecksum = {}__checksum;'.format(self._mangleType(m.retType))
         elif isinstance(m.retType, Struct):
             yield '\t_ret_val_type.payload.structDescriptor = {}__GetStructDescriptor();'.format(self._mangleType(m.retType))
         if m.params:
-            yield '\tJoint_Parameter params[{}];'.format(len(m.params))
+            yield '\tJointCore_Parameter params[{}];'.format(len(m.params))
             for p in m.params:
                 param_val = self._toJointParam(p.type, p.name)
                 for l in param_val.initialization:
                     yield '\t{}'.format(l)
                 yield '\tparams[{}].value.{} = {};'.format(p.index, p.type.variantName, param_val.code)
-                yield '\tparams[{}].type.id = (Joint_TypeId){};'.format(p.index, p.type.index)
+                yield '\tparams[{}].type.id = (JointCore_TypeId){};'.format(p.index, p.type.index)
                 if isinstance(p.type, Interface):
                     yield '\tparams[{}].type.payload.interfaceChecksum = {}__checksum;'.format(p.index, self._mangleType(p.type))
                 elif isinstance(p.type, Struct):
                     yield '\tparams[{}].type.payload.structDescriptor = {}__GetStructDescriptor();'.format(p.index, self._mangleType(p.type))
-        yield '\tJoint_Error _ret = Joint_InvokeMethod((Joint_ObjectHandle)_obj, {}, {}, {}, _ret_val_type, &_ret_val);'.format(m.index, 'params' if m.params else 'NULL', len(m.params))
-        yield '\tif (_ret != JOINT_ERROR_NONE)'
+        yield '\tJointCore_Error _ret = Joint_InvokeMethod((JointCore_ObjectHandle)_obj, {}, {}, {}, _ret_val_type, &_ret_val);'.format(m.index, 'params' if m.params else 'NULL', len(m.params))
+        yield '\tif (_ret != JOINT_CORE_ERROR_NONE)'
         yield '\t{'
-        yield '\t\tif (_ret == JOINT_ERROR_EXCEPTION)'
+        yield '\t\tif (_ret == JOINT_CORE_ERROR_EXCEPTION)'
         yield '\t\t\t*_ex = _ret_val.result.ex;'
         yield '\t\treturn _ret;'
         yield '\t}'
@@ -211,11 +211,11 @@ class CGenerator:
         yield '#define DETAIL_DEFINE_INVOKE_METHOD__{}(ComponentImpl, IfcPrefix) \\'.format(mangled_ifc)
         for b in ifc.bases:
             yield 'DETAIL_DEFINE_INVOKE_METHOD__{}(ComponentImpl, IfcPrefix##__##{}) \\'.format(self._mangleType(b), mangled_ifc)
-        yield 'Joint_Error Detail__##ComponentImpl##IfcPrefix##__{}__InvokeMethod(void* componentWrapper, Joint_SizeT methodId, const Joint_Parameter* params, Joint_SizeT paramsCount, Joint_Type retType, Joint_RetValue* outRetValue) \\'.format(mangled_ifc)
+        yield 'JointCore_Error Detail__##ComponentImpl##IfcPrefix##__{}__InvokeMethod(void* componentWrapper, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue) \\'.format(mangled_ifc)
         yield '{ \\'
         yield '\tComponentImpl##__wrapper* w = (ComponentImpl##__wrapper*)componentWrapper; \\'
         yield '\t(void)w; \\'
-        yield '\tJoint_Error ret; \\'
+        yield '\tJointCore_Error ret; \\'
         yield '\tswitch(methodId) \\'
         yield '\t{ \\'
         for m in ifc.methods:
@@ -223,7 +223,7 @@ class CGenerator:
             yield '\t\t{ \\'
             if isinstance(m.retType, Interface):
                 yield '\t\t\tif (retType.payload.interfaceChecksum != {}__checksum) \\'.format(self._mangleType(m.retType))
-                yield '\t\t\t\treturn JOINT_ERROR_INVALID_INTERFACE_CHECKSUM; \\'
+                yield '\t\t\t\treturn JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM; \\'
             for p in m.params:
                 for l in self._validateJointParam(p.type, 'params[{}].type'.format(p.index)):
                     yield '\t\t\t{} \\'.format(l)
@@ -246,8 +246,8 @@ class CGenerator:
             yield '\t\t} \\'
             yield '\t\tbreak; \\'
         yield '\tdefault: \\'
-        yield '\t\tJoint_Log(JOINT_LOGLEVEL_ERROR, "Joint.C", "Invalid {} method id: %d", methodId); \\'.format(ifc.fullname)
-        yield '\t\treturn JOINT_ERROR_GENERIC; \\'
+        yield '\t\tJoint_Log(JOINT_CORE_LOGLEVEL_ERROR, "Joint.C", "Invalid {} method id: %d", methodId); \\'.format(ifc.fullname)
+        yield '\t\treturn JOINT_CORE_ERROR_GENERIC; \\'
         yield '\t} \\'
         yield '\toutRetValue->releaseValue = &JointC_ReleaseRetValue; \\'
         yield '\treturn ret; \\'
@@ -285,7 +285,7 @@ class CGenerator:
         if isinstance(type, BuiltinType):
             return CodeWithInitialization(cValue)
         elif isinstance(type, Interface):
-            return CodeWithInitialization('(Joint_ObjectHandle){}'.format(cValue))
+            return CodeWithInitialization('(JointCore_ObjectHandle){}'.format(cValue))
         elif isinstance(type, Enum):
             return CodeWithInitialization('(int32_t){}'.format(cValue))
         elif isinstance(type, Struct):
@@ -296,7 +296,7 @@ class CGenerator:
                 member_val = self._toJointParam(m.type, '{}.{}'.format(cValue, m.name))
                 initialization += member_val.initialization
                 member_values.append(member_val.code)
-            initialization.append('Joint_Value {}_members[{}];'.format(mangled_value, len(type.members)))
+            initialization.append('JointCore_Value {}_members[{}];'.format(mangled_value, len(type.members)))
             for i,m in enumerate(member_values):
                 initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, type.members[i].type.variantName, m))
             return CodeWithInitialization('{}_members'.format(mangled_value), initialization)
@@ -309,7 +309,7 @@ class CGenerator:
         if isinstance(type, BuiltinType):
             return CodeWithInitialization(cValue)
         elif isinstance(type, Interface):
-            return CodeWithInitialization('(Joint_ObjectHandle)({})'.format(cValue))
+            return CodeWithInitialization('(JointCore_ObjectHandle)({})'.format(cValue))
         elif isinstance(type, Enum):
             return CodeWithInitialization('(int32_t)({})'.format(cValue))
         elif isinstance(type, Struct):
@@ -320,7 +320,7 @@ class CGenerator:
                 member_val = self._toJointRetValue(m.type, '{}.{}'.format(cValue, m.name))
                 initialization += member_val.initialization
                 member_values.append(member_val.code)
-            initialization.append('Joint_Value* {}_members = (Joint_Value*)malloc(sizeof(Joint_Value) * {});'.format(mangled_value, len(type.members)))
+            initialization.append('JointCore_Value* {}_members = (JointCore_Value*)malloc(sizeof(JointCore_Value) * {});'.format(mangled_value, len(type.members)))
             for i,m in enumerate(member_values):
                 initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, type.members[i].type.variantName, m))
             return CodeWithInitialization('{}_members'.format(mangled_value), initialization)
@@ -334,7 +334,7 @@ class CGenerator:
             return
         elif isinstance(type, Interface):
             yield 'if ({}.payload.interfaceChecksum != {}__checksum)'.format(jointType, self._mangleType(type))
-            yield '\treturn JOINT_ERROR_INVALID_INTERFACE_CHECKSUM;'
+            yield '\treturn JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM;'
         elif isinstance(type, Struct):
             for i,m in enumerate(type.members):
                 for l in self._validateJointParam(m.type, '{}.memberTypes[{}]'.format(jointType, i)):

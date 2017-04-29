@@ -23,79 +23,79 @@ namespace java
 			: env(env)
 		{ }
 
-		jvalue Unbox(Joint_Type type, const JObjWeakRef& boxed) const
+		jvalue Unbox(JointCore_Type type, const JObjWeakRef& boxed) const
 		{
 			jvalue result;
 
 			switch (type.id)
 			{
-			case JOINT_TYPE_BOOL:
+			case JOINT_CORE_TYPE_BOOL:
 				result.z = UnboxBoolean(boxed);
 				break;
-			case JOINT_TYPE_U8:
-			case JOINT_TYPE_I8:
+			case JOINT_CORE_TYPE_U8:
+			case JOINT_CORE_TYPE_I8:
 				result.b = UnboxByte(boxed);
 				break;
-			case JOINT_TYPE_U16:
-			case JOINT_TYPE_I16:
+			case JOINT_CORE_TYPE_U16:
+			case JOINT_CORE_TYPE_I16:
 				result.s = UnboxShort(boxed);
 				break;
-			case JOINT_TYPE_U32:
-			case JOINT_TYPE_I32:
+			case JOINT_CORE_TYPE_U32:
+			case JOINT_CORE_TYPE_I32:
 				result.i = UnboxInteger(boxed);
 				break;
-			case JOINT_TYPE_U64:
-			case JOINT_TYPE_I64:
+			case JOINT_CORE_TYPE_U64:
+			case JOINT_CORE_TYPE_I64:
 				result.j = UnboxLong(boxed);
 				break;
-			case JOINT_TYPE_F32:
+			case JOINT_CORE_TYPE_F32:
 				result.f = UnboxFloat(boxed);
 				break;
-			case JOINT_TYPE_F64:
+			case JOINT_CORE_TYPE_F64:
 				result.d = UnboxDouble(boxed);
 				break;
-			case JOINT_TYPE_UTF8:
-			case JOINT_TYPE_ENUM:
-			case JOINT_TYPE_OBJ:
-			case JOINT_TYPE_STRUCT:
+			case JOINT_CORE_TYPE_UTF8:
+			case JOINT_CORE_TYPE_ENUM:
+			case JOINT_CORE_TYPE_OBJ:
+			case JOINT_CORE_TYPE_STRUCT:
 				result.l = boxed.Get();
 				break;
 			default:
-				JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
+				JOINT_THROW(JOINT_CORE_ERROR_NOT_IMPLEMENTED);
 			}
 
 			return result;
 		}
 
-		JObjLocalRef Box(Joint_Type type, jvalue unboxed) const
+		JObjLocalRef Box(JointCore_Type type, jvalue unboxed) const
 		{
 			switch (type.id)
 			{
-			case JOINT_TYPE_BOOL:
+			case JOINT_CORE_TYPE_BOOL:
 				return BoxBoolean(unboxed.z);
-			case JOINT_TYPE_U8:
-			case JOINT_TYPE_I8:
+			case JOINT_CORE_TYPE_U8:
+			case JOINT_CORE_TYPE_I8:
 				return BoxByte(unboxed.b);
-			case JOINT_TYPE_U16:
-			case JOINT_TYPE_I16:
+			case JOINT_CORE_TYPE_U16:
+			case JOINT_CORE_TYPE_I16:
 				return BoxShort(unboxed.s);
-			case JOINT_TYPE_U32:
-			case JOINT_TYPE_I32:
+			case JOINT_CORE_TYPE_U32:
+			case JOINT_CORE_TYPE_I32:
 				return BoxInteger(unboxed.i);
-			case JOINT_TYPE_U64:
-			case JOINT_TYPE_I64:
+			case JOINT_CORE_TYPE_U64:
+			case JOINT_CORE_TYPE_I64:
 				return BoxLong(unboxed.j);
-			case JOINT_TYPE_F32:
+			case JOINT_CORE_TYPE_F32:
 				return BoxFloat(unboxed.f);
-			case JOINT_TYPE_F64:
+			case JOINT_CORE_TYPE_F64:
 				return BoxDouble(unboxed.d);
-			case JOINT_TYPE_UTF8:
-			case JOINT_TYPE_ENUM:
-			case JOINT_TYPE_OBJ:
-			case JOINT_TYPE_STRUCT:
+			case JOINT_CORE_TYPE_UTF8:
+			case JOINT_CORE_TYPE_ENUM:
+			case JOINT_CORE_TYPE_OBJ:
+			case JOINT_CORE_TYPE_STRUCT:
 				return JObjLocalRef::StealLocal(env, unboxed.l);
 			default:
-				JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
+				JOINT_THROW(JOINT_CORE_ERROR_NOT_IMPLEMENTED);
 			}
 		}
 

@@ -21,22 +21,22 @@
 	DETAIL_DEFINE_INVOKE_METHOD__##Ifc(ComponentImpl, _) \
 	\
 	DETAIL_DEFINE_ACCESSOR_VTABLE__##Ifc(ComponentImpl, _); \
-	Joint_ObjectHandle ComponentImpl##__as__##Ifc(Joint_ModuleHandle module, ComponentImpl##__wrapper* w) \
+	JointCore_ObjectHandle ComponentImpl##__as__##Ifc(JointCore_ModuleHandle module, ComponentImpl##__wrapper* w) \
 	{ \
-		Joint_ObjectHandle result = JOINT_NULL_HANDLE; \
+		JointCore_ObjectHandle result = JOINT_CORE_NULL_HANDLE; \
 		JointC_Accessor* internal = NULL; \
-		Joint_Error ret = Detail__##ComponentImpl##__Cast(w, Ifc##__id, Ifc##__checksum, (const JointC_Accessor**)&internal); \
+		JointCore_Error ret = Detail__##ComponentImpl##__Cast(w, Ifc##__id, Ifc##__checksum, (const JointC_Accessor**)&internal); \
 		--w->refCount; \
-		if (ret != JOINT_ERROR_NONE) \
+		if (ret != JOINT_CORE_ERROR_NONE) \
 		{ \
-			fprintf(stderr, JOINT_C_PP_STRINGIZE(Detail__##ComponentImpl##__Cast) " failed: %s\n", Joint_ErrorToString(ret)); \
-			return JOINT_NULL_HANDLE; \
+			fprintf(stderr, JOINT_C_PP_STRINGIZE(Detail__##ComponentImpl##__Cast) " failed: %s\n", JointCore_ErrorToString(ret)); \
+			return JOINT_CORE_NULL_HANDLE; \
 		} \
 		ret = Joint_CreateObject(module, internal, &result); \
-		if (ret != JOINT_ERROR_NONE) \
+		if (ret != JOINT_CORE_ERROR_NONE) \
 		{ \
-			fprintf(stderr, "Joint_CreateObject failed: %s\n", Joint_ErrorToString(ret)); \
-			return JOINT_NULL_HANDLE; \
+			fprintf(stderr, "Joint_CreateObject failed: %s\n", JointCore_ErrorToString(ret)); \
+			return JOINT_CORE_NULL_HANDLE; \
 		} \
 		return result; \
 	}
@@ -56,32 +56,32 @@
 		C                  impl; \
 	} C##__wrapper; \
 	\
-	static Joint_Error Detail__##C##__AddRef(void* componentWrapper) \
+	static JointCore_Error Detail__##C##__AddRef(void* componentWrapper) \
 	{ \
 		C##__wrapper* w = (C##__wrapper*)componentWrapper; \
 		++w->refCount; \
-		return JOINT_ERROR_NONE; \
+		return JOINT_CORE_ERROR_NONE; \
 	} \
-	static Joint_Error Detail__##C##__Release(void* componentWrapper) \
+	static JointCore_Error Detail__##C##__Release(void* componentWrapper) \
 	{ \
 		C##__wrapper* w = (C##__wrapper*)componentWrapper; \
 		if (--w->refCount == 0) \
 		{ \
-			Joint_Error ret = C##_Deinit(&w->impl); \
+			JointCore_Error ret = C##_Deinit(&w->impl); \
 			free(w); \
 			return ret; \
 		} \
-		return JOINT_ERROR_NONE; \
+		return JOINT_CORE_ERROR_NONE; \
 	} \
-	static Joint_Error Detail__##C##__Cast(void* componentWrapper, JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, const JointC_Accessor** outAccessor) \
+	static JointCore_Error Detail__##C##__Cast(void* componentWrapper, JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, const JointC_Accessor** outAccessor) \
 	{ \
 		C##__wrapper* w = (C##__wrapper*)componentWrapper; \
 		if (0) ;\
 		JOINT_C_PP_FOREACH(DETAIL_JOINT_C_CAST, ~, __VA_ARGS__) \
 		else \
-			return JOINT_ERROR_CAST_FAILED; \
+			return JOINT_CORE_ERROR_CAST_FAILED; \
 		++w->refCount; \
-		return JOINT_ERROR_NONE; \
+		return JOINT_CORE_ERROR_NONE; \
 	} \
 	\
 	JOINT_C_PP_FOREACH(DETAIL_JOINT_C_GLOBAL_STUFF, C, __VA_ARGS__) \

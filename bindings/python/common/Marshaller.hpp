@@ -19,14 +19,14 @@ namespace python
 	class ParamsAllocator
 	{
 	private:
-		devkit::StackStorage<Joint_Value, 64>     _members;
+		devkit::StackStorage<JointCore_Value, 64>     _members;
 		devkit::StackStorage<PyBytesHolder, 64>   _strParams;
 
 	public:
 		const char* AllocateUtf8(PyObject* value)
 		{ return _strParams.MakeSingle(Utf8FromPyUnicode(value)).GetContent(); }
 
-		Joint_Value* AllocateMembers(size_t count)
+		JointCore_Value* AllocateMembers(size_t count)
 		{ return _members.Make(count); }
 	};
 
@@ -42,8 +42,8 @@ namespace python
 			return result_str.release();
 		}
 
-		Joint_Value* AllocateMembers(size_t count)
-		{ return new Joint_Value[count]; }
+		JointCore_Value* AllocateMembers(size_t count)
+		{ return new JointCore_Value[count]; }
 	};
 
 
@@ -70,11 +70,11 @@ namespace python
 			return PyObjectHolder(PY_OBJ_CHECK(PyObject_CallObject(enumType, enum_params)));
 		}
 
-		PyObjectHolder FromJointObj(devkit::ValueDirection dir, Joint_ObjectHandle val, PyObject* proxyType, JointCore_InterfaceChecksum checksum) const
+		PyObjectHolder FromJointObj(devkit::ValueDirection dir, JointCore_ObjectHandle val, PyObject* proxyType, JointCore_InterfaceChecksum checksum) const
 		{
 			using namespace devkit;
 
-			if (val == JOINT_NULL_HANDLE)
+			if (val == JOINT_CORE_NULL_HANDLE)
 			{
 				Py_INCREF(Py_None);
 				return PyObjectHolder(Py_None);
@@ -96,11 +96,11 @@ namespace python
 			return result;
 		}
 
-		PyObjectHolder FromJointArray(devkit::ValueDirection dir, Joint_ArrayHandle val, PyObject* elementTypeDesc) const
+		PyObjectHolder FromJointArray(devkit::ValueDirection dir, JointCore_ArrayHandle val, PyObject* elementTypeDesc) const
 		{
 			using namespace devkit;
 
-			if (val == JOINT_NULL_HANDLE)
+			if (val == JOINT_CORE_NULL_HANDLE)
 			{
 				Py_INCREF(Py_None);
 				return PyObjectHolder(Py_None);
@@ -162,12 +162,12 @@ namespace python
 			return FromPyLong<int32_t>(int_value);
 		}
 
-		Joint_ObjectHandle ToJointObj(devkit::ValueDirection dir, PyObject* val, const PyObjectHolder& objType) const
+		JointCore_ObjectHandle ToJointObj(devkit::ValueDirection dir, PyObject* val, const PyObjectHolder& objType) const
 		{
 			using namespace devkit;
 
 			if (val == Py_None)
-				return JOINT_NULL_HANDLE;
+				return JOINT_CORE_NULL_HANDLE;
 
 			auto proxy = CastPyObject<pyjoint::ProxyBase>(val, &pyjoint::ProxyBase_type);
 			NATIVE_CHECK(proxy, "Invalid proxy");
@@ -178,12 +178,12 @@ namespace python
 			return handle;
 		}
 
-		Joint_ArrayHandle ToJointArray(devkit::ValueDirection dir, PyObject* val, const PyObjectHolder& objType) const
+		JointCore_ArrayHandle ToJointArray(devkit::ValueDirection dir, PyObject* val, const PyObjectHolder& objType) const
 		{
 			using namespace devkit;
 
 			if (val == Py_None)
-				return JOINT_NULL_HANDLE;
+				return JOINT_CORE_NULL_HANDLE;
 
 			auto arr = CastPyObject<pyjoint::Array>(val, &pyjoint::Array_type);
 			NATIVE_CHECK(arr, "Invalid array object");

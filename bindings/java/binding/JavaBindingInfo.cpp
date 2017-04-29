@@ -7,7 +7,7 @@ namespace joint {
 namespace java
 {
 
-	Joint_TypeId JavaBindingInfo::GetJointTypeId(JObjTempRef typeNode) const
+	JointCore_TypeId JavaBindingInfo::GetJointTypeId(JObjTempRef typeNode) const
 	{ return JointJavaContext::TypeDescriptor(typeNode.Weak()).GetId(); }
 
 

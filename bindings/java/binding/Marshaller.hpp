@@ -20,14 +20,14 @@ namespace java
 	class ParamsAllocator
 	{
 	private:
-		devkit::StackStorage<Joint_Value, 64>        _members;
+		devkit::StackStorage<JointCore_Value, 64>        _members;
 		devkit::StackStorage<StringDataHolder, 64>   _strParams;
 
 	public:
 		const char* AllocateUtf8(JNIEnv* env, const jstring& value)
 		{ return _strParams.MakeSingle(JStringWeakRef(env, value)).GetData(); }
 
-		Joint_Value* AllocateMembers(size_t count)
+		JointCore_Value* AllocateMembers(size_t count)
 		{ return _members.Make(count); }
 	};
 
@@ -43,8 +43,8 @@ namespace java
 			return result_str.release();
 		}
 
-		Joint_Value* AllocateMembers(size_t count)
-		{ return new Joint_Value[count]; }
+		JointCore_Value* AllocateMembers(size_t count)
+		{ return new JointCore_Value[count]; }
 	};
 
 
@@ -89,10 +89,10 @@ namespace java
 			return result;
 		}
 
-		JavaVariant FromJointObj(devkit::ValueDirection dir, Joint_ObjectHandle val, const JavaBindingInfo::ObjectUserData& proxyType, JointCore_InterfaceChecksum checksum) const
+		JavaVariant FromJointObj(devkit::ValueDirection dir, JointCore_ObjectHandle val, const JavaBindingInfo::ObjectUserData& proxyType, JointCore_InterfaceChecksum checksum) const
 		{
 			jvalue result;
-			if (val == JOINT_NULL_HANDLE)
+			if (val == JOINT_CORE_NULL_HANDLE)
 			{
 				result.l = NULL;
 				return result;
@@ -113,7 +113,7 @@ namespace java
 			return result;
 		}
 
-		JavaVariant FromJointArray(devkit::ValueDirection dir, Joint_ArrayHandle val, const JavaBindingInfo::ArrayUserData& elementTypeDesc) const
+		JavaVariant FromJointArray(devkit::ValueDirection dir, JointCore_ArrayHandle val, const JavaBindingInfo::ArrayUserData& elementTypeDesc) const
 		{
 			if (dir == devkit::ValueDirection::Parameter)
 				Joint_IncRefArray(val);
@@ -175,10 +175,10 @@ namespace java
 			return  JAVA_CALL(env->GetIntField(val.l, value_id));
 		}
 
-		Joint_ObjectHandle ToJointObj(devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::ObjectUserData& objType) const
+		JointCore_ObjectHandle ToJointObj(devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::ObjectUserData& objType) const
 		{
 			if (!val.l)
-				return JOINT_NULL_HANDLE;
+				return JOINT_CORE_NULL_HANDLE;
 
 			auto cls = JClassLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectClass(val.l)));
 			jfieldID obj_id = JAVA_CALL(env->GetFieldID(cls.Get(), "_obj", "Lorg/joint/JointObject;"));
@@ -192,7 +192,7 @@ namespace java
 			return handle;
 		}
 
-		Joint_ArrayHandle ToJointArray(devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::ArrayUserData& objType) const
+		JointCore_ArrayHandle ToJointArray(devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::ArrayUserData& objType) const
 		{
 			auto handle = JointJavaContext::Array(JObjWeakRef(env, val.l)).GetHandle();
 
@@ -211,39 +211,39 @@ namespace java
 			jvalue res;
 			switch (memberInfo.GetType().GetJointType().id)
 			{
-			case JOINT_TYPE_BOOL:
+			case JOINT_CORE_TYPE_BOOL:
 				res.z = env->GetBooleanField(val.l, memberInfo.GetMemberId().Id);
 				break;
-			case JOINT_TYPE_U8:
-			case JOINT_TYPE_I8:
+			case JOINT_CORE_TYPE_U8:
+			case JOINT_CORE_TYPE_I8:
 				res.b = env->GetByteField(val.l, memberInfo.GetMemberId().Id);
 				break;
-			case JOINT_TYPE_U16:
-			case JOINT_TYPE_I16:
+			case JOINT_CORE_TYPE_U16:
+			case JOINT_CORE_TYPE_I16:
 				res.s = env->GetShortField(val.l, memberInfo.GetMemberId().Id);
 				break;
-			case JOINT_TYPE_U32:
-			case JOINT_TYPE_I32:
+			case JOINT_CORE_TYPE_U32:
+			case JOINT_CORE_TYPE_I32:
 				res.i = env->GetIntField(val.l, memberInfo.GetMemberId().Id);
 				break;
-			case JOINT_TYPE_U64:
-			case JOINT_TYPE_I64:
+			case JOINT_CORE_TYPE_U64:
+			case JOINT_CORE_TYPE_I64:
 				res.j = env->GetLongField(val.l, memberInfo.GetMemberId().Id);
 				break;
-			case JOINT_TYPE_F32:
+			case JOINT_CORE_TYPE_F32:
 				res.f = env->GetFloatField(val.l, memberInfo.GetMemberId().Id);
 				break;
-			case JOINT_TYPE_F64:
+			case JOINT_CORE_TYPE_F64:
 				res.d = env->GetDoubleField(val.l, memberInfo.GetMemberId().Id);
 				break;
-			case JOINT_TYPE_UTF8:
-			case JOINT_TYPE_ENUM:
-			case JOINT_TYPE_OBJ:
-			case JOINT_TYPE_STRUCT:
+			case JOINT_CORE_TYPE_UTF8:
+			case JOINT_CORE_TYPE_ENUM:
+			case JOINT_CORE_TYPE_OBJ:
+			case JOINT_CORE_TYPE_STRUCT:
 				res.l = env->GetObjectField(val.l, memberInfo.GetMemberId().Id);
 				break;
 			default:
-				JOINT_THROW(JOINT_ERROR_NOT_IMPLEMENTED);
+				JOINT_THROW(JOINT_CORE_ERROR_NOT_IMPLEMENTED);
 			}
 
 			return res;

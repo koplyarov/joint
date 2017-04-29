@@ -9,7 +9,7 @@
 			try { \
 
 #define JOINT_CPP_WRAP_END \
-				return JOINT_ERROR_NONE; \
+				return JOINT_CORE_ERROR_NONE; \
 			} \
 			catch (const joint::JointException& ex) { \
 				GetLogger().Error() << __func__ << " failed: " << ex.GetError(); \
@@ -17,7 +17,7 @@
 			} \
 			catch (const std::exception& ex) { \
 				GetLogger().Error() << __func__ << " failed: " << ex; \
-				return JOINT_ERROR_GENERIC; \
+				return JOINT_CORE_ERROR_GENERIC; \
 			}
 
 #define JOINT_CPP_WRAP_END_VOID \

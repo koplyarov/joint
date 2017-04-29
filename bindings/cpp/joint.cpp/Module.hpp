@@ -17,20 +17,20 @@ namespace joint
 	class Manifest
 	{
 	private:
-		Joint_ManifestHandle    _manifest;
+		JointCore_ManifestHandle    _manifest;
 
 	public:
 		Manifest(const std::string& location)
-			: _manifest(JOINT_NULL_HANDLE)
+			: _manifest(JOINT_CORE_NULL_HANDLE)
 		{ JOINT_CALL( Joint_ReadManifestFromFile(location.c_str(), &_manifest) ); }
 
 		~Manifest()
 		{
-			if (_manifest != JOINT_NULL_HANDLE)
+			if (_manifest != JOINT_CORE_NULL_HANDLE)
 				Joint_DeleteManifest(_manifest);
 		}
 
-		Joint_ManifestHandle GetHandle() const
+		JointCore_ManifestHandle GetHandle() const
 		{ return _manifest; }
 
 	private:
@@ -42,29 +42,29 @@ namespace joint
 	class ModuleContext
 	{
 	private:
-		Joint_ModuleHandle    _module;
+		JointCore_ModuleHandle    _module;
 
 	public:
-		ModuleContext(Joint_ModuleHandle module = JOINT_NULL_HANDLE) : _module(module) { }
+		ModuleContext(JointCore_ModuleHandle module = JOINT_CORE_NULL_HANDLE) : _module(module) { }
 		ModuleContext(const ModuleContext& other) : _module(other._module) { JOINT_CALL( Joint_IncRefModule(_module) ); }
 		ModuleContext& operator= (const ModuleContext& other) { ModuleContext tmp(other); Swap(tmp); return *this; }
 
 #if __cplusplus >= 201100L
-		ModuleContext(ModuleContext&& other) : _module(other._module) { other._module = JOINT_NULL_HANDLE; }
+		ModuleContext(ModuleContext&& other) : _module(other._module) { other._module = JOINT_CORE_NULL_HANDLE; }
 		ModuleContext& operator= (ModuleContext&& other) { ModuleContext tmp(other); Swap(tmp); return *this; }
 #endif
 
 		~ModuleContext()
 		{
-			if (_module != JOINT_NULL_HANDLE)
+			if (_module != JOINT_CORE_NULL_HANDLE)
 			{
-				Joint_Error ret = Joint_DecRefModule(_module);
-				if (ret != JOINT_ERROR_NONE)
-					Joint_Log(JOINT_LOGLEVEL_WARNING, "Joint.C++", "Could not unload module");
+				JointCore_Error ret = Joint_DecRefModule(_module);
+				if (ret != JOINT_CORE_ERROR_NONE)
+					Joint_Log(JOINT_CORE_LOGLEVEL_WARNING, "Joint.C++", "Could not unload module");
 			}
 		}
 
-		Joint_ModuleHandle GetHandle() const
+		JointCore_ModuleHandle GetHandle() const
 		{ return _module; }
 
 		void Swap(ModuleContext& other)
@@ -87,33 +87,33 @@ namespace joint
 	class Module
 	{
 	private:
-		Joint_ModuleHandle     _module;
+		JointCore_ModuleHandle     _module;
 
 	public:
 		Module(const Manifest& manifest)
-			: _module(JOINT_NULL_HANDLE)
+			: _module(JOINT_CORE_NULL_HANDLE)
 		{ JOINT_CALL( JointCore_LoadModule(manifest.GetHandle(), &_module) ); }
 
-		Module(Joint_ModuleHandle module = JOINT_NULL_HANDLE) : _module(module) { }
+		Module(JointCore_ModuleHandle module = JOINT_CORE_NULL_HANDLE) : _module(module) { }
 		Module(const Module& other) : _module(other._module) { JOINT_CALL( Joint_IncRefModule(_module) ); }
 		Module& operator= (const Module& other) { Module tmp(other); Swap(tmp); return *this; }
 
 #if __cplusplus >= 201100L
-		Module(Module&& other) : _module(other._module) { other._module = JOINT_NULL_HANDLE; }
+		Module(Module&& other) : _module(other._module) { other._module = JOINT_CORE_NULL_HANDLE; }
 		Module& operator= (Module&& other) { Module tmp(other); Swap(tmp); return *this; }
 #endif
 
 		~Module()
 		{
-			if (_module != JOINT_NULL_HANDLE)
+			if (_module != JOINT_CORE_NULL_HANDLE)
 			{
-				Joint_Error ret = Joint_DecRefModule(_module);
-				if (ret != JOINT_ERROR_NONE)
-					Joint_Log(JOINT_LOGLEVEL_WARNING, "Joint.C++", "Could not unload module");
+				JointCore_Error ret = Joint_DecRefModule(_module);
+				if (ret != JOINT_CORE_ERROR_NONE)
+					Joint_Log(JOINT_CORE_LOGLEVEL_WARNING, "Joint.C++", "Could not unload module");
 			}
 		}
 
-		Joint_ModuleHandle GetHandle() const
+		JointCore_ModuleHandle GetHandle() const
 		{ return _module; }
 
 		void Swap(Module& other)
@@ -121,7 +121,7 @@ namespace joint
 
 		joint::Ptr<joint::IObject> GetRootObject(const std::string& getterName) const
 		{
-			Joint_ObjectHandle obj;
+			JointCore_ObjectHandle obj;
 			JOINT_CALL( Joint_GetRootObject(_module, getterName.c_str(), &obj) );
 			return joint::Ptr<joint::IObject>(joint::IObject(obj));
 		}
@@ -135,29 +135,29 @@ namespace joint
 	class Binding
 	{
 	private:
-		Joint_BindingHandle    _binding;
+		JointCore_BindingHandle    _binding;
 
 	public:
-		Binding(Joint_BindingHandle binding = JOINT_NULL_HANDLE) : _binding(binding) { }
+		Binding(JointCore_BindingHandle binding = JOINT_CORE_NULL_HANDLE) : _binding(binding) { }
 		Binding(const Binding& other) : _binding(other._binding) { JOINT_CALL( Joint_IncRefBinding(_binding) ); }
 		Binding& operator= (const Binding& other) { Binding tmp(other); Swap(tmp); return *this; }
 
 #if __ReleaseBindingcplusplus >= 201100L
-		Binding(Binding&& other) : _binding(other._binding) { other._binding = JOINT_NULL_HANDLE; }
+		Binding(Binding&& other) : _binding(other._binding) { other._binding = JOINT_CORE_NULL_HANDLE; }
 		Binding& operator= (Binding&& other) { Binding tmp(other); Swap(tmp); return *this; }
 #endif
 
 		~Binding()
 		{
-			if (_binding == JOINT_NULL_HANDLE)
+			if (_binding == JOINT_CORE_NULL_HANDLE)
 				return;
 
-			Joint_Error ret = Joint_DecRefBinding(_binding);
-			if (ret != JOINT_ERROR_NONE)
-				Joint_Log(JOINT_LOGLEVEL_WARNING, "Joint.C++", "Joint_ReleaseBinding failed!");
+			JointCore_Error ret = Joint_DecRefBinding(_binding);
+			if (ret != JOINT_CORE_ERROR_NONE)
+				Joint_Log(JOINT_CORE_LOGLEVEL_WARNING, "Joint.C++", "Joint_ReleaseBinding failed!");
 		}
 
-		Joint_BindingHandle GetHandle() const
+		JointCore_BindingHandle GetHandle() const
 		{ return _binding; }
 
 		void Swap(Binding& other)
@@ -174,11 +174,11 @@ namespace joint
 	public:
 		Context()
 		{
-			Joint_BindingHandle binding_handle = JOINT_NULL_HANDLE;
+			JointCore_BindingHandle binding_handle = JOINT_CORE_NULL_HANDLE;
 			JOINT_CALL( JointCpp_MakeBinding(&binding_handle) );
 			_binding = binding_handle;
 
-			Joint_ModuleHandle module_handle = JOINT_NULL_HANDLE;
+			JointCore_ModuleHandle module_handle = JOINT_CORE_NULL_HANDLE;
 			JOINT_CALL( Joint_MakeModule(_binding.GetHandle(), NULL, &module_handle) );
 			_mainModule = module_handle;
 		}

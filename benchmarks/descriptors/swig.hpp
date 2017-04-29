@@ -156,9 +156,9 @@ namespace swig
 			{
 				using namespace ::joint::devkit;
 
-				Joint_ManifestHandle m;
-				Joint_Error err = Joint_ReadManifestFromFile(moduleManifestPath.c_str(), &m);
-				JOINT_CHECK(err == JOINT_ERROR_NONE, err);
+				JointCore_ManifestHandle m;
+				JointCore_Error err = Joint_ReadManifestFromFile(moduleManifestPath.c_str(), &m);
+				JOINT_CHECK(err == JOINT_CORE_ERROR_NONE, err);
 
 				auto sg = ScopeExit([&]{ Joint_DeleteManifest(m); });
 
