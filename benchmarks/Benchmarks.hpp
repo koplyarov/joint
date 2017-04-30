@@ -36,12 +36,12 @@ namespace benchmarks
 			using B = BenchmarksPtr;
 
 			AddSimpleBenchmark("invokeNative_void_void", [](C& ctx, i64 n, B b){ b->MeasureNativeVoidToVoid(n); });
-			AddSimpleBenchmark("invokeNative_void_i32", [](C& ctx, i64 n, B b){ b->MeasureNativeVoidToI32(n); });
-			AddSimpleBenchmark("invokeNative_i32_void", [](C& ctx, i64 n, B b){ b->MeasureNativeI32ToVoid(n); });
-			AddSimpleBenchmark("invokeNative_void_string3", [](C& ctx, i64 n, B b){ b->MeasureNativeVoidToString3(n); });
-			AddSimpleBenchmark("invokeNative_string3_void", [](C& ctx, i64 n, B b){ b->MeasureNativeString3ToVoid(n); });
-			AddSimpleBenchmark("invokeNative_void_string100", [](C& ctx, i64 n, B b){ b->MeasureNativeVoidToString100(n); });
-			AddSimpleBenchmark("invokeNative_string100_void", [](C& ctx, i64 n, B b){ b->MeasureNativeString100ToVoid(n); });
+			AddSimpleBenchmark("invokeNative_void_i32", [](C& ctx, i64 n, B b){ b->MeasureNativeI32ToVoid(n); });
+			AddSimpleBenchmark("invokeNative_i32_void", [](C& ctx, i64 n, B b){ b->MeasureNativeVoidToI32(n); });
+			AddSimpleBenchmark("invokeNative_void_string3", [](C& ctx, i64 n, B b){ b->MeasureNativeString3ToVoid(n); });
+			AddSimpleBenchmark("invokeNative_string3_void", [](C& ctx, i64 n, B b){ b->MeasureNativeVoidToString3(n); });
+			AddSimpleBenchmark("invokeNative_void_string100", [](C& ctx, i64 n, B b){ b->MeasureNativeString100ToVoid(n); });
+			AddSimpleBenchmark("invokeNative_string100_void", [](C& ctx, i64 n, B b){ b->MeasureNativeVoidToString100(n); });
 
 			AddSimpleBenchmark("invoke_void_void", [](C& ctx, i64 n, B b){ for (auto i = 0; i < n; ++i) b->VoidToVoid(); });
 
