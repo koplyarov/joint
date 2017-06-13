@@ -1,6 +1,15 @@
 #ifndef JOINT_JOINTCONFIG_H
 #define JOINT_JOINTCONFIG_H
 
+
+#ifdef __cplusplus
+#	define JOINT_CORE_EXTERN_C_BEGIN extern "C" {
+#	define JOINT_CORE_EXTERN_C_END }
+#else
+#	define JOINT_CORE_EXTERN_C_BEGIN
+#	define JOINT_CORE_EXTERN_C_END
+#endif
+
 #if defined(__GNUC__) || defined(__clang)
 #	if !defined(JOINT_CORE_PLATFORM_POSIX)
 #		define JOINT_CORE_PLATFORM_POSIX 1
