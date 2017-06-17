@@ -5,7 +5,7 @@
 #include <joint/Joint.h>
 
 
-#define JOINT_C_THROW(Msg_, Ex_) JointC_ThrowException(Msg_, __FILE__, __LINE__, __func__, Ex_)
+#define JOINT_THROW(Msg_, Ex_) JointC_ThrowException(Msg_, __FILE__, __LINE__, __func__, Ex_)
 
 JointCore_Error JointC_ThrowException(const char* msg, const char* file, int line, const char* function, JointCore_ExceptionHandle* ex)
 {

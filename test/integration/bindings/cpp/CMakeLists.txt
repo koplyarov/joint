@@ -17,6 +17,7 @@ endif()
 ################################################################################
 
 joint_generate_adapters(c++ Tests_adapters.hpp
+	${IDL_DIR}/IStarterTests.idl
 	${IDL_DIR}/IBasicTests.idl
 	${IDL_DIR}/IEnumTests.idl
 	${IDL_DIR}/IObjectTests.idl
@@ -26,6 +27,7 @@ joint_generate_adapters(c++ Tests_adapters.hpp
 	${IDL_DIR}/IInterfaceChecksumTests.idl
 	${IDL_DIR}/IStructTests.idl
 	${IDL_DIR}/IArrayTests.idl
+
 )
 
 add_library(tests-cpp SHARED Tests.cpp Tests_adapters.hpp)

@@ -19,7 +19,7 @@
 		t.id = JointType_; \
 		JointCore_Error ret = Joint_MakeArray(t, size, &array->handle); \
 		if (ret != JOINT_CORE_ERROR_NONE) \
-			return JOINT_C_THROW("Joint_MakeArray failed!", ex); \
+			return JOINT_THROW("Joint_MakeArray failed!", ex); \
 		return JOINT_CORE_ERROR_NONE; \
 	} \
 	JointCore_Error Name_##__Array_GetSize(Name_##__Array array, size_t* result, JointCore_ExceptionHandle* ex) \
@@ -27,7 +27,7 @@
 		JointCore_SizeT size; \
 		JointCore_Error ret = Joint_ArrayGetSize(array.handle, &size); \
 		if (ret != JOINT_CORE_ERROR_NONE) \
-			return JOINT_C_THROW("Joint_ArrayGet failed!", ex); \
+			return JOINT_THROW("Joint_ArrayGet failed!", ex); \
 		*result = size; \
 		return JOINT_CORE_ERROR_NONE; \
 	} \
@@ -36,7 +36,7 @@
 		JointCore_Value result_v; \
 		JointCore_Error ret = Joint_ArrayGet(array.handle, index, &result_v); \
 		if (ret != JOINT_CORE_ERROR_NONE) \
-			return JOINT_C_THROW("Joint_ArrayGet failed!", ex); \
+			return JOINT_THROW("Joint_ArrayGet failed!", ex); \
 		{ GetCode_; } \
 		return JOINT_CORE_ERROR_NONE; \
 	} \
@@ -46,7 +46,7 @@
 		{ SetCode_; } \
 		JointCore_Error ret = Joint_ArraySet(array.handle, index, value_v); \
 		if (ret != JOINT_CORE_ERROR_NONE) \
-			return JOINT_C_THROW("Joint_ArraySet failed!", ex); \
+			return JOINT_THROW("Joint_ArraySet failed!", ex); \
 		return JOINT_CORE_ERROR_NONE; \
 	}
 
@@ -70,7 +70,7 @@ DETAIL_JOINT_C_DEFINE_BASIC_ARRAY(f32, float, JOINT_CORE_TYPE_F32, f32)
 DETAIL_JOINT_C_DEFINE_BASIC_ARRAY(f64, double, JOINT_CORE_TYPE_F64, f64)
 
 DETAIL_JOINT_C_DEFINE_ARRAY(string, const char*, JOINT_CORE_TYPE_UTF8,
-		*result = JointC_CopyString(result_v.utf8),
+		*result = Joint_CopyString(result_v.utf8),
 		value_v.utf8 = value
 	)
 

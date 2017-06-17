@@ -18,7 +18,7 @@
 
 extern "C"
 {
-	JOINT_JAVA_CORE_API JointCore_Error JointJava_MakeBinding(JointCore_BindingHandle* outBinding);
+	JOINT_JAVA_CORE_API JointCore_Error JointJava_MakeBinding(JointCore_BindingAccessor* outBinding);
 }
 
 #endif

@@ -1,5 +1,6 @@
 #include <binding/Module.hpp>
 
+#include <joint/devkit/CppWrappers.hpp>
 #include <joint/devkit/JointException.hpp>
 
 #include <binding/JointJavaContext.hpp>
@@ -15,9 +16,12 @@ namespace binding
 	using namespace devkit;
 
 
-	Module::Module(const ModuleManifest& manifest, const std::string& location)
+	Module::Module(JointCore_ManifestHandle moduleManifest)
 		: _cls()
 	{
+		ManifestReader::Read(moduleManifest, _manifest);
+		auto location = ManifestReader::GetLocation(moduleManifest);
+
 		auto jvm = JointJavaContext::GetJvm();
 		auto env = GetJavaEnv(jvm);
 
@@ -25,8 +29,8 @@ namespace binding
 
 		////////////////////////////////////////////////////////////////////////////////
 
-		auto jars = manifest.GetJars();
-		auto class_name_string = JStringLocalRef::StealLocal(env, JAVA_CALL(env->NewStringUTF(manifest.GetClassName().c_str())));
+		auto jars = _manifest.GetJars();
+		auto class_name_string = JStringLocalRef::StealLocal(env, JAVA_CALL(env->NewStringUTF(_manifest.GetClassName().c_str())));
 		auto urls = JObjArrayLocalRef::StealLocal(env, JAVA_CALL(env->NewObjectArray(jars.size(), jjc.URL_cls.Get(), nullptr)));
 
 		for (size_t i = 0; i < jars.size(); ++i)
@@ -44,11 +48,32 @@ namespace binding
 		auto class_loader = JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(jjc.URLClassLoader_cls.Get(), jjc.URLClassLoader_ctor_id, urls.Get())));
 
 		_cls = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->CallObjectMethod(class_loader.Get(), jjc.URLClassLoader_loadClass_id, class_name_string.Get())));
-		JOINT_CHECK(_cls, StringBuilder() % "Class " % manifest.GetClassName() % " not found");
+		JOINT_CHECK(_cls, StringBuilder() % "Class " % _manifest.GetClassName() % " not found");
 	}
 
 
 	Module::~Module()
 	{ }
+
+
+	JointCore_Error Module::GetRootObject(const char* getterName, JointCore_ObjectAccessor* outObject) JOINT_DEVKIT_NOEXCEPT
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		auto jvm = JointJavaContext::GetJvm();
+		auto env = GetJavaEnv(jvm);
+
+		auto jm = JointJavaContext::ModuleContext::Make(env, AccessorFromSelf());
+
+		jmethodID root_obj_getter_id = JAVA_CALL(env->GetStaticMethodID(_cls.Get(), getterName, "(Lorg/joint/ModuleContext;)Lorg/joint/JointObject;"));
+
+		auto root_obj = JObjLocalRef::StealLocal(env, JAVA_CALL(env->CallStaticObjectMethod(_cls.Get(), root_obj_getter_id, jm.Get())));
+		JointJavaContext::JointObject jo(root_obj);
+
+		*outObject = jo.GetAccessor();
+		JOINT_CORE_INCREF_ACCESSOR(*outObject);
+
+		JOINT_CPP_WRAP_END
+	}
 
 }}}

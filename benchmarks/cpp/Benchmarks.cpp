@@ -78,13 +78,5 @@ public:
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToString100(); }
 };
 
-extern "C"
-{
-
-#ifdef _MSC_VER
-	__declspec(dllexport)
-#endif
-	JointCore_ObjectHandle GetBenchmarks(JointCore_ModuleHandle module)
-	{ return Export(MakeComponent<IObject, Benchmarks>(module)); }
-
-}
+JOINT_CPP_ROOT_OBJECT_GETTER(GetBenchmarks)
+{ return moduleContext.MakeComponent<IObject, Benchmarks>(); }

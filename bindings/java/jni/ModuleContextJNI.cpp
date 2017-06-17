@@ -1,5 +1,9 @@
+#include <joint/devkit/accessors/MakeAccessor.hpp>
+
 #include <JointJNI.h>
+#include <binding/JointJavaContext.hpp>
 #include <binding/Object.hpp>
+#include <jni/JNIHelpers.hpp>
 
 
 using namespace joint::devkit;
@@ -9,19 +13,15 @@ using namespace joint::java::binding;
 JOINT_DEVKIT_LOGGER("Joint.Java.JNI")
 
 
-JNIEXPORT jlong JNICALL Java_org_joint_ModuleContext_doRegister(JNIEnv* env, jclass cls, jlong moduleHandleLong, jobject accessor)
+JNIEXPORT jobject JNICALL Java_org_joint_ModuleContext_doRegister(JNIEnv* env, jclass cls, jlong accessorVTableLong, jlong accessorInstanceLong, jobject jaccessor)
 {
 	JNI_WRAP_CPP_BEGIN
 
 	JavaVM* jvm = nullptr;
 	JNI_CALL( env->GetJavaVM(&jvm) );
 
-	std::unique_ptr<Object> o(new Object(env, JObjGlobalRef::StealLocal(env, accessor)));
-	JointCore_ObjectHandle handle = JOINT_CORE_NULL_HANDLE;
-	JointCore_ModuleHandle module = (JointCore_ModuleHandle)moduleHandleLong;
-	JointCore_Error ret = Joint_CreateObject(module, o.get(), &handle);
-	JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
-	o.release();
+	JointCore_ObjectAccessor native_accessor = accessors::MakeAccessor<binding::Object>(env, JObjGlobalRef::StealLocal(env, jaccessor));
+	JObjLocalRef result = JointJavaContext::JointObject::Make(env, native_accessor);
 
-	JNI_WRAP_CPP_END(reinterpret_cast<jlong>(handle), 0)
+	JNI_WRAP_CPP_END(result.Release(), 0)
 }

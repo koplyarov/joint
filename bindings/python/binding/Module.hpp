@@ -4,6 +4,7 @@
 
 #include <joint/devkit/Logger.hpp>
 #include <joint/devkit/ManifestReader.hpp>
+#include <joint/devkit/accessors/Module.hpp>
 
 #include <string>
 
@@ -34,18 +35,21 @@ namespace binding
 	};
 
 
-	class Module
+	class Module : public joint::devkit::accessors::Module<Module>
 	{
 		JOINT_DEVKIT_LOGGER("Joint.Python.Module")
 
 	private:
 		PyObjectHolder  _pyModule;
-		std::string     _moduleName;
+		ModuleManifest  _manifest;
 
 	public:
-		Module(const std::string& location, const std::string& moduleName);
+		Module(JointCore_ManifestHandle moduleManifest);
 		~Module();
 
+		JointCore_Error GetRootObject(const char* getterName, JointCore_ObjectAccessor* outObject) JOINT_DEVKIT_NOEXCEPT;
+
+	private:
 		PyObjectHolder InvokeFunction(const std::string& functionName, const PyObjectHolder& jointModule);
 	};
 

@@ -143,16 +143,15 @@ JointCore_Error Benchmarks_MeasureOutgoingVoidToString100(Benchmarks* self, benc
 }
 
 
-JOINT_C_COMPONENT(Benchmarks, benchmarks_IBenchmarks);
+JOINT_COMPONENT(Benchmarks, benchmarks_IBenchmarks);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef _MSC_VER
-__declspec(dllexport)
-#endif
-JointCore_ObjectHandle GetBenchmarks(JointCore_ModuleHandle module)
+JOINT_C_ROOT_OBJECT_GETTER(GetBenchmarks)
 {
-	Benchmarks__wrapper* t = JointC_Wrap__Benchmarks();
-	Benchmarks_Init(&t->impl);
-	return Benchmarks__as__benchmarks_IBenchmarks(module, t);
+	joint_IObject result;
+	Benchmarks* impl;
+	JOINT_CREATE_COMPONENT(joint_IObject, Benchmarks, moduleContext, &result, &impl);
+	Benchmarks_Init(impl);
+	return result;
 }

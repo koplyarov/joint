@@ -13,8 +13,11 @@ namespace pyjoint
 	struct Module
 	{
 		PyObject_HEAD
-		JointCore_ModuleHandle     handle;
+		JointCore_ModuleAccessor accessor;
 	};
+
+
+	PyObject* MakeModule(JointCore_ModuleAccessor accessor);
 
 
 	extern PyTypeObject Module_type;

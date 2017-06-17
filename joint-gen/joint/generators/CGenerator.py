@@ -103,20 +103,22 @@ class CGenerator:
         yield 'JointCore_InterfaceChecksum {}__checksum = {};'.format(mangled_ifc, hex(ifc.checksum))
         yield 'const char* {}__id = "{}";'.format(mangled_ifc, ifc.fullname)
         yield ''
-        yield 'typedef struct {n}_s* {n};'.format(n=mangled_ifc)
+        yield 'typedef struct {n}_s {{'.format(n=mangled_ifc)
+        yield '\tJointCore_ObjectAccessor Accessor;'
+        yield '}} {n};'.format(n=mangled_ifc)
         for m in ifc.methods:
             yield 'JointCore_Error {n}_{m}({n} _obj{p}{r}, JointCore_ExceptionHandle* _ex);'.format(n=mangled_ifc, m=m.name, p=self._paramsDecl(m.params), r=self._retDecl(m.retType))
         yield ''
         yield 'typedef struct {'
         if not ifc.bases:
-            yield '\tJointC_Accessor accessor;'
+            yield '\tJointCore_ObjectAccessor Accessor;'
         for b in ifc.bases:
             yield '\t{mn}__Accessors {mn}__accessors;'.format(mn=self._mangleType(b))
         yield '}} {}__Accessors;'.format(mangled_ifc)
         yield '#define DETAIL_DEFINE_ACCESSOR_VTABLE__{}(ComponentImpl, IfcPrefix) \\'.format(mangled_ifc)
         for b in ifc.bases:
             yield '\tDETAIL_DEFINE_ACCESSOR_VTABLE__{}(ComponentImpl, IfcPrefix##__##{}) \\'.format(self._mangleType(b), mangled_ifc)
-        yield '\tJointC_AccessorVTable Detail__##ComponentImpl##__accessor_vtable##IfcPrefix##__{} = \\'.format(mangled_ifc)
+        yield '\tJointCore_ObjectAccessorVTable Detail__##ComponentImpl##__accessor_vtable##IfcPrefix##__{} = \\'.format(mangled_ifc)
         yield '\t\t{ \\'
         yield '\t\t\t&Detail__##ComponentImpl##__AddRef, \\'
         yield '\t\t\t&Detail__##ComponentImpl##__Release, \\'
@@ -125,13 +127,13 @@ class CGenerator:
         yield '\t\t};'
         yield '#define DETAIL_ACCESSOR__{}(Accessors) \\'.format(mangled_ifc)
         if not ifc.bases:
-            yield '\t((Accessors).accessor)'
+            yield '\t((Accessors).Accessor)'
         else:
             yield '\tDETAIL_ACCESSOR__{b}((Accessors).{b}__accessors)'.format(b=self._mangleType(ifc.bases[0]))
         yield '#define DETAIL_INIT_ACCESSOR__{}(ComponentImpl, ComponentWrapper, Accessors, IfcPrefix) \\'.format(mangled_ifc)
         if ifc.bases:
             yield '\tDETAIL_INIT_ACCESSOR__{b}(ComponentImpl, (ComponentWrapper), (Accessors).{b}__accessors, IfcPrefix##__##{i}) \\'.format(b=self._mangleType(ifc.bases[0]), i=mangled_ifc)
-        yield '\tDETAIL_ACCESSOR__{i}(Accessors).Component = (ComponentWrapper); \\'.format(i=mangled_ifc)
+        yield '\tDETAIL_ACCESSOR__{i}(Accessors).Instance = (ComponentWrapper); \\'.format(i=mangled_ifc)
         yield '\tDETAIL_ACCESSOR__{i}(Accessors).VTable = &Detail__##ComponentImpl##__accessor_vtable##IfcPrefix##__{i}; \\'.format(i=mangled_ifc)
         for b in ifc.bases[1:]:
             yield '\tDETAIL_INIT_ACCESSOR__{b}(ComponentImpl, (ComponentWrapper), (Accessors).{b}__accessors, IfcPrefix##__##{i}) \\'.format(b=self._mangleType(b), i=mangled_ifc)
@@ -141,7 +143,7 @@ class CGenerator:
         yield '\t{ \\'
         yield '\t\tif (checksum != {}__checksum) \\'.format(mangled_ifc)
         yield '\t\t\treturn JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM; \\'
-        yield '\t\t*outAccessor = &DETAIL_ACCESSOR__{}(Accessors); \\'.format(mangled_ifc)
+        yield '\t\t*outAccessor = DETAIL_ACCESSOR__{}(Accessors); \\'.format(mangled_ifc)
         yield '\t} \\'
         for b in ifc.bases:
             yield '\tDETAIL_TRY_CAST__{mn}((Accessors).{mn}__accessors) \\'.format(mn=self._mangleType(b))
@@ -149,15 +151,6 @@ class CGenerator:
         yield ''
 
     def _generateMethods(self, ifc):
-        yield 'JointCore_Error JointC_CastTo__{mn}(void* obj, {mn}* result)'.format(mn=self._mangleType(ifc))
-        yield '{'
-        yield '\tJointCore_Error ret = JOINT_CORE_ERROR_NONE;'
-        yield '\tif (!obj)'
-        yield '\t\t*result = JOINT_CORE_NULL_HANDLE;'
-        yield '\telse'
-        yield '\t\tret = Joint_CastObject((JointCore_ObjectHandle)obj, {mn}__id, {mn}__checksum, (JointCore_ObjectHandle*)result);'.format(mn=self._mangleType(ifc))
-        yield '\treturn ret == JOINT_CORE_ERROR_CAST_FAILED ? JOINT_CORE_ERROR_NONE : ret;'
-        yield '}'
         for m in ifc.methods:
             for l in self._generateMethodDefinition(ifc, m):
                 yield '{}'.format(l)
@@ -188,7 +181,7 @@ class CGenerator:
                     yield '\tparams[{}].type.payload.interfaceChecksum = {}__checksum;'.format(p.index, self._mangleType(p.type))
                 elif isinstance(p.type, Struct):
                     yield '\tparams[{}].type.payload.structDescriptor = {}__GetStructDescriptor();'.format(p.index, self._mangleType(p.type))
-        yield '\tJointCore_Error _ret = Joint_InvokeMethod((JointCore_ObjectHandle)_obj, {}, {}, {}, _ret_val_type, &_ret_val);'.format(m.index, 'params' if m.params else 'NULL', len(m.params))
+        yield '\tJointCore_Error _ret = _obj.Accessor.VTable->InvokeMethod(_obj.Accessor.Instance, {}, {}, {}, _ret_val_type, &_ret_val);'.format(m.index, 'params' if m.params else 'NULL', len(m.params))
         yield '\tif (_ret != JOINT_CORE_ERROR_NONE)'
         yield '\t{'
         yield '\t\tif (_ret == JOINT_CORE_ERROR_EXCEPTION)'
@@ -199,7 +192,10 @@ class CGenerator:
             ret_val = self._fromJointRetValue(m.retType, '_ret_val.result.value')
             for l in ret_val.initialization:
                 yield '\t{}'.format(l)
-            yield '\t*_outResult = {};'.format(ret_val.code)
+            if isinstance(m.retType, Interface):
+                yield '\t_outResult->Accessor = {};'.format(ret_val.code)
+            else:
+                yield '\t*_outResult = {};'.format(ret_val.code)
             if m.retType.needRelease:
                 yield '\t_ret_val.releaseValue(_ret_val_type, _ret_val.result.value);'
         yield '\treturn _ret;'
@@ -285,7 +281,7 @@ class CGenerator:
         if isinstance(type, BuiltinType):
             return CodeWithInitialization(cValue)
         elif isinstance(type, Interface):
-            return CodeWithInitialization('(JointCore_ObjectHandle){}'.format(cValue))
+            return CodeWithInitialization('{}.Accessor'.format(cValue))
         elif isinstance(type, Enum):
             return CodeWithInitialization('(int32_t){}'.format(cValue))
         elif isinstance(type, Struct):
@@ -309,7 +305,7 @@ class CGenerator:
         if isinstance(type, BuiltinType):
             return CodeWithInitialization(cValue)
         elif isinstance(type, Interface):
-            return CodeWithInitialization('(JointCore_ObjectHandle)({})'.format(cValue))
+            return CodeWithInitialization('({}).Accessor'.format(cValue))
         elif isinstance(type, Enum):
             return CodeWithInitialization('(int32_t)({})'.format(cValue))
         elif isinstance(type, Struct):
@@ -345,7 +341,9 @@ class CGenerator:
     def _fromJointParam(self, type, jointValue):
         if isinstance(type, BuiltinType):
             return CodeWithInitialization('{}.{}'.format(jointValue, type.variantName))
-        elif isinstance(type, Enum) or isinstance(type, Interface):
+        elif isinstance(type, Interface):
+            return CodeWithInitialization('{{ ({}.{}) }}'.format(jointValue, type.variantName))
+        elif isinstance(type, Enum):
             return CodeWithInitialization('({})({}.{})'.format(self._toCType(type), jointValue, type.variantName))
         elif isinstance(type, Struct):
             initialization = []
@@ -373,7 +371,9 @@ class CGenerator:
                 return CodeWithInitialization('_{}_copy'.format(mangled_value), initialization)
             else:
                 return CodeWithInitialization('{}.{}'.format(jointValue, type.variantName))
-        elif isinstance(type, Interface) or isinstance(type, Enum):
+        elif isinstance(type, Interface):
+            return CodeWithInitialization('({}.{})'.format(jointValue, type.variantName))
+        elif isinstance(type, Enum):
             return CodeWithInitialization('({})({}.{})'.format(self._toCType(type), jointValue, type.variantName))
         elif isinstance(type, Struct):
             mangled_value = jointValue.replace('.', '_').replace('[', '_').replace(']', '_')

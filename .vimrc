@@ -5,6 +5,7 @@ call g:cpp_plugin.indexer.builder.addCustomRegex('c++', '/[ \t]*DETAIL_JOINT_JAV
 call g:cpp_plugin.indexer.builder.addCustomRegex('c++', '/[ \t]*DETAIL_JOINT_JAVA_DECLARE_JREFS[ \t]*\([^,]*,[ \t]*([A-Za-z0-9_]*)[ \t]*\)/J\1LocalRef/t/')
 call g:cpp_plugin.indexer.builder.addCustomRegex('c++', '/[ \t]*DETAIL_JOINT_JAVA_DECLARE_JREFS[ \t]*\([^,]*,[ \t]*([A-Za-z0-9_]*)[ \t]*\)/J\1GlobalRef/t/')
 call g:cpp_plugin.indexer.builder.addCustomRegex('python', '/[ \t]*self\.([A-Za-z0-9_]*)[ \t]*=/\1/v/')
+call g:cpp_plugin.indexer.builder.preprocessorIdentifiers(['JOINT_DEVKIT_NOEXCEPT', 'noexcept'])
 
 call g:buildsystem.setAvailableBuildConfigs( { 'host': CMakeBuildConfig(4, './build/') } )
 
@@ -24,8 +25,8 @@ function! GetCppNamespaceFromPath(path)
 	if len(a:path) > 1 && a:path[0] == 'devkit'
 		call add(res, 'joint')
 		call add(res, 'devkit')
-		if len(a:path) > 3 && a:path[2] == 'detail'
-			call add(res, a:path[2])
+		if len(a:path) > 4 && index(['detail', 'accessors', 'proxy'], a:path[3]) >= 0
+			call add(res, a:path[3])
 		endif
 	endif
 	if len(a:path) > 1 && a:path[0] == 'core'

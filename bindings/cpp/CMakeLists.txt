@@ -14,6 +14,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_library(joint-cpp SHARED 
 	JointCpp.cpp
 	binding/Binding.cpp
+	binding/Module.cpp
 	utils/DynamicLibrary.cpp
 )
 target_link_libraries(joint-cpp joint ${CMAKE_THREAD_LIBS_INIT})

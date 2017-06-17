@@ -32,7 +32,7 @@ namespace accessors
 			Derived_::InitVTable(vTable);
 		}
 
-		static const JointCore_BindingAccessorVTable* GetVTablePtr()
+		static const VTableType* GetVTablePtr()
 		{ return s_vTable.GetVTablePtr(); }
 
 	protected:
@@ -40,6 +40,14 @@ namespace accessors
 
 		static Derived_& DerivedRef(void* instance) JOINT_DEVKIT_NOEXCEPT
 		{ return *static_cast<Derived_*>(reinterpret_cast<ImplBase*>(instance)); }
+
+		AccessorType AccessorFromSelf() JOINT_DEVKIT_NOEXCEPT
+		{
+			AccessorType result;
+			result.VTable = GetVTablePtr();
+			result.Instance = this;
+			return result;
+		}
 
 	private:
 		static void StaticAddRef(void* instance) JOINT_DEVKIT_NOEXCEPT

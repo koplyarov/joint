@@ -91,7 +91,7 @@ class CppGenerator:
         yield '\t{'
         for m in s.members:
             if isinstance(m.type, Interface):
-                yield '\t\tJoint_IncRefObject(members[2].obj);'
+                yield '\t\tJOINT_CORE_INCREF_ACCESSOR(members[2].obj);'
             #elif isinstance(m.type, Array)
                 #yield '\t\tJoint_IncRefArray(members[2].array);'
         yield '\t\treturn {}({});'.format(s.name, ', '.join('members[{}].{}'.format(i, m.type.variantName) for i,m in enumerate(s.members)))
@@ -110,7 +110,7 @@ class CppGenerator:
             elif isinstance(m.type, Enum):
                 val = '{}._RawValue()'.format(m.name)
             elif isinstance(m.type, Interface):
-                val = '{}._GetObjectHandle()'.format(m.name)
+                val = '{}._GetObjectAccessor()'.format(m.name)
             elif isinstance(m.type, Struct):
                 val = 'members{}'.format(substruct_offset)
                 substruct_offset += ' + {}::_RecursiveMembersCount'.format(self._mangleType(m.type))
@@ -170,16 +170,16 @@ class CppGenerator:
         yield 'class {}'.format(ifc.name)
         yield '{'
         yield 'private:'
-        yield '\tJointCore_ObjectHandle _obj;'
+        yield '\tJointCore_ObjectAccessor _obj;'
         yield ''
         yield 'public:'
         yield '\ttypedef ::joint::TypeList<{}> BaseInterfaces;'.format(', '.join(self._mangleType(b) for b in ifc.bases))
         yield '\ttemplate <typename ComponentImpl_> using Accessor = {}_accessor<ComponentImpl_>;'.format(ifc.name)
         yield ''
-        yield '\t{}() : _obj(JOINT_CORE_NULL_HANDLE) {{ }}'.format(ifc.name);
-        yield '\t{}(JointCore_ObjectHandle obj) : _obj(obj) {{ }}'.format(ifc.name);
+        yield '\t{}() {{ _obj.Instance = NULL; _obj.VTable = NULL; }}'.format(ifc.name);
+        yield '\t{}(JointCore_ObjectAccessor obj) : _obj(obj) {{ }}'.format(ifc.name);
         yield ''
-        yield '\tJointCore_ObjectHandle _GetObjectHandle() const { return _obj; }'
+        yield '\tJointCore_ObjectAccessor _GetObjectAccessor() const { return _obj; }'
         yield '\tstatic JointCore_InterfaceChecksum _GetInterfaceChecksum() {{ return {}; }}'.format(hex(ifc.checksum))
         yield '\tstatic const char* _GetInterfaceId() {{ return "{}"; }}'.format(ifc.fullname)
         yield ''
@@ -243,7 +243,7 @@ class CppGenerator:
                     yield '\tparams[{}].type.payload.interfaceChecksum = {}::_GetInterfaceChecksum();'.format(p.index, self._mangleType(p.type))
                 elif isinstance(p.type, Struct):
                     yield '\tparams[{}].type.payload.structDescriptor = {}::_GetStructDescriptor();'.format(p.index, self._mangleType(p.type))
-        yield '\tJOINT_METHOD_CALL("{}.{}", Joint_InvokeMethod(_obj, {}, {}, {}, _ret_val_type, &_ret_val));'.format(ifc.fullname, m.name, m.index, 'params' if m.params else 'nullptr', len(m.params), m.retType.index)
+        yield '\tJOINT_METHOD_CALL("{}.{}", _obj.VTable->InvokeMethod(_obj.Instance, {}, {}, {}, _ret_val_type, &_ret_val));'.format(ifc.fullname, m.name, m.index, 'params' if m.params else 'nullptr', len(m.params), m.retType.index)
         if m.retType.needRelease:
             yield '\t::joint::detail::RetValueGuard _rvg(_ret_val_type, _ret_val);'.format(m.retType.index)
         if m.retType.name != 'void':
@@ -359,7 +359,7 @@ class CppGenerator:
             else:
                 return CodeWithInitialization(cppValue)
         elif isinstance(type, Interface):
-            return CodeWithInitialization('{}->_GetObjectHandle()'.format(cppValue))
+            return CodeWithInitialization('{}->_GetObjectAccessor()'.format(cppValue))
         elif isinstance(type, Enum):
             return CodeWithInitialization('{}._RawValue()'.format(cppValue))
         elif isinstance(type, Struct):
@@ -391,8 +391,8 @@ class CppGenerator:
             else:
                 return CodeWithInitialization(cppValue)
         elif isinstance(type, Interface):
-            initialization = [ 'Joint_IncRefObject({}->_GetObjectHandle());'.format(cppValue), ]
-            return CodeWithInitialization('{}->_GetObjectHandle()'.format(cppValue), initialization)
+            initialization = [ 'JOINT_CORE_INCREF_ACCESSOR({}->_GetObjectAccessor());'.format(cppValue), ]
+            return CodeWithInitialization('{}->_GetObjectAccessor()'.format(cppValue), initialization)
         elif isinstance(type, Enum):
             return CodeWithInitialization('{}._RawValue()'.format(cppValue))
         elif isinstance(type, Struct):
@@ -440,7 +440,7 @@ class CppGenerator:
                 member_values.append('{}({})'.format(self._toCppType(m.type), member_code.code))
             return CodeWithInitialization(', '.join(member_values), initialization)
         elif isinstance(type, Interface):
-            initialization = [ 'Joint_IncRefObject({}.{});'.format(jointValue, type.variantName) ]
+            initialization = [ 'JOINT_CORE_INCREF_ACCESSOR({}.{});'.format(jointValue, type.variantName) ]
             return CodeWithInitialization('{}({}.{})'.format(self._toCppType(type), jointValue, type.variantName), initialization)
         elif isinstance(type, Array):
             initialization = [ 'Joint_IncRefArray({}.{});'.format(jointValue, type.variantName) ]

@@ -19,7 +19,7 @@
 extern "C"
 {
 
-	JOINT_PYTHON_API JointCore_Error JointPython_MakeBinding(JointCore_BindingHandle* outBinding);
+	JOINT_PYTHON_API JointCore_Error JointPython_MakeBinding(JointCore_BindingAccessor* outBinding);
 
 }
 

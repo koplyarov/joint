@@ -7,10 +7,10 @@ using namespace joint;
 class SomeObject
 {
 private:
-	int	_counter;
+	int    _counter;
 
 public:
-	typedef TypeList<ISomeObject>	JointInterfaces;
+	typedef TypeList<ISomeObject>    JointInterfaces;
 
 	SomeObject() : _counter(0) { }
 
@@ -22,10 +22,10 @@ public:
 class LifetimeListenable
 {
 private:
-	ILifetimeListener_Ptr	_listener;
+	ILifetimeListener_Ptr    _listener;
 
 public:
-	typedef TypeList<ILifetimeListenable>	JointInterfaces;
+	typedef TypeList<ILifetimeListenable>   JointInterfaces;
 
 	~LifetimeListenable()
 	{
@@ -65,11 +65,11 @@ struct InterfaceChecksumComponent2
 struct InterfaceChecksumComponent12
 { typedef TypeList<IInterfaceCS1, IInterfaceCS2> JointInterfaces; };
 
-
 class Tests
 {
 public:
 	typedef TypeList<
+			IStarterTests,
 			IBasicTests,
 			IEnumTests,
 			IObjectTests,
@@ -82,15 +82,17 @@ public:
 		> JointInterfaces;
 
 private:
-	JointCore_ModuleHandle   _module;
+	ModuleContext   _moduleContext;
 
 public:
-	Tests(JointCore_ModuleHandle module)
-		: _module(module)
+	Tests(const ModuleContext& moduleContext)
+		: _moduleContext(moduleContext)
 	{ }
 
 	~Tests()
 	{ }
+
+	int32_t Increment(int32_t value) { return value + 1; }
 
 	uint8_t   AddU8(uint8_t l, uint8_t r)     { return l + r; }
 	int8_t    AddI8(int8_t l, int8_t r)       { return l + r; }
@@ -158,26 +160,26 @@ public:
 	{ return o; }
 
 	ISomeObject_Ptr ReturnNewObject()
-	{ return MakeComponent<ISomeObject, SomeObject>(_module); }
+	{ return _moduleContext.MakeComponent<ISomeObject, SomeObject>(); }
 
 
 	ILifetimeListenable_Ptr CreateListenable()
-	{ return MakeComponent<ILifetimeListenable, LifetimeListenable>(_module); }
+	{ return _moduleContext.MakeComponent<ILifetimeListenable, LifetimeListenable>(); }
 
 	void CollectGarbage()
 	{ }
 
 
-	IInterface1_Ptr CastTo1(const IInterface0_Ptr& obj) { return joint::Cast<IInterface1>(obj); }
-	IInterface2_Ptr CastTo2(const IInterface0_Ptr& obj) { return joint::Cast<IInterface2>(obj); }
-	IInterface3_Ptr CastTo3(const IInterface0_Ptr& obj) { return joint::Cast<IInterface3>(obj); }
-	IInterface4_Ptr CastTo4(const IInterface0_Ptr& obj) { return joint::Cast<IInterface4>(obj); }
-	IInterface5_Ptr CastTo5(const IInterface0_Ptr& obj) { return joint::Cast<IInterface5>(obj); }
-	IInterface6_Ptr CastTo6(const IInterface0_Ptr& obj) { return joint::Cast<IInterface6>(obj); }
-	IInterface7_Ptr CastTo7(const IInterface0_Ptr& obj) { return joint::Cast<IInterface7>(obj); }
+	IInterface1_Ptr CastTo1(const IInterface0_Ptr& obj) { return Cast<IInterface1>(obj); }
+	IInterface2_Ptr CastTo2(const IInterface0_Ptr& obj) { return Cast<IInterface2>(obj); }
+	IInterface3_Ptr CastTo3(const IInterface0_Ptr& obj) { return Cast<IInterface3>(obj); }
+	IInterface4_Ptr CastTo4(const IInterface0_Ptr& obj) { return Cast<IInterface4>(obj); }
+	IInterface5_Ptr CastTo5(const IInterface0_Ptr& obj) { return Cast<IInterface5>(obj); }
+	IInterface6_Ptr CastTo6(const IInterface0_Ptr& obj) { return Cast<IInterface6>(obj); }
+	IInterface7_Ptr CastTo7(const IInterface0_Ptr& obj) { return Cast<IInterface7>(obj); }
 
 	IInterface0_Ptr Create017()
-	{ return MakeComponent<IInterface0, CastComponent017>(_module); }
+	{ return _moduleContext.MakeComponent<IInterface0, CastComponent017>(); }
 
 
 	void ThrowNative() { throw std::runtime_error("Requested exception"); }
@@ -196,13 +198,13 @@ public:
 	void LetThrough(const test::IExceptionTestsCallback_Ptr& cb)
 	{ cb->Method(); }
 
-	IInterfaceCS1_Ptr Return1() { return MakeComponent<IInterfaceCS1, InterfaceChecksumComponent1>(_module); }
-	IInterfaceCS2_Ptr Return2() { return MakeComponent<IInterfaceCS2, InterfaceChecksumComponent2>(_module); }
-	IInterfaceCS1_Ptr Return12() { return MakeComponent<IInterfaceCS1, InterfaceChecksumComponent12>(_module); }
+	IInterfaceCS1_Ptr Return1() { return _moduleContext.MakeComponent<IInterfaceCS1, InterfaceChecksumComponent1>(); }
+	IInterfaceCS2_Ptr Return2() { return _moduleContext.MakeComponent<IInterfaceCS2, InterfaceChecksumComponent2>(); }
+	IInterfaceCS1_Ptr Return12() { return _moduleContext.MakeComponent<IInterfaceCS1, InterfaceChecksumComponent12>(); }
 
 	void AcceptCS1(const IInterfaceCS1_Ptr& obj) { }
 	void AcceptCS2(const IInterfaceCS2_Ptr& obj) { }
-	void CastToCS2(const IInterfaceCS1_Ptr& obj) { joint::Cast<IInterfaceCS2>(obj); }
+	void CastToCS2(const IInterfaceCS1_Ptr& obj) { Cast<IInterfaceCS2>(obj); }
 
 	S1 MakeS1(int32_t i, const std::string& s) { return S1(i, s); }
 	std::string GetS(S1 s) { return s.s; }
@@ -216,13 +218,6 @@ public:
 	int32_t GetI32Element(const Array<int32_t>& array, int32_t index) { return array.Get(index); }
 };
 
-extern "C"
-{
 
-#ifdef _MSC_VER
-	__declspec(dllexport)
-#endif
-	JointCore_ObjectHandle GetTests(JointCore_ModuleHandle module)
-	{ return Export(MakeComponent<IObject, Tests>(module, module)); }
-
-}
+JOINT_CPP_ROOT_OBJECT_GETTER(GetTests)
+{ return moduleContext.MakeComponent<IObject, Tests>(moduleContext); }

@@ -42,78 +42,142 @@ namespace joint
 	class ModuleContext
 	{
 	private:
-		JointCore_ModuleHandle    _module;
+		JointCore_ModuleAccessor    _accessor;
 
 	public:
-		ModuleContext(JointCore_ModuleHandle module = JOINT_CORE_NULL_HANDLE) : _module(module) { }
-		ModuleContext(const ModuleContext& other) : _module(other._module) { JOINT_CALL( Joint_IncRefModule(_module) ); }
-		ModuleContext& operator= (const ModuleContext& other) { ModuleContext tmp(other); Swap(tmp); return *this; }
+		class NewRefTag { };
+		class StealRefTag { };
+
+	public:
+		ModuleContext()
+		{
+			_accessor.VTable = NULL;
+			_accessor.Instance = NULL;
+		}
+
+		ModuleContext(JointCore_ModuleAccessor accessor, NewRefTag)
+			: _accessor(accessor)
+		{ _accessor.VTable->AddRef(_accessor.Instance); }
+
+		ModuleContext(JointCore_ModuleAccessor accessor, StealRefTag)
+			: _accessor(accessor)
+		{ }
+
+		ModuleContext(const ModuleContext& other)
+			: _accessor(other._accessor)
+		{ _accessor.VTable->AddRef(_accessor.Instance); }
+
+		ModuleContext& operator= (const ModuleContext& other)
+		{
+			ModuleContext tmp(other);
+			Swap(tmp);
+			return *this;
+		}
 
 #if __cplusplus >= 201100L
-		ModuleContext(ModuleContext&& other) : _module(other._module) { other._module = JOINT_CORE_NULL_HANDLE; }
-		ModuleContext& operator= (ModuleContext&& other) { ModuleContext tmp(other); Swap(tmp); return *this; }
+		ModuleContext(ModuleContext&& other)
+			: _accessor(other._accessor)
+		{
+			other._accessor.VTable = NULL;
+			other._accessor.Instance = NULL;
+		}
+
+		ModuleContext& operator= (ModuleContext&& other)
+		{
+			ModuleContext tmp(other);
+			Swap(tmp);
+			return *this;
+		}
 #endif
 
 		~ModuleContext()
 		{
-			if (_module != JOINT_CORE_NULL_HANDLE)
-			{
-				JointCore_Error ret = Joint_DecRefModule(_module);
-				if (ret != JOINT_CORE_ERROR_NONE)
-					Joint_Log(JOINT_CORE_LOGLEVEL_WARNING, "Joint.C++", "Could not unload module");
-			}
+			if (_accessor.Instance != NULL)
+				_accessor.VTable->Release(_accessor.Instance);
 		}
 
-		JointCore_ModuleHandle GetHandle() const
-		{ return _module; }
+		JointCore_ModuleAccessor GetAccessor() const
+		{ return _accessor; }
 
 		void Swap(ModuleContext& other)
-		{ std::swap(_module, other._module); }
+		{ std::swap(_accessor, other._accessor); }
 
 		template < typename Interface_, typename ComponentType_ >
-		Ptr<Interface_> MakeComponentProxy(const ComponentImplPtr<ComponentType_>& component)
-		{ return joint::MakeComponentProxy<Interface_, ComponentType_>(_module, component); }
+		Ptr<Interface_> MakeComponentProxy(const ComponentImplPtr<ComponentType_>& component) const
+		{ return joint::MakeComponentProxy<Interface_, ComponentType_>(component); }
 
 		template < typename Interface_, typename ComponentType_ >
-		Ptr<Interface_> MakeComponent()
-		{ return joint::MakeComponent<Interface_, ComponentType_>(_module); }
+		Ptr<Interface_> MakeComponent() const
+		{ return joint::MakeComponent<Interface_, ComponentType_>(_accessor); }
 
 		template < typename Interface_, typename ComponentType_, typename Arg1_ >
-		Ptr<Interface_> MakeComponent(const Arg1_& arg1)
-		{ return joint::MakeComponent<Interface_, ComponentType_, Arg1_>(_module, arg1); }
+		Ptr<Interface_> MakeComponent(const Arg1_& arg1) const
+		{ return joint::MakeComponent<Interface_, ComponentType_, Arg1_>(_accessor, arg1); }
+
+		template < typename ComponentType_ >
+		ComponentImplPtr<ComponentType_> MakeComponentWrapper() const
+		{ return joint::MakeComponentWrapper<ComponentType_>(_accessor); }
+
+		template < typename ComponentType_, typename Arg1_ >
+		ComponentImplPtr<ComponentType_> MakeComponentWrapper(const Arg1_& arg1) const
+		{ return joint::MakeComponentWrapper<ComponentType_, Arg1_>(_accessor, arg1); }
 	};
 
 
 	class Module
 	{
 	private:
-		JointCore_ModuleHandle     _module;
+		JointCore_ModuleAccessor     _module;
 
 	public:
 		Module(const Manifest& manifest)
-			: _module(JOINT_CORE_NULL_HANDLE)
-		{ JOINT_CALL( JointCore_LoadModule(manifest.GetHandle(), &_module) ); }
+		{
+			_module.Instance = NULL;
+			_module.VTable = NULL;
+			JOINT_CALL( JointCore_LoadModule2(manifest.GetHandle(), &_module) );
+		}
 
-		Module(JointCore_ModuleHandle module = JOINT_CORE_NULL_HANDLE) : _module(module) { }
-		Module(const Module& other) : _module(other._module) { JOINT_CALL( Joint_IncRefModule(_module) ); }
-		Module& operator= (const Module& other) { Module tmp(other); Swap(tmp); return *this; }
+		Module()
+		{
+			_module.Instance = NULL;
+			_module.VTable = NULL;
+		}
+
+		Module(JointCore_ModuleAccessor module) : _module(module) { }
+
+		Module(const Module& other)
+			: _module(other._module)
+		{ _module.VTable->AddRef(_module.Instance); }
+
+		Module& operator= (const Module& other)
+		{
+			Module tmp(other);
+			Swap(tmp);
+			return *this;
+		}
 
 #if __cplusplus >= 201100L
-		Module(Module&& other) : _module(other._module) { other._module = JOINT_CORE_NULL_HANDLE; }
-		Module& operator= (Module&& other) { Module tmp(other); Swap(tmp); return *this; }
+		Module(Module&& other)
+			: _module(other._module)
+		{
+			other._module.Instance = NULL;
+		}
+
+		Module& operator= (Module&& other)
+		{
+			Module tmp(other);
+			Swap(tmp);
+			return *this;
+		}
 #endif
 
 		~Module()
 		{
-			if (_module != JOINT_CORE_NULL_HANDLE)
-			{
-				JointCore_Error ret = Joint_DecRefModule(_module);
-				if (ret != JOINT_CORE_ERROR_NONE)
-					Joint_Log(JOINT_CORE_LOGLEVEL_WARNING, "Joint.C++", "Could not unload module");
-			}
+			if (_module.Instance)
+				_module.VTable->Release(_module.Instance);
 		}
 
-		JointCore_ModuleHandle GetHandle() const
+		JointCore_ModuleAccessor GetAccessor() const
 		{ return _module; }
 
 		void Swap(Module& other)
@@ -121,8 +185,8 @@ namespace joint
 
 		joint::Ptr<joint::IObject> GetRootObject(const std::string& getterName) const
 		{
-			JointCore_ObjectHandle obj;
-			JOINT_CALL( Joint_GetRootObject(_module, getterName.c_str(), &obj) );
+			JointCore_ObjectAccessor obj;
+			JOINT_CALL( _module.VTable->GetRootObject(_module.Instance, getterName.c_str(), &obj) );
 			return joint::Ptr<joint::IObject>(joint::IObject(obj));
 		}
 
@@ -135,29 +199,47 @@ namespace joint
 	class Binding
 	{
 	private:
-		JointCore_BindingHandle    _binding;
+		JointCore_BindingAccessor    _binding;
 
 	public:
-		Binding(JointCore_BindingHandle binding = JOINT_CORE_NULL_HANDLE) : _binding(binding) { }
-		Binding(const Binding& other) : _binding(other._binding) { JOINT_CALL( Joint_IncRefBinding(_binding) ); }
-		Binding& operator= (const Binding& other) { Binding tmp(other); Swap(tmp); return *this; }
+		Binding()
+		{
+			_binding.Instance = NULL;
+			_binding.VTable = NULL;
+		}
+
+		Binding(JointCore_BindingAccessor binding)
+			: _binding(binding)
+		{ }
+
+		Binding(const Binding& other)
+			: _binding(other._binding)
+		{ JOINT_CORE_INCREF_ACCESSOR(_binding); }
+
+		Binding& operator= (const Binding& other)
+		{
+			Binding tmp(other);
+			Swap(tmp);
+			return *this;
+		}
 
 #if __ReleaseBindingcplusplus >= 201100L
-		Binding(Binding&& other) : _binding(other._binding) { other._binding = JOINT_CORE_NULL_HANDLE; }
-		Binding& operator= (Binding&& other) { Binding tmp(other); Swap(tmp); return *this; }
+		Binding(Binding&& other)
+			: _binding(other._binding)
+		{ other._binding.Instance = NULL; }
+
+		Binding& operator= (Binding&& other)
+		{
+			Binding tmp(other);
+			Swap(tmp);
+			return *this;
+		}
 #endif
 
 		~Binding()
-		{
-			if (_binding == JOINT_CORE_NULL_HANDLE)
-				return;
+		{ JOINT_CORE_DECREF_ACCESSOR(_binding); }
 
-			JointCore_Error ret = Joint_DecRefBinding(_binding);
-			if (ret != JOINT_CORE_ERROR_NONE)
-				Joint_Log(JOINT_CORE_LOGLEVEL_WARNING, "Joint.C++", "Joint_ReleaseBinding failed!");
-		}
-
-		JointCore_BindingHandle GetHandle() const
+		JointCore_BindingAccessor GetAccessor() const
 		{ return _binding; }
 
 		void Swap(Binding& other)
@@ -174,13 +256,10 @@ namespace joint
 	public:
 		Context()
 		{
-			JointCore_BindingHandle binding_handle = JOINT_CORE_NULL_HANDLE;
-			JOINT_CALL( JointCpp_MakeBinding(&binding_handle) );
-			_binding = binding_handle;
-
-			JointCore_ModuleHandle module_handle = JOINT_CORE_NULL_HANDLE;
-			JOINT_CALL( Joint_MakeModule(_binding.GetHandle(), NULL, &module_handle) );
-			_mainModule = module_handle;
+			JointCore_BindingAccessor binding_accessor;
+			JOINT_CALL( JointCpp_MakeBinding(&binding_accessor) );
+			_binding = binding_accessor;
+			// TODO: _mainModule?
 		}
 
 		~Context()
@@ -202,6 +281,14 @@ namespace joint
 		template < typename Interface_, typename ComponentType_, typename Arg1_ >
 		Ptr<Interface_> MakeComponent(const Arg1_& arg1)
 		{ return _mainModule.MakeComponent<Interface_, ComponentType_, Arg1_>(arg1); }
+
+		template < typename ComponentType_ >
+		ComponentImplPtr<ComponentType_> MakeComponentWrapper()
+		{ return _mainModule.MakeComponentWrapper<ComponentType_>(); }
+
+		template < typename ComponentType_, typename Arg1_ >
+		ComponentImplPtr<ComponentType_> MakeComponentWrapper(const Arg1_& arg1)
+		{ return _mainModule.MakeComponentWrapper<ComponentType_, Arg1_>(arg1); }
 	};
 
 }

@@ -20,7 +20,7 @@
 
 extern "C"
 {
-	JOINT_PYTHON_CORE_API JointCore_Error JointPythonCore_MakeBinding(JointCore_BindingHandle* outBinding);
+	JOINT_PYTHON_CORE_API JointCore_Error JointPythonCore_MakeBinding(JointCore_BindingAccessor* outBinding);
 }
 
 PyMODINIT_FUNC JointPythonCore_InitModule_py3(void);

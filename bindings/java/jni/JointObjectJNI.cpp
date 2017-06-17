@@ -2,6 +2,7 @@
 #include <binding/Boxing.hpp>
 #include <binding/JavaBindingInfo.hpp>
 #include <binding/Marshaller.hpp>
+#include <jni/JNIHelpers.hpp>
 
 
 using namespace joint::devkit;
@@ -11,27 +12,31 @@ static const char* LoggerName = "Joint.Java.JNI";
 JOINT_DEVKIT_LOGGER(LoggerName)
 
 
-JNIEXPORT void JNICALL Java_org_joint_JointObject_releaseObject(JNIEnv* env, jclass cls, jlong handleLong)
+JNIEXPORT void JNICALL Java_org_joint_JointObject_releaseObject(JNIEnv* env, jclass cls, jlong accessorVTableLong, jlong accessorInstanceLong)
 {
 	JNI_WRAP_CPP_BEGIN
 
-	Joint_DecRefObject(reinterpret_cast<JointCore_ObjectHandle>(handleLong));
+	JOINT_CORE_DECREF_ACCESSOR(ObjectAccessorFromJLongs(accessorVTableLong, accessorInstanceLong));
 
 	JNI_WRAP_CPP_END_VOID()
 }
 
 
-JNIEXPORT jlong JNICALL Java_org_joint_JointObject_doCast(JNIEnv* env, jclass cls, jlong handleLong, jstring interfaceId, jint interfaceChecksum)
+JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doCast(JNIEnv* env, jclass cls, jlong accessorVTableLong, jlong accessorInstanceLong, jstring interfaceId, jint interfaceChecksum)
 {
 	JNI_WRAP_CPP_BEGIN
 
-	JointCore_ObjectHandle handle = reinterpret_cast<JointCore_ObjectHandle>(handleLong);
+	JointCore_ObjectAccessor accessor = ObjectAccessorFromJLongs(accessorVTableLong, accessorInstanceLong);
 
-	JointCore_ObjectHandle new_handle = JOINT_CORE_NULL_HANDLE;
-	JointCore_Error ret = Joint_CastObject(handle, StringDataHolder(JStringWeakRef(env, interfaceId)).GetData(), interfaceChecksum, &new_handle);
+	JointCore_ObjectAccessor new_accessor;
+	JointCore_Error ret = accessor.VTable->CastObject(accessor.Instance, StringDataHolder(JStringWeakRef(env, interfaceId)).GetData(), interfaceChecksum, &new_accessor);
 	JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE || JOINT_CORE_ERROR_CAST_FAILED, ret);
 
-	JNI_WRAP_CPP_END(ret == JOINT_CORE_ERROR_NONE ? reinterpret_cast<jlong>(new_handle) : 0, 0)
+	JObjLocalRef result;
+	if (ret == JOINT_CORE_ERROR_NONE)
+		result = JointJavaContext::JointObject::Make(env, new_accessor);
+
+	JNI_WRAP_CPP_END(result.Release(), nullptr)
 }
 
 
@@ -81,16 +86,16 @@ namespace
 #define DETAIL_JOINT_JAVA_DO_INVOKE_METHOD(ParamsCount_, ...) \
 	JNI_WRAP_CPP_BEGIN \
 	\
-	auto obj = reinterpret_cast<JointCore_ObjectHandle>(handle); \
+	auto obj = ObjectAccessorFromJLongs(accessorVTableLong, accessorInstanceLong); \
 	auto ifc_desc = reinterpret_cast<JavaInterfaceDescriptor*>(nativeInterfaceDescriptor); \
-	JOINT_ASSERT(obj && ifc_desc); \
+	JOINT_ASSERT(!JOINT_CORE_IS_NULL(obj) && ifc_desc); \
 	\
 	const auto& method_desc = ifc_desc->GetMethod(methodId); \
 	\
 	__VA_ARGS__ \
 	\
 	JointCore_RetValue ret_value; \
-	JointCore_Error ret = Joint_InvokeMethod(obj, methodId, params, ParamsCount_, method_desc.GetRetType().GetJointType(), &ret_value); \
+	JointCore_Error ret = obj.VTable->InvokeMethod(obj.Instance, methodId, params, ParamsCount_, method_desc.GetRetType().GetJointType(), &ret_value); \
 	JObjLocalRef result = WrapResult(env, ret, method_desc.GetRetType(), ret_value); \
 	\
 	JNI_WRAP_CPP_END(result.Release(), nullptr)
@@ -98,7 +103,7 @@ namespace
 #define DETAIL_JOINT_JAVA_UNWRAP_PARAMETER(I_) \
 	params[I_] = UnwrapParameter(env, m, method_desc.GetParamType(I_), alloc, JObjWeakRef(env, p##I_));
 
-JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod0(JNIEnv* env, jclass cls, jlong handle, jlong nativeInterfaceDescriptor, jint methodId)
+JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod0(JNIEnv* env, jclass cls, jlong accessorVTableLong, jlong accessorInstanceLong, jlong nativeInterfaceDescriptor, jint methodId)
 {
 	DETAIL_JOINT_JAVA_DO_INVOKE_METHOD(0,
 		JointCore_Parameter* params = nullptr;
@@ -106,7 +111,7 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod0(JNIEnv* env
 }
 
 
-JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod1(JNIEnv* env, jclass cls, jlong handle, jlong nativeInterfaceDescriptor, jint methodId,
+JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod1(JNIEnv* env, jclass cls, jlong accessorVTableLong, jlong accessorInstanceLong, jlong nativeInterfaceDescriptor, jint methodId,
 	jobject p0)
 {
 	DETAIL_JOINT_JAVA_DO_INVOKE_METHOD(1,
@@ -117,7 +122,7 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod1(JNIEnv* env
 	)
 }
 
-JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod2(JNIEnv* env, jclass cls, jlong handle, jlong nativeInterfaceDescriptor, jint methodId,
+JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod2(JNIEnv* env, jclass cls, jlong accessorVTableLong, jlong accessorInstanceLong, jlong nativeInterfaceDescriptor, jint methodId,
 	jobject p0, jobject p1)
 {
 	DETAIL_JOINT_JAVA_DO_INVOKE_METHOD(2,
@@ -129,7 +134,7 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod2(JNIEnv* env
 	)
 }
 
-JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod3(JNIEnv* env, jclass cls, jlong handle, jlong nativeInterfaceDescriptor, jint methodId,
+JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod3(JNIEnv* env, jclass cls, jlong accessorVTableLong, jlong accessorInstanceLong, jlong nativeInterfaceDescriptor, jint methodId,
 	jobject p0, jobject p1, jobject p2)
 {
 	DETAIL_JOINT_JAVA_DO_INVOKE_METHOD(3,
@@ -143,7 +148,7 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod3(JNIEnv* env
 }
 
 
-JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod4(JNIEnv* env, jclass cls, jlong handle, jlong nativeInterfaceDescriptor, jint methodId,
+JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod4(JNIEnv* env, jclass cls, jlong accessorVTableLong, jlong accessorInstanceLong, jlong nativeInterfaceDescriptor, jint methodId,
 	jobject p0, jobject p1, jobject p2, jobject p3)
 {
 	DETAIL_JOINT_JAVA_DO_INVOKE_METHOD(4,
@@ -157,7 +162,7 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod4(JNIEnv* env
 	)
 }
 
-JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod5(JNIEnv* env, jclass cls, jlong handle, jlong nativeInterfaceDescriptor, jint methodId, jint paramsCount,
+JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod5(JNIEnv* env, jclass cls, jlong accessorVTableLong, jlong accessorInstanceLong, jlong nativeInterfaceDescriptor, jint methodId, jint paramsCount,
 	jobject p0, jobject p1, jobject p2, jobject p3,
 	jobjectArray allP)
 {

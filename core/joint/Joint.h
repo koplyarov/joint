@@ -27,20 +27,11 @@ extern "C" {
 	typedef uint32_t JointCore_InterfaceChecksum;
 	typedef const char* JointCore_InterfaceId;
 
-	struct Joint_Binding;
-	typedef struct Joint_Binding* JointCore_BindingHandle;
-
 	struct Joint_ManifestNode;
 	typedef const struct Joint_ManifestNode* JointCore_ManifestNodeHandle;
 
 	struct Joint_Manifest;
 	typedef struct Joint_Manifest* JointCore_ManifestHandle;
-
-	struct Joint_Module;
-	typedef struct Joint_Module* JointCore_ModuleHandle;
-
-	struct Joint_Object;
-	typedef struct Joint_Object* JointCore_ObjectHandle;
 
 	struct Joint_Exception;
 	typedef struct Joint_Exception* JointCore_ExceptionHandle;
@@ -50,9 +41,6 @@ extern "C" {
 
 
 	typedef uint32_t JointCore_SizeT;
-
-	typedef void* JointCore_ObjectHandleInternal;
-	typedef void* JointCore_ModuleHandleInternal;
 
 
 	typedef enum
@@ -148,6 +136,88 @@ extern "C" {
 		JointCore_TypePayload       payload;
 	} JointCore_Type;
 
+	////////////////////////////////////////////////////////////////////////////////
+
+	typedef struct JointCore_Parameter_s JointCore_Parameter;
+	typedef struct JointCore_RetValue_s JointCore_RetValue;
+
+	////////////////////////////////////////////////////////////////////////////////
+
+
+	typedef struct JointCore_ObjectAccessor_s JointCore_ObjectAccessor;
+
+	typedef struct
+	{
+		void (*AddRef)(void* component);
+		void (*Release)(void* component);
+		JointCore_Error (*CastObject)(void* component, JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, JointCore_ObjectAccessor* outAccessor);
+		JointCore_Error (*InvokeMethod)(void* component, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue);
+	} JointCore_ObjectAccessorVTable;
+
+
+	struct JointCore_ObjectAccessor_s
+	{
+		const JointCore_ObjectAccessorVTable*   VTable;
+		void*                                   Instance;
+	};
+
+#define JOINT_CORE_INCREF_ACCESSOR(Accessor_) \
+		do { \
+			if ((Accessor_).Instance) \
+				(Accessor_).VTable->AddRef((Accessor_).Instance); \
+		} while (0)
+
+#define JOINT_CORE_DECREF_ACCESSOR(Accessor_) \
+		do { \
+			if ((Accessor_).Instance) \
+				(Accessor_).VTable->Release((Accessor_).Instance); \
+		} while (0)
+
+#define JOINT_CORE_IS_NULL(Accessor_) \
+		(!(Accessor_).Instance)
+
+#define JOINT_CORE_INIT_ACCESSOR(Accessor_) \
+		do { \
+			(Accessor_).Instance = NULL; \
+		} while(0)
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	typedef struct JointCore_ModuleAccessor_s JointCore_ModuleAccessor;
+
+	typedef struct
+	{
+		void (*AddRef)(void* module);
+		void (*Release)(void* module);
+		JointCore_Error (*GetRootObject)(void* module, const char* getterName, JointCore_ObjectAccessor* outObject);
+	} JointCore_ModuleAccessorVTable;
+
+
+	struct JointCore_ModuleAccessor_s
+	{
+		const JointCore_ModuleAccessorVTable*   VTable;
+		void*                                   Instance;
+	};
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	typedef struct JointCore_BindingAccessor_s JointCore_BindingAccessor;
+
+	typedef struct
+	{
+		void (*AddRef)(void* binding);
+		void (*Release)(void* binding);
+		JointCore_Error (*LoadModule)(void* binding, JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule);
+	} JointCore_BindingAccessorVTable;
+
+
+	struct JointCore_BindingAccessor_s
+	{
+		const JointCore_BindingAccessorVTable*   VTable;
+		void*                                    Instance;
+	};
+
+	////////////////////////////////////////////////////////////////////////////////
 
 	typedef union _JointCore_Value_t
 	{
@@ -165,21 +235,21 @@ extern "C" {
 		const char*                 utf8;
 		int32_t                     e;
 		union _JointCore_Value_t*   members;
-		JointCore_ObjectHandle      obj;
+		JointCore_ObjectAccessor    obj;
 		JointCore_ArrayHandle       array;
 	} JointCore_Value;
 
 
-	typedef struct
+	struct JointCore_Parameter_s
 	{
 		JointCore_Value value;
 		JointCore_Type  type;
-	} JointCore_Parameter;
+	};
 
 
 	typedef JointCore_Error JointCore_ReleaseRetValue_Func(JointCore_Type type, JointCore_Value value);
 
-	typedef struct
+	struct JointCore_RetValue_s
 	{
 		union
 		{
@@ -187,38 +257,13 @@ extern "C" {
 			JointCore_ExceptionHandle     ex;
 		} result;
 		JointCore_ReleaseRetValue_Func*   releaseValue;
-	} JointCore_RetValue;
+	};
 
 	struct Joint_Context;
 	typedef struct Joint_Context* JointCore_ContextHandle;
 
-	typedef JointCore_Error JointCore_GetRootObject_Func(JointCore_ModuleHandle module, void* bindingUserData, JointCore_ModuleHandleInternal moduleInt, const char* getterName, JointCore_ObjectHandle* outObject);
-	typedef JointCore_Error JointCore_ReleaseObject_Func(void* bindingUserData, JointCore_ModuleHandleInternal module, JointCore_ObjectHandleInternal object);
-	typedef JointCore_Error JointCore_InvokeMethod_Func(JointCore_ModuleHandle module, void* bindingUserData, JointCore_ModuleHandleInternal moduleInt, JointCore_ObjectHandleInternal obj, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue);
-	typedef JointCore_Error JointCore_CastObject_Func(void* bindingUserData, JointCore_ModuleHandleInternal module, JointCore_ObjectHandleInternal obj, JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, JointCore_ObjectHandleInternal* outRetValue);
-	typedef JointCore_Error JointCore_LoadModule_Func(void* bindingUserData, JointCore_ManifestHandle moduleManifest, JointCore_ModuleHandleInternal* outModule);
-	typedef JointCore_Error JointCore_UnloadModule_Func(void* bindingUserData, JointCore_ModuleHandleInternal module);
-	typedef JointCore_Error JointCore_DeinitBinding_Func(void* bindingUserData);
-
-	typedef struct
-	{
-		JointCore_InvokeMethod_Func*    invokeMethod;
-		JointCore_ReleaseObject_Func*   releaseObject;
-		JointCore_CastObject_Func*      castObject;
-		JointCore_GetRootObject_Func*   getRootObject;
-		JointCore_LoadModule_Func*      loadModule;
-		JointCore_UnloadModule_Func*    unloadModule;
-		JointCore_DeinitBinding_Func*   deinitBinding;
-
-		const char*                     name;
-	} JointCore_BindingDesc;
-
 	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_MakeContext(JointCore_ContextHandle *outJointCtx);
 	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_ReleaseContext(JointCore_ContextHandle jointCtx);
-
-	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_MakeBinding(JointCore_BindingDesc desc, void* userData, JointCore_BindingHandle* outBinding);
-	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_IncRefBinding(JointCore_BindingHandle handle);
-	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_DecRefBinding(JointCore_BindingHandle handle);
 
 	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_ReadManifestFromFile(const char* path, JointCore_ManifestHandle* outManifest);
 	JOINT_CORE_API void Joint_DeleteManifest(JointCore_ManifestHandle handle);
@@ -233,19 +278,6 @@ extern "C" {
 	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_GetManifestNodeChildrenCount(JointCore_ManifestNodeHandle node, JointCore_SizeT* outCount);
 	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_GetManifestNodeArrayElement(JointCore_ManifestNodeHandle node, JointCore_SizeT index, JointCore_ManifestNodeHandle* outNode);
 	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_GetManifestNodeObjectElementByKey(JointCore_ManifestNodeHandle node, const char* key, JointCore_ManifestNodeHandle* outValue);
-
-	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_LoadModuleInternal(JointCore_BindingHandle binding, JointCore_ManifestHandle moduleManifest, JointCore_ModuleHandle* outModule);
-	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_MakeModule(JointCore_BindingHandle binding, JointCore_ModuleHandleInternal internal, JointCore_ModuleHandle* outModule);
-	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_IncRefModule(JointCore_ModuleHandle handle);
-	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_DecRefModule(JointCore_ModuleHandle handle);
-
-	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_CreateObject(JointCore_ModuleHandle module, JointCore_ObjectHandleInternal internal, JointCore_ObjectHandle* outObject);
-
-	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_GetRootObject(JointCore_ModuleHandle module, const char* getterName, JointCore_ObjectHandle* outObject);
-	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_InvokeMethod(JointCore_ObjectHandle obj, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue);
-	JOINT_CORE_API void Joint_IncRefObject(JointCore_ObjectHandle handle);
-	JOINT_CORE_API void Joint_DecRefObject(JointCore_ObjectHandle handle);
-	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_CastObject(JointCore_ObjectHandle handle, JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, JointCore_ObjectHandle* outObject);
 
 	typedef struct
 	{

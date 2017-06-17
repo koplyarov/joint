@@ -1,5 +1,8 @@
 #include <JointPythonCore.h>
 
+#include <joint/devkit/CppWrappers.hpp>
+#include <joint/devkit/accessors/MakeAccessor.hpp>
+
 #include <memory>
 #include <string>
 
@@ -13,36 +16,18 @@
 #include <utils/PyObjectHolder.hpp>
 
 
-JOINT_DEVKIT_LOGGER("Joint.Python.Core")
+JOINT_DEVKIT_LOGGER("Joint.Python");
 
 extern "C"
 {
 
-	JointCore_Error JointPythonCore_MakeBinding(JointCore_BindingHandle* outBinding)
+	JointCore_Error JointPythonCore_MakeBinding(JointCore_BindingAccessor* outBinding)
 	{
-		using namespace joint::python::binding;
+		using namespace joint::devkit::accessors;
 
-		GetLogger().Info() << "MakeBinding";
-
-		JointCore_BindingDesc binding_desc = { };
-		binding_desc.name            = "python";
-		binding_desc.deinitBinding   = &Binding::Deinit;
-		binding_desc.loadModule      = &Binding::LoadModule;
-		binding_desc.unloadModule    = &Binding::UnloadModule;
-		binding_desc.getRootObject   = &Binding::GetRootObject;
-		binding_desc.invokeMethod    = &Binding::InvokeMethod;
-		binding_desc.releaseObject   = &Binding::ReleaseObject;
-		binding_desc.castObject      = &Binding::CastObject;
-
-		std::unique_ptr<Binding> binding(new Binding);
-
-		JointCore_Error ret = Joint_MakeBinding(binding_desc, binding.get(), outBinding);
-		if (ret != JOINT_CORE_ERROR_NONE)
-			GetLogger().Error() << "Joint_MakeBinding failed: " << ret;
-		else
-			binding.release();
-
-		return ret;
+		JOINT_CPP_WRAP_BEGIN
+		*outBinding = MakeAccessor<joint::python::binding::Binding>();
+		JOINT_CPP_WRAP_END
 	}
 
 }

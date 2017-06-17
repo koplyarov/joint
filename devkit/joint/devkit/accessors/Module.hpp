@@ -24,7 +24,7 @@ namespace accessors
 		~Module() = default;
 
 	private:
-		static JointCore_Error StaticGetRootObject(void* module, const char* getterName, JointCore_ObjectHandle* outObject) JOINT_DEVKIT_NOEXCEPT
+		static JointCore_Error StaticGetRootObject(void* module, const char* getterName, JointCore_ObjectAccessor* outObject) JOINT_DEVKIT_NOEXCEPT
 		{
 			static_assert(noexcept(Base::DerivedRef(module).GetRootObject(getterName, outObject)), "Derived_::GetRootObject method must have a noexcept specifier!");
 			return Base::DerivedRef(module).GetRootObject(getterName, outObject);

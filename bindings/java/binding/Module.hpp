@@ -5,6 +5,7 @@
 #include <joint/devkit/Holder.hpp>
 #include <joint/devkit/Logger.hpp>
 #include <joint/devkit/ManifestReader.hpp>
+#include <joint/devkit/accessors/Module.hpp>
 
 #include <string>
 
@@ -35,16 +36,19 @@ namespace binding
 	};
 
 
-	class Module
+	class Module : public joint::devkit::accessors::Module<Module>
 	{
 		JOINT_DEVKIT_LOGGER("Joint.Java.Module")
 
 	private:
+		ModuleManifest      _manifest;
 		JClassGlobalRef     _cls;
 
 	public:
-		Module(const ModuleManifest& manifest, const std::string& location);
+		Module(JointCore_ManifestHandle moduleManifest);
 		~Module();
+
+		JointCore_Error GetRootObject(const char* getterName, JointCore_ObjectAccessor* outObject) JOINT_DEVKIT_NOEXCEPT;
 
 		const JClassGlobalRef& GetClass() const { return _cls; }
 	};

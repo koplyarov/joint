@@ -24,7 +24,7 @@ namespace accessors
 		~Binding() = default;
 
 	private:
-		static JointCore_Error StaticLoadModule(void* binding, JointCore_ManifestHandle moduleManifest, JointCore_ModuleHandleInternal* outModule) JOINT_DEVKIT_NOEXCEPT
+		static JointCore_Error StaticLoadModule(void* binding, JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule) JOINT_DEVKIT_NOEXCEPT
 		{
 			static_assert(noexcept(Base::DerivedRef(binding).LoadModule(moduleManifest, outModule)), "Derived_::LoadModule method must have a noexcept specifier!");
 			return Base::DerivedRef(binding).LoadModule(moduleManifest, outModule);

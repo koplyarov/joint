@@ -26,7 +26,7 @@ TEST_DEFINE_TEST(TestCtx, LifetimeTests)
 	}
 
 	auto listenable = t->CreateListenable();
-	auto listener = joint::MakeComponentWrapper<LifetimeListener>();
+	auto listener = Ctx.MakeComponentWrapper<LifetimeListener>();
 	TEST_THROWS_NOTHING(listenable->SetListener(Ctx.MakeComponentProxy<test::ILifetimeListener>(listener)));
 	TEST_EQUALS(listener->GetObjectDestroyed(), false);
 	listenable.Reset();

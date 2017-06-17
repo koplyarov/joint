@@ -88,16 +88,16 @@ namespace java
 		{
 			using WrapperBase::WrapperBase;
 
-			JointCore_ObjectHandle GetHandle() const;
+			JointCore_ObjectAccessor GetAccessor() const;
 
-			static JObjLocalRef Make(JNIEnv* env, JointCore_ObjectHandle handle);
+			static JObjLocalRef Make(JNIEnv* env, JointCore_ObjectAccessor accessor);
 		};
 
 		struct ModuleContext : public WrapperBase
 		{
-			JointCore_ObjectHandle GetHandle() const;
+			JointCore_ModuleAccessor GetAccessor() const;
 
-			static JObjLocalRef Make(JNIEnv* env, JointCore_ModuleHandle handle);
+			static JObjLocalRef Make(JNIEnv* env, JointCore_ModuleAccessor accessor);
 		};
 
 		struct InterfaceId : public WrapperBase
@@ -189,10 +189,11 @@ namespace java
 		jmethodID Accessor_getInterfaceDescriptor;
 		jmethodID Accessor_cast;
 
-		jfieldID JointObject_handle;
-		jmethodID JointObject_long_ctor;
+		jfieldID JointObject_accessorVTable;
+		jfieldID JointObject_accessorInstance;
+		jmethodID JointObject_long_long_ctor;
 
-		jmethodID ModuleContext_long_ctor;
+		jmethodID ModuleContext_long_long_ctor;
 
 		jmethodID InterfaceId_String_ctor;
 

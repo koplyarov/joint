@@ -1,7 +1,8 @@
 #include <binding/Object.hpp>
 
-#include <joint/devkit/ValueMarshaller.hpp>
 #include <joint/devkit/CppWrappers.hpp>
+#include <joint/devkit/ValueMarshaller.hpp>
+#include <joint/devkit/accessors/MakeAccessor.hpp>
 
 #include <algorithm>
 
@@ -27,12 +28,39 @@ namespace binding
 	}
 
 
-	JointCore_Error Object::InvokeMethod(size_t index, joint::ArrayView<const JointCore_Parameter> params, JointCore_Type retType, JointCore_RetValue* outRetValue)
+	JointCore_Error Object::CastObject(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, JointCore_ObjectAccessor* outAccessor) JOINT_DEVKIT_NOEXCEPT
 	{
-		PyObject* py_function = PY_OBJ_CHECK_MSG((PyTuple_GetItem(_methods, index)), "Could not find method with id " + std::to_string(index));
+		JOINT_CPP_WRAP_BEGIN
+
+		PyObjectHolder py_obj(PY_OBJ_CHECK(PyObject_GetAttrString(_obj, "obj")));
+		PyObjectHolder py_obj_type(PyObject_Type(py_obj));
+		PyObjectHolder base_type = FindBaseById(py_obj_type, interfaceId);
+		if (!base_type)
+			return JOINT_CORE_ERROR_CAST_FAILED;
+
+		PyObjectHolder py_checksum(PY_OBJ_CHECK(PyObject_GetAttrString(base_type, "interfaceChecksum")));
+		if (FromPyLong<JointCore_InterfaceChecksum>(py_checksum) != checksum)
+			return JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM;
+
+		PyObjectHolder base_accessor_type(PY_OBJ_CHECK(PyObject_GetAttrString(base_type, "accessor")));
+
+		PyObjectHolder py_params(Py_BuildValue("(O)", (PyObject*)py_obj));
+		PyObjectHolder new_accessor(PY_OBJ_CHECK(PyObject_CallObject(base_accessor_type, py_params)));
+		*outAccessor = accessors::MakeAccessor<Object>(new_accessor);
+
+		JOINT_CPP_WRAP_END
+	}
+
+	JointCore_Error Object::InvokeMethod(JointCore_SizeT methodId, const JointCore_Parameter* paramsPtr, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue) JOINT_DEVKIT_NOEXCEPT
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		joint::ArrayView<const JointCore_Parameter> params(paramsPtr, paramsCount);
+
+		PyObject* py_function = PY_OBJ_CHECK_MSG((PyTuple_GetItem(_methods, methodId)), "Could not find method with id " + std::to_string(methodId));
 		auto ifc_desc = CastPyObject<pyjoint::InterfaceDescriptor>(_interfaceDesc, &pyjoint::InterfaceDescriptor_type);
 		NATIVE_CHECK(ifc_desc, "Invalid InterfaceDescriptor object");
-		const auto& m_desc = ifc_desc->GetDescriptor().GetMethod(index);
+		const auto& m_desc = ifc_desc->GetDescriptor().GetMethod(methodId);
 
 		PyObjectHolder py_args;
 		if (!params.empty())
@@ -109,6 +137,8 @@ namespace binding
 			outRetValue->result.value = ValueMarshaller::ToJoint(ValueDirection::Return, m_desc.GetRetType(), py_res, PythonMarshaller(), alloc);
 		outRetValue->releaseValue = &Object::ReleaseRetValue;
 		return JOINT_CORE_ERROR_NONE;
+
+		JOINT_CPP_WRAP_END
 	}
 
 
@@ -129,6 +159,40 @@ namespace binding
 			break;
 		}
 		JOINT_CPP_WRAP_END
+	}
+
+	PyObjectHolder Object::FindBaseById(PyObject* type, const char* interfaceId)
+	{
+		PyObjectHolder bases(PyObject_GetAttrString(type, "__bases__"));
+		PyObjectHolder seq(PySequence_Fast((PyObject*)bases, "A sequence expected!"));
+		int len = PySequence_Size(seq);
+		for (int i = 0; i < len; ++i)
+		{
+			PyObject* base = PY_OBJ_CHECK(PySequence_Fast_GET_ITEM(seq.Get(), i));
+
+			if (!PyObject_HasAttrString(base, "interfaceId"))
+				continue;
+
+#if PY_VERSION_HEX >= 0x03000000
+			PyObjectHolder py_base_interface_id(PY_OBJ_CHECK(PyObject_GetAttrString(base, "interfaceId")));
+#else
+			PyObjectHolder py_base_interface_id_attr(PY_OBJ_CHECK(PyObject_GetAttrString(base, "interfaceId")));
+			PyObjectHolder py_base_interface_id(PY_OBJ_CHECK(PyObject_Unicode(py_base_interface_id_attr)));
+#endif
+
+			auto base_interface_id = Utf8FromPyUnicode(py_base_interface_id);
+			if (strcmp(interfaceId, base_interface_id.GetContent()) == 0)
+			{
+				Py_INCREF(base);
+				return PyObjectHolder(base);
+			}
+
+			PyObjectHolder in_base = FindBaseById(base, interfaceId);
+			if (in_base)
+				return in_base;
+		}
+
+		return PyObjectHolder();
 	}
 
 }}}

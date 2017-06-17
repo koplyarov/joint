@@ -70,22 +70,22 @@ namespace python
 			return PyObjectHolder(PY_OBJ_CHECK(PyObject_CallObject(enumType, enum_params)));
 		}
 
-		PyObjectHolder FromJointObj(devkit::ValueDirection dir, JointCore_ObjectHandle val, PyObject* proxyType, JointCore_InterfaceChecksum checksum) const
+		PyObjectHolder FromJointObj(devkit::ValueDirection dir, JointCore_ObjectAccessor val, PyObject* proxyType, JointCore_InterfaceChecksum checksum) const
 		{
 			using namespace devkit;
 
-			if (val == JOINT_CORE_NULL_HANDLE)
+			if (JOINT_CORE_IS_NULL(val))
 			{
 				Py_INCREF(Py_None);
 				return PyObjectHolder(Py_None);
 			}
 
 			if (dir == ValueDirection::Parameter)
-				Joint_IncRefObject(val);
+				JOINT_CORE_INCREF_ACCESSOR(val);
 
 			auto sg(ScopeExit([&]{
 				if (dir == ValueDirection::Parameter)
-					Joint_DecRefObject(val);
+					JOINT_CORE_DECREF_ACCESSOR(val);
 			}));
 
 			PyObjectHolder result(PY_OBJ_CHECK(PyObject_CallObject(proxyType, nullptr)));
@@ -162,20 +162,25 @@ namespace python
 			return FromPyLong<int32_t>(int_value);
 		}
 
-		JointCore_ObjectHandle ToJointObj(devkit::ValueDirection dir, PyObject* val, const PyObjectHolder& objType) const
+		JointCore_ObjectAccessor ToJointObj(devkit::ValueDirection dir, PyObject* val, const PyObjectHolder& objType) const
 		{
 			using namespace devkit;
 
+			JointCore_ObjectAccessor result;
+
 			if (val == Py_None)
-				return JOINT_CORE_NULL_HANDLE;
+			{
+				JOINT_CORE_INIT_ACCESSOR(result);
+				return result;
+			}
 
 			auto proxy = CastPyObject<pyjoint::ProxyBase>(val, &pyjoint::ProxyBase_type);
 			NATIVE_CHECK(proxy, "Invalid proxy");
-			auto handle = proxy->obj;
+			result = proxy->obj;
 
 			if (dir == ValueDirection::Return)
-				Joint_IncRefObject(handle);
-			return handle;
+				JOINT_CORE_INCREF_ACCESSOR(result);
+			return result;
 		}
 
 		JointCore_ArrayHandle ToJointArray(devkit::ValueDirection dir, PyObject* val, const PyObjectHolder& objType) const

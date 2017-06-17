@@ -5,6 +5,7 @@
 #include <joint/Joint.h>
 #include <joint/devkit/ArrayView.hpp>
 #include <joint/devkit/Logger.hpp>
+#include <joint/devkit/accessors/Object.hpp>
 
 #include <vector>
 
@@ -17,7 +18,7 @@ namespace java {
 namespace binding
 {
 
-	class Object
+	class Object : public joint::devkit::accessors::Object<Object>
 	{
 		JOINT_DEVKIT_LOGGER("Joint.Java.Object")
 
@@ -34,6 +35,9 @@ namespace binding
 		JointCore_Error InvokeMethod(size_t index, joint::ArrayView<const JointCore_Parameter> params, JointCore_Type retType, JointCore_RetValue* outRetValue);
 
 		JObjWeakRef GetAccessor(JNIEnv* env) const { return _accessor.Weak(env); }
+
+		JointCore_Error CastObject(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, JointCore_ObjectAccessor* outAccessor) JOINT_DEVKIT_NOEXCEPT;
+		JointCore_Error InvokeMethod(JointCore_SizeT methodId, const JointCore_Parameter* paramsPtr, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue) JOINT_DEVKIT_NOEXCEPT;
 
 	public:
 		static JointCore_Error ReleaseRetValue(JointCore_Type type, JointCore_Value value);

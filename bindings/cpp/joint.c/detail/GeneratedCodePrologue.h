@@ -7,6 +7,35 @@
 #include <joint/Joint.h>
 #include <string.h>
 
+#define JOINT_CAST(Interface_, Object_, OutResultPtr_) \
+		do { \
+			if (JOINT_IS_NULL(Object_)) \
+				JOINT_INIT_REF(*(OutResultPtr_)); \
+			else \
+			{ \
+				JointCore_Error ret =  \
+				(Object_).Accessor.VTable->CastObject( \
+					(Object_).Accessor.Instance, \
+					Interface_##__id, \
+					Interface_##__checksum, \
+					&(OutResultPtr_)->Accessor \
+				); \
+				if (ret == JOINT_CORE_ERROR_CAST_FAILED) \
+					JOINT_INIT_REF(*(OutResultPtr_)); \
+			} \
+		} while (0)
+
+#define JOINT_INIT_REF(Object_) \
+		do { \
+			(Object_).Accessor.Instance = NULL; \
+		} while (0)
+
+#define JOINT_IS_OBJECT(Object_) \
+		((Object_).Accessor.Instance != NULL)
+
+#define JOINT_IS_NULL(Object_) \
+		(!JOINT_IS_OBJECT(Object_))
+
 JointCore_Error JointC_ReleaseRetValue(JointCore_Type type, JointCore_Value value)
 {
 	int32_t i;

@@ -43,8 +43,8 @@ namespace pyjoint
 		JointCore_InterfaceChecksum checksum = FromPyLong<JointCore_InterfaceChecksum>(py_checksum);
 		auto interface_id = Utf8FromPyUnicode(py_interface_id);
 
-		JointCore_ObjectHandle casted_obj;
-		JointCore_Error ret = Joint_CastObject(proxy->obj, interface_id.GetContent(), checksum, &casted_obj);
+		JointCore_ObjectAccessor casted_obj;
+		JointCore_Error ret = proxy->obj.VTable->CastObject(proxy->obj.Instance, interface_id.GetContent(), checksum, &casted_obj);
 		if (ret == JOINT_CORE_ERROR_CAST_FAILED)
 		{
 			Py_INCREF(Py_None);

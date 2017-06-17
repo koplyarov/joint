@@ -19,17 +19,6 @@ extern "C"
 		int dummy;
 	};
 
-	struct Joint_Binding
-	{
-		void*                       userData;
-		JointCore_BindingDesc           desc;
-		std::atomic<int>            refCount;
-
-		Joint_Binding(void* userData, const JointCore_BindingDesc& desc)
-			: userData(userData), desc(desc), refCount(1)
-		{ }
-	};
-
 
 	struct Joint_ManifestNode : public joint::JsonNode
 	{
@@ -50,30 +39,6 @@ extern "C"
 
 		Joint_Manifest(Joint_ManifestNode&& rootNode, std::string location)
 			: rootNode(std::move(rootNode)), location(std::move(location))
-		{ }
-	};
-
-
-	struct Joint_Module
-	{
-		JointCore_ModuleHandleInternal  internal;
-		Joint_Binding*              binding;
-		std::atomic<int>            refCount;
-
-		Joint_Module(JointCore_ModuleHandleInternal internal, Joint_Binding* binding)
-			: internal(internal), binding(binding), refCount(1)
-		{ }
-	};
-
-
-	struct Joint_Object
-	{
-		JointCore_ObjectHandleInternal  internal;
-		Joint_Module*               module;
-		std::atomic<int>            refCount;
-
-		Joint_Object(JointCore_ObjectHandleInternal internal, Joint_Module* module)
-			: internal(internal), module(module), refCount(1)
 		{ }
 	};
 

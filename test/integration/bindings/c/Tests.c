@@ -21,7 +21,7 @@ JointCore_Error SomeObject_Method(SomeObject* self, JointCore_ExceptionHandle* e
 JointCore_Error SomeObject_GetInvokationsCount(SomeObject* self, int32_t* result, JointCore_ExceptionHandle* ex)
 { *result = self->counter; return JOINT_CORE_ERROR_NONE; }
 
-JOINT_C_COMPONENT(SomeObject, test_ISomeObject);
+JOINT_COMPONENT(SomeObject, test_ISomeObject);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -32,29 +32,29 @@ typedef struct
 
 JointCore_Error LifetimeListenable_Init(LifetimeListenable* self)
 {
-	self->listener = (test_ILifetimeListener)NULL;
+	JOINT_INIT_REF(self->listener);
 	return JOINT_CORE_ERROR_NONE;
 }
 
 JointCore_Error LifetimeListenable_Deinit(LifetimeListenable* self)
 {
-	if (self->listener)
+	if (JOINT_IS_OBJECT(self->listener))
 	{
 		JointCore_ExceptionHandle ex;
 		test_ILifetimeListener_OnDestroyed(self->listener, &ex);
-		Joint_DecRefObject((JointCore_ObjectHandle)self->listener);
+		JOINT_DECREF(self->listener);
 	}
 	return JOINT_CORE_ERROR_NONE;
 }
 
 JointCore_Error LifetimeListenable_SetListener(LifetimeListenable* self, test_ILifetimeListener l, JointCore_ExceptionHandle* ex)
 {
-	Joint_IncRefObject((JointCore_ObjectHandle)l);
+	JOINT_INCREF(l);
 	self->listener = l;
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JOINT_C_COMPONENT(LifetimeListenable, test_ILifetimeListenable);
+JOINT_COMPONENT(LifetimeListenable, test_ILifetimeListenable);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -85,39 +85,43 @@ JointCore_Error CastComponent017_Method7(CastComponent017* self, int64_t i, int6
 { *result = i; return JOINT_CORE_ERROR_NONE; }
 
 
-JOINT_C_COMPONENT(CastComponent017, test_IInterface0, test_IInterface1, test_IInterface7);
+JOINT_COMPONENT(CastComponent017, test_IInterface0, test_IInterface1, test_IInterface7);
 
 ////////////////////////////////////////////////////////////////////////////////
 
 typedef struct { int dummy; } InterfaceChecksumComponent1;
 JointCore_Error InterfaceChecksumComponent1_Init(InterfaceChecksumComponent1* self) { return JOINT_CORE_ERROR_NONE; }
 JointCore_Error InterfaceChecksumComponent1_Deinit(InterfaceChecksumComponent1* self) { return JOINT_CORE_ERROR_NONE; }
-JOINT_C_COMPONENT(InterfaceChecksumComponent1, test_IInterfaceCS1);
+JOINT_COMPONENT(InterfaceChecksumComponent1, test_IInterfaceCS1);
 
 typedef struct { int dummy; } InterfaceChecksumComponent2;
 JointCore_Error InterfaceChecksumComponent2_Init(InterfaceChecksumComponent2* self) { return JOINT_CORE_ERROR_NONE; }
 JointCore_Error InterfaceChecksumComponent2_Deinit(InterfaceChecksumComponent2* self) { return JOINT_CORE_ERROR_NONE; }
-JOINT_C_COMPONENT(InterfaceChecksumComponent2, test_IInterfaceCS2);
+JOINT_COMPONENT(InterfaceChecksumComponent2, test_IInterfaceCS2);
 
 typedef struct { int dummy; } InterfaceChecksumComponent12;
 JointCore_Error InterfaceChecksumComponent12_Init(InterfaceChecksumComponent12* self) { return JOINT_CORE_ERROR_NONE; }
 JointCore_Error InterfaceChecksumComponent12_Deinit(InterfaceChecksumComponent12* self) { return JOINT_CORE_ERROR_NONE; }
-JOINT_C_COMPONENT(InterfaceChecksumComponent12, test_IInterfaceCS1, test_IInterfaceCS2);
+JOINT_COMPONENT(InterfaceChecksumComponent12, test_IInterfaceCS1, test_IInterfaceCS2);
 
 ////////////////////////////////////////////////////////////////////////////////
 
 typedef struct {
-	JointCore_ModuleHandle module;
+	Joint_ModuleContext moduleContext;
 } Tests;
 
-JointCore_Error Tests_Init(Tests* self, JointCore_ModuleHandle module)
+JointCore_Error Tests_Init(Tests* self, Joint_ModuleContext moduleContext)
 {
-	self->module = module;
+	self->moduleContext = moduleContext;
+	JOINT_CORE_INCREF_ACCESSOR(self->moduleContext);
 	return JOINT_CORE_ERROR_NONE;
 }
 
 JointCore_Error Tests_Deinit(Tests* self)
-{ return JOINT_CORE_ERROR_NONE; }
+{
+	JOINT_CORE_DECREF_ACCESSOR(self->moduleContext);
+	return JOINT_CORE_ERROR_NONE;
+}
 
 JointCore_Error Tests_AddU8(Tests* self, uint8_t l, uint8_t r, uint8_t* result, JointCore_ExceptionHandle* ex)
 { *result = l + r; return JOINT_CORE_ERROR_NONE; }
@@ -200,9 +204,7 @@ JointCore_Error Tests_CallbackString(Tests* self, test_IBasicTestsCallbackString
 
 JointCore_Error Tests_StringRepresentation(Tests* self, test_Enum e, const char** result, JointCore_ExceptionHandle* ex)
 {
-	char* tmp = (char*)malloc(strlen(test_Enum__ToString(e)) + 1);
-	strcpy(tmp, test_Enum__ToString(e));
-	*result = tmp;
+	*result = Joint_CopyString(test_Enum__ToString(e));
 	return JOINT_CORE_ERROR_NONE;
 }
 
@@ -214,18 +216,18 @@ JointCore_Error Tests_GetNextValueInRing(Tests* self, test_Enum e, test_Enum* re
 	case test_Enum_Value2: *result = test_Enum_Value3; break;
 	case test_Enum_Value3: *result = test_Enum_Value4; break;
 	case test_Enum_Value4: *result = test_Enum_Value1; break;
-	default: return JOINT_C_THROW("Invalid enum value", ex);
+	default: return JOINT_THROW("Invalid enum value", ex);
 	}
 	return JOINT_CORE_ERROR_NONE;
 }
 
 
 JointCore_Error Tests_ReturnNull(Tests* self, test_ISomeObject* result, JointCore_ExceptionHandle* ex)
-{ *result = NULL; return JOINT_CORE_ERROR_NONE; }
+{ JOINT_INIT_REF(*result); return JOINT_CORE_ERROR_NONE; }
 
 JointCore_Error Tests_CheckNotNull(Tests* self, test_ISomeObject o, Joint_Bool* result, JointCore_ExceptionHandle* ex)
 {
-	*result = o != NULL;
+	*result = JOINT_IS_OBJECT(o);
 	return JOINT_CORE_ERROR_NONE;
 }
 
@@ -241,15 +243,15 @@ JointCore_Error Tests_InvokeObjectMethod(Tests* self, test_ISomeObject o, JointC
 
 JointCore_Error Tests_ReturnNewObject(Tests* self, test_ISomeObject* result, JointCore_ExceptionHandle* ex)
 {
-	SomeObject__wrapper* t = JointC_Wrap__SomeObject();
-	SomeObject_Init(&t->impl);
-	*result = (test_ISomeObject)SomeObject__as__test_ISomeObject(self->module, t);
+	SomeObject* impl;
+	JOINT_CREATE_COMPONENT(test_ISomeObject, SomeObject, self->moduleContext, result, &impl);
+	SomeObject_Init(impl);
 	return JOINT_CORE_ERROR_NONE;
 }
 
 JointCore_Error Tests_ReturnSameObject(Tests* self, test_ISomeObject o, test_ISomeObject* result, JointCore_ExceptionHandle* ex)
 {
-	Joint_IncRefObject((JointCore_ObjectHandle)o);
+	JOINT_INCREF(o);
 	*result = o;
 	return JOINT_CORE_ERROR_NONE;
 }
@@ -257,9 +259,9 @@ JointCore_Error Tests_ReturnSameObject(Tests* self, test_ISomeObject o, test_ISo
 
 JointCore_Error Tests_CreateListenable(Tests* self, test_ILifetimeListenable* result, JointCore_ExceptionHandle* ex)
 {
-	LifetimeListenable__wrapper* t = JointC_Wrap__LifetimeListenable();
-	LifetimeListenable_Init(&t->impl);
-	*result = (test_ILifetimeListenable)LifetimeListenable__as__test_ILifetimeListenable(self->module, t);
+	LifetimeListenable* impl;
+	JOINT_CREATE_COMPONENT(test_ILifetimeListenable, LifetimeListenable, self->moduleContext, result, &impl);
+	LifetimeListenable_Init(impl);
 	return JOINT_CORE_ERROR_NONE;
 }
 
@@ -268,36 +270,36 @@ JointCore_Error Tests_CollectGarbage(Tests* self, JointCore_ExceptionHandle* ex)
 
 
 JointCore_Error Tests_CastTo1(Tests* self, test_IInterface0 obj, test_IInterface1* result, JointCore_ExceptionHandle* ex)
-{ return JointC_CastTo__test_IInterface1(obj, result); }
+{ JOINT_CAST(test_IInterface1, obj, result); return JOINT_CORE_ERROR_NONE; }
 
 JointCore_Error Tests_CastTo2(Tests* self, test_IInterface0 obj, test_IInterface2* result, JointCore_ExceptionHandle* ex)
-{ return JointC_CastTo__test_IInterface2(obj, result); }
+{ JOINT_CAST(test_IInterface2, obj, result); return JOINT_CORE_ERROR_NONE; }
 
 JointCore_Error Tests_CastTo3(Tests* self, test_IInterface0 obj, test_IInterface3* result, JointCore_ExceptionHandle* ex)
-{ return JointC_CastTo__test_IInterface3(obj, result); }
+{ JOINT_CAST(test_IInterface3, obj, result); return JOINT_CORE_ERROR_NONE; }
 
 JointCore_Error Tests_CastTo4(Tests* self, test_IInterface0 obj, test_IInterface4* result, JointCore_ExceptionHandle* ex)
-{ return JointC_CastTo__test_IInterface4(obj, result); }
+{ JOINT_CAST(test_IInterface4, obj, result); return JOINT_CORE_ERROR_NONE; }
 
 JointCore_Error Tests_CastTo5(Tests* self, test_IInterface0 obj, test_IInterface5* result, JointCore_ExceptionHandle* ex)
-{ return JointC_CastTo__test_IInterface5(obj, result); }
+{ JOINT_CAST(test_IInterface5, obj, result); return JOINT_CORE_ERROR_NONE; }
 
 JointCore_Error Tests_CastTo6(Tests* self, test_IInterface0 obj, test_IInterface6* result, JointCore_ExceptionHandle* ex)
-{ return JointC_CastTo__test_IInterface6(obj, result); }
+{ JOINT_CAST(test_IInterface6, obj, result); return JOINT_CORE_ERROR_NONE; }
 
 JointCore_Error Tests_CastTo7(Tests* self, test_IInterface0 obj, test_IInterface7* result, JointCore_ExceptionHandle* ex)
-{ return JointC_CastTo__test_IInterface7(obj, result); }
+{ JOINT_CAST(test_IInterface7, obj, result); return JOINT_CORE_ERROR_NONE; }
 
 JointCore_Error Tests_Create017(Tests* self, test_IInterface0* result, JointCore_ExceptionHandle* ex)
 {
-	CastComponent017__wrapper* t = JointC_Wrap__CastComponent017();
-	CastComponent017_Init(&t->impl);
-	*result = (test_IInterface0)CastComponent017__as__test_IInterface0(self->module, t);
+	CastComponent017* impl;
+	JOINT_CREATE_COMPONENT(test_IInterface0, CastComponent017, self->moduleContext, result, &impl);
+	CastComponent017_Init(impl);
 	return JOINT_CORE_ERROR_NONE;
 }
 
 JointCore_Error Tests_ThrowNative(Tests* self, JointCore_ExceptionHandle* ex)
-{ return JOINT_C_THROW("Requested exception", ex); }
+{ return JOINT_THROW("Requested exception", ex); }
 
 JointCore_Error Tests_CatchAll(Tests* self, test_IExceptionTestsCallback cb, Joint_Bool* result, JointCore_ExceptionHandle* ex)
 {
@@ -315,25 +317,25 @@ JointCore_Error Tests_LetThrough(Tests* self, test_IExceptionTestsCallback cb, J
 
 JointCore_Error Tests_Return1(Tests* self, test_IInterfaceCS1* result, JointCore_ExceptionHandle* ex)
 {
-	InterfaceChecksumComponent1__wrapper* t = JointC_Wrap__InterfaceChecksumComponent1();
-	InterfaceChecksumComponent1_Init(&t->impl);
-	*result = (test_IInterfaceCS1)InterfaceChecksumComponent1__as__test_IInterfaceCS1(self->module, t);
+	InterfaceChecksumComponent1* impl;
+	JOINT_CREATE_COMPONENT(test_IInterfaceCS1, InterfaceChecksumComponent1, self->moduleContext, result, &impl);
+	InterfaceChecksumComponent1_Init(impl);
 	return JOINT_CORE_ERROR_NONE;
 }
 
 JointCore_Error Tests_Return2(Tests* self, test_IInterfaceCS2* result, JointCore_ExceptionHandle* ex)
 {
-	InterfaceChecksumComponent2__wrapper* t = JointC_Wrap__InterfaceChecksumComponent2();
-	InterfaceChecksumComponent2_Init(&t->impl);
-	*result = (test_IInterfaceCS2)InterfaceChecksumComponent2__as__test_IInterfaceCS2(self->module, t);
+	InterfaceChecksumComponent2* impl;
+	JOINT_CREATE_COMPONENT(test_IInterfaceCS2, InterfaceChecksumComponent2, self->moduleContext, result, &impl);
+	InterfaceChecksumComponent2_Init(impl);
 	return JOINT_CORE_ERROR_NONE;
 }
 
 JointCore_Error Tests_Return12(Tests* self, test_IInterfaceCS1* result, JointCore_ExceptionHandle* ex)
 {
-	InterfaceChecksumComponent12__wrapper* t = JointC_Wrap__InterfaceChecksumComponent12();
-	InterfaceChecksumComponent12_Init(&t->impl);
-	*result = (test_IInterfaceCS1)InterfaceChecksumComponent12__as__test_IInterfaceCS1(self->module, t);
+	InterfaceChecksumComponent12* impl;
+	JOINT_CREATE_COMPONENT(test_IInterfaceCS1, InterfaceChecksumComponent12, self->moduleContext, result, &impl);
+	InterfaceChecksumComponent12_Init(impl);
 	return JOINT_CORE_ERROR_NONE;
 }
 
@@ -345,28 +347,25 @@ JointCore_Error Tests_AcceptCS2(Tests* self, test_IInterfaceCS2 obj, JointCore_E
 
 JointCore_Error Tests_CastToCS2(Tests* self, test_IInterfaceCS1 obj, JointCore_ExceptionHandle* ex)
 {
-	test_IInterfaceCS2 tmp = NULL;
-	JointCore_Error ret = JointC_CastTo__test_IInterfaceCS2(obj, &tmp);
-	if (ret != JOINT_CORE_ERROR_NONE)
-		return JOINT_C_THROW("Could not cast to test.IInterfaceCS2", ex);
+	test_IInterfaceCS2 tmp = { NULL };
+	JOINT_CAST(test_IInterfaceCS2, obj, &tmp);
+	if (JOINT_IS_NULL(tmp))
+		return JOINT_THROW("Could not cast to test.IInterfaceCS2", ex);
+	JOINT_DECREF(tmp);
 	return JOINT_CORE_ERROR_NONE;
 }
 
 
 JointCore_Error Tests_MakeS1(Tests* self, int32_t i, const char* s, test_S1* result, JointCore_ExceptionHandle* ex)
 {
-	char* tmp = (char*)malloc(strlen(s) + 1);
-	strcpy(tmp, s);
 	result->i = i;
-	result->s = tmp;
+	result->s = Joint_CopyString(s);
 	return JOINT_CORE_ERROR_NONE;
 }
 
 JointCore_Error Tests_GetS(Tests* self, test_S1 s, const char** result, JointCore_ExceptionHandle* ex)
 {
-	char* tmp = (char*)malloc(strlen(s.s) + 1);
-	strcpy(tmp, s.s);
-	*result = tmp;
+	*result = Joint_CopyString(s.s);
 	return JOINT_CORE_ERROR_NONE;
 }
 
@@ -393,16 +392,15 @@ JointCore_Error Tests_GetI32Element(Tests* self, i32__Array array, int32_t index
 { return i32__Array_Get(array, index, result, ex); }
 
 
-JOINT_C_COMPONENT(Tests, test_IBasicTests, test_IEnumTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests, test_IInterfaceChecksumTests, test_IStructTests, test_IArrayTests);
+JOINT_COMPONENT(Tests, test_IBasicTests, test_IEnumTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests, test_IInterfaceChecksumTests, test_IStructTests, test_IArrayTests);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef _MSC_VER
-__declspec(dllexport)
-#endif
-JointCore_ObjectHandle GetTests(JointCore_ModuleHandle module)
+JOINT_C_ROOT_OBJECT_GETTER(GetTests)
 {
-	Tests__wrapper* t = JointC_Wrap__Tests();
-	Tests_Init(&t->impl, module);
-	return Tests__as__test_IBasicTests(module, t);
+	joint_IObject result;
+	Tests* impl;
+	JOINT_CREATE_COMPONENT(joint_IObject, Tests, moduleContext, &result, &impl);
+	Tests_Init(impl, moduleContext);
+	return result;
 }

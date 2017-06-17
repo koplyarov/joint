@@ -2,8 +2,8 @@
 #define JOINT_DEVKIT_UTIL_INTRUSIVEREFCOUNTER_HPP
 
 
-#include <joint/util/Assert.h>
 #include <joint/devkit/Config.hpp>
+#include <joint/util/Assert.h>
 
 #include <atomic>
 
@@ -34,12 +34,12 @@ namespace devkit
 		{
 			int newVal = --_refCount;
 			JOINT_CORE_ASSERT(newVal >= 0);
-			if (newVal < 0)
+			if (newVal == 0)
 				delete DerivedPtr();
 		}
 
 	protected:
-		~IntrusiveRefCounter() = default;
+		virtual ~IntrusiveRefCounter() = default;
 
 	private:
 		Derived_* DerivedPtr() JOINT_DEVKIT_NOEXCEPT

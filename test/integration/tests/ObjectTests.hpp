@@ -58,7 +58,7 @@ TEST_DEFINE_TEST(TestCtx, ObjectTests)
 	TEST_EQUALS(t->CallbackParam(joint::Cast<test::IObjectTestsCallbackParam>(cb), nullptr), false);
 	TEST_EQUALS(t->CallbackParam(joint::Cast<test::IObjectTestsCallbackParam>(cb), some_obj), true);
 
-	auto o_impl = joint::MakeComponentWrapper<SomeObject>();
+	auto o_impl = Ctx.MakeComponentWrapper<SomeObject>();
 	auto o = Ctx.MakeComponentProxy<test::ISomeObject>(o_impl);
 
 	TEST_THROWS_NOTHING(t->InvokeObjectMethod(o));

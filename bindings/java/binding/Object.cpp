@@ -1,14 +1,14 @@
-#include <binding/Object.hpp>
-
 #include <joint/devkit/CppWrappers.hpp>
 #include <joint/devkit/JointException.hpp>
 #include <joint/devkit/StackStorage.hpp>
 #include <joint/devkit/StringBuilder.hpp>
 #include <joint/devkit/ValueMarshaller.hpp>
+#include <joint/devkit/accessors/MakeAccessor.hpp>
 
 #include <binding/JavaBindingInfo.hpp>
 #include <binding/JointJavaContext.hpp>
 #include <binding/Marshaller.hpp>
+#include <binding/Object.hpp>
 #include <utils/Utils.hpp>
 
 
@@ -33,9 +33,31 @@ namespace binding
 	{ }
 
 
-	JointCore_Error Object::InvokeMethod(size_t index, joint::ArrayView<const JointCore_Parameter> params, JointCore_Type retType, JointCore_RetValue* outRetValue)
+	JointCore_Error Object::CastObject(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, JointCore_ObjectAccessor* outAccessor) JOINT_DEVKIT_NOEXCEPT
 	{
-		const auto& m_desc = _nativeInterfaceDesc->GetMethod(index);
+		JOINT_CPP_WRAP_BEGIN
+
+		auto jvm = JointJavaContext::GetJvm();
+		auto env = GetJavaEnv(jvm);
+
+		auto iid = JointJavaContext::InterfaceId::Make(env, JStringLocalRef::StealLocal(env, JAVA_CALL(env->NewStringUTF(interfaceId))));
+
+		auto jaccessor = GetAccessor(env);
+		JObjLocalRef new_jaccessor = JointJavaContext::Accessor(jaccessor).Cast(iid);
+		if (!new_jaccessor)
+			return JOINT_CORE_ERROR_CAST_FAILED;
+
+		*outAccessor = accessors::MakeAccessor<Object>(env, new_jaccessor.Global());
+
+		JOINT_CPP_WRAP_END
+	}
+
+
+	JointCore_Error Object::InvokeMethod(JointCore_SizeT methodId, const JointCore_Parameter* paramsPtr, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue) JOINT_DEVKIT_NOEXCEPT
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		const auto& m_desc = _nativeInterfaceDesc->GetMethod(methodId);
 
 		StackStorage<jvalue, 1024> params_storage;
 
@@ -43,13 +65,13 @@ namespace binding
 		auto env = GetJavaEnv(jvm);
 
 		jvalue* jparams = nullptr;
-		if (!params.empty())
+		if (paramsCount)
 		{
 			JavaMarshaller m(env);
-			jparams = params_storage.Make(params.size());
+			jparams = params_storage.Make(paramsCount);
 
-			for (size_t i = 0; i < params.size(); ++i)
-				jparams[i] = ValueMarshaller::FromJoint<jvalue>(ValueDirection::Parameter, m_desc.GetParamType(i), params[i].value, m);
+			for (size_t i = 0; i < paramsCount; ++i)
+				jparams[i] = ValueMarshaller::FromJoint<jvalue>(ValueDirection::Parameter, m_desc.GetParamType(i), paramsPtr[i].value, m);
 		}
 
 		jvalue j_res;
@@ -111,6 +133,8 @@ namespace binding
 			outRetValue->result.ex = GetJavaExceptionInfo(env).MakeJointException().Release();
 			return JOINT_CORE_ERROR_EXCEPTION;
 		}
+
+		JOINT_CPP_WRAP_END
 	}
 
 

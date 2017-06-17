@@ -14,7 +14,7 @@ namespace pyjoint
 	struct ProxyBase
 	{
 		PyObject_HEAD
-		JointCore_ObjectHandle obj;
+		JointCore_ObjectAccessor obj;
 		JointCore_InterfaceChecksum checksum;
 		PyObject* ifcDesc;
 	};

@@ -2,30 +2,25 @@ package org.joint;
 
 public class ModuleContext
 {
-	private long handle;
+	private long accessorVTable;
+	private long accessorInstance;
 
     static
 	{ System.loadLibrary("joint-java"); }
 
-	ModuleContext(long handle)
-	{ this.handle = handle; }
+	ModuleContext(long accessorVTable, long accessorInstance)
+	{
+		this.accessorVTable = accessorVTable;
+		this.accessorInstance = accessorInstance;
+	}
 
 	public JointObject register(Accessor accessor)
 	{
 		if (accessor == null)
 			throw new NullPointerException("accessor");
 
-		long objHandle = doRegister(handle, accessor);
-		try
-		{
-			return new JointObject(objHandle);
-		}
-		catch (Exception e)
-		{
-			JointObject.releaseObject(objHandle);
-			throw e;
-		}
+		return doRegister(accessorVTable, accessorInstance, accessor);
 	}
 
-	private static native long doRegister(long moduleHandleLong, Accessor accessor);
+	private static native JointObject doRegister(long accessorVTable, long accessorInstance, Accessor accessor);
 }

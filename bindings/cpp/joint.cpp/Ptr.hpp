@@ -2,9 +2,10 @@
 #define BINDINGS_CPP_JOINT_CPP_PTR_HPP
 
 
-#include <joint.cpp/detail/JointCall.hpp>
+#include <joint/accessors/ObjectAccessor.h>
 
 #include <cstddef>
+#include <joint.cpp/detail/JointCall.hpp>
 
 
 namespace joint
@@ -25,7 +26,7 @@ namespace joint
 			: _raw()
 		{ }
 
-		explicit Ptr(JointCore_ObjectHandle obj)
+		explicit Ptr(JointCore_ObjectAccessor obj)
 			: _raw(obj)
 		{ }
 
@@ -36,14 +37,16 @@ namespace joint
 		Ptr(const Ptr& other)
 			: _raw(other._raw)
 		{
-			if (*this)
-				Joint_IncRefObject(_raw._GetObjectHandle());
+			JointCore_ObjectAccessor a = _raw._GetObjectAccessor();
+			if (a.Instance)
+				a.VTable->AddRef(a.Instance);
 		}
 
 		~Ptr()
 		{
-			if (*this)
-				Joint_DecRefObject(_raw._GetObjectHandle());
+			JointCore_ObjectAccessor a = _raw._GetObjectAccessor();
+			if (a.Instance)
+				a.VTable->Release(a.Instance);
 		}
 
 
@@ -65,7 +68,7 @@ namespace joint
 		}
 
 		explicit operator bool() const
-		{ return _raw._GetObjectHandle() != JOINT_CORE_NULL_HANDLE; }
+		{ return _raw._GetObjectAccessor().Instance != NULL; }
 
 		//T_* Get() { return &_raw; }
 		T_* Get() const { return &_raw; }
@@ -84,14 +87,15 @@ namespace joint
 		if (!src)
 			return Ptr<Dst_>();
 
-		JointCore_ObjectHandle result_handle;
-		JointCore_Error ret = Joint_CastObject(src->_GetObjectHandle(), Dst_::_GetInterfaceId(), Dst_::_GetInterfaceChecksum(), &result_handle);
+		JointCore_ObjectAccessor result_accessor;
+		JointCore_ObjectAccessor a = src.Get()->_GetObjectAccessor();
+		JointCore_Error ret = a.VTable->CastObject(a.Instance, Dst_::_GetInterfaceId(), Dst_::_GetInterfaceChecksum(), &result_accessor);
 		if (ret == JOINT_CORE_ERROR_NONE)
-			return Ptr<Dst_>(Dst_(result_handle));
+			return Ptr<Dst_>(Dst_(result_accessor));
 		else if (ret == JOINT_CORE_ERROR_CAST_FAILED)
 			return Ptr<Dst_>();
 		else
-			throw std::runtime_error(std::string("Joint_CastObject failed: ") + JointCore_ErrorToString(ret));
+			throw std::runtime_error(std::string("CastObject failed: ") + JointCore_ErrorToString(ret));
 	}
 
 }

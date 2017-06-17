@@ -3,6 +3,7 @@
 
 
 #include <joint/Joint.h>
+#include <joint/accessors/BindingAccessor.h>
 
 
 #ifdef _MSC_VER
@@ -18,7 +19,7 @@
 
 extern "C"
 {
-	JOINT_CPP_CORE_API JointCore_Error JointCpp_MakeBinding(JointCore_BindingHandle* outBinding);
+	JOINT_CPP_CORE_API JointCore_Error JointCpp_MakeBinding(JointCore_BindingAccessor* outBinding);
 }
 
 #endif

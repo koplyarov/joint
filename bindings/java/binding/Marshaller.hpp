@@ -89,21 +89,21 @@ namespace java
 			return result;
 		}
 
-		JavaVariant FromJointObj(devkit::ValueDirection dir, JointCore_ObjectHandle val, const JavaBindingInfo::ObjectUserData& proxyType, JointCore_InterfaceChecksum checksum) const
+		JavaVariant FromJointObj(devkit::ValueDirection dir, JointCore_ObjectAccessor val, const JavaBindingInfo::ObjectUserData& proxyType, JointCore_InterfaceChecksum checksum) const
 		{
 			jvalue result;
-			if (val == JOINT_CORE_NULL_HANDLE)
+			if (JOINT_CORE_IS_NULL(val))
 			{
 				result.l = NULL;
 				return result;
 			}
 
 			if (dir == devkit::ValueDirection::Parameter)
-				Joint_IncRefObject(val);
+				JOINT_CORE_INCREF_ACCESSOR(val);
 
 			auto sg(devkit::ScopeExit([&]{
 				if (dir == devkit::ValueDirection::Parameter)
-					Joint_DecRefObject(val);
+					JOINT_CORE_DECREF_ACCESSOR(val);
 			}));
 
 			auto joint_obj = JointJavaContext::JointObject::Make(env, val);
@@ -175,10 +175,14 @@ namespace java
 			return  JAVA_CALL(env->GetIntField(val.l, value_id));
 		}
 
-		JointCore_ObjectHandle ToJointObj(devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::ObjectUserData& objType) const
+		JointCore_ObjectAccessor ToJointObj(devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::ObjectUserData& objType) const
 		{
+			JointCore_ObjectAccessor result;
 			if (!val.l)
-				return JOINT_CORE_NULL_HANDLE;
+			{
+				JOINT_CORE_INIT_ACCESSOR(result);
+				return result;
+			}
 
 			auto cls = JClassLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectClass(val.l)));
 			jfieldID obj_id = JAVA_CALL(env->GetFieldID(cls.Get(), "_obj", "Lorg/joint/JointObject;"));
@@ -186,10 +190,10 @@ namespace java
 			auto raw_joint_obj = JObjLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectField(val.l, obj_id)));
 			JointJavaContext::JointObject joint_obj(raw_joint_obj);
 
-			auto handle = joint_obj.GetHandle();
+			result = joint_obj.GetAccessor();
 			if (dir == devkit::ValueDirection::Return)
-				Joint_IncRefObject(handle);
-			return handle;
+				JOINT_CORE_INCREF_ACCESSOR(result);
+			return result;
 		}
 
 		JointCore_ArrayHandle ToJointArray(devkit::ValueDirection dir, jvalue val, const JavaBindingInfo::ArrayUserData& objType) const

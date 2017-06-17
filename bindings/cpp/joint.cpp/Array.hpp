@@ -135,7 +135,7 @@ namespace joint
 
 			static Ptr<T_> FromJointValue(JointCore_Value value)
 			{
-				Joint_IncRefObject(value.obj);
+				JOINT_CORE_INCREF_ACCESSOR(value.obj);
 				return Ptr<T_>(value.obj);
 			}
 

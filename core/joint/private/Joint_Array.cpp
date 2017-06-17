@@ -60,7 +60,7 @@ extern "C"
 			Joint_DecRefArray(value.array);
 			break;
 		case JOINT_CORE_TYPE_OBJ:
-			Joint_DecRefObject(value.obj);
+			JOINT_CORE_DECREF_ACCESSOR(value.obj);
 			break;
 		default:
 			break;
@@ -92,7 +92,7 @@ extern "C"
 			Joint_IncRefArray(result.array);
 			break;
 		case JOINT_CORE_TYPE_OBJ:
-			Joint_IncRefObject(result.obj);
+			JOINT_CORE_DECREF_ACCESSOR(result.obj);
 			break;
 		default:
 			break;

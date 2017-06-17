@@ -1,5 +1,5 @@
 #include <binding/JointJavaContext.hpp>
-
+#include <jni/JNIHelpers.hpp>
 #include <utils/Utils.hpp>
 
 
@@ -99,10 +99,11 @@ namespace java
 		Accessor_getInterfaceDescriptor      = JAVA_CALL(env->GetMethodID(Accessor_cls.Get(), "getInterfaceDescriptor", "()Lorg/joint/InterfaceDescriptor;"));
 		Accessor_cast                        = JAVA_CALL(env->GetMethodID(Accessor_cls.Get(), "cast", "(Lorg/joint/InterfaceId;)Lorg/joint/Accessor;"));
 
-		JointObject_handle                   = JAVA_CALL(env->GetFieldID(JointObject_cls.Get(), "handle", "J"));
-		JointObject_long_ctor                = JAVA_CALL(env->GetMethodID(JointObject_cls.Get(), "<init>", "(J)V"));
+		JointObject_accessorVTable           = JAVA_CALL(env->GetFieldID(JointObject_cls.Get(), "accessorVTable", "J"));
+		JointObject_accessorInstance         = JAVA_CALL(env->GetFieldID(JointObject_cls.Get(), "accessorInstance", "J"));
+		JointObject_long_long_ctor           = JAVA_CALL(env->GetMethodID(JointObject_cls.Get(), "<init>", "(JJ)V"));
 
-		ModuleContext_long_ctor              = JAVA_CALL(env->GetMethodID(ModuleContext_cls.Get(), "<init>", "(J)V"));
+		ModuleContext_long_long_ctor         = JAVA_CALL(env->GetMethodID(ModuleContext_cls.Get(), "<init>", "(JJ)V"));
 
 		InterfaceId_String_ctor              = JAVA_CALL(env->GetMethodID(InterfaceId_cls.Get(), "<init>", "(Ljava/lang/String;)V"));
 
@@ -176,15 +177,19 @@ namespace java
 	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->CallObjectMethod(_obj.Get(), ConstInstance().Accessor_cast, iid.Get()))); }
 
 
-	JObjLocalRef JointJavaContext::JointObject::Make(JNIEnv* env, JointCore_ObjectHandle handle)
-	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().JointObject_cls.Get(), ConstInstance().JointObject_long_ctor, (jlong)handle))); }
+	JObjLocalRef JointJavaContext::JointObject::Make(JNIEnv* env, JointCore_ObjectAccessor accessor)
+	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().JointObject_cls.Get(), ConstInstance().JointObject_long_long_ctor, (jlong)accessor.VTable, (jlong)accessor.Instance))); }
 
-	JointCore_ObjectHandle JointJavaContext::JointObject::GetHandle() const
-	{ return reinterpret_cast<JointCore_ObjectHandle>(JAVA_CALL(env->GetLongField(_obj.Get(), ConstInstance().JointObject_handle))); }
+	JointCore_ObjectAccessor JointJavaContext::JointObject::GetAccessor() const
+	{
+		jlong vtable_long = JAVA_CALL(env->GetLongField(_obj.Get(), ConstInstance().JointObject_accessorVTable));
+		jlong instance_long = JAVA_CALL(env->GetLongField(_obj.Get(), ConstInstance().JointObject_accessorInstance));
+		return ObjectAccessorFromJLongs(vtable_long, instance_long);
+	}
 
 
-	JObjLocalRef JointJavaContext::ModuleContext::Make(JNIEnv* env, JointCore_ModuleHandle handle)
-	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().ModuleContext_cls.Get(), ConstInstance().ModuleContext_long_ctor, (jlong)handle)));}
+	JObjLocalRef JointJavaContext::ModuleContext::Make(JNIEnv* env, JointCore_ModuleAccessor accessor)
+	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().ModuleContext_cls.Get(), ConstInstance().ModuleContext_long_long_ctor, (jlong)accessor.VTable, (jlong)accessor.Instance)));}
 
 
 	JObjLocalRef JointJavaContext::InterfaceId::Make(JNIEnv* env, const JStringTempRef& id)

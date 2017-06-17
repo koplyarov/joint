@@ -1,6 +1,7 @@
 #include <pyjoint/Module.hpp>
 
 #include <joint/devkit/Logger.hpp>
+#include <joint/devkit/accessors/MakeAccessor.hpp>
 
 #include <binding/Object.hpp>
 #include <pyjoint/ProxyBase.hpp>
@@ -11,6 +12,9 @@ namespace joint {
 namespace python {
 namespace pyjoint
 {
+
+	using namespace joint::devkit;
+
 
 	JOINT_DEVKIT_LOGGER("Joint.Python.PyJoint.Module")
 
@@ -68,12 +72,27 @@ namespace pyjoint
 	};
 
 
+	PyObject* MakeModule(JointCore_ModuleAccessor accessor)
+	{
+		PyObjectHolder pyjoint_pymodule_name(PY_OBJ_CHECK(PyUnicode_FromString("pyjoint")));
+		PyObjectHolder pyjoint_pymodule(PY_OBJ_CHECK_MSG(PyImport_Import(pyjoint_pymodule_name), "Could not import python module pyjoint"));
+		PyObjectHolder pyjoint_module_type(PY_OBJ_CHECK(PyObject_GetAttrString(pyjoint_pymodule, "Module")));
+
+		PyObjectHolder pyjoint_module(PY_OBJ_CHECK(PyObject_CallObject(pyjoint_module_type, nullptr)));
+		auto inst = CastPyObject<Module>(pyjoint_module, &pyjoint::Module_type);
+		JOINT_CORE_INCREF_ACCESSOR(accessor);
+		inst->accessor = accessor;
+		return pyjoint_module.Release();
+	}
+
+
 	static PyObject* Module_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 	{
 		PYJOINT_CPP_WRAP_BEGIN
 
 		Module* self = PY_OBJ_CHECK((Module*)type->tp_alloc(type, 0));
-		self->handle = JOINT_CORE_NULL_HANDLE;
+		self->accessor.Instance = nullptr;
+		self->accessor.VTable = nullptr;
 
 		PYJOINT_CPP_WRAP_END((PyObject*)self, NULL)
 	}
@@ -83,11 +102,7 @@ namespace pyjoint
 	{
 		PYJOINT_CPP_WRAP_BEGIN
 
-		PyObject* py_module_handle;
-		PYTHON_CHECK(PyArg_ParseTuple(args, "O", &py_module_handle), "Could not parse arguments");
-		NATIVE_CHECK(PyCapsule_IsValid(py_module_handle, "Joint.Module"), "Could not unwrap joint module handle");
-		JointCore_ModuleHandle handle = reinterpret_cast<JointCore_ModuleHandle>(PyCapsule_GetPointer(py_module_handle, "Joint.Module"));
-		reinterpret_cast<Module*>(self)->handle = handle;
+		// TODO: ???
 
 		PYJOINT_CPP_WRAP_END(0, -1, Py_DECREF(self);)
 	}
@@ -98,12 +113,10 @@ namespace pyjoint
 		PYJOINT_CPP_WRAP_BEGIN
 
 		auto m = reinterpret_cast<Module*>(self);
-		if (m && m->handle)
+		if (m)
 		{
-			JointCore_Error ret = Joint_DecRefModule(m->handle);
-			if (ret != JOINT_CORE_ERROR_NONE)
-				GetLogger().Error() << "Joint_DecRefModule failed: " << ret;
-			m->handle = JOINT_CORE_NULL_HANDLE;
+			JOINT_CORE_DECREF_ACCESSOR(m->accessor);
+			JOINT_CORE_INIT_ACCESSOR(m->accessor);
 		}
 
 		Py_TYPE(self)->tp_free(self);
@@ -117,13 +130,13 @@ namespace pyjoint
 		PYJOINT_CPP_WRAP_BEGIN
 
 		auto m = reinterpret_cast<Module*>(self);
-		NATIVE_CHECK(m && m->handle, "Uninitialized module object");
+		NATIVE_CHECK(m && !JOINT_CORE_IS_NULL(m->accessor), "Uninitialized module object");
 
 		const char* getter_name;
 		PYTHON_CHECK(PyArg_ParseTuple(args, "s", &getter_name), "Could not parse arguments");
 
-		JointCore_ObjectHandle obj;
-		JointCore_Error ret = Joint_GetRootObject(m->handle, getter_name, &obj);
+		JointCore_ObjectAccessor obj;
+		JointCore_Error ret = m->accessor.VTable->GetRootObject(m->accessor.Instance, getter_name, &obj);
 		NATIVE_CHECK(ret == JOINT_CORE_ERROR_NONE, (std::string("Joint_GetRootObject failed: ") + JointCore_ErrorToString(ret)).c_str());
 
 		NATIVE_THROW("Not implemented!");
@@ -141,7 +154,7 @@ namespace pyjoint
 		PYJOINT_CPP_WRAP_BEGIN
 
 		auto m = reinterpret_cast<Module*>(self);
-		NATIVE_CHECK(m && m->handle, "Uninitialized module object");
+		NATIVE_CHECK(m && !JOINT_CORE_IS_NULL(m->accessor), "Uninitialized module object");
 
 		auto tuple_size = PyTuple_Size(args);
 		NATIVE_CHECK(tuple_size >= 2, "Could not parse arguments");
@@ -170,14 +183,11 @@ namespace pyjoint
 		PyObjectHolder accessor_ctor_args(PY_OBJ_CHECK(Py_BuildValue("(O)", (PyObject*)component_impl)));
 		PyObjectHolder accessor(PY_OBJ_CHECK(PyObject_CallObject(accessor_type, accessor_ctor_args)));
 
-		JointCore_ObjectHandleInternal obj_internal = new binding::Object(accessor);
-		JointCore_ObjectHandle obj = JOINT_CORE_NULL_HANDLE;
-		JointCore_Error ret = Joint_CreateObject(m->handle, obj_internal, &obj);
-		NATIVE_CHECK(ret == JOINT_CORE_ERROR_NONE, (std::string("Joint_CreateObject failed: ") + JointCore_ErrorToString(ret)).c_str());
+		JointCore_ObjectAccessor native_accessor = accessors::MakeAccessor<binding::Object>(accessor);
 
 		PyObjectHolder proxy_type(PY_OBJ_CHECK(PyObject_GetAttrString(interface, "proxy")));
 		PyObjectHolder proxy(PY_OBJ_CHECK(PyObject_CallObject(proxy_type, nullptr)));
-		reinterpret_cast<ProxyBase*>(proxy.Get())->obj = obj;
+		reinterpret_cast<ProxyBase*>(proxy.Get())->obj = native_accessor;
 		reinterpret_cast<ProxyBase*>(proxy.Get())->checksum = checksum;
 
 		PYJOINT_CPP_WRAP_END(proxy.Release(), Py_None, Py_INCREF(Py_None);)
