@@ -347,7 +347,8 @@ JointCore_Error Tests_AcceptCS2(Tests* self, test_IInterfaceCS2 obj, JointCore_E
 
 JointCore_Error Tests_CastToCS2(Tests* self, test_IInterfaceCS1 obj, JointCore_ExceptionHandle* ex)
 {
-	test_IInterfaceCS2 tmp = { NULL };
+	test_IInterfaceCS2 tmp;
+	JOINT_INIT_REF(tmp);
 	JOINT_CAST(test_IInterfaceCS2, obj, &tmp);
 	if (JOINT_IS_NULL(tmp))
 		return JOINT_THROW("Could not cast to test.IInterfaceCS2", ex);
