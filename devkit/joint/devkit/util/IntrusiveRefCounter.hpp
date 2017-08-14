@@ -16,10 +16,12 @@ namespace devkit
 	class IntrusiveRefCounter
 	{
 	private:
-		std::atomic<int>   _refCount{1};
+		std::atomic<int>   _refCount;
 
 	public:
-		IntrusiveRefCounter() = default;
+		IntrusiveRefCounter()
+			: _refCount(1)
+		{ }
 
 		IntrusiveRefCounter(const IntrusiveRefCounter&) = delete;
 		IntrusiveRefCounter& operator = (const IntrusiveRefCounter&) = delete;
