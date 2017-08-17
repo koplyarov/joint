@@ -10,6 +10,24 @@ find_package(PythonLibs)
 find_package(JNI)
 find_package(Java)
 
+message (STATUS "BENCHMARKS_DEPENDENCIES_RESOLVED: ${BENCHMARKS_DEPENDENCIES_RESOLVED}")
+message (STATUS "SWIG_FOUND: ${SWIG_FOUND}")
+message (STATUS "PythonLibs_FOUND: ${PythonLibs_FOUND}")
+message (STATUS "PYTHONLIBS_FOUND: ${PYTHONLIBS_FOUND}")
+message (STATUS "JNI_FOUND: ${JNI_FOUND}")
+message (STATUS "Java_FOUND: ${Java_FOUND}")
+message (STATUS "JAVA_FOUND: ${JAVA_FOUND}")
+
+if (PythonLibs_FOUND OR PYTHONLIBS_FOUND)
+	set (PythonLibs_FOUND TRUE)
+	set (PYTHONLIBS_FOUND TRUE)
+endif()
+
+if (Java_FOUND OR JAVA_FOUND)
+	set (Java_FOUND TRUE)
+	set (JAVA_FOUND TRUE)
+endif()
+
 if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PythonLibs_FOUND AND JNI_FOUND AND Java_FOUND)
 	include(UseJava)
 
