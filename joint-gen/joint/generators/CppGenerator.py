@@ -239,11 +239,6 @@ class CppGenerator:
                 for l in param_val.initialization:
                     yield '\t{}'.format(l)
                 yield '\tparams[{}].value.{} = {};'.format(p.index, p.type.variantName, param_val.code)
-                yield '\tparams[{}].type.id = (JointCore_TypeId){};'.format(p.index, p.type.index)
-                if isinstance(p.type, Interface):
-                    yield '\tparams[{}].type.payload.interfaceChecksum = {}::_GetInterfaceChecksum();'.format(p.index, self._mangleType(p.type))
-                elif isinstance(p.type, Struct):
-                    yield '\tparams[{}].type.payload.structDescriptor = {}::_GetStructDescriptor();'.format(p.index, self._mangleType(p.type))
         yield '\tJOINT_METHOD_CALL("{}.{}", _obj.VTable->InvokeMethod(_obj.Instance, {}, {}, {}, &_ret_val));'.format(ifc.fullname, m.name, m.index, 'params' if m.params else 'nullptr', len(m.params), m.retType.index)
         if m.retType.needRelease:
             yield '\t::joint::detail::RetValueGuard _rvg(_ret_val_type, _ret_val);'.format(m.retType.index)
@@ -261,9 +256,9 @@ class CppGenerator:
         #if isinstance(m.retType, Interface):
         #    yield '\t\tif (retType.payload.interfaceChecksum != {}::_GetInterfaceChecksum())'.format(self._mangleType(m.retType))
         #    yield '\t\t\treturn JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM;'
-        for p in m.params:
-            for l in self._validateJointParam(p.type, 'params[{}].type'.format(p.index)):
-                yield '\t\t{}'.format(l)
+        #for p in m.params:
+        #    for l in self._validateJointParam(p.type, 'params[{}].type'.format(p.index)):
+        #        yield '\t\t{}'.format(l)
         for p in m.params:
             param_val = self._fromJointParam(p.type, 'params[{}].value'.format(p.index))
             for l in param_val.initialization:

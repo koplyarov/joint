@@ -243,7 +243,6 @@ extern "C" {
 	struct JointCore_Parameter_s
 	{
 		JointCore_Value value;
-		JointCore_Type  type;
 	};
 
 

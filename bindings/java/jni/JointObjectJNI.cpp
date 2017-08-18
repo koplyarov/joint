@@ -78,7 +78,7 @@ namespace
 	JointCore_Parameter UnwrapParameter(JNIEnv* env, const Marshaller_& m, const TypeDesc_& t, ParamsAllocator_& alloc, JObjWeakRef p)
 	{
 		JointCore_Value v = ValueMarshaller::ToJoint(ValueDirection::Parameter, t, Boxing(env).Unbox(t.GetJointType(), p), m, alloc);
-		return JointCore_Parameter{v, t.GetJointType()};
+		return JointCore_Parameter{v};
 	}
 }
 
@@ -185,7 +185,7 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doInvokeMethod5(JNIEnv* env
 			auto p = JObjLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectArrayElement(allP, i)));
 
 			JointCore_Value v = ValueMarshaller::ToJoint(ValueDirection::Parameter, t, Boxing(env).Unbox(t.GetJointType(), p), JavaMarshaller(env), alloc);
-			params[i] = JointCore_Parameter{v, t.GetJointType()};
+			params[i] = JointCore_Parameter{v};
 		}
 	)
 }

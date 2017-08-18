@@ -123,7 +123,7 @@ namespace pyjoint
 
 			const auto& t = method_desc.GetParamType(i);
 			JointCore_Value v = ValueMarshaller::ToJoint(ValueDirection::Parameter, t, py_param, PythonMarshaller(), alloc);
-			params[i] = JointCore_Parameter{v, t.GetJointType()};
+			params[i] = JointCore_Parameter{v};
 		}
 
 		JointCore_Type ret_type = method_desc.GetRetType().GetJointType();

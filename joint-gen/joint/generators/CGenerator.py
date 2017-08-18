@@ -177,11 +177,6 @@ class CGenerator:
                 for l in param_val.initialization:
                     yield '\t{}'.format(l)
                 yield '\tparams[{}].value.{} = {};'.format(p.index, p.type.variantName, param_val.code)
-                yield '\tparams[{}].type.id = (JointCore_TypeId){};'.format(p.index, p.type.index)
-                if isinstance(p.type, Interface):
-                    yield '\tparams[{}].type.payload.interfaceChecksum = {}__checksum;'.format(p.index, self._mangleType(p.type))
-                elif isinstance(p.type, Struct):
-                    yield '\tparams[{}].type.payload.structDescriptor = {}__GetStructDescriptor();'.format(p.index, self._mangleType(p.type))
         yield '\tJointCore_Error _ret = _obj.Accessor.VTable->InvokeMethod(_obj.Accessor.Instance, {}, {}, {}, &_ret_val);'.format(m.index, 'params' if m.params else 'NULL', len(m.params))
         yield '\tif (_ret != JOINT_CORE_ERROR_NONE)'
         yield '\t{'
@@ -221,9 +216,9 @@ class CGenerator:
             #if isinstance(m.retType, Interface):
             #    yield '\t\t\tif (retType.payload.interfaceChecksum != {}__checksum) \\'.format(self._mangleType(m.retType))
             #    yield '\t\t\t\treturn JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM; \\'
-            for p in m.params:
-                for l in self._validateJointParam(p.type, 'params[{}].type'.format(p.index)):
-                    yield '\t\t\t{} \\'.format(l)
+            #for p in m.params:
+            #    for l in self._validateJointParam(p.type, 'params[{}].type'.format(p.index)):
+            #        yield '\t\t\t{} \\'.format(l)
             if m.retType.fullname != 'void':
                 yield '\t\t\t{} result; \\'.format(self._toCType(m.retType))
             for p in m.params:
