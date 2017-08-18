@@ -144,7 +144,7 @@ class JavaGenerator:
                 yield '\t{{ {}; }}'.format(method_invokation)
         yield ''
         yield '\tpublic static InterfaceId id = new InterfaceId("{}");'.format(ifc.fullname)
-        yield '\tpublic static int checksum = {};'.format(hex(ifc.checksum))
+        yield '\tpublic static int checksum = 0x{:X};'.format(ifc.checksum)
         yield '\tpublic static TypeDescriptor typeDescriptor = TypeDescriptor.interfaceType("Ladapters/Adapters${n};", {n}.class, checksum);'.format(n=self._mangleType(ifc))
         yield '\tpublic static InterfaceDescriptor desc = new InterfaceDescriptor('
         impl_class = '{}_impl.class'.format(self._mangleType(ifc))
