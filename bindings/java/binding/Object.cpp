@@ -53,7 +53,7 @@ namespace binding
 	}
 
 
-	JointCore_Error Object::InvokeMethod(JointCore_SizeT methodId, const JointCore_Parameter* paramsPtr, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue) JOINT_DEVKIT_NOEXCEPT
+	JointCore_Error Object::InvokeMethod(JointCore_SizeT methodId, const JointCore_Parameter* paramsPtr, JointCore_SizeT paramsCount, JointCore_RetValue* outRetValue) JOINT_DEVKIT_NOEXCEPT
 	{
 		JOINT_CPP_WRAP_BEGIN
 

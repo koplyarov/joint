@@ -163,12 +163,13 @@ class CGenerator:
         yield 'JointCore_Error {n}_{m}({n} _obj{p}{r}, JointCore_ExceptionHandle* _ex)'.format(n=mangled_ifc, m=m.name, p=self._paramsDecl(m.params), r=self._retDecl(m.retType))
         yield '{'
         yield '\tJointCore_RetValue _ret_val;'
-        yield '\tJointCore_Type _ret_val_type;'
-        yield '\t_ret_val_type.id = (JointCore_TypeId){};'.format(m.retType.index)
-        if isinstance(m.retType, Interface):
-            yield '\t_ret_val_type.payload.interfaceChecksum = {}__checksum;'.format(self._mangleType(m.retType))
-        elif isinstance(m.retType, Struct):
-            yield '\t_ret_val_type.payload.structDescriptor = {}__GetStructDescriptor();'.format(self._mangleType(m.retType))
+        if m.retType.needRelease:
+            yield '\tJointCore_Type _ret_val_type;'
+            yield '\t_ret_val_type.id = (JointCore_TypeId){};'.format(m.retType.index)
+            if isinstance(m.retType, Interface):
+                yield '\t_ret_val_type.payload.interfaceChecksum = {}__checksum;'.format(self._mangleType(m.retType))
+            elif isinstance(m.retType, Struct):
+                yield '\t_ret_val_type.payload.structDescriptor = {}__GetStructDescriptor();'.format(self._mangleType(m.retType))
         if m.params:
             yield '\tJointCore_Parameter params[{}];'.format(len(m.params))
             for p in m.params:
@@ -181,7 +182,7 @@ class CGenerator:
                     yield '\tparams[{}].type.payload.interfaceChecksum = {}__checksum;'.format(p.index, self._mangleType(p.type))
                 elif isinstance(p.type, Struct):
                     yield '\tparams[{}].type.payload.structDescriptor = {}__GetStructDescriptor();'.format(p.index, self._mangleType(p.type))
-        yield '\tJointCore_Error _ret = _obj.Accessor.VTable->InvokeMethod(_obj.Accessor.Instance, {}, {}, {}, _ret_val_type, &_ret_val);'.format(m.index, 'params' if m.params else 'NULL', len(m.params))
+        yield '\tJointCore_Error _ret = _obj.Accessor.VTable->InvokeMethod(_obj.Accessor.Instance, {}, {}, {}, &_ret_val);'.format(m.index, 'params' if m.params else 'NULL', len(m.params))
         yield '\tif (_ret != JOINT_CORE_ERROR_NONE)'
         yield '\t{'
         yield '\t\tif (_ret == JOINT_CORE_ERROR_EXCEPTION)'
@@ -207,7 +208,7 @@ class CGenerator:
         yield '#define DETAIL_DEFINE_INVOKE_METHOD__{}(ComponentImpl, IfcPrefix) \\'.format(mangled_ifc)
         for b in ifc.bases:
             yield 'DETAIL_DEFINE_INVOKE_METHOD__{}(ComponentImpl, IfcPrefix##__##{}) \\'.format(self._mangleType(b), mangled_ifc)
-        yield 'JointCore_Error Detail__##ComponentImpl##IfcPrefix##__{}__InvokeMethod(void* componentWrapper, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue) \\'.format(mangled_ifc)
+        yield 'JointCore_Error Detail__##ComponentImpl##IfcPrefix##__{}__InvokeMethod(void* componentWrapper, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_RetValue* outRetValue) \\'.format(mangled_ifc)
         yield '{ \\'
         yield '\tComponentImpl##__wrapper* w = (ComponentImpl##__wrapper*)componentWrapper; \\'
         yield '\t(void)w; \\'
@@ -217,9 +218,9 @@ class CGenerator:
         for m in ifc.methods:
             yield '\tcase {}: \\'.format(m.index)
             yield '\t\t{ \\'
-            if isinstance(m.retType, Interface):
-                yield '\t\t\tif (retType.payload.interfaceChecksum != {}__checksum) \\'.format(self._mangleType(m.retType))
-                yield '\t\t\t\treturn JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM; \\'
+            #if isinstance(m.retType, Interface):
+            #    yield '\t\t\tif (retType.payload.interfaceChecksum != {}__checksum) \\'.format(self._mangleType(m.retType))
+            #    yield '\t\t\t\treturn JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM; \\'
             for p in m.params:
                 for l in self._validateJointParam(p.type, 'params[{}].type'.format(p.index)):
                     yield '\t\t\t{} \\'.format(l)

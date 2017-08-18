@@ -95,7 +95,7 @@ namespace
 	__VA_ARGS__ \
 	\
 	JointCore_RetValue ret_value; \
-	JointCore_Error ret = obj.VTable->InvokeMethod(obj.Instance, methodId, params, ParamsCount_, method_desc.GetRetType().GetJointType(), &ret_value); \
+	JointCore_Error ret = obj.VTable->InvokeMethod(obj.Instance, methodId, params, ParamsCount_, &ret_value); \
 	JObjLocalRef result = WrapResult(env, ret, method_desc.GetRetType(), ret_value); \
 	\
 	JNI_WRAP_CPP_END(result.Release(), nullptr)

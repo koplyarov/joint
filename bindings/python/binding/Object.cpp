@@ -51,7 +51,7 @@ namespace binding
 		JOINT_CPP_WRAP_END
 	}
 
-	JointCore_Error Object::InvokeMethod(JointCore_SizeT methodId, const JointCore_Parameter* paramsPtr, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue) JOINT_DEVKIT_NOEXCEPT
+	JointCore_Error Object::InvokeMethod(JointCore_SizeT methodId, const JointCore_Parameter* paramsPtr, JointCore_SizeT paramsCount, JointCore_RetValue* outRetValue) JOINT_DEVKIT_NOEXCEPT
 	{
 		JOINT_CPP_WRAP_BEGIN
 
@@ -133,7 +133,7 @@ namespace binding
 		}
 
 		RetValueAllocator alloc;
-		if (retType.id != JOINT_CORE_TYPE_VOID)
+		if (m_desc.GetRetType().GetJointType().id != JOINT_CORE_TYPE_VOID)
 			outRetValue->result.value = ValueMarshaller::ToJoint(ValueDirection::Return, m_desc.GetRetType(), py_res, PythonMarshaller(), alloc);
 		outRetValue->releaseValue = &Object::ReleaseRetValue;
 		return JOINT_CORE_ERROR_NONE;

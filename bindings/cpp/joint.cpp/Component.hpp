@@ -209,10 +209,10 @@ namespace joint
 		}
 
 		template < typename Accessor_ >
-		static JointCore_Error InvokeMethod(void* component, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue)
+		static JointCore_Error InvokeMethod(void* component, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_RetValue* outRetValue)
 		{
 			ComponentWrapper* inst = reinterpret_cast<ComponentWrapper*>(component);
-			return Accessor_::InvokeMethodImpl(&inst->_componentImpl, methodId, params, paramsCount, retType, outRetValue);
+			return Accessor_::InvokeMethodImpl(&inst->_componentImpl, methodId, params, paramsCount, outRetValue);
 		}
 	};
 
@@ -220,10 +220,10 @@ namespace joint
 	template < typename ComponentImpl_ >
 	class ComponentImplPtr
 	{
-		typedef ComponentWrapper<ComponentImpl_>	WrapperType;
+		typedef ComponentWrapper<ComponentImpl_>    WrapperType;
 
 	private:
-		WrapperType*	_wrapper;
+		WrapperType*    _wrapper;
 
 	public:
 		ComponentImplPtr(WrapperType* wrapper)

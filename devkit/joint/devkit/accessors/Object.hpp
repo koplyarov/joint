@@ -35,10 +35,10 @@ namespace accessors
 			return DerivedRef(component).CastObject(interfaceId, checksum, outAccessor);
 		}
 
-		static JointCore_Error StaticInvokeMethod(void* component, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue) JOINT_DEVKIT_NOEXCEPT
+		static JointCore_Error StaticInvokeMethod(void* component, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_RetValue* outRetValue) JOINT_DEVKIT_NOEXCEPT
 		{
-			static_assert(noexcept(DerivedRef(component).InvokeMethod(methodId, params, paramsCount, retType, outRetValue)), "Derived_::InvokeMethod method must have a noexcept specifier!");
-			return DerivedRef(component).InvokeMethod(methodId, params, paramsCount, retType, outRetValue);
+			static_assert(noexcept(DerivedRef(component).InvokeMethod(methodId, params, paramsCount, outRetValue)), "Derived_::InvokeMethod method must have a noexcept specifier!");
+			return DerivedRef(component).InvokeMethod(methodId, params, paramsCount, outRetValue);
 		}
 	};
 

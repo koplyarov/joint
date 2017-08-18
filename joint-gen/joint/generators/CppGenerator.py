@@ -204,7 +204,7 @@ class CppGenerator:
         yield '\t\treturn JOINT_CORE_ERROR_CAST_FAILED;'
         yield '\t}'
         yield ''
-        yield '\tstatic JointCore_Error InvokeMethodImpl(ComponentImpl_* componentImpl, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue);'
+        yield '\tstatic JointCore_Error InvokeMethodImpl(ComponentImpl_* componentImpl, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_RetValue* outRetValue);'
         yield '};'
         yield ''
         yield ''
@@ -225,12 +225,13 @@ class CppGenerator:
         yield '{'
         yield '\tusing namespace ::joint::detail;'
         yield '\tJointCore_RetValue _ret_val;'
-        yield '\tJointCore_Type _ret_val_type;'
-        yield '\t_ret_val_type.id = (JointCore_TypeId){};'.format(m.retType.index)
-        if isinstance(m.retType, Interface):
-            yield '\t_ret_val_type.payload.interfaceChecksum = {}::_GetInterfaceChecksum();'.format(self._mangleType(m.retType))
-        elif isinstance(m.retType, Struct):
-            yield '\t_ret_val_type.payload.structDescriptor = {}::_GetStructDescriptor();'.format(self._mangleType(m.retType))
+        if m.retType.needRelease:
+            yield '\tJointCore_Type _ret_val_type;'
+            yield '\t_ret_val_type.id = (JointCore_TypeId){};'.format(m.retType.index)
+            if isinstance(m.retType, Interface):
+                yield '\t_ret_val_type.payload.interfaceChecksum = {}::_GetInterfaceChecksum();'.format(self._mangleType(m.retType))
+            elif isinstance(m.retType, Struct):
+                yield '\t_ret_val_type.payload.structDescriptor = {}::_GetStructDescriptor();'.format(self._mangleType(m.retType))
         if m.params:
             yield '\tJointCore_Parameter params[{}];'.format(len(m.params))
             for p in m.params:
@@ -243,7 +244,7 @@ class CppGenerator:
                     yield '\tparams[{}].type.payload.interfaceChecksum = {}::_GetInterfaceChecksum();'.format(p.index, self._mangleType(p.type))
                 elif isinstance(p.type, Struct):
                     yield '\tparams[{}].type.payload.structDescriptor = {}::_GetStructDescriptor();'.format(p.index, self._mangleType(p.type))
-        yield '\tJOINT_METHOD_CALL("{}.{}", _obj.VTable->InvokeMethod(_obj.Instance, {}, {}, {}, _ret_val_type, &_ret_val));'.format(ifc.fullname, m.name, m.index, 'params' if m.params else 'nullptr', len(m.params), m.retType.index)
+        yield '\tJOINT_METHOD_CALL("{}.{}", _obj.VTable->InvokeMethod(_obj.Instance, {}, {}, {}, &_ret_val));'.format(ifc.fullname, m.name, m.index, 'params' if m.params else 'nullptr', len(m.params), m.retType.index)
         if m.retType.needRelease:
             yield '\t::joint::detail::RetValueGuard _rvg(_ret_val_type, _ret_val);'.format(m.retType.index)
         if m.retType.name != 'void':
@@ -257,9 +258,9 @@ class CppGenerator:
     def _generateAccessorInvokeMethodCase(self, ifc, m):
         yield 'case {}:'.format(m.index)
         yield '\t{'
-        if isinstance(m.retType, Interface):
-            yield '\t\tif (retType.payload.interfaceChecksum != {}::_GetInterfaceChecksum())'.format(self._mangleType(m.retType))
-            yield '\t\t\treturn JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM;'
+        #if isinstance(m.retType, Interface):
+        #    yield '\t\tif (retType.payload.interfaceChecksum != {}::_GetInterfaceChecksum())'.format(self._mangleType(m.retType))
+        #    yield '\t\t\treturn JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM;'
         for p in m.params:
             for l in self._validateJointParam(p.type, 'params[{}].type'.format(p.index)):
                 yield '\t\t{}'.format(l)
@@ -282,7 +283,7 @@ class CppGenerator:
 
     def _generateAccessorInvokeMethod(self, ifc):
         yield 'template <typename ComponentImpl_>'
-        yield 'JointCore_Error {}_accessor<ComponentImpl_>::InvokeMethodImpl(ComponentImpl_* componentImpl, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_Type retType, JointCore_RetValue* outRetValue)'.format(ifc.name)
+        yield 'JointCore_Error {}_accessor<ComponentImpl_>::InvokeMethodImpl(ComponentImpl_* componentImpl, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_RetValue* outRetValue)'.format(ifc.name)
         yield '{'
         yield '\ttry'
         yield '\t{'
