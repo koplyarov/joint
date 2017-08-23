@@ -1,6 +1,6 @@
 joint_generate_adapters(python Benchmarks_adapters.py ../idl/IBenchmarks.idl)
 
-add_custom_target(benchmarks-adapters-py ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Benchmarks_adapters.py)
+add_custom_target(benchmarks-adapters-py ALL DEPENDS Benchmarks_adapters.py)
 
 joint_make_module_package(benchmarks-component-py
 	PACKAGE_DIR ${JOINT_MODULE_OUTPUT_DIRECTORY}/python/Benchmarks

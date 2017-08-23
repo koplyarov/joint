@@ -25,8 +25,9 @@ int main(int argc, char* argv[])
 		using namespace benchmarks;
 
 		BenchmarkSuite s;
-		s.RegisterBenchmarks<Benchmarks, descriptors::joint::Desc>();
-		s.RegisterBenchmarks<Benchmarks, descriptors::swig::Desc>();
+		s.RegisterBenchmarks<BasicBenchmarks, descriptors::joint::Desc>();
+		s.RegisterBenchmarks<BasicBenchmarks, descriptors::swig::Desc>();
+		s.RegisterBenchmarks<CastBenchmarks, descriptors::joint::Desc>();
 
 		return BenchmarkApp(s).Run(argc, argv);
 	}

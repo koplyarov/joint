@@ -5,11 +5,26 @@
 #include "OtherTranslationUnit.h"
 
 
+////////////////////////////////////////////////////////////////////////////////
+
+typedef struct { int dummy; } CastComponent;
+
+JointCore_Error CastComponent_Deinit(CastComponent* self)
+{ return JOINT_CORE_ERROR_NONE; }
+
+JOINT_COMPONENT(CastComponent, benchmarks_ICastInterface1, benchmarks_ICastInterface2);
+
+////////////////////////////////////////////////////////////////////////////////
+
 typedef struct {
+	Joint_ModuleContext moduleContext;
 } Benchmarks;
 
-JointCore_Error Benchmarks_Init(Benchmarks* self)
-{ return JOINT_CORE_ERROR_NONE; }
+JointCore_Error Benchmarks_Init(Benchmarks* self, Joint_ModuleContext moduleContext)
+{
+	self->moduleContext = moduleContext;
+	return JOINT_CORE_ERROR_NONE;
+}
 
 JointCore_Error Benchmarks_Deinit(Benchmarks* self)
 { return JOINT_CORE_ERROR_NONE; }
@@ -157,7 +172,34 @@ JointCore_Error Benchmarks_MeasureOutgoingVoidToString100(Benchmarks* self, benc
 }
 
 
-JOINT_COMPONENT(Benchmarks, benchmarks_IBenchmarks);
+
+JointCore_Error Benchmarks_GetCastComponent(Benchmarks* self, benchmarks_ICastInterface1* result, JointCore_ExceptionHandle* ex)
+{
+	CastComponent* impl;
+	JOINT_CREATE_COMPONENT(benchmarks_ICastInterface1, CastComponent, self->moduleContext, result, &impl);
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Benchmarks_MeasureNativeCast(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+{ return JOINT_THROW("Makes no sense", ex); }
+
+JointCore_Error Benchmarks_MeasureProxySideCast(Benchmarks* self, benchmarks_ICastInterface1 obj, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	benchmarks_ICastInterface2 tmp;
+
+	for (i = 0; i < n; ++i)
+	{
+		JOINT_INIT_REF(tmp);
+		JOINT_CAST(benchmarks_ICastInterface2, obj, &tmp);
+		JOINT_DECREF(tmp);
+	}
+
+	return JOINT_CORE_ERROR_NONE;
+}
+
+
+JOINT_COMPONENT(Benchmarks, benchmarks_IBenchmarks, benchmarks_ICastBenchmarks);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -166,6 +208,6 @@ JOINT_C_ROOT_OBJECT_GETTER(GetBenchmarks)
 	joint_IObject result;
 	Benchmarks* impl;
 	JOINT_CREATE_COMPONENT(joint_IObject, Benchmarks, moduleContext, &result, &impl);
-	Benchmarks_Init(impl);
+	Benchmarks_Init(impl, moduleContext);
 	return result;
 }

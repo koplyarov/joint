@@ -1,8 +1,12 @@
 import pyjoint
-from Benchmarks_adapters import *
+from .Benchmarks_adapters import *
 
 
-class Benchmarks(benchmarks_IBenchmarks):
+class CastComponent(benchmarks_ICastInterface1, benchmarks_ICastInterface2):
+    pass
+
+
+class Benchmarks(benchmarks_IBenchmarks, benchmarks_ICastBenchmarks):
     def __init__(self, jointModule):
         super(Benchmarks, self).__init__()
         self.jointModule = jointModule
@@ -47,6 +51,16 @@ class Benchmarks(benchmarks_IBenchmarks):
         for i in range(n): invokable.StringToVoid("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890")
     def MeasureOutgoingVoidToString100(self, invokable, n):
         for i in range(n): invokable.VoidToString100()
+
+    def GetCastComponent(self):
+        return self.jointModule.CreateComponent(benchmarks_ICastInterface1, CastComponent)
+
+    def MeasureNativeCast(self, n):
+        raise RuntimeError("Makes no sense")
+
+    def MeasureProxySideCast(self, obj, n):
+        for i in range(n):
+            pyjoint.Cast(obj, benchmarks_ICastInterface2)
 
 
 def GetBenchmarks(jointModule):

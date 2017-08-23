@@ -3,21 +3,40 @@
 #include "OtherTranslationUnit.hpp"
 
 
+#ifdef _MSC_VER
+#pragma optimize("", off)
+template <class T> void DoNotOptimizeAway(T&& x) { x = x; }
+#pragma optimize("", on)
+#else
+template <class T> void DoNotOptimizeAway(T&& x) { asm volatile("" : "+r" (x)); }
+#endif
+
+
 using namespace joint;
+using namespace benchmarks;
+
+
+class CastComponent
+{
+public:
+	using JointInterfaces = TypeList<ICastInterface1, ICastInterface2>;
+};
 
 
 class Benchmarks
 {
 public:
-	using JointInterfaces = TypeList<benchmarks::IBenchmarks>;
+	using JointInterfaces = TypeList<IBenchmarks, ICastBenchmarks>;
 
 private:
-	std::string _string3;
-	std::string _string100;
+	ModuleContext   _moduleContext;
+	std::string     _string3;
+	std::string     _string100;
 
 public:
-	Benchmarks()
-		: _string3("abc"),
+	Benchmarks(const ModuleContext& moduleContext)
+		: _moduleContext(moduleContext),
+		  _string3("abc"),
 		  _string100("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890")
 	{ }
 
@@ -56,27 +75,41 @@ public:
 	{ for (int64_t i = 0; i < n; ++i) NativeVoidToString100(); }
 
 
-	void MeasureOutgoingVoidToVoid(benchmarks::IInvokable_Ptr invokable, int64_t n)
+	void MeasureOutgoingVoidToVoid(IInvokable_Ptr invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToVoid(); }
 
-	void MeasureOutgoingI32ToVoid(benchmarks::IInvokable_Ptr invokable, int64_t n)
+	void MeasureOutgoingI32ToVoid(IInvokable_Ptr invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->I32ToVoid(0); }
 
-	void MeasureOutgoingVoidToI32(benchmarks::IInvokable_Ptr invokable, int64_t n)
+	void MeasureOutgoingVoidToI32(IInvokable_Ptr invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToI32(); }
 
-	void MeasureOutgoingString3ToVoid(benchmarks::IInvokable_Ptr invokable, int64_t n)
+	void MeasureOutgoingString3ToVoid(IInvokable_Ptr invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->StringToVoid(_string3); }
 
-	void MeasureOutgoingVoidToString3(benchmarks::IInvokable_Ptr invokable, int64_t n)
+	void MeasureOutgoingVoidToString3(IInvokable_Ptr invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToString3(); }
 
-	void MeasureOutgoingString100ToVoid(benchmarks::IInvokable_Ptr invokable, int64_t n)
+	void MeasureOutgoingString100ToVoid(IInvokable_Ptr invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->StringToVoid(_string100); }
 
-	void MeasureOutgoingVoidToString100(benchmarks::IInvokable_Ptr invokable, int64_t n)
+	void MeasureOutgoingVoidToString100(IInvokable_Ptr invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToString100(); }
+
+
+	ICastInterface1_Ptr GetCastComponent()
+	{ return _moduleContext.MakeComponent<ICastInterface1, CastComponent>(); }
+
+	void MeasureNativeCast(int64_t n)
+	{
+		std::unique_ptr<INativeCastInterface1> c(MakeNativeCastComponent());
+		for (int64_t i = 0; i < n; ++i)
+			DoNotOptimizeAway(dynamic_cast<INativeCastInterface2*>(c.get()));
+	}
+
+	void MeasureProxySideCast(ICastInterface1_Ptr obj, int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) joint::Cast<ICastInterface2>(obj); }
 };
 
 JOINT_CPP_ROOT_OBJECT_GETTER(GetBenchmarks)
-{ return moduleContext.MakeComponent<IObject, Benchmarks>(); }
+{ return moduleContext.MakeComponent<IObject, Benchmarks>(moduleContext); }

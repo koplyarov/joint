@@ -14,6 +14,9 @@ namespace joint
 	template < typename T_ >
 	class Ptr
 	{
+	public:
+		typedef T_ Interface;
+
 	private:
 		mutable T_		_raw;
 

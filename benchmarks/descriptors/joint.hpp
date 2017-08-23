@@ -26,7 +26,17 @@ namespace joint
 			std::string VoidToString100() { return "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"; }
 		};
 
+		class CastComponent
+		{
+		public:
+			typedef ::joint::TypeList<benchmarks::ICastInterface1, benchmarks::ICastInterface2>	JointInterfaces;
+		};
+
 		using BenchmarksPtr = benchmarks::IBenchmarks_Ptr;
+		using CastBenchmarksPtr = benchmarks::ICastBenchmarks_Ptr;
+
+		using ICastInterface1 = benchmarks::ICastInterface1_Ptr;
+		using ICastInterface2 = benchmarks::ICastInterface2_Ptr;
 
 		class BenchmarkCtx
 		{
@@ -45,10 +55,19 @@ namespace joint
 			benchmarks::IBenchmarks_Ptr CreateBenchmarks() const
 			{ return _module.GetRootObject<benchmarks::IBenchmarks>("GetBenchmarks"); }
 
+			benchmarks::ICastBenchmarks_Ptr CreateCastBenchmarks() const
+			{ return _module.GetRootObject<benchmarks::ICastBenchmarks>("GetBenchmarks"); }
+
 			benchmarks::IInvokable_Ptr CreateLocalInvokable()
 			{ return _ctx.MakeComponent<benchmarks::IInvokable, Invokable>(); }
-		};
 
+			benchmarks::ICastInterface1_Ptr CreateLocalCastComponent()
+			{ return _ctx.MakeComponent<benchmarks::ICastInterface1, CastComponent>(); }
+
+			template < typename Dst_, typename Src_ >
+			Dst_ Cast(const Src_& src) const
+			{ return ::joint::Cast<typename Dst_::Interface>(src); }
+		};
 
 		static std::string GetName() { return "joint"; }
 	};

@@ -7,18 +7,37 @@ import adapters.Adapters.*;
 class Benchmarks
 {
 
-	static class Component 
+	static class CastComponent
 		extends
 			AccessorsContainer
 		implements
-			benchmarks_IBenchmarks_impl
+			benchmarks_ICastInterface1_impl,
+			benchmarks_ICastInterface2_impl
+	{
+		CastComponent()
+		{
+			benchmarks_ICastInterface1.registerAccessors(this);
+			benchmarks_ICastInterface2.registerAccessors(this);
+		}
+	}
+
+
+	static class Component
+		extends
+			AccessorsContainer
+		implements
+			benchmarks_IBenchmarks_impl,
+			benchmarks_ICastBenchmarks_impl
 	{
 		private java.util.Random r = new java.util.Random();
+		private ModuleContext module;
 		public int dummyInt = 0;
 
-		Component()
+		Component(ModuleContext module)
 		{
 			benchmarks_IBenchmarks.registerAccessors(this);
+			benchmarks_ICastBenchmarks.registerAccessors(this);
+			this.module = module;
 		}
 
 		public void NativeVoidToVoid() { dummyInt = r.nextInt(); }
@@ -83,8 +102,18 @@ class Benchmarks
 
 		public void MeasureOutgoingVoidToString100(benchmarks_IInvokable invokable, long n)
 		{ for (long i = 0; i < n; ++i) invokable.VoidToString100(); }
+
+		public benchmarks_ICastInterface1 GetCastComponent()
+		{ return benchmarks_ICastInterface1.makeComponent(module, new CastComponent()); }
+
+		public void MeasureNativeCast(long n)
+		{ throw new RuntimeException("Not implemented"); }
+
+		public void MeasureProxySideCast(benchmarks_ICastInterface1 obj, long n)
+		{for (long i = 0; i < n; ++i) benchmarks_ICastInterface2.cast(obj); }
 	}
 
+
 	public static JointObject GetBenchmarks(ModuleContext module)
-	{ return benchmarks_IBenchmarks.makeComponent(module, new Component()).getJointObject(); }
+	{ return benchmarks_IBenchmarks.makeComponent(module, new Component(module)).getJointObject(); }
 }
