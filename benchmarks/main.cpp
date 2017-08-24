@@ -28,6 +28,7 @@ int main(int argc, char* argv[])
 		s.RegisterBenchmarks<BasicBenchmarks, descriptors::joint::Desc>();
 		s.RegisterBenchmarks<BasicBenchmarks, descriptors::swig::Desc>();
 		s.RegisterBenchmarks<CastBenchmarks, descriptors::joint::Desc>();
+		s.RegisterBenchmarks<ExceptionBenchmarks, descriptors::joint::Desc>();
 
 		return BenchmarkApp(s).Run(argc, argv);
 	}

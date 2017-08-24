@@ -172,7 +172,6 @@ JointCore_Error Benchmarks_MeasureOutgoingVoidToString100(Benchmarks* self, benc
 }
 
 
-
 JointCore_Error Benchmarks_GetCastComponent(Benchmarks* self, benchmarks_ICastInterface1* result, JointCore_ExceptionHandle* ex)
 {
 	CastComponent* impl;
@@ -199,7 +198,27 @@ JointCore_Error Benchmarks_MeasureProxySideCast(Benchmarks* self, benchmarks_ICa
 }
 
 
-JOINT_COMPONENT(Benchmarks, benchmarks_IBenchmarks, benchmarks_ICastBenchmarks);
+JointCore_Error Benchmarks_Throw(Benchmarks* self, JointCore_ExceptionHandle* ex)
+{ return JOINT_THROW("Requested exception", ex); }
+
+JointCore_Error Benchmarks_MeasureNativeThrow(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+{ return JOINT_THROW("Makes no sense", ex); }
+
+JointCore_Error Benchmarks_MeasureProxySideThrow(Benchmarks* self, benchmarks_IThrower thrower, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	for (i = 0; i < n; ++i)
+	{
+		JointCore_ExceptionHandle ex_tmp;
+		benchmarks_IThrower_Throw(thrower, &ex_tmp);
+		if (ex_tmp)
+			Joint_ReleaseException(ex_tmp);
+	}
+	return JOINT_CORE_ERROR_NONE;
+}
+
+
+JOINT_COMPONENT(Benchmarks, benchmarks_IBenchmarks, benchmarks_ICastBenchmarks, benchmarks_IExceptionBenchmarks);
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -27,7 +27,8 @@ class Benchmarks
 			AccessorsContainer
 		implements
 			benchmarks_IBenchmarks_impl,
-			benchmarks_ICastBenchmarks_impl
+			benchmarks_ICastBenchmarks_impl,
+			benchmarks_IExceptionBenchmarks_impl
 	{
 		private java.util.Random r = new java.util.Random();
 		private ModuleContext module;
@@ -37,6 +38,7 @@ class Benchmarks
 		{
 			benchmarks_IBenchmarks.registerAccessors(this);
 			benchmarks_ICastBenchmarks.registerAccessors(this);
+			benchmarks_IExceptionBenchmarks.registerAccessors(this);
 			this.module = module;
 		}
 
@@ -103,6 +105,7 @@ class Benchmarks
 		public void MeasureOutgoingVoidToString100(benchmarks_IInvokable invokable, long n)
 		{ for (long i = 0; i < n; ++i) invokable.VoidToString100(); }
 
+
 		public benchmarks_ICastInterface1 GetCastComponent()
 		{ return benchmarks_ICastInterface1.makeComponent(module, new CastComponent()); }
 
@@ -111,6 +114,27 @@ class Benchmarks
 
 		public void MeasureProxySideCast(benchmarks_ICastInterface1 obj, long n)
 		{for (long i = 0; i < n; ++i) benchmarks_ICastInterface2.cast(obj); }
+
+
+		public void Throw() { throw new RuntimeException("Requested exception"); }
+
+		public void MeasureNativeThrow(long n)
+		{
+			for (long i = 0; i < n; ++i)
+			{
+				try { throw new RuntimeException(""); }
+				catch (Exception ex) { }
+			}
+		}
+
+		public void MeasureProxySideThrow(benchmarks_IThrower thrower, long n)
+		{
+			for (long i = 0; i < n; ++i)
+			{
+				try { thrower.Throw(); }
+				catch (Exception ex) { }
+			}
+		}
 	}
 
 

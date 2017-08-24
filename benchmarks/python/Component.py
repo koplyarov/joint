@@ -6,7 +6,7 @@ class CastComponent(benchmarks_ICastInterface1, benchmarks_ICastInterface2):
     pass
 
 
-class Benchmarks(benchmarks_IBenchmarks, benchmarks_ICastBenchmarks):
+class Benchmarks(benchmarks_IBenchmarks, benchmarks_ICastBenchmarks, benchmarks_IExceptionBenchmarks):
     def __init__(self, jointModule):
         super(Benchmarks, self).__init__()
         self.jointModule = jointModule
@@ -61,6 +61,23 @@ class Benchmarks(benchmarks_IBenchmarks, benchmarks_ICastBenchmarks):
     def MeasureProxySideCast(self, obj, n):
         for i in range(n):
             pyjoint.Cast(obj, benchmarks_ICastInterface2)
+
+    def Throw(self):
+        raise RuntimeError("Requested exception")
+
+    def MeasureNativeThrow(self, n):
+        for i in range(n):
+            try:
+                raise RuntimeError("")
+            except:
+                pass
+
+    def MeasureProxySideThrow(self, thrower, n):
+        for i in range(n):
+            try:
+                thrower.Throw()
+            except:
+                pass
 
 
 def GetBenchmarks(jointModule):

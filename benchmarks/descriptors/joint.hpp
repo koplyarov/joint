@@ -14,7 +14,7 @@ namespace joint
 		class Invokable
 		{
 		public:
-			typedef ::joint::TypeList<benchmarks::IInvokable>	JointInterfaces;
+			using JointInterfaces = ::joint::TypeList<benchmarks::IInvokable>;
 
 			void VoidToVoid() { }
 
@@ -29,11 +29,20 @@ namespace joint
 		class CastComponent
 		{
 		public:
-			typedef ::joint::TypeList<benchmarks::ICastInterface1, benchmarks::ICastInterface2>	JointInterfaces;
+			using JointInterfaces = ::joint::TypeList<benchmarks::ICastInterface1, benchmarks::ICastInterface2>;
+		};
+
+		class Thrower
+		{
+		public:
+			using JointInterfaces =  ::joint::TypeList<benchmarks::IThrower>;
+
+			void Throw() { throw std::runtime_error("Requested exception"); }
 		};
 
 		using BenchmarksPtr = benchmarks::IBenchmarks_Ptr;
 		using CastBenchmarksPtr = benchmarks::ICastBenchmarks_Ptr;
+		using ExceptionBenchmarksPtr = benchmarks::IExceptionBenchmarks_Ptr;
 
 		using ICastInterface1 = benchmarks::ICastInterface1_Ptr;
 		using ICastInterface2 = benchmarks::ICastInterface2_Ptr;
@@ -41,8 +50,8 @@ namespace joint
 		class BenchmarkCtx
 		{
 		private:
-			::joint::Context	_ctx;
-			::joint::Module		_module;
+			::joint::Context    _ctx;
+			::joint::Module     _module;
 
 		public:
 			BenchmarkCtx(const std::string& moduleManifestPath)
@@ -58,11 +67,17 @@ namespace joint
 			benchmarks::ICastBenchmarks_Ptr CreateCastBenchmarks() const
 			{ return _module.GetRootObject<benchmarks::ICastBenchmarks>("GetBenchmarks"); }
 
+			benchmarks::IExceptionBenchmarks_Ptr CreateExceptionBenchmarks() const
+			{ return _module.GetRootObject<benchmarks::IExceptionBenchmarks>("GetBenchmarks"); }
+
 			benchmarks::IInvokable_Ptr CreateLocalInvokable()
 			{ return _ctx.MakeComponent<benchmarks::IInvokable, Invokable>(); }
 
 			benchmarks::ICastInterface1_Ptr CreateLocalCastComponent()
 			{ return _ctx.MakeComponent<benchmarks::ICastInterface1, CastComponent>(); }
+
+			benchmarks::IThrower_Ptr CreateLocalThrower()
+			{ return _ctx.MakeComponent<benchmarks::IThrower, Thrower>(); }
 
 			template < typename Dst_, typename Src_ >
 			Dst_ Cast(const Src_& src) const

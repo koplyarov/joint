@@ -26,7 +26,11 @@ public:
 class Benchmarks
 {
 public:
-	using JointInterfaces = TypeList<IBenchmarks, ICastBenchmarks>;
+	using JointInterfaces = TypeList<
+		IBenchmarks,
+		ICastBenchmarks,
+		IExceptionBenchmarks
+	>;
 
 private:
 	ModuleContext   _moduleContext;
@@ -109,6 +113,27 @@ public:
 
 	void MeasureProxySideCast(ICastInterface1_Ptr obj, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) joint::Cast<ICastInterface2>(obj); }
+
+
+	void Throw() { throw std::runtime_error("Requested exception"); }
+
+	void MeasureNativeThrow(int64_t n)
+	{
+		for (int64_t i = 0; i < n; ++i)
+		{
+			try { throw std::runtime_error(""); }
+			catch (const std::exception& ex) { }
+		}
+	}
+
+	void MeasureProxySideThrow(IThrower_Ptr thrower, int64_t n)
+	{
+		for (int64_t i = 0; i < n; ++i)
+		{
+			try { thrower->Throw(); }
+			catch (const std::exception& ex) { }
+		}
+	}
 };
 
 JOINT_CPP_ROOT_OBJECT_GETTER(GetBenchmarks)
