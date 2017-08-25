@@ -13,7 +13,9 @@
 
 #include <iostream>
 
-#include <Benchmarks.hpp>
+#include <benchmarks/Basic.hpp>
+#include <benchmarks/Cast.hpp>
+#include <benchmarks/Exception.hpp>
 #include <descriptors/joint.hpp>
 #include <descriptors/swig.hpp>
 
