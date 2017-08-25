@@ -8,7 +8,7 @@
 #include <joint/devkit/StringBuilder.hpp>
 
 #include <jni.h>
-#include <swig/ISwigBenchmarks.hpp>
+#include <implementations/swig/ISwigBenchmarks.hpp>
 
 
 #if defined(_DEBUG)

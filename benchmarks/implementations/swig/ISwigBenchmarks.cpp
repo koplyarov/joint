@@ -1,4 +1,4 @@
-#include <swig/ISwigBenchmarks.hpp>
+#include "ISwigBenchmarks.hpp"
 
 #include <stdio.h>
 

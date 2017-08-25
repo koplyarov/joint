@@ -9,7 +9,7 @@ endif()
 
 ################################################################################
 
-joint_generate_adapters(c Benchmarks_adapters.h ../idl/IBenchmarks.idl)
+joint_generate_adapters(c Benchmarks_adapters.h ${BENCHMARKS_IDL_DIR}/IBenchmarks.idl)
 
 add_library(benchmarks-c SHARED Benchmarks.c OtherTranslationUnit.c Benchmarks_adapters.h)
 target_link_libraries(benchmarks-c joint)

@@ -53,6 +53,6 @@
 
 %feature("director") IBenchmarks;
 %{
-	#include <swig/ISwigBenchmarks.hpp>
+	#include <ISwigBenchmarks.hpp>
 %}
 %include "ISwigBenchmarks.hpp"
