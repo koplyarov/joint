@@ -1,4 +1,4 @@
 {
-	"binding": "cpp",
+	"binding": "native",
 	"library": "benchmarks-c"
 }

@@ -8,12 +8,12 @@
 
 
 namespace joint {
-namespace cpp
+namespace native
 {
 
 	class DynamicLibrary
 	{
-		JOINT_DEVKIT_LOGGER("Joint.C++.DynamicLibrary");
+		JOINT_DEVKIT_LOGGER("Joint.Native.DynamicLibrary");
 
 		class Impl;
 		using FuncPtr = void (*)();

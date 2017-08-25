@@ -1,5 +1,5 @@
-#ifndef BINDINGS_CPP_CPPBINDING_H
-#define BINDINGS_CPP_CPPBINDING_H
+#ifndef BINDINGS_NATIVE_NATIVEBINDING_H
+#define BINDINGS_NATIVE_NATIVEBINDING_H
 
 
 #include <joint/Joint.h>
@@ -8,13 +8,13 @@
 
 
 namespace joint {
-namespace cpp {
+namespace native {
 namespace binding
 {
 
 	class Binding : public joint::devkit::accessors::Binding<Binding>
 	{
-		JOINT_DEVKIT_LOGGER("Joint.C++.Binding")
+		JOINT_DEVKIT_LOGGER("Joint.Native.Binding")
 
 	public:
 		JointCore_Error LoadModule(JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule) JOINT_DEVKIT_NOEXCEPT;

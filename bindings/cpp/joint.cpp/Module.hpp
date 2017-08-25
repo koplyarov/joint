@@ -4,7 +4,7 @@
 
 #include <joint/JointLoader.h>
 
-#include <bindings/cpp/JointCpp.h>
+#include <bindings/native/JointNative.h>
 #include <joint.cpp/Component.hpp>
 #include <joint.cpp/Ptr.hpp>
 #include <joint.cpp/detail/Dummy.hpp>
@@ -134,7 +134,7 @@ namespace joint
 		{
 			_module.Instance = NULL;
 			_module.VTable = NULL;
-			JOINT_CALL( JointCore_LoadModule2(manifest.GetHandle(), &_module) );
+			JOINT_CALL( JointCore_LoadModule(manifest.GetHandle(), &_module) );
 		}
 
 		Module()
@@ -257,7 +257,7 @@ namespace joint
 		Context()
 		{
 			JointCore_BindingAccessor binding_accessor;
-			JOINT_CALL( JointCpp_MakeBinding(&binding_accessor) );
+			JOINT_CALL( JointNative_MakeBinding(&binding_accessor) );
 			_binding = binding_accessor;
 			// TODO: _mainModule?
 		}

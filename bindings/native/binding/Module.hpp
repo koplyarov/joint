@@ -12,13 +12,13 @@
 
 
 namespace joint {
-namespace cpp {
+namespace native {
 namespace binding
 {
 
 	class Module : public joint::devkit::accessors::Module<Module>
 	{
-		JOINT_DEVKIT_LOGGER("Joint.C++.Module")
+		JOINT_DEVKIT_LOGGER("Joint.Native.Module")
 
 	private:
 		std::unique_ptr<DynamicLibrary> _dl;

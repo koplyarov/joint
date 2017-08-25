@@ -12,13 +12,11 @@
 #include <stdio.h>
 
 #include <binding/Module.hpp>
-#include <joint.c/Accessor.h>
-#include <joint.cpp/Ptr.hpp>
 #include <utils/DynamicLibrary.hpp>
 
 
 namespace joint {
-namespace cpp {
+namespace native {
 namespace binding
 {
 

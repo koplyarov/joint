@@ -5,7 +5,6 @@
 #include <atomic>
 #include <typeinfo>
 
-#include <joint.c/Accessor.h>
 #include <joint.cpp/MetaProgramming.hpp>
 #include <joint.cpp/Ptr.hpp>
 #include <joint.cpp/TypeList.hpp>

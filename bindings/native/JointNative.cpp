@@ -1,4 +1,4 @@
-#include <JointCpp.h>
+#include <JointNative.h>
 
 #include <joint/devkit/accessors/MakeAccessor.hpp>
 
@@ -11,11 +11,11 @@
 extern "C"
 {
 
-	JointCore_Error JointCpp_MakeBinding(JointCore_BindingAccessor* outBinding)
+	JointCore_Error JointNative_MakeBinding(JointCore_BindingAccessor* outBinding)
 	{
 		using namespace joint::devkit::accessors;
 
-		*outBinding = MakeAccessor<joint::cpp::binding::Binding>();
+		*outBinding = MakeAccessor<joint::native::binding::Binding>();
 		return JOINT_CORE_ERROR_NONE;
 	}
 

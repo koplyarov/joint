@@ -5,7 +5,7 @@
 
 
 namespace joint {
-namespace cpp {
+namespace native {
 namespace binding
 {
 

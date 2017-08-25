@@ -1,3 +1,3 @@
-project(joint-cpp)
+project(joint-c)
 
 # TODO: install headers

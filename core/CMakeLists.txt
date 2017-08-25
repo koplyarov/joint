@@ -60,7 +60,7 @@ set(JOINT_SRC
 )
 
 add_library(joint-loader SHARED ${JOINT_SRC})
-target_link_libraries(joint-loader joint joint-python joint-cpp joint-java ${CMAKE_THREAD_LIBS_INIT} ${PLATFORM_LIBS})
+target_link_libraries(joint-loader joint joint-python joint-native joint-java ${CMAKE_THREAD_LIBS_INIT} ${PLATFORM_LIBS})
 
 ################################################################################
 

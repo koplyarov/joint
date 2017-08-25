@@ -9,7 +9,7 @@
 #include <memory>
 #include <mutex>
 
-#include <../bindings/cpp/JointCpp.h>
+#include <../bindings/native/JointNative.h>
 #include <../bindings/java/JointJava.h>
 #include <../bindings/python/JointPython.h>
 
@@ -64,10 +64,10 @@ extern "C"
 				JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
 				g_bindings.AddBinding("python", Holder<JointCore_BindingAccessor>(python_binding, release_binding));
 
-				static JointCore_BindingAccessor cpp_binding;
-				ret = JointCpp_MakeBinding(&cpp_binding);
+				static JointCore_BindingAccessor native_binding;
+				ret = JointNative_MakeBinding(&native_binding);
 				JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
-				g_bindings.AddBinding("cpp", Holder<JointCore_BindingAccessor>(cpp_binding, release_binding));
+				g_bindings.AddBinding("native", Holder<JointCore_BindingAccessor>(native_binding, release_binding));
 
 				static JointCore_BindingAccessor java_binding;
 				ret = JointJava_MakeBinding(&java_binding);
@@ -78,27 +78,8 @@ extern "C"
 		JOINT_CPP_WRAP_END
 	}
 
-#if 0
-	JointCore_Error JointCore_LoadModule(JointCore_ManifestHandle moduleManifest, JointCore_ModuleHandle* outModule)
-	{
-		JOINT_CPP_WRAP_BEGIN
 
-		JOINT_CHECK(moduleManifest != JOINT_CORE_NULL_HANDLE, JOINT_CORE_ERROR_INVALID_PARAMETER);
-
-		JointCore_Error ret = JointCore_InitLoader();
-		JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
-
-		ModuleManifestBase m;
-		ManifestReader::Read(moduleManifest, m);
-		auto binding_name = m.GetBindingName();
-
-		return Joint_LoadModuleInternal(g_bindings.GetBinding(binding_name), moduleManifest, outModule);
-
-		JOINT_CPP_WRAP_END
-	}
-#endif
-
-	JointCore_Error JointCore_LoadModule2(JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule)
+	JointCore_Error JointCore_LoadModule(JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule)
 	{
 		JOINT_CPP_WRAP_BEGIN
 

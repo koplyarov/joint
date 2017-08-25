@@ -17,9 +17,7 @@ extern "C"
 {
 
 	JOINT_LOADER_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) JointCore_InitLoader();
-	//JOINT_LOADER_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) JointCore_LoadModule(JointCore_ManifestHandle moduleManifest, JointCore_ModuleHandle* outModule);
-
-	JOINT_LOADER_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) JointCore_LoadModule2(JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule);
+	JOINT_LOADER_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) JointCore_LoadModule(JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule);
 
 }
 

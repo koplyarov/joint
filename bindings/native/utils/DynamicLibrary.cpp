@@ -12,7 +12,7 @@
 #endif
 
 namespace joint {
-namespace cpp
+namespace native
 {
 
 #ifdef _WIN32

@@ -1,7 +1,7 @@
 project(test-c)
 
 include_directories(${CMAKE_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/bindings/cpp)
+include_directories(${CMAKE_SOURCE_DIR}/bindings/c)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
