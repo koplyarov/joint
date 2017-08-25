@@ -54,8 +54,8 @@ namespace joint
 			::joint::Module     _module;
 
 		public:
-			BenchmarkCtx(const std::string& moduleManifestPath)
-				: _module(_ctx.LoadModule(::joint::Manifest(moduleManifestPath)))
+			BenchmarkCtx(const std::string& language)
+				: _module(_ctx.LoadModule(::joint::Manifest("build/bin/" + language + "/Benchmarks/Benchmarks.jm")))
 			{ }
 
 			BenchmarkCtx(const BenchmarkCtx&) = delete;

@@ -154,12 +154,13 @@ namespace swig
 			jobject             _javaBenchmarks = nullptr;
 
 		public:
-			BenchmarkCtx(const std::string& moduleManifestPath)
+			BenchmarkCtx(const std::string& language)
 			{
+				std::string module_manifest_path = "benchmarks/implementations/swig/" + language + ".manifest";
 				using namespace ::joint::devkit;
 
 				JointCore_ManifestHandle m;
-				JointCore_Error err = Joint_ReadManifestFromFile(moduleManifestPath.c_str(), &m);
+				JointCore_Error err = Joint_ReadManifestFromFile(module_manifest_path.c_str(), &m);
 				JOINT_CHECK(err == JOINT_CORE_ERROR_NONE, err);
 
 				auto sg = ScopeExit([&]{ Joint_DeleteManifest(m); });

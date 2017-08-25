@@ -36,15 +36,15 @@ namespace benchmarks
 	protected:
 		template < typename Func_ >
 		void AddSimpleBenchmark(const std::string& name, const Func_& func)
-		{ AddBenchmark<std::string>(name, MakeSimple(func), {"module"}); }
+		{ AddBenchmark<std::string>(name, MakeSimple(func), {"lang"}); }
 
 		template < typename Func_ >
-		std::function<void(BenchmarkContext& context, const std::string& moduleManifest)> MakeSimple(const Func_& func)
+		std::function<void(BenchmarkContext& context, const std::string& language)> MakeSimple(const Func_& func)
 		{
 			auto cb = _createBenchmarks;
-			return [func, cb](BenchmarkContext& context, const std::string& moduleManifest) {
+			return [func, cb](BenchmarkContext& context, const std::string& language) {
 				const auto n = context.GetIterationsCount();
-				BenchmarkCtx ctx(moduleManifest);
+				BenchmarkCtx ctx(language);
 				auto b = cb(ctx);
 				if (!b)
 					throw std::runtime_error("Could not create Benchmarks object!");
