@@ -1,0 +1,303 @@
+{% macro open_ns(package) -%}
+{%- for n in package.nameList %}
+namespace {{n}} {
+{%- endfor %}
+{%- endmacro -%}
+
+{% macro close_ns(package) -%}
+{% for n in package.nameList -%} } {%- endfor %}
+{%- endmacro -%}
+
+{% macro for_each_package() -%}
+{% for p in packages -%}
+{{ open_ns(p) }}{{ caller(p) }}{{ close_ns(p) }}
+{% endfor -%}
+{%- endmacro -%}
+
+
+#pragma once
+
+#include <joint.cpp/detail/GeneratedCodePrologue.hpp>
+
+{% call(p) for_each_package() %}
+{% for e in p.enums %}
+	class {{e.name}}
+	{
+	public:
+		enum _Value
+		{
+		{%- for v in e.values %}
+			{{v.name}} = {{v.value}}{{"," if not loop.last}}
+		{%- endfor %}
+		};
+
+		DETAIL_JOINT_CPP_ENUM_CLASS_INTERNALS({{e.name}}, {{"_Value::" + e.values[0].name if e.values else "_Value()"}})
+	};
+{% endfor %}
+{% endcall -%}
+
+
+{% call(p) for_each_package() %}
+{% for i in p.interfaces %}
+	class {{i.name}};
+	typedef ::joint::Ptr<{{i.name}}> {{i.name}}_Ptr;
+	template <typename ComponentImpl_> class {{i.name}}_accessor;
+{% endfor %}
+{% endcall -%}
+
+
+{% call(p) for_each_package() %}
+{% for s in p.structs %}
+	struct {{s.name}}
+	{
+		{%- for m in s.members %}
+		{{ cpp_type(m.type) }} {{m.name}};
+		{%- endfor %}
+
+		{{s.name}}() { }
+		{% if s.members %}
+#if DETAIL_JOINT_CPP_MOVE_SUPPORTED
+		{{s.name}}(
+			{%- for m in s.members -%}
+			{{ cpp_type(m.type) }} {{m.name}} {{-", " if not loop.last}}
+			{%- endfor -%}
+		)
+			: {% for m in s.members -%}
+			{{m.name}}(std:move({{m.name}})){{", " if not loop.last}}
+			{%- endfor %}
+		{ }
+#else
+		{{s.name}}({{ s.members | map('param_decl') | join(', ') }})
+			: {% for m in s.members -%}
+			{{m.name}}({{m.name}}){{", " if not loop.last}}
+			{%- endfor %}
+		{ }
+#endif
+		{% endif %}
+		std::string ToString() const;
+
+		static {{s.name}} _FromJointMembers(JointCore_Value* members)
+		{
+			{% for m in s.members -%}
+			{% if type_name(m.type) == 'Interface' -%}
+			JOINT_CORE_INCREF_ACCESSOR(members[{{loop.index - 1}}].obj);
+			{% endif -%}
+			{% endfor -%}
+			return {{s.name}}(
+			{%- for m in s.members -%}
+				members[{{loop.index - 1}}].{{m.type.variantName}}{{', ' if not loop.last}}
+			{%- endfor -%}
+			);
+		}
+
+		static const size_t _MembersCount = {{s.members | length}};
+		static const size_t _RecursiveMembersCount = _MembersCount
+		{%- for m in s.members if type_name(m.type) == 'Struct' -%}
+		+ {{m.type.name}}::_RecursiveMembersCount
+		{%- endfor -%}
+		;
+
+		void _FillMembers(JointCore_Value* members) const
+		{
+			{% for m in s.members -%}
+			members[{{loop.index - 1}}].{{m.type.variantName}} =
+			{%- if type_name(m.type) == 'BuiltinType' -%}
+			{{m.name}}{{'.c_str()' if m.type.fullname == 'string'}}
+			{%- elif type_name(m.type) == 'Enum' -%}
+			{{m.name}}._RawValue()
+			{%- elif type_name(m.type) == 'Interface' -%}
+			{{m.name}}._GetObjectAccessor()
+			{%- elif type_name(m.type) == 'Struct' -%}
+			members + _MembersCount
+			{%- for m in s.members[:loop.index - 1] %} + {{mangle_type(m.type)}}::_RecursiveMembersCount {% endfor -%}
+			{%- endif -%}
+			;
+			{% endfor -%}
+			{% for m in s.members -%}
+			{% if type_name(m.type) == 'Struct' -%}
+			{{m.name}}._FillMembers(members[{{loop.index - 1}}].members);
+			{% endif -%}
+			{% endfor -%}
+		}
+
+		static JointCore_StructDescriptor* _GetStructDescriptor()
+		{
+			static JointCore_Type member_types[] = {
+			{% for m in s.members -%}
+				{ (JointCore_TypeId){{m.type.index}}, JointCore_TypePayload(
+				{%- if type_name(m.type) == 'Interface' -%}
+				{{mangle_type(m.type)}}::_GetInterfaceChecksum()
+				{%- elif type_name(m.type) == 'Struct' -%}
+				{{mangle_type(m.type)}}::_GetStructDescriptor()
+				{%- endif -%}
+				) }{{', ' if not loop.last}}
+			{% endfor -%}
+			};
+			static JointCore_StructDescriptor desc = { {{s.members | length}}, member_types };
+			return &desc;
+		}
+	};
+
+	std::ostream& operator << (std::ostream& s, const {{mangle_type(s)}}& st)
+	{
+		return s << "{"
+		{% for m in s.members -%}
+		"{{- '\'' if m.type.fullname == 'string' -}}" << st.{{m.name}} << "{{- '\'' if m.type.fullname == 'string' -}}"
+		{% endfor -%}
+		" }";
+	}
+
+	std::string {{s.name}}::ToString() const
+	{ std::stringstream s; s << *this; return s.str(); }
+
+{% endfor %}
+{% endcall -%}
+
+{% call(p) for_each_package() %}
+{% for i in p.interfaces %}
+	class {{i.name}}
+	{
+	private:
+		JointCore_ObjectAccessor _obj;
+
+	public:
+		typedef ::joint::TypeList<{{ i.bases | map('mangle_type') | join(', ') }}> BaseInterfaces;
+		template <typename ComponentImpl_> using Accessor = {{i.name}}_accessor<ComponentImpl_>;
+
+		{{i.name}}() { _obj.Instance = NULL; _obj.VTable = NULL; }
+		{{i.name}}(JointCore_ObjectAccessor obj) : _obj(obj) { }
+
+		JointCore_ObjectAccessor _GetObjectAccessor() const { return _obj; }
+		static JointCore_InterfaceChecksum _GetInterfaceChecksum() { return {{hex(i.checksum)}}; }
+		static const char* _GetInterfaceId() { return "{{i.fullname}}"; }
+
+		{%- for m in i.methods %}
+		{{cpp_type(m.retType)}} {{m.name}}({{ m.params | map('param_decl') | join(', ') }});
+		{%- endfor -%}
+	};
+
+	template <typename ComponentImpl_>
+	class {{i.name}}_accessor
+	{
+	public:
+		static JointCore_Error InheritsInterface(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum)
+		{
+			{% for b in [ i ] recursive %}
+			{%- if loop.first -%}
+			if (strcmp(interfaceId, "{{b.fullname}}") == 0)
+				return (checksum == {{mangle_type(b)}}::_GetInterfaceChecksum()) ? JOINT_CORE_ERROR_NONE : JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM;
+			{% if b.bases -%} {{ loop(b.bases) }} {%- endif -%}
+			{%- endif -%}
+			{% endfor -%}
+			return JOINT_CORE_ERROR_CAST_FAILED;
+		}
+
+		static JointCore_Error InvokeMethodImpl(ComponentImpl_* componentImpl, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_RetValue* outRetValue);
+	};
+
+{% endfor %}
+{% endcall -%}
+
+
+{% call(p) for_each_package() %}
+{% for e in p.enums %}
+	std::string {{e.name}}::ToString() const
+	{
+		switch (_value)
+		{
+		{% for v in e.values -%}
+		case {{v.name}}: return "{{v.name}}";
+		{% endfor -%}
+		default: return "<Unknown {{e.name}} value>";
+		}
+	}
+{% endfor %}
+{% endcall -%}
+
+
+{% call(p) for_each_package() %}
+{% for i in p.interfaces %}
+{% for m in i.methods %}
+	{{cpp_type(m.retType)}} {{i.name}}::{{m.name}}({{m.params | map('param_decl') | join(', ')}})
+	{
+		using namespace ::joint::detail;
+		JointCore_RetValue _ret_val;
+		{% if m.retType.needRelease -%}
+		JointCore_Type _ret_val_type;
+		_ret_val_type.id = (JointCore_TypeId){{m.retType.index}};
+		{% if type_name(m.retType) == 'Interface' -%}
+		_ret_val_type.payload.interfaceChecksum = {{mangle_type(m.retType)}}::_GetInterfaceChecksum();
+		{% endif -%}
+		{% if type_name(m.retType) == 'Struct' -%}
+		_ret_val_type.payload.structDescriptor = {{mangle_type(m.retType)}}::_GetStructDescriptor();
+		{% endif -%}
+		{% endif -%}
+		{% if m.params -%}
+		JointCore_Parameter params[{{m.params | length}}];
+		{% for p in m.params -%}
+		{{to_joint_param(p.type, p.name).initialization | join('\n') | indent(8)}}
+		params[{{p.index}}].value.{{p.type.variantName}} = {{to_joint_param(p.type, p.name).code}};
+		{% endfor -%}
+		{% endif -%}
+		JOINT_METHOD_CALL("{{i.fullname}}.{{m.name}}", _obj.VTable->InvokeMethod(_obj.Instance, {{m.index}}, {{'params' if m.params else 'nullptr'}}, {{m.params | length}}, &_ret_val));
+		{% if m.retType.needRelease -%}
+		::joint::detail::RetValueGuard _rvg(_ret_val_type, _ret_val);
+		{%- endif %}
+		{% if m.retType.name != 'void' -%}
+		{{from_joint_retval(m.retType, '_ret_val.result.value').initialization | join('\n') | indent(8)}}
+		return {{from_joint_retval(m.retType, '_ret_val.result.value').code}};
+		{%- endif %}
+	}
+{% endfor %}
+
+	template <typename ComponentImpl_>
+	JointCore_Error {{i.name}}_accessor<ComponentImpl_>::InvokeMethodImpl(ComponentImpl_* componentImpl, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_RetValue* outRetValue)
+	{
+		try
+		{
+			switch(methodId)
+			{
+			{% for m in i.methods -%}
+			case {{m.index}}:
+				{
+					{%- for p in m.params -%}
+					{{from_joint_param(p.type, 'params[{}].value'.format(p.index)).initialization | join('\n') | indent(20)}}
+					{{cpp_type(p.type)}} p{{p.index}}({{from_joint_param(p.type, 'params[{}].value'.format(p.index)).code}});
+					{%- endfor -%}
+					{%- if m.retType.name != 'void' %}
+					{{cpp_type(m.retType)}} result(componentImpl->{{m.name}}({%- for p in m.params -%}p{{p.index}}{{', ' if not loop.last}}{%- endfor -%}));
+					{{to_joint_retval(m.retType, 'result').initialization | join('\n') | indent(20)}}
+					outRetValue->result.value.{{m.retType.variantName}} = {{to_joint_retval(m.retType, 'result').code}};
+					{%- else %}
+					componentImpl->{{m.name}}({%- for p in m.params -%}p{{p.index}}{{', ' if not loop.last}}{%- endfor -%});
+					{%- endif %}
+				}
+				break;
+			{% endfor -%}
+			default:
+				return JOINT_CORE_ERROR_GENERIC;
+			}
+		}
+		catch (const ::joint::detail::JointCppException& ex)
+		{
+			{% if i.methods -%}
+			const char* method_names[] = { {% for m in i.methods %}"{{i.fullname}}.{{m.name}}"{{', ' if not loop.last}}{% endfor %} };
+			{% endif -%}
+			return ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, {{'method_names[methodId]' if i.methods else '""'}});
+		}
+		catch (const std::exception& ex)
+		{
+			{% if i.methods -%}
+			const char* method_names[] = { {% for m in i.methods %}"{{i.fullname}}.{{m.name}}"{{', ' if not loop.last}}{% endfor %} };
+			{% endif -%}
+			return ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, {{'method_names[methodId]' if i.methods else '""'}});
+		}
+		outRetValue->releaseValue = &::joint::detail::_ReleaseRetValue;
+		return JOINT_CORE_ERROR_NONE;
+	}
+
+{% endfor %}
+{% endcall -%}
+
+#include <joint.cpp/detail/GeneratedCodeEpilogue.hpp>
+
