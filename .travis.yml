@@ -20,7 +20,7 @@ matrix:
 before_install:
   - sudo apt-get install -yq python-dev
   - sudo apt-get install -yq python-pip
-  - sudo pip install pyparsing
+  - sudo pip install pyparsing jinja2
 
 script: 
   - ( mkdir build && cd build && CC="$COMPILER" CXX="$COMPILERXX" cmake -DJOINT_TREAT_WARNINGS_AS_ERRORS=TRUE -DJOINT_VALGRIND=TRUE .. && make )
