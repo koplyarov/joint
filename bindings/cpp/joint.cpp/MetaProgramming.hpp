@@ -3,6 +3,8 @@
 
 namespace joint
 {
+	class NoneType;
+
 	struct YesType { char dummy; };
 	struct NoType { YesType dummy[2]; };
 
@@ -52,7 +54,7 @@ namespace joint
 
 	public:
 		static const bool Value =
-			sizeof(Test((const Derived_*)NULL)) == sizeof(YesType) &&
+			sizeof(Test((const Derived_*)0)) == sizeof(YesType) &&
 			!IsSame<Derived_, void>::Value;
 	};
 

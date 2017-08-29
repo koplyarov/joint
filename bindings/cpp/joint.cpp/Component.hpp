@@ -26,66 +26,41 @@ namespace joint
 		{ static const bool Value = IsSame<Ifc_, BaseIfc_>::Value; };
 
 
-		template < typename List_, typename Ifc_, bool IsEmpty_ = TypeList_IsEmpty<List_>::Value >
-		struct AppendToInterfacesList
+		template < typename List_, typename Head_ >
+		struct InitLinearizedInterfacesListHead
+		{ typedef Head_ ValueT; };
+
+		template < typename List_ >
+		struct InitLinearizedInterfacesListHead<List_, NoneType>
+		{ typedef typename List_::Type ValueT; };
+
+
+		template <
+			typename InterfacesList_,
+			typename HeadType_ = NoneType,
+			typename TailNode_ = TypeListEndNode,
+			bool InterfacesListEmpty_ = TypeList_IsEmpty<InterfacesList_>::Value
+		>
+		struct LinearizedInterfacesList
 		{
-			typedef typename IfElse<
-				ContainsInterface<typename List_::Type, Ifc_>::Value,
-				List_,
-				TypeListNode<
-					typename IfElse<
-						ContainsInterface<Ifc_, typename List_::Type>::Value,
-						Ifc_,
-						typename List_::Type
-					>::ValueT,
-					typename AppendToInterfacesList<typename List_::NextNode, Ifc_>::ValueT
-				>
+			typedef typename LinearizedInterfacesList<
+				typename InterfacesList_::Type::BaseInterfaces,
+				typename InitLinearizedInterfacesListHead<InterfacesList_, HeadType_>::ValueT,
+				typename LinearizedInterfacesList<
+					typename InterfacesList_::NextNode,
+					NoneType,
+					TailNode_
+				>::ValueT
 			>::ValueT ValueT;
 		};
 
-		template < typename List_, typename Ifc_ >
-		struct AppendToInterfacesList<List_, Ifc_, true>
-		{ typedef TypeListNode<Ifc_, TypeListEndNode> ValueT; };
+		template < typename InterfacesList_, typename HeadType_, typename TailNode_ >
+		struct LinearizedInterfacesList<InterfacesList_, HeadType_, TailNode_, true>
+		{ typedef TypeListNode<HeadType_, TailNode_> ValueT; };
 
-
-		template < typename L_, typename R_, bool IsEmpty_ = TypeList_IsEmpty<R_>::Value >
-		struct InterfacesListMerger
-		{ typedef typename InterfacesListMerger<typename AppendToInterfacesList<L_, typename R_::Type>::ValueT, typename R_::NextNode>::ValueT ValueT; };
-
-		template < typename L_, typename R_ >
-		struct InterfacesListMerger<L_, R_, true>
-		{ typedef L_ ValueT; };
-
-
-		template < typename Root_, typename Bases_ = typename Root_::BaseInterfaces, bool BasesEmpty_ = TypeList_IsEmpty<Bases_>::Value >
-		struct InterfacesTreeLinearizer
-		{
-			typedef typename InterfacesListMerger<
-					typename InterfacesListMerger<
-						TypeListNode<Root_, TypeListEndNode>,
-						typename InterfacesTreeLinearizer<typename Bases_::Type>::ValueT
-					>::ValueT,
-					typename InterfacesTreeLinearizer<Root_, typename Bases_::NextNode>::ValueT
-				>::ValueT ValueT;
-		};
-
-		template < typename Root_, typename Bases_ >
-		struct InterfacesTreeLinearizer<Root_, Bases_, true>
-		{ typedef TypeListNode<Root_, TypeListEndNode> ValueT; };
-
-
-		template < typename InterfacesList_, bool IsEmpty_ = TypeList_IsEmpty<InterfacesList_>::Value >
-		struct LinearizedInterfacesList
-		{
-			typedef typename InterfacesListMerger<
-					typename InterfacesTreeLinearizer<typename InterfacesList_::Type>::ValueT,
-					typename LinearizedInterfacesList<typename InterfacesList_::NextNode>::ValueT
-				>::ValueT ValueT;
-		};
-
-		template < typename InterfacesList_ >
-		struct LinearizedInterfacesList<InterfacesList_, true>
-		{ typedef TypeListEndNode ValueT; };
+		template < typename InterfacesList_, typename TailNode_ >
+		struct LinearizedInterfacesList<InterfacesList_, NoneType, TailNode_, true>
+		{ typedef TailNode_ ValueT; };
 
 
 		template < typename ComponentImpl_, typename InterfacesList_ >
