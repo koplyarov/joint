@@ -131,11 +131,10 @@ namespace joint
 
 	public:
 		Module(const Manifest& manifest)
-		{
-			_module.Instance = NULL;
-			_module.VTable = NULL;
-			JOINT_CALL( JointCore_LoadModule(manifest.GetHandle(), &_module) );
-		}
+		{ Init(manifest); }
+
+		Module(const std::string& manifestLocation)
+		{ Init(Manifest(manifestLocation)); }
 
 		Module()
 		{
@@ -193,6 +192,14 @@ namespace joint
 		template < typename Interface_ >
 		joint::Ptr<Interface_> GetRootObject(const std::string& getterName, detail::Dummy d = detail::Dummy()) const
 		{ return joint::Cast<Interface_>(GetRootObject(getterName)); }
+
+	private:
+		void Init(const Manifest& manifest)
+		{
+			_module.Instance = NULL;
+			_module.VTable = NULL;
+			JOINT_CALL( JointCore_LoadModule(manifest.GetHandle(), &_module) );
+		}
 	};
 
 
