@@ -22,6 +22,7 @@ add_subdirectory(joint-gen)
 add_subdirectory(core)
 add_subdirectory(bindings)
 add_subdirectory(test)
+add_subdirectory(examples)
 add_subdirectory(benchmarks)
 
 ################################################################################
