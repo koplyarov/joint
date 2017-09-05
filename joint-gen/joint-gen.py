@@ -39,6 +39,9 @@ try:
 
     gen = generators[args.languageId](semantic_graph_builder.build(args.input))
     code = list(gen.generate())
+    out_dir = os.path.dirname(args.output)
+    if out_dir and not os.path.exists(out_dir):
+        os.makedirs(out_dir)
     out_file = open(args.output, 'w')
     for l in code:
         out_file.write(l)
