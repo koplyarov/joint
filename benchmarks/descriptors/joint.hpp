@@ -11,10 +11,15 @@ namespace joint
 
 	struct Desc
 	{
+		using Enum = benchmarks::Enum;
+
 		class Invokable
 		{
 		public:
-			using JointInterfaces = ::joint::TypeList<benchmarks::IInvokable>;
+			using JointInterfaces = ::joint::TypeList<
+				benchmarks::IInvokable,
+				benchmarks::IEnumInvokable
+			>;
 
 			void VoidToVoid() { }
 
@@ -24,6 +29,9 @@ namespace joint
 			void StringToVoid(const std::string& s) { }
 			std::string VoidToString3() { return "abc"; }
 			std::string VoidToString100() { return "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"; }
+
+			void EnumToVoid(Enum) { }
+			Enum VoidToEnum() { return Enum(); }
 		};
 
 		class CastComponent
@@ -43,6 +51,7 @@ namespace joint
 		using BenchmarksPtr = benchmarks::IBenchmarks_Ptr;
 		using CastBenchmarksPtr = benchmarks::ICastBenchmarks_Ptr;
 		using ExceptionBenchmarksPtr = benchmarks::IExceptionBenchmarks_Ptr;
+		using EnumBenchmarksPtr = benchmarks::IEnumBenchmarks_Ptr;
 
 		using ICastInterface1 = benchmarks::ICastInterface1_Ptr;
 		using ICastInterface2 = benchmarks::ICastInterface2_Ptr;
@@ -69,6 +78,12 @@ namespace joint
 
 			benchmarks::IExceptionBenchmarks_Ptr CreateExceptionBenchmarks() const
 			{ return _module.GetRootObject<benchmarks::IExceptionBenchmarks>("GetBenchmarks"); }
+
+			benchmarks::IEnumBenchmarks_Ptr CreateEnumBenchmarks() const
+			{ return _module.GetRootObject<benchmarks::IEnumBenchmarks>("GetBenchmarks"); }
+
+			benchmarks::IEnumInvokable_Ptr CreateLocalEnumInvokable()
+			{ return _ctx.MakeComponent<benchmarks::IEnumInvokable, Invokable>(); }
 
 			benchmarks::IInvokable_Ptr CreateLocalInvokable()
 			{ return _ctx.MakeComponent<benchmarks::IInvokable, Invokable>(); }

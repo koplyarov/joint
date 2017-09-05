@@ -30,6 +30,9 @@ JointCore_Error Benchmarks_Deinit(Benchmarks* self)
 { return JOINT_CORE_ERROR_NONE; }
 
 
+///// IBenchmarks /////
+
+
 JointCore_Error Benchmarks_VoidToVoid(Benchmarks* self, JointCore_ExceptionHandle* ex)
 { return JOINT_CORE_ERROR_NONE; }
 
@@ -172,6 +175,52 @@ JointCore_Error Benchmarks_MeasureOutgoingVoidToString100(Benchmarks* self, benc
 }
 
 
+///// IEnumBenchmarks /////
+
+
+JointCore_Error Benchmarks_EnumToVoid(Benchmarks* self, benchmarks_Enum p, JointCore_ExceptionHandle* ex)
+{ return JOINT_CORE_ERROR_NONE; }
+
+JointCore_Error Benchmarks_VoidToEnum(Benchmarks* self, benchmarks_Enum* result, JointCore_ExceptionHandle* ex)
+{ *result = benchmarks_Enum_A; return JOINT_CORE_ERROR_NONE; }
+
+JointCore_Error Benchmarks_MeasureNativeEnumToVoid(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	for (i = 0; i < n; ++i)
+		NativeEnumToVoid(NATIVE_ENUM_A);
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Benchmarks_MeasureNativeVoidToEnum(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	for (i = 0; i < n; ++i)
+		NativeVoidToEnum();
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Benchmarks_MeasureOutgoingEnumToVoid(Benchmarks* self, benchmarks_IEnumInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	for (i = 0; i < n; ++i)
+		benchmarks_IEnumInvokable_EnumToVoid(invokable, benchmarks_Enum_A, ex);
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Benchmarks_MeasureOutgoingVoidToEnum(Benchmarks* self, benchmarks_IEnumInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	benchmarks_Enum v;
+	for (i = 0; i < n; ++i)
+		benchmarks_IEnumInvokable_VoidToEnum(invokable, &v, ex);
+	return JOINT_CORE_ERROR_NONE;
+}
+
+
+///// ICastBenchmarks /////
+
+
 JointCore_Error Benchmarks_GetCastComponent(Benchmarks* self, benchmarks_ICastInterface1* result, JointCore_ExceptionHandle* ex)
 {
 	CastComponent* impl;
@@ -198,6 +247,9 @@ JointCore_Error Benchmarks_MeasureProxySideCast(Benchmarks* self, benchmarks_ICa
 }
 
 
+///// IExceptionBenchmarks /////
+
+
 JointCore_Error Benchmarks_Throw(Benchmarks* self, JointCore_ExceptionHandle* ex)
 { return JOINT_THROW("Requested exception", ex); }
 
@@ -218,7 +270,13 @@ JointCore_Error Benchmarks_MeasureProxySideThrow(Benchmarks* self, benchmarks_IT
 }
 
 
-JOINT_COMPONENT(Benchmarks, benchmarks_IBenchmarks, benchmarks_ICastBenchmarks, benchmarks_IExceptionBenchmarks);
+JOINT_COMPONENT(
+	Benchmarks,
+	benchmarks_IBenchmarks,
+	benchmarks_IEnumBenchmarks,
+	benchmarks_ICastBenchmarks,
+	benchmarks_IExceptionBenchmarks
+);
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -27,6 +27,7 @@ class Benchmarks
 			AccessorsContainer
 		implements
 			benchmarks_IBenchmarks_impl,
+			benchmarks_IEnumBenchmarks_impl,
 			benchmarks_ICastBenchmarks_impl,
 			benchmarks_IExceptionBenchmarks_impl
 	{
@@ -37,10 +38,13 @@ class Benchmarks
 		Component(ModuleContext module)
 		{
 			benchmarks_IBenchmarks.registerAccessors(this);
+			benchmarks_IEnumBenchmarks.registerAccessors(this);
 			benchmarks_ICastBenchmarks.registerAccessors(this);
 			benchmarks_IExceptionBenchmarks.registerAccessors(this);
 			this.module = module;
 		}
+
+		///// IBenchmarks /////
 
 		public void NativeVoidToVoid() { dummyInt = r.nextInt(); }
 
@@ -106,6 +110,27 @@ class Benchmarks
 		{ for (long i = 0; i < n; ++i) invokable.VoidToString100(); }
 
 
+		///// IEnumBenchmarks /////
+
+		public void EnumToVoid(benchmarks_Enum p) { }
+		public benchmarks_Enum VoidToEnum() { return benchmarks_Enum.A; }
+
+		public void MeasureNativeEnumToVoid(long n)
+		{ throw new RuntimeException("Not implemented"); }
+
+		public void MeasureNativeVoidToEnum(long n)
+		{ throw new RuntimeException("Not implemented"); }
+
+		public void MeasureOutgoingEnumToVoid(benchmarks_IEnumInvokable invokable, long n)
+		{ for (long i = 0; i < n; ++i) invokable.EnumToVoid(benchmarks_Enum.A); }
+
+		public void MeasureOutgoingVoidToEnum(benchmarks_IEnumInvokable invokable, long n)
+		{ for (long i = 0; i < n; ++i) invokable.VoidToEnum(); }
+
+
+		///// ICastBenchmarks /////
+
+
 		public benchmarks_ICastInterface1 GetCastComponent()
 		{ return benchmarks_ICastInterface1.makeComponent(module, new CastComponent()); }
 
@@ -114,6 +139,9 @@ class Benchmarks
 
 		public void MeasureProxySideCast(benchmarks_ICastInterface1 obj, long n)
 		{for (long i = 0; i < n; ++i) benchmarks_ICastInterface2.cast(obj); }
+
+
+		///// IExceptionBenchmarks /////
 
 
 		public void Throw() { throw new RuntimeException("Requested exception"); }

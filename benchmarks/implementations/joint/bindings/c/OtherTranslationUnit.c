@@ -24,3 +24,7 @@ char* NativeVoidToString100()
 	strcpy(result, "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
 	return result;
 }
+
+
+void NativeEnumToVoid(NativeEnum p) { }
+NativeEnum NativeVoidToEnum() { return NATIVE_ENUM_A; }

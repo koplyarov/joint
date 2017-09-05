@@ -18,6 +18,12 @@ std::string NativeVoidToString3();
 std::string NativeVoidToString100();
 
 
+enum class NativeEnum { A, B, C };
+
+void NativeEnumToVoid(NativeEnum p);
+NativeEnum NativeVoidToEnum();
+
+
 struct INativeCastInterface1 { virtual ~INativeCastInterface1() { } };
 struct INativeCastInterface2 { virtual ~INativeCastInterface2() { } };
 

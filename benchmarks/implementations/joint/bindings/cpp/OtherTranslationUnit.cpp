@@ -11,6 +11,10 @@ std::string NativeVoidToString3() { return "abc"; }
 std::string NativeVoidToString100() { return "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"; }
 
 
+void NativeEnumToVoid(NativeEnum p) { }
+NativeEnum NativeVoidToEnum() { return NativeEnum::A; }
+
+
 class NativeCastComponent : public INativeCastInterface1, public INativeCastInterface2
 { };
 

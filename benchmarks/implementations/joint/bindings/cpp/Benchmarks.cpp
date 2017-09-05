@@ -28,6 +28,7 @@ class Benchmarks
 public:
 	using JointInterfaces = TypeList<
 		IBenchmarks,
+		IEnumBenchmarks,
 		ICastBenchmarks,
 		IExceptionBenchmarks
 	>;
@@ -45,6 +46,9 @@ public:
 	{ }
 
 	~Benchmarks() { }
+
+
+	///// IBenchmarks /////
 
 
 	void VoidToVoid() { }
@@ -101,6 +105,28 @@ public:
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToString100(); }
 
 
+	///// IBenchmarks /////
+
+
+	void EnumToVoid(Enum) { }
+	Enum VoidToEnum() { return Enum(); }
+
+	void MeasureNativeEnumToVoid(int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) NativeEnumToVoid(NativeEnum()); }
+
+	void MeasureNativeVoidToEnum(int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) NativeVoidToEnum(); }
+
+	void MeasureOutgoingEnumToVoid(IEnumInvokable_Ptr invokable, int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) invokable->EnumToVoid(Enum()); }
+
+	void MeasureOutgoingVoidToEnum(IEnumInvokable_Ptr invokable, int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToEnum(); }
+
+
+	///// ICastBenchmarks /////
+
+
 	ICastInterface1_Ptr GetCastComponent()
 	{ return _moduleContext.MakeComponent<ICastInterface1, CastComponent>(); }
 
@@ -113,6 +139,9 @@ public:
 
 	void MeasureProxySideCast(ICastInterface1_Ptr obj, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) joint::Cast<ICastInterface2>(obj); }
+
+
+	///// IExceptionBenchmarks /////
 
 
 	void Throw() { throw std::runtime_error("Requested exception"); }

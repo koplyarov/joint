@@ -32,6 +32,24 @@ package benchmarks
 	}
 
 
+	enum Enum { A, B, C }
+
+	interface IEnumInvokable
+	{
+		void EnumToVoid(Enum p);
+		Enum VoidToEnum();
+	}
+
+	interface IEnumBenchmarks : IEnumInvokable
+	{
+		void MeasureNativeEnumToVoid(i64 n);
+		void MeasureNativeVoidToEnum(i64 n);
+
+		void MeasureOutgoingEnumToVoid(IEnumInvokable callback, i64 n);
+		void MeasureOutgoingVoidToEnum(IEnumInvokable callback, i64 n);
+	}
+
+
 	interface ICastInterface1 { }
 	interface ICastInterface2 { }
 
