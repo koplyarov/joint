@@ -104,15 +104,24 @@ namespace joint
 
 		template < typename Interface_, typename ComponentType_ >
 		Ptr<Interface_> MakeComponentProxy(const ComponentImplPtr<ComponentType_>& component) const
-		{ return joint::MakeComponentProxy<Interface_, ComponentType_>(component); }
+		{
+			DETAIL_JOINT_CPP_ASSERT_IMPLEMENTS_INTERFACE(ComponentType_, Interface_);
+			return joint::MakeComponentProxy<Interface_, ComponentType_>(component);
+		}
 
 		template < typename Interface_, typename ComponentType_ >
 		Ptr<Interface_> MakeComponent() const
-		{ return joint::MakeComponent<Interface_, ComponentType_>(_accessor); }
+		{
+			DETAIL_JOINT_CPP_ASSERT_IMPLEMENTS_INTERFACE(ComponentType_, Interface_);
+			return joint::MakeComponent<Interface_, ComponentType_>(_accessor);
+		}
 
 		template < typename Interface_, typename ComponentType_, typename Arg1_ >
 		Ptr<Interface_> MakeComponent(const Arg1_& arg1) const
-		{ return joint::MakeComponent<Interface_, ComponentType_, Arg1_>(_accessor, arg1); }
+		{
+			DETAIL_JOINT_CPP_ASSERT_IMPLEMENTS_INTERFACE(ComponentType_, Interface_);
+			return joint::MakeComponent<Interface_, ComponentType_, Arg1_>(_accessor, arg1);
+		}
 
 		template < typename ComponentType_ >
 		ComponentImplPtr<ComponentType_> MakeComponentWrapper() const
@@ -279,15 +288,24 @@ namespace joint
 
 		template < typename Interface_, typename ComponentType_ >
 		Ptr<Interface_> MakeComponentProxy(const ComponentImplPtr<ComponentType_>& component)
-		{ return _mainModule.MakeComponentProxy<Interface_, ComponentType_>(component); }
+		{
+			DETAIL_JOINT_CPP_ASSERT_IMPLEMENTS_INTERFACE(ComponentType_, Interface_);
+			return _mainModule.MakeComponentProxy<Interface_, ComponentType_>(component);
+		}
 
 		template < typename Interface_, typename ComponentType_ >
 		Ptr<Interface_> MakeComponent()
-		{ return _mainModule.MakeComponent<Interface_, ComponentType_>(); }
+		{
+			DETAIL_JOINT_CPP_ASSERT_IMPLEMENTS_INTERFACE(ComponentType_, Interface_);
+			return _mainModule.MakeComponent<Interface_, ComponentType_>();
+		}
 
 		template < typename Interface_, typename ComponentType_, typename Arg1_ >
 		Ptr<Interface_> MakeComponent(const Arg1_& arg1)
-		{ return _mainModule.MakeComponent<Interface_, ComponentType_, Arg1_>(arg1); }
+		{
+			DETAIL_JOINT_CPP_ASSERT_IMPLEMENTS_INTERFACE(ComponentType_, Interface_);
+			return _mainModule.MakeComponent<Interface_, ComponentType_, Arg1_>(arg1);
+		}
 
 		template < typename ComponentType_ >
 		ComponentImplPtr<ComponentType_> MakeComponentWrapper()

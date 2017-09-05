@@ -78,6 +78,18 @@ namespace joint
 	template < >
 	class StaticAssert<true> { };
 
+
+#if DETAIL_JOINT_CPP_STATIC_ASSERT_SUPPORTED
+#	define JOINT_CPP_PORTABLE_STATIC_ASSERT(Expr_, TextMsg_, VarMsg_) \
+		static_assert((Expr_), TextMsg_)
+#else
+#	define JOINT_CPP_PORTABLE_STATIC_ASSERT(Expr_, TextMsg_, VarMsg_) \
+		do { \
+			::joint::StaticAssert<(Expr_)> ERROR__##VarMsg_; \
+			(void)ERROR__##VarMsg_; \
+		} while (false)
+#endif
+
 }
 
 #endif

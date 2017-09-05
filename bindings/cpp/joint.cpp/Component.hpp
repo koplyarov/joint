@@ -9,7 +9,12 @@
 #include <joint.cpp/Ptr.hpp>
 #include <joint.cpp/TypeList.hpp>
 #include <joint.cpp/detail/AccessorHolder.hpp>
+#include <joint.cpp/detail/Config.hpp>
 #include <joint.cpp/detail/NonCopyable.hpp>
+
+
+#define DETAIL_JOINT_CPP_ASSERT_IMPLEMENTS_INTERFACE(ComponentType_, Interface_) \
+	JOINT_CPP_PORTABLE_STATIC_ASSERT((::joint::detail::InheritsInterface<typename ComponentType_::JointInterfaces, Interface_>::Value), "Interface not implemented!", interface_not_implemented)
 
 
 namespace joint
@@ -24,6 +29,20 @@ namespace joint
 		template < typename Ifc_, typename BaseIfc_, typename BaseInterfacesList_ >
 		struct ContainsInterface<Ifc_, BaseIfc_, BaseInterfacesList_, true>
 		{ static const bool Value = IsSame<Ifc_, BaseIfc_>::Value; };
+
+
+		template < typename InterfacesList_, typename Interface_, bool IsEmpty_ = TypeList_IsEmpty<InterfacesList_>::Value >
+		struct InheritsInterface
+		{
+			typedef typename InterfacesList_::Type Head;
+			static const bool Value = IsSame<Head, Interface_>::Value ||
+				InheritsInterface<typename Head::BaseInterfaces, Interface_>::Value ||
+				InheritsInterface<typename InterfacesList_::NextNode, Interface_>::Value;
+		};
+
+		template < typename InterfacesList_, typename Interface_ >
+		struct InheritsInterface<InterfacesList_, Interface_, true>
+		{ static const bool Value = false; };
 
 
 		template < typename List_, typename Head_ >
@@ -62,10 +81,27 @@ namespace joint
 		struct LinearizedInterfacesList<InterfacesList_, NoneType, TailNode_, true>
 		{ typedef TailNode_ ValueT; };
 
+		template < typename Interface_, typename AccessorInterface_, bool Match_ = ContainsInterface<AccessorInterface_, Interface_>::Value >
+		struct AccessorsHolder_GetAccessor_Impl
+		{
+			template < typename Tail_ >
+			static JointCore_ObjectAccessor Get(JointCore_ObjectAccessor current, const Tail_& tail)
+			{ return tail.template GetAccessor<Interface_>(); }
+		};
+
+		template < typename Interface_, typename AccessorInterface_ >
+		struct AccessorsHolder_GetAccessor_Impl<Interface_, AccessorInterface_, true>
+		{
+			template < typename Tail_ >
+			static JointCore_ObjectAccessor Get(JointCore_ObjectAccessor current, const Tail_& tail)
+			{ return current; }
+		};
+
 
 		template < typename ComponentImpl_, typename InterfacesList_ >
 		class AccessorsHolder
 		{
+			typedef typename InterfacesList_::Type                                       AccessorInterface;
 			typedef typename InterfacesList_::Type::template Accessor<ComponentImpl_>    AccessorType;
 			typedef AccessorsHolder<ComponentImpl_, typename InterfacesList_::NextNode>  TailAccessors;
 
@@ -84,7 +120,7 @@ namespace joint
 
 			template < typename Interface_ >
 			JointCore_ObjectAccessor GetAccessor() const
-			{ return _accessor; }
+			{ return AccessorsHolder_GetAccessor_Impl<Interface_, AccessorInterface>::Get(_accessor, _tail); }
 
 			JointCore_Error GetAccessorById(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, JointCore_ObjectAccessor* outAccessor)
 			{
@@ -106,6 +142,14 @@ namespace joint
 		public:
 			void Init(void* component)
 			{ }
+
+			template < typename Interface_ >
+			JointCore_ObjectAccessor GetAccessor() const
+			{
+				StaticAssert<(sizeof(Interface_) < 0)> ERROR__interface_not_implemented;
+				(void)ERROR__interface_not_implemented;
+				return JointCore_ObjectAccessor();
+			}
 
 			JointCore_Error GetAccessorById(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, JointCore_ObjectAccessor* outAccessor)
 			{ return JOINT_CORE_ERROR_CAST_FAILED; }

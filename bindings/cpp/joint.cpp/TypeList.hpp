@@ -154,6 +154,13 @@ namespace joint
 	template < typename List_, size_t N_ >
 	struct TypeList_Get<List_, N_, true> { };
 
+
+	template < typename List_, typename T_, bool IsEmpty_ = TypeList_IsEmpty<List_>::Value >
+	struct TypeList_Contains { static const bool Value = IsSame<typename List_::Type, T_>::Value || TypeList_Contains<typename List_::NextNode, T_>::Value; };
+
+	template < typename List_, typename T_ >
+	struct TypeList_Contains<List_, T_, true> { static const bool Value = false; };
+
 }
 
 #endif
