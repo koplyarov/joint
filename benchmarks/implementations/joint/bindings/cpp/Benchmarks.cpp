@@ -27,7 +27,7 @@ class Benchmarks
 {
 public:
 	using JointInterfaces = TypeList<
-		IBenchmarks,
+		IBasicBenchmarks,
 		IEnumBenchmarks,
 		ICastBenchmarks,
 		IExceptionBenchmarks
@@ -48,7 +48,7 @@ public:
 	~Benchmarks() { }
 
 
-	///// IBenchmarks /////
+	///// IBasicBenchmarks /////
 
 
 	void VoidToVoid() { }
@@ -83,29 +83,29 @@ public:
 	{ for (int64_t i = 0; i < n; ++i) NativeVoidToString100(); }
 
 
-	void MeasureOutgoingVoidToVoid(IInvokable_Ptr invokable, int64_t n)
+	void MeasureOutgoingVoidToVoid(IBasicInvokable_Ptr invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToVoid(); }
 
-	void MeasureOutgoingI32ToVoid(IInvokable_Ptr invokable, int64_t n)
+	void MeasureOutgoingI32ToVoid(IBasicInvokable_Ptr invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->I32ToVoid(0); }
 
-	void MeasureOutgoingVoidToI32(IInvokable_Ptr invokable, int64_t n)
+	void MeasureOutgoingVoidToI32(IBasicInvokable_Ptr invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToI32(); }
 
-	void MeasureOutgoingString3ToVoid(IInvokable_Ptr invokable, int64_t n)
+	void MeasureOutgoingString3ToVoid(IBasicInvokable_Ptr invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->StringToVoid(_string3); }
 
-	void MeasureOutgoingVoidToString3(IInvokable_Ptr invokable, int64_t n)
+	void MeasureOutgoingVoidToString3(IBasicInvokable_Ptr invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToString3(); }
 
-	void MeasureOutgoingString100ToVoid(IInvokable_Ptr invokable, int64_t n)
+	void MeasureOutgoingString100ToVoid(IBasicInvokable_Ptr invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->StringToVoid(_string100); }
 
-	void MeasureOutgoingVoidToString100(IInvokable_Ptr invokable, int64_t n)
+	void MeasureOutgoingVoidToString100(IBasicInvokable_Ptr invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToString100(); }
 
 
-	///// IBenchmarks /////
+	///// IBasicBenchmarks /////
 
 
 	void EnumToVoid(Enum) { }

@@ -51,7 +51,7 @@
 	}
 %}
 
-%feature("director") IBenchmarks;
+%feature("director") IBasicBenchmarks;
 %{
 	#include <ISwigBenchmarks.hpp>
 %}

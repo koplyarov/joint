@@ -6,41 +6,41 @@
 #define PVC() fprintf(stderr, "SWIG director pure virtual call!\n"); std::terminate()
 
 
-IInvokable::~IInvokable() { }
+IBasicInvokable::~IBasicInvokable() { }
 
-void IInvokable::VoidToVoid() { PVC(); }
+void IBasicInvokable::VoidToVoid() { PVC(); }
 
-void IInvokable::I32ToVoid(int32_t) { PVC(); }
-int32_t IInvokable::VoidToI32() { PVC(); }
+void IBasicInvokable::I32ToVoid(int32_t) { PVC(); }
+int32_t IBasicInvokable::VoidToI32() { PVC(); }
 
-void IInvokable::StringToVoid(const std::string& s) { PVC(); }
-std::string IInvokable::VoidToString3() { PVC(); }
-std::string IInvokable::VoidToString100() { PVC(); }
-
-
-IBenchmarks::~IBenchmarks() { }
-
-void IBenchmarks::MeasureNativeVoidToVoid(int64_t n) { PVC(); }
-void IBenchmarks::MeasureNativeI32ToVoid(int64_t n) { PVC(); }
-void IBenchmarks::MeasureNativeVoidToI32(int64_t n) { PVC(); }
-void IBenchmarks::MeasureNativeString3ToVoid(int64_t n) { PVC(); }
-void IBenchmarks::MeasureNativeVoidToString3(int64_t n) { PVC(); }
-void IBenchmarks::MeasureNativeString100ToVoid(int64_t n) { PVC(); }
-void IBenchmarks::MeasureNativeVoidToString100(int64_t n) { PVC(); }
-
-void IBenchmarks::MeasureOutgoingVoidToVoid(IInvokable* callback, int64_t n) { PVC(); }
-void IBenchmarks::MeasureOutgoingI32ToVoid(IInvokable* callback, int64_t n) { PVC(); }
-void IBenchmarks::MeasureOutgoingVoidToI32(IInvokable* callback, int64_t n) { PVC(); }
-void IBenchmarks::MeasureOutgoingString3ToVoid(IInvokable* callback, int64_t n) { PVC(); }
-void IBenchmarks::MeasureOutgoingVoidToString3(IInvokable* callback, int64_t n) { PVC(); }
-void IBenchmarks::MeasureOutgoingString100ToVoid(IInvokable* callback, int64_t n) { PVC(); }
-void IBenchmarks::MeasureOutgoingVoidToString100(IInvokable* callback, int64_t n) { PVC(); }
+void IBasicInvokable::StringToVoid(const std::string& s) { PVC(); }
+std::string IBasicInvokable::VoidToString3() { PVC(); }
+std::string IBasicInvokable::VoidToString100() { PVC(); }
 
 
-IBenchmarks* g_benchmarks = nullptr;
+IBasicBenchmarks::~IBasicBenchmarks() { }
 
-IBenchmarks* GetGlobalBenchmarks()
+void IBasicBenchmarks::MeasureNativeVoidToVoid(int64_t n) { PVC(); }
+void IBasicBenchmarks::MeasureNativeI32ToVoid(int64_t n) { PVC(); }
+void IBasicBenchmarks::MeasureNativeVoidToI32(int64_t n) { PVC(); }
+void IBasicBenchmarks::MeasureNativeString3ToVoid(int64_t n) { PVC(); }
+void IBasicBenchmarks::MeasureNativeVoidToString3(int64_t n) { PVC(); }
+void IBasicBenchmarks::MeasureNativeString100ToVoid(int64_t n) { PVC(); }
+void IBasicBenchmarks::MeasureNativeVoidToString100(int64_t n) { PVC(); }
+
+void IBasicBenchmarks::MeasureOutgoingVoidToVoid(IBasicInvokable* callback, int64_t n) { PVC(); }
+void IBasicBenchmarks::MeasureOutgoingI32ToVoid(IBasicInvokable* callback, int64_t n) { PVC(); }
+void IBasicBenchmarks::MeasureOutgoingVoidToI32(IBasicInvokable* callback, int64_t n) { PVC(); }
+void IBasicBenchmarks::MeasureOutgoingString3ToVoid(IBasicInvokable* callback, int64_t n) { PVC(); }
+void IBasicBenchmarks::MeasureOutgoingVoidToString3(IBasicInvokable* callback, int64_t n) { PVC(); }
+void IBasicBenchmarks::MeasureOutgoingString100ToVoid(IBasicInvokable* callback, int64_t n) { PVC(); }
+void IBasicBenchmarks::MeasureOutgoingVoidToString100(IBasicInvokable* callback, int64_t n) { PVC(); }
+
+
+IBasicBenchmarks* g_benchmarks = nullptr;
+
+IBasicBenchmarks* GetGlobalBenchmarks()
 { return g_benchmarks; }
 
-void SetGlobalBenchmarks(IBenchmarks* benchmarks)
+void SetGlobalBenchmarks(IBasicBenchmarks* benchmarks)
 { g_benchmarks = benchmarks; }

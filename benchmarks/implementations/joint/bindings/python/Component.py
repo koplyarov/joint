@@ -7,7 +7,7 @@ class CastComponent(benchmarks_ICastInterface1, benchmarks_ICastInterface2):
 
 
 class Benchmarks(
-        benchmarks_IBenchmarks,
+        benchmarks_IBasicBenchmarks,
         benchmarks_IEnumBenchmarks,
         benchmarks_ICastBenchmarks,
         benchmarks_IExceptionBenchmarks
@@ -16,7 +16,7 @@ class Benchmarks(
         super(Benchmarks, self).__init__()
         self.jointModule = jointModule
 
-    ### IBenchmarks ###
+    ### IBasicBenchmarks ###
 
     def VoidToVoid(self): pass
 

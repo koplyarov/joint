@@ -1,6 +1,6 @@
 import swig_benchmarks_wrappers_py
 
-class Benchmarks(swig_benchmarks_wrappers_py.IBenchmarks):
+class Benchmarks(swig_benchmarks_wrappers_py.IBasicBenchmarks):
     def __init__(self):
         super(Benchmarks, self).__init__()
         swig_benchmarks_wrappers_py.SetGlobalBenchmarks(self)

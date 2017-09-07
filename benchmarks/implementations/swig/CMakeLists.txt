@@ -36,8 +36,8 @@ swig_link_libraries(swig_benchmarks_wrappers_java swig_benchmarks_native ${JNI_L
 add_jar(benchmarks-java-swig
 	SOURCES
 		SwigBenchmarks.java
-		${CMAKE_SWIG_OUTDIR}/IBenchmarks.java
-		${CMAKE_SWIG_OUTDIR}/IInvokable.java
+		${CMAKE_SWIG_OUTDIR}/IBasicBenchmarks.java
+		${CMAKE_SWIG_OUTDIR}/IBasicInvokable.java
 		${CMAKE_SWIG_OUTDIR}/swig_benchmarks_wrappers_java.java
 		${CMAKE_SWIG_OUTDIR}/swig_benchmarks_wrappers_javaJNI.java
 	OUTPUT_DIR

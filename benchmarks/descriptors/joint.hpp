@@ -17,7 +17,7 @@ namespace joint
 		{
 		public:
 			using JointInterfaces = ::joint::TypeList<
-				benchmarks::IInvokable,
+				benchmarks::IBasicInvokable,
 				benchmarks::IEnumInvokable
 			>;
 
@@ -48,7 +48,7 @@ namespace joint
 			void Throw() { throw std::runtime_error("Requested exception"); }
 		};
 
-		using BenchmarksPtr = benchmarks::IBenchmarks_Ptr;
+		using BenchmarksPtr = benchmarks::IBasicBenchmarks_Ptr;
 		using CastBenchmarksPtr = benchmarks::ICastBenchmarks_Ptr;
 		using ExceptionBenchmarksPtr = benchmarks::IExceptionBenchmarks_Ptr;
 		using EnumBenchmarksPtr = benchmarks::IEnumBenchmarks_Ptr;
@@ -70,8 +70,8 @@ namespace joint
 			BenchmarkCtx(const BenchmarkCtx&) = delete;
 			BenchmarkCtx& operator = (const BenchmarkCtx&) = delete;
 
-			benchmarks::IBenchmarks_Ptr CreateBenchmarks() const
-			{ return _module.GetRootObject<benchmarks::IBenchmarks>("GetBenchmarks"); }
+			benchmarks::IBasicBenchmarks_Ptr CreateBenchmarks() const
+			{ return _module.GetRootObject<benchmarks::IBasicBenchmarks>("GetBenchmarks"); }
 
 			benchmarks::ICastBenchmarks_Ptr CreateCastBenchmarks() const
 			{ return _module.GetRootObject<benchmarks::ICastBenchmarks>("GetBenchmarks"); }
@@ -85,8 +85,8 @@ namespace joint
 			benchmarks::IEnumInvokable_Ptr CreateLocalEnumInvokable()
 			{ return _ctx.MakeComponent<benchmarks::IEnumInvokable, Invokable>(); }
 
-			benchmarks::IInvokable_Ptr CreateLocalInvokable()
-			{ return _ctx.MakeComponent<benchmarks::IInvokable, Invokable>(); }
+			benchmarks::IBasicInvokable_Ptr CreateLocalInvokable()
+			{ return _ctx.MakeComponent<benchmarks::IBasicInvokable, Invokable>(); }
 
 			benchmarks::ICastInterface1_Ptr CreateLocalCastComponent()
 			{ return _ctx.MakeComponent<benchmarks::ICastInterface1, CastComponent>(); }

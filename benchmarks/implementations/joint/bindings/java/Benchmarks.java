@@ -26,7 +26,7 @@ class Benchmarks
 		extends
 			AccessorsContainer
 		implements
-			benchmarks_IBenchmarks_impl,
+			benchmarks_IBasicBenchmarks_impl,
 			benchmarks_IEnumBenchmarks_impl,
 			benchmarks_ICastBenchmarks_impl,
 			benchmarks_IExceptionBenchmarks_impl
@@ -37,14 +37,14 @@ class Benchmarks
 
 		Component(ModuleContext module)
 		{
-			benchmarks_IBenchmarks.registerAccessors(this);
+			benchmarks_IBasicBenchmarks.registerAccessors(this);
 			benchmarks_IEnumBenchmarks.registerAccessors(this);
 			benchmarks_ICastBenchmarks.registerAccessors(this);
 			benchmarks_IExceptionBenchmarks.registerAccessors(this);
 			this.module = module;
 		}
 
-		///// IBenchmarks /////
+		///// IBasicBenchmarks /////
 
 		public void NativeVoidToVoid() { dummyInt = r.nextInt(); }
 
@@ -88,25 +88,25 @@ class Benchmarks
 		{ for (long i = 0; i < n; ++i) NativeVoidToString100(); }
 
 
-		public void MeasureOutgoingVoidToVoid(benchmarks_IInvokable invokable, long n)
+		public void MeasureOutgoingVoidToVoid(benchmarks_IBasicInvokable invokable, long n)
 		{ for (long i = 0; i < n; ++i) invokable.VoidToVoid(); }
 
-		public void MeasureOutgoingI32ToVoid(benchmarks_IInvokable invokable, long n)
+		public void MeasureOutgoingI32ToVoid(benchmarks_IBasicInvokable invokable, long n)
 		{ for (long i = 0; i < n; ++i) invokable.I32ToVoid(0); }
 
-		public void MeasureOutgoingVoidToI32(benchmarks_IInvokable invokable, long n)
+		public void MeasureOutgoingVoidToI32(benchmarks_IBasicInvokable invokable, long n)
 		{ for (long i = 0; i < n; ++i) invokable.VoidToI32(); }
 
-		public void MeasureOutgoingString3ToVoid(benchmarks_IInvokable invokable, long n)
+		public void MeasureOutgoingString3ToVoid(benchmarks_IBasicInvokable invokable, long n)
 		{ for (long i = 0; i < n; ++i) invokable.StringToVoid("abc"); }
 
-		public void MeasureOutgoingVoidToString3(benchmarks_IInvokable invokable, long n)
+		public void MeasureOutgoingVoidToString3(benchmarks_IBasicInvokable invokable, long n)
 		{ for (long i = 0; i < n; ++i) invokable.VoidToString3(); }
 
-		public void MeasureOutgoingString100ToVoid(benchmarks_IInvokable invokable, long n)
+		public void MeasureOutgoingString100ToVoid(benchmarks_IBasicInvokable invokable, long n)
 		{ for (long i = 0; i < n; ++i) invokable.StringToVoid("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"); }
 
-		public void MeasureOutgoingVoidToString100(benchmarks_IInvokable invokable, long n)
+		public void MeasureOutgoingVoidToString100(benchmarks_IBasicInvokable invokable, long n)
 		{ for (long i = 0; i < n; ++i) invokable.VoidToString100(); }
 
 
@@ -167,5 +167,5 @@ class Benchmarks
 
 
 	public static JointObject GetBenchmarks(ModuleContext module)
-	{ return benchmarks_IBenchmarks.makeComponent(module, new Component(module)).getJointObject(); }
+	{ return benchmarks_IBasicBenchmarks.makeComponent(module, new Component(module)).getJointObject(); }
 }

@@ -1,4 +1,4 @@
-public class SwigBenchmarks extends SB.IBenchmarks
+public class SwigBenchmarks extends SB.IBasicBenchmarks
 {
 	private java.util.Random r = new java.util.Random();
 	public int dummyInt = 0;
@@ -49,24 +49,24 @@ public class SwigBenchmarks extends SB.IBenchmarks
 	{ for (long i = 0; i < n; ++i) NativeVoidToString100(); }
 
 
-	public void MeasureOutgoingVoidToVoid(SB.IInvokable invokable, long n)
+	public void MeasureOutgoingVoidToVoid(SB.IBasicInvokable invokable, long n)
 	{ for (long i = 0; i < n; ++i) invokable.VoidToVoid(); }
 
-	public void MeasureOutgoingI32ToVoid(SB.IInvokable invokable, long n)
+	public void MeasureOutgoingI32ToVoid(SB.IBasicInvokable invokable, long n)
 	{ for (long i = 0; i < n; ++i) invokable.I32ToVoid(0); }
 
-	public void MeasureOutgoingVoidToI32(SB.IInvokable invokable, long n)
+	public void MeasureOutgoingVoidToI32(SB.IBasicInvokable invokable, long n)
 	{ for (long i = 0; i < n; ++i) invokable.VoidToI32(); }
 
-	public void MeasureOutgoingString3ToVoid(SB.IInvokable invokable, long n)
+	public void MeasureOutgoingString3ToVoid(SB.IBasicInvokable invokable, long n)
 	{ for (long i = 0; i < n; ++i) invokable.StringToVoid("abc"); }
 
-	public void MeasureOutgoingVoidToString3(SB.IInvokable invokable, long n)
+	public void MeasureOutgoingVoidToString3(SB.IBasicInvokable invokable, long n)
 	{ for (long i = 0; i < n; ++i) invokable.VoidToString3(); }
 
-	public void MeasureOutgoingString100ToVoid(SB.IInvokable invokable, long n)
+	public void MeasureOutgoingString100ToVoid(SB.IBasicInvokable invokable, long n)
 	{ for (long i = 0; i < n; ++i) invokable.StringToVoid("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"); }
 
-	public void MeasureOutgoingVoidToString100(SB.IInvokable invokable, long n)
+	public void MeasureOutgoingVoidToString100(SB.IBasicInvokable invokable, long n)
 	{ for (long i = 0; i < n; ++i) invokable.VoidToString100(); }
 }

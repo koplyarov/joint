@@ -7,9 +7,9 @@
 #include <stdint.h>
 
 
-struct IInvokable
+struct IBasicInvokable
 {
-	virtual ~IInvokable();
+	virtual ~IBasicInvokable();
 
 	virtual void VoidToVoid();
 
@@ -22,9 +22,9 @@ struct IInvokable
 };
 
 
-struct IBenchmarks : public IInvokable
+struct IBasicBenchmarks : public IBasicInvokable
 {
-	virtual ~IBenchmarks();
+	virtual ~IBasicBenchmarks();
 
 	virtual void MeasureNativeVoidToVoid(int64_t n);
 	virtual void MeasureNativeI32ToVoid(int64_t n);
@@ -34,17 +34,17 @@ struct IBenchmarks : public IInvokable
 	virtual void MeasureNativeString100ToVoid(int64_t n);
 	virtual void MeasureNativeVoidToString100(int64_t n);
 
-	virtual void MeasureOutgoingVoidToVoid(IInvokable* callback, int64_t n);
-	virtual void MeasureOutgoingI32ToVoid(IInvokable* callback, int64_t n);
-	virtual void MeasureOutgoingVoidToI32(IInvokable* callback, int64_t n);
-	virtual void MeasureOutgoingString3ToVoid(IInvokable* callback, int64_t n);
-	virtual void MeasureOutgoingVoidToString3(IInvokable* callback, int64_t n);
-	virtual void MeasureOutgoingString100ToVoid(IInvokable* callback, int64_t n);
-	virtual void MeasureOutgoingVoidToString100(IInvokable* callback, int64_t n);
+	virtual void MeasureOutgoingVoidToVoid(IBasicInvokable* callback, int64_t n);
+	virtual void MeasureOutgoingI32ToVoid(IBasicInvokable* callback, int64_t n);
+	virtual void MeasureOutgoingVoidToI32(IBasicInvokable* callback, int64_t n);
+	virtual void MeasureOutgoingString3ToVoid(IBasicInvokable* callback, int64_t n);
+	virtual void MeasureOutgoingVoidToString3(IBasicInvokable* callback, int64_t n);
+	virtual void MeasureOutgoingString100ToVoid(IBasicInvokable* callback, int64_t n);
+	virtual void MeasureOutgoingVoidToString100(IBasicInvokable* callback, int64_t n);
 };
 
 
-extern IBenchmarks* GetGlobalBenchmarks();
-extern void SetGlobalBenchmarks(IBenchmarks* benchmarks);
+extern IBasicBenchmarks* GetGlobalBenchmarks();
+extern void SetGlobalBenchmarks(IBasicBenchmarks* benchmarks);
 
 #endif

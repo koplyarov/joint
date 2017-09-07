@@ -1,6 +1,6 @@
 package benchmarks
 {
-	interface IInvokable
+	interface IBasicInvokable
 	{
 		void VoidToVoid();
 
@@ -12,7 +12,7 @@ package benchmarks
 		string VoidToString100();
 	}
 
-	interface IBenchmarks : IInvokable
+	interface IBasicBenchmarks : IBasicInvokable
 	{
 		void MeasureNativeVoidToVoid(i64 n);
 		void MeasureNativeI32ToVoid(i64 n);
@@ -22,13 +22,13 @@ package benchmarks
 		void MeasureNativeString100ToVoid(i64 n);
 		void MeasureNativeVoidToString100(i64 n);
 
-		void MeasureOutgoingVoidToVoid(IInvokable callback, i64 n);
-		void MeasureOutgoingI32ToVoid(IInvokable callback, i64 n);
-		void MeasureOutgoingVoidToI32(IInvokable callback, i64 n);
-		void MeasureOutgoingString3ToVoid(IInvokable callback, i64 n);
-		void MeasureOutgoingVoidToString3(IInvokable callback, i64 n);
-		void MeasureOutgoingString100ToVoid(IInvokable callback, i64 n);
-		void MeasureOutgoingVoidToString100(IInvokable callback, i64 n);
+		void MeasureOutgoingVoidToVoid(IBasicInvokable callback, i64 n);
+		void MeasureOutgoingI32ToVoid(IBasicInvokable callback, i64 n);
+		void MeasureOutgoingVoidToI32(IBasicInvokable callback, i64 n);
+		void MeasureOutgoingString3ToVoid(IBasicInvokable callback, i64 n);
+		void MeasureOutgoingVoidToString3(IBasicInvokable callback, i64 n);
+		void MeasureOutgoingString100ToVoid(IBasicInvokable callback, i64 n);
+		void MeasureOutgoingVoidToString100(IBasicInvokable callback, i64 n);
 	}
 
 

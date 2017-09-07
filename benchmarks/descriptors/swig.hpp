@@ -45,7 +45,7 @@ namespace swig
 	{
 		JOINT_DEVKIT_LOGGER("Benchmarks.Swig");
 
-		class Invokable : public IInvokable
+		class Invokable : public IBasicInvokable
 		{
 		public:
 			void VoidToVoid() { }
@@ -58,7 +58,7 @@ namespace swig
 			std::string VoidToString100() { return "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"; }
 		};
 
-		using BenchmarksPtr = IBenchmarks*;
+		using BenchmarksPtr = IBasicBenchmarks*;
 
 		class BenchmarkCtx
 		{
@@ -226,7 +226,7 @@ namespace swig
 				}
 			}
 
-			IBenchmarks* CreateBenchmarks() const
+			IBasicBenchmarks* CreateBenchmarks() const
 			{
 				auto result = GetGlobalBenchmarks();
 				if (!result)
@@ -234,7 +234,7 @@ namespace swig
 				return result;
 			}
 
-			IInvokable* CreateLocalInvokable()
+			IBasicInvokable* CreateLocalInvokable()
 			{ return new Invokable; }
 		};
 

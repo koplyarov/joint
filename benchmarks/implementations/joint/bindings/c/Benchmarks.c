@@ -30,7 +30,7 @@ JointCore_Error Benchmarks_Deinit(Benchmarks* self)
 { return JOINT_CORE_ERROR_NONE; }
 
 
-///// IBenchmarks /////
+///// IBasicBenchmarks /////
 
 
 JointCore_Error Benchmarks_VoidToVoid(Benchmarks* self, JointCore_ExceptionHandle* ex)
@@ -109,66 +109,66 @@ JointCore_Error Benchmarks_MeasureNativeVoidToString100(Benchmarks* self, int64_
 }
 
 
-JointCore_Error Benchmarks_MeasureOutgoingVoidToVoid(Benchmarks* self, benchmarks_IInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingVoidToVoid(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
-		benchmarks_IInvokable_VoidToVoid(invokable, ex);
+		benchmarks_IBasicInvokable_VoidToVoid(invokable, ex);
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingI32ToVoid(Benchmarks* self, benchmarks_IInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingI32ToVoid(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
-		benchmarks_IInvokable_I32ToVoid(invokable, 0, ex);
+		benchmarks_IBasicInvokable_I32ToVoid(invokable, 0, ex);
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingVoidToI32(Benchmarks* self, benchmarks_IInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingVoidToI32(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
 {
 	int64_t i;
 	int32_t v;
 	for (i = 0; i < n; ++i)
-		benchmarks_IInvokable_VoidToI32(invokable, &v, ex);
+		benchmarks_IBasicInvokable_VoidToI32(invokable, &v, ex);
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingString3ToVoid(Benchmarks* self, benchmarks_IInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingString3ToVoid(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
-		benchmarks_IInvokable_StringToVoid(invokable, "abc", ex);
+		benchmarks_IBasicInvokable_StringToVoid(invokable, "abc", ex);
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingVoidToString3(Benchmarks* self, benchmarks_IInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingVoidToString3(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
 {
 	int64_t i;
 	const char* v;
 	for (i = 0; i < n; ++i)
 	{
-		benchmarks_IInvokable_VoidToString3(invokable, &v, ex);
+		benchmarks_IBasicInvokable_VoidToString3(invokable, &v, ex);
 		free((void*)v);
 	}
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingString100ToVoid(Benchmarks* self, benchmarks_IInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingString100ToVoid(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
-		benchmarks_IInvokable_StringToVoid(invokable, "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890", ex);
+		benchmarks_IBasicInvokable_StringToVoid(invokable, "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890", ex);
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingVoidToString100(Benchmarks* self, benchmarks_IInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingVoidToString100(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
 {
 	int64_t i;
 	const char* v;
 	for (i = 0; i < n; ++i)
 	{
-		benchmarks_IInvokable_VoidToString100(invokable, &v, ex);
+		benchmarks_IBasicInvokable_VoidToString100(invokable, &v, ex);
 		free((void*)v);
 	}
 	return JOINT_CORE_ERROR_NONE;
@@ -272,7 +272,7 @@ JointCore_Error Benchmarks_MeasureProxySideThrow(Benchmarks* self, benchmarks_IT
 
 JOINT_COMPONENT(
 	Benchmarks,
-	benchmarks_IBenchmarks,
+	benchmarks_IBasicBenchmarks,
 	benchmarks_IEnumBenchmarks,
 	benchmarks_ICastBenchmarks,
 	benchmarks_IExceptionBenchmarks
