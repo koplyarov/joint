@@ -38,7 +38,12 @@ if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PYTHONLIBS_FOUND AND JNI
 	include_directories(${CMAKE_SOURCE_DIR}/bindings/cpp)
 
 	find_package(JointGen)
-	joint_generate_adapters(c++ Benchmarks_adapters.hpp implementations/joint/idl/IBenchmarks.idl)
+	joint_generate_adapters(c++ Benchmarks_adapters.hpp
+		implementations/joint/idl/IBasicBenchmarks.idl
+		implementations/joint/idl/ICastBenchmarks.idl
+		implementations/joint/idl/IEnumBenchmarks.idl
+		implementations/joint/idl/IExceptionBenchmarks.idl
+	)
 
 	if (MSVC)
 		set(PLATFORM_LIBS ole32 oleaut32)

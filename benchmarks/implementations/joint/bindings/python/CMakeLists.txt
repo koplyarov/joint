@@ -1,4 +1,9 @@
-joint_generate_adapters(python Benchmarks_adapters.py ${BENCHMARKS_IDL_DIR}/IBenchmarks.idl)
+joint_generate_adapters(python Benchmarks_adapters.py
+	${BENCHMARKS_IDL_DIR}/IBasicBenchmarks.idl
+	${BENCHMARKS_IDL_DIR}/ICastBenchmarks.idl
+	${BENCHMARKS_IDL_DIR}/IEnumBenchmarks.idl
+	${BENCHMARKS_IDL_DIR}/IExceptionBenchmarks.idl
+)
 
 add_custom_target(benchmarks-adapters-py ALL DEPENDS Benchmarks_adapters.py)
 

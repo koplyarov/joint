@@ -1,0 +1,14 @@
+package benchmarks
+{
+
+	interface ICastInterface1 { }
+	interface ICastInterface2 { }
+
+	interface ICastBenchmarks
+	{
+		ICastInterface1 GetCastComponent();
+		void MeasureNativeCast(i64 n);
+		void MeasureProxySideCast(ICastInterface1 obj, i64 n);
+	}
+
+}

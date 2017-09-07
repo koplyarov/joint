@@ -1,0 +1,15 @@
+package benchmarks
+{
+
+	interface IThrower
+	{
+		void Throw();
+	}
+
+	interface IExceptionBenchmarks : IThrower
+	{
+		void MeasureNativeThrow(i64 n);
+		void MeasureProxySideThrow(IThrower obj, i64 n);
+	}
+
+}
