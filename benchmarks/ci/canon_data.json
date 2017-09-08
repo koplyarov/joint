@@ -1,8 +1,8 @@
 {
-    "cpp: component i32()": 2.888888888888889, 
-    "cpp: proxy void()": 2.7777777777777777, 
-    "cpp: proxy i32()": 3.0555555555555554, 
-    "cpp: proxy void(i32)": 2.888888888888889, 
-    "cpp: component void()": 2.7222222222222223, 
-    "cpp: component void(i32)": 2.7222222222222223
+    "cpp, proxy void(i32)": 2.888888888888889, 
+    "cpp, component void()": 2.7222222222222223, 
+    "cpp, component i32()": 2.888888888888889, 
+    "cpp, component void(i32)": 2.7222222222222223, 
+    "cpp, proxy void()": 2.7777777777777777, 
+    "cpp, proxy i32()": 3.0555555555555554
 }
