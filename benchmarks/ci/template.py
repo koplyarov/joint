@@ -99,6 +99,9 @@ class Context:
         self.num_errors += 1
         print('{fg}{msg}{rs}'.format(msg=msg, fg=colorama.Fore.RED, rs=colorama.Style.RESET_ALL))
 
+    def warning(self,msg):
+        print('{fg}{msg}{rs}'.format(msg=msg, fg=colorama.Fore.YELLOW, rs=colorama.Style.RESET_ALL))
+
     def info(self,msg):
         print(msg)
 
@@ -126,10 +129,19 @@ def main():
                     ctx.error('New key: {}'.format(key))
                 elif key not in data:
                     ctx.error('Missing key: {}'.format(key))
-                elif data[key] > canon_data[key] * 1.2:
-                    ctx.error('Slower: {} (canonized: {}, actual: {})'.format(key, canon_data[key], data[key]))
                 else:
-                    ctx.info('OK: {} (canonized: {}, actual: {})'.format(key, canon_data[key], data[key]))
+                    d = data[key]
+                    c = canon_data[key]
+                    msg = '{} (canonized: {}, actual: {})'.format(key, c, d)
+
+                    if d > c * 1.5:
+                        ctx.error('Slower: {}'.format(msg))
+                    elif d > c * 1.2:
+                        ctx.warning('A bit slower: {}'.format(msg))
+                    elif d * 1.5 < c:
+                        ctx.ok('Faster: {}'.format(msg))
+                    else:
+                        ctx.info('OK: {}'.format(msg))
 
             if ctx.num_errors:
                 ctx.error('{} errors!'.format(ctx.num_errors))
