@@ -24,7 +24,7 @@ matrix:
       env: RUN_BENCHMARKS=0 COMPILER=clang-3.5 COMPILERXX=clang++-3.5 BUILD_TYPE=Debug
 
 before_install:
-  - sudo apt-get install -yq libboost-all-dev
+  - test "$RUN_BENCHMARKS" -ne 1 || sudo apt-get install -yq libboost-all-dev
   - sudo apt-get install -yq swig
   - sudo apt-get install -yq python-dev
   - sudo apt-get install -yq python-pip
