@@ -29,4 +29,4 @@ script:
   - valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test build/bin/c/Tests/Tests.jm
   - valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test build/bin/cpp/Tests/Tests.jm
   - PYTHONPATH="`pwd`/test/python:`pwd`/build/bin" valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test build/bin/python/Tests/Tests.jm
-  - [ "$DEFAULT_COMPILER" -ne 1 ] || ( sudo ./build/bin/joint-benchmarks -c10 -v2 -t benchmarks/ci/template.py -o- > build/benchmarks/ci.py && python ./build/benchmarks/ci.py --data benchmarks/ci/canon_data.json )
+  - test "$DEFAULT_COMPILER" -ne 1 || ( sudo ./build/bin/joint-benchmarks -c10 -v2 -t benchmarks/ci/template.py -o- > build/benchmarks/ci.py && python ./build/benchmarks/ci.py --data benchmarks/ci/canon_data.json )
