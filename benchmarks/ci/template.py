@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+from __future__ import division
+
 import argparse
 import colorama
 import json
@@ -12,7 +14,133 @@ data = {
     'cpp, proxy i32()': ${basic.invokeOutgoing_i32_void.joint(lang:cpp)[main]} / ${basic.invokeNative_i32_void.joint(lang:cpp)[main]},
     'cpp, component void(i32)': ${basic.invoke_void_i32.joint(lang:cpp)[main]} / ${basic.invokeNative_void_i32.joint(lang:cpp)[main]},
     'cpp, proxy void(i32)': ${basic.invokeOutgoing_void_i32.joint(lang:cpp)[main]} / ${basic.invokeNative_void_i32.joint(lang:cpp)[main]},
+    'cpp, component string3()': ${basic.invoke_string3_void.joint(lang:cpp)[main]} / ${basic.invokeNative_string3_void.joint(lang:cpp)[main]},
+    'cpp, proxy string3()': ${basic.invokeOutgoing_string3_void.joint(lang:cpp)[main]} / ${basic.invokeNative_string3_void.joint(lang:cpp)[main]},
+    'cpp, component void(string3)': ${basic.invoke_void_string3.joint(lang:cpp)[main]} / ${basic.invokeNative_void_string3.joint(lang:cpp)[main]},
+    'cpp, proxy void(string3)': ${basic.invokeOutgoing_void_string3.joint(lang:cpp)[main]} / ${basic.invokeNative_void_string3.joint(lang:cpp)[main]},
+    'cpp, component string100()': ${basic.invoke_string100_void.joint(lang:cpp)[main]} / ${basic.invokeNative_string100_void.joint(lang:cpp)[main]},
+    'cpp, proxy string100()': ${basic.invokeOutgoing_string100_void.joint(lang:cpp)[main]} / ${basic.invokeNative_string100_void.joint(lang:cpp)[main]},
+    'cpp, component void(string100)': ${basic.invoke_void_string100.joint(lang:cpp)[main]} / ${basic.invokeNative_void_string100.joint(lang:cpp)[main]},
+    'cpp, proxy void(string100)': ${basic.invokeOutgoing_void_string100.joint(lang:cpp)[main]} / ${basic.invokeNative_void_string100.joint(lang:cpp)[main]},
+
+    'cpp, component cast': ${cast.castComponentSide.joint(lang:cpp)[main]} / ${cast.castNative.joint(lang:cpp)[main]},
+    'cpp, proxy cast': ${cast.castProxySide.joint(lang:cpp)[main]} / ${cast.castNative.joint(lang:cpp)[main]},
+    'cpp, component throw': ${exception.throwComponentSide.joint(lang:cpp)[main]} / ${exception.throwNative.joint(lang:cpp)[main]},
+    'cpp, proxy throw': ${exception.throwProxySide.joint(lang:cpp)[main]} / ${exception.throwNative.joint(lang:cpp)[main]},
+    'cpp, component enum()': ${enum.invoke_void_enum.joint(lang:cpp)[main]} / ${enum.invokeNative_void_enum.joint(lang:cpp)[main]} ,
+    'cpp, proxy enum()': ${enum.invokeOutgoing_void_enum.joint(lang:cpp)[main]} / ${enum.invokeNative_void_enum.joint(lang:cpp)[main]},
+
+    'c, component void()': ${basic.invoke_void_void.joint(lang:c)[main]} / ${basic.invokeNative_void_void.joint(lang:c)[main]},
+    'c, proxy void()': ${basic.invokeOutgoing_void_void.joint(lang:c)[main]} / ${basic.invokeNative_void_void.joint(lang:c)[main]},
+    'c, component i32()': ${basic.invoke_i32_void.joint(lang:c)[main]} / ${basic.invokeNative_i32_void.joint(lang:c)[main]},
+    'c, proxy i32()': ${basic.invokeOutgoing_i32_void.joint(lang:c)[main]} / ${basic.invokeNative_i32_void.joint(lang:c)[main]},
+    'c, component void(i32)': ${basic.invoke_void_i32.joint(lang:c)[main]} / ${basic.invokeNative_void_i32.joint(lang:c)[main]},
+    'c, proxy void(i32)': ${basic.invokeOutgoing_void_i32.joint(lang:c)[main]} / ${basic.invokeNative_void_i32.joint(lang:c)[main]},
+    'c, component string3()': ${basic.invoke_string3_void.joint(lang:c)[main]} / ${basic.invokeNative_string3_void.joint(lang:c)[main]},
+    'c, proxy string3()': ${basic.invokeOutgoing_string3_void.joint(lang:c)[main]} / ${basic.invokeNative_string3_void.joint(lang:c)[main]},
+    'c, component void(string3)': ${basic.invoke_void_string3.joint(lang:c)[main]} / ${basic.invokeNative_void_string3.joint(lang:c)[main]},
+    'c, proxy void(string3)': ${basic.invokeOutgoing_void_string3.joint(lang:c)[main]} / ${basic.invokeNative_void_string3.joint(lang:c)[main]},
+    'c, component string100()': ${basic.invoke_string100_void.joint(lang:c)[main]} / ${basic.invokeNative_string100_void.joint(lang:c)[main]},
+    'c, proxy string100()': ${basic.invokeOutgoing_string100_void.joint(lang:c)[main]} / ${basic.invokeNative_string100_void.joint(lang:c)[main]},
+    'c, component void(string100)': ${basic.invoke_void_string100.joint(lang:c)[main]} / ${basic.invokeNative_void_string100.joint(lang:c)[main]},
+    'c, proxy void(string100)': ${basic.invokeOutgoing_void_string100.joint(lang:c)[main]} / ${basic.invokeNative_void_string100.joint(lang:c)[main]},
+
+    'c, component cast': ${cast.castComponentSide.joint(lang:c)[main]} / ${cast.castNative.joint(lang:cpp)[main]},
+    'c, proxy cast': ${cast.castProxySide.joint(lang:c)[main]} / ${cast.castNative.joint(lang:cpp)[main]},
+    'c, component throw': ${exception.throwComponentSide.joint(lang:c)[main]} / ${exception.throwNative.joint(lang:cpp)[main]},
+    'c, proxy throw': ${exception.throwProxySide.joint(lang:c)[main]} / ${exception.throwNative.joint(lang:cpp)[main]},
+    'c, component enum()': ${enum.invoke_void_enum.joint(lang:c)[main]} / ${enum.invokeNative_void_enum.joint(lang:c)[main]} ,
+    'c, proxy enum()': ${enum.invokeOutgoing_void_enum.joint(lang:c)[main]} / ${enum.invokeNative_void_enum.joint(lang:c)[main]},
+
+    'java, component void()': ${basic.invoke_void_void.joint(lang:java)[main]} / ${basic.invokeNative_void_void.joint(lang:java)[main]},
+    'java, proxy void()': ${basic.invokeOutgoing_void_void.joint(lang:java)[main]} / ${basic.invokeNative_void_void.joint(lang:java)[main]},
+    'java, component i32()': ${basic.invoke_i32_void.joint(lang:java)[main]} / ${basic.invokeNative_i32_void.joint(lang:java)[main]},
+    'java, proxy i32()': ${basic.invokeOutgoing_i32_void.joint(lang:java)[main]} / ${basic.invokeNative_i32_void.joint(lang:java)[main]},
+    'java, component void(i32)': ${basic.invoke_void_i32.joint(lang:java)[main]} / ${basic.invokeNative_void_i32.joint(lang:java)[main]},
+    'java, proxy void(i32)': ${basic.invokeOutgoing_void_i32.joint(lang:java)[main]} / ${basic.invokeNative_void_i32.joint(lang:java)[main]},
+    'java, component string3()': ${basic.invoke_string3_void.joint(lang:java)[main]} / ${basic.invokeNative_string3_void.joint(lang:java)[main]},
+    'java, proxy string3()': ${basic.invokeOutgoing_string3_void.joint(lang:java)[main]} / ${basic.invokeNative_string3_void.joint(lang:java)[main]},
+    'java, component void(string3)': ${basic.invoke_void_string3.joint(lang:java)[main]} / ${basic.invokeNative_void_string3.joint(lang:java)[main]},
+    'java, proxy void(string3)': ${basic.invokeOutgoing_void_string3.joint(lang:java)[main]} / ${basic.invokeNative_void_string3.joint(lang:java)[main]},
+    'java, component string100()': ${basic.invoke_string100_void.joint(lang:java)[main]} / ${basic.invokeNative_string100_void.joint(lang:java)[main]},
+    'java, proxy string100()': ${basic.invokeOutgoing_string100_void.joint(lang:java)[main]} / ${basic.invokeNative_string100_void.joint(lang:java)[main]},
+    'java, component void(string100)': ${basic.invoke_void_string100.joint(lang:java)[main]} / ${basic.invokeNative_void_string100.joint(lang:java)[main]},
+    'java, proxy void(string100)': ${basic.invokeOutgoing_void_string100.joint(lang:java)[main]} / ${basic.invokeNative_void_string100.joint(lang:java)[main]},
+
+    'java, component cast': ${cast.castComponentSide.joint(lang:java)[main]} / ${cast.castNative.joint(lang:cpp)[main]},
+    'java, proxy cast': ${cast.castProxySide.joint(lang:java)[main]} / ${cast.castNative.joint(lang:cpp)[main]},
+    'java, component throw': ${exception.throwComponentSide.joint(lang:java)[main]} / ${exception.throwNative.joint(lang:java)[main]},
+    'java, proxy throw': ${exception.throwProxySide.joint(lang:java)[main]} / ${exception.throwNative.joint(lang:java)[main]},
+    'java, component enum()': ${enum.invoke_void_enum.joint(lang:java)[main]} / ${enum.invokeNative_void_enum.joint(lang:cpp)[main]} ,
+    'java, proxy enum()': ${enum.invokeOutgoing_void_enum.joint(lang:java)[main]} / ${enum.invokeNative_void_enum.joint(lang:cpp)[main]},
+
+    'python, component void()': ${basic.invoke_void_void.joint(lang:python)[main]} / ${basic.invokeNative_void_void.joint(lang:python)[main]},
+    'python, proxy void()': ${basic.invokeOutgoing_void_void.joint(lang:python)[main]} / ${basic.invokeNative_void_void.joint(lang:python)[main]},
+    'python, component i32()': ${basic.invoke_i32_void.joint(lang:python)[main]} / ${basic.invokeNative_i32_void.joint(lang:python)[main]},
+    'python, proxy i32()': ${basic.invokeOutgoing_i32_void.joint(lang:python)[main]} / ${basic.invokeNative_i32_void.joint(lang:python)[main]},
+    'python, component void(i32)': ${basic.invoke_void_i32.joint(lang:python)[main]} / ${basic.invokeNative_void_i32.joint(lang:python)[main]},
+    'python, proxy void(i32)': ${basic.invokeOutgoing_void_i32.joint(lang:python)[main]} / ${basic.invokeNative_void_i32.joint(lang:python)[main]},
+    'python, component string3()': ${basic.invoke_string3_void.joint(lang:python)[main]} / ${basic.invokeNative_string3_void.joint(lang:python)[main]},
+    'python, proxy string3()': ${basic.invokeOutgoing_string3_void.joint(lang:python)[main]} / ${basic.invokeNative_string3_void.joint(lang:python)[main]},
+    'python, component void(string3)': ${basic.invoke_void_string3.joint(lang:python)[main]} / ${basic.invokeNative_void_string3.joint(lang:python)[main]},
+    'python, proxy void(string3)': ${basic.invokeOutgoing_void_string3.joint(lang:python)[main]} / ${basic.invokeNative_void_string3.joint(lang:python)[main]},
+    'python, component string100()': ${basic.invoke_string100_void.joint(lang:python)[main]} / ${basic.invokeNative_string100_void.joint(lang:python)[main]},
+    'python, proxy string100()': ${basic.invokeOutgoing_string100_void.joint(lang:python)[main]} / ${basic.invokeNative_string100_void.joint(lang:python)[main]},
+    'python, component void(string100)': ${basic.invoke_void_string100.joint(lang:python)[main]} / ${basic.invokeNative_void_string100.joint(lang:python)[main]},
+    'python, proxy void(string100)': ${basic.invokeOutgoing_void_string100.joint(lang:python)[main]} / ${basic.invokeNative_void_string100.joint(lang:python)[main]},
+
+    'python, component cast': ${cast.castComponentSide.joint(lang:python)[main]} / ${cast.castNative.joint(lang:cpp)[main]},
+    'python, proxy cast': ${cast.castProxySide.joint(lang:python)[main]} / ${cast.castNative.joint(lang:cpp)[main]},
+    'python, component throw': ${exception.throwComponentSide.joint(lang:python)[main]} / ${exception.throwNative.joint(lang:python)[main]},
+    'python, proxy throw': ${exception.throwProxySide.joint(lang:python)[main]} / ${exception.throwNative.joint(lang:python)[main]},
+    'python, component enum()': ${enum.invoke_void_enum.joint(lang:python)[main]} / ${enum.invokeNative_void_enum.joint(lang:cpp)[main]} ,
+    'python, proxy enum()': ${enum.invokeOutgoing_void_enum.joint(lang:python)[main]} / ${enum.invokeNative_void_enum.joint(lang:cpp)[main]},
+
+    'vs swig, java, component void()': ${basic.invoke_void_void.joint(lang:java)[main]} / ${basic.invoke_void_void.swig(lang:java)[main]},
+    'vs swig, java, proxy void()': ${basic.invokeOutgoing_void_void.joint(lang:java)[main]} / ${basic.invoke_void_void.swig(lang:java)[main]},
+    'vs swig, java, component i32()': ${basic.invoke_i32_void.joint(lang:java)[main]} / ${basic.invoke_i32_void.swig(lang:java)[main]},
+    'vs swig, java, proxy i32()': ${basic.invokeOutgoing_i32_void.joint(lang:java)[main]} / ${basic.invoke_i32_void.swig(lang:java)[main]},
+    'vs swig, java, component void(i32)': ${basic.invoke_void_i32.joint(lang:java)[main]} / ${basic.invoke_void_i32.swig(lang:java)[main]},
+    'vs swig, java, proxy void(i32)': ${basic.invokeOutgoing_void_i32.joint(lang:java)[main]} / ${basic.invoke_void_i32.swig(lang:java)[main]},
+    'vs swig, java, component string3()': ${basic.invoke_string3_void.joint(lang:java)[main]} / ${basic.invoke_string3_void.swig(lang:java)[main]},
+    'vs swig, java, proxy string3()': ${basic.invokeOutgoing_string3_void.joint(lang:java)[main]} / ${basic.invoke_string3_void.swig(lang:java)[main]},
+    'vs swig, java, component void(string3)': ${basic.invoke_void_string3.joint(lang:java)[main]} / ${basic.invoke_void_string3.swig(lang:java)[main]},
+    'vs swig, java, proxy void(string3)': ${basic.invokeOutgoing_void_string3.joint(lang:java)[main]} / ${basic.invoke_void_string3.swig(lang:java)[main]},
+    'vs swig, java, component string100()': ${basic.invoke_string100_void.joint(lang:java)[main]} / ${basic.invoke_string100_void.swig(lang:java)[main]},
+    'vs swig, java, proxy string100()': ${basic.invokeOutgoing_string100_void.joint(lang:java)[main]} / ${basic.invoke_string100_void.swig(lang:java)[main]},
+    'vs swig, java, component void(string100)': ${basic.invoke_void_string100.joint(lang:java)[main]} / ${basic.invoke_void_string100.swig(lang:java)[main]},
+    'vs swig, java, proxy void(string100)': ${basic.invokeOutgoing_void_string100.joint(lang:java)[main]} / ${basic.invoke_void_string100.swig(lang:java)[main]},
+
+    'vs swig, python, component void()': ${basic.invoke_void_void.joint(lang:python)[main]} / ${basic.invoke_void_void.swig(lang:python)[main]},
+    'vs swig, python, proxy void()': ${basic.invokeOutgoing_void_void.joint(lang:python)[main]} / ${basic.invoke_void_void.swig(lang:python)[main]},
+    'vs swig, python, component i32()': ${basic.invoke_i32_void.joint(lang:python)[main]} / ${basic.invoke_i32_void.swig(lang:python)[main]},
+    'vs swig, python, proxy i32()': ${basic.invokeOutgoing_i32_void.joint(lang:python)[main]} / ${basic.invoke_i32_void.swig(lang:python)[main]},
+    'vs swig, python, component void(i32)': ${basic.invoke_void_i32.joint(lang:python)[main]} / ${basic.invoke_void_i32.swig(lang:python)[main]},
+    'vs swig, python, proxy void(i32)': ${basic.invokeOutgoing_void_i32.joint(lang:python)[main]} / ${basic.invoke_void_i32.swig(lang:python)[main]},
+    'vs swig, python, component string3()': ${basic.invoke_string3_void.joint(lang:python)[main]} / ${basic.invoke_string3_void.swig(lang:python)[main]},
+    'vs swig, python, proxy string3()': ${basic.invokeOutgoing_string3_void.joint(lang:python)[main]} / ${basic.invoke_string3_void.swig(lang:python)[main]},
+    'vs swig, python, component void(string3)': ${basic.invoke_void_string3.joint(lang:python)[main]} / ${basic.invoke_void_string3.swig(lang:python)[main]},
+    'vs swig, python, proxy void(string3)': ${basic.invokeOutgoing_void_string3.joint(lang:python)[main]} / ${basic.invoke_void_string3.swig(lang:python)[main]},
+    'vs swig, python, component string100()': ${basic.invoke_string100_void.joint(lang:python)[main]} / ${basic.invoke_string100_void.swig(lang:python)[main]},
+    'vs swig, python, proxy string100()': ${basic.invokeOutgoing_string100_void.joint(lang:python)[main]} / ${basic.invoke_string100_void.swig(lang:python)[main]},
+    'vs swig, python, component void(string100)': ${basic.invoke_void_string100.joint(lang:python)[main]} / ${basic.invoke_void_string100.swig(lang:python)[main]},
+    'vs swig, python, proxy void(string100)': ${basic.invokeOutgoing_void_string100.joint(lang:python)[main]} / ${basic.invoke_void_string100.swig(lang:python)[main]},
 }
+
+
+class Context:
+    def __init__(self):
+        self.num_errors = 0
+
+    def error(self, msg):
+        self.num_errors += 1
+        print('{fg}{msg}{rs}'.format(msg=msg, fg=colorama.Fore.RED, rs=colorama.Style.RESET_ALL))
+
+    def info(self,msg):
+        print(msg)
+
+    def ok(self,msg):
+        print('{fg}{msg}{rs}'.format(msg=msg, fg=colorama.Fore.GREEN, rs=colorama.Style.RESET_ALL))
 
 
 def main():
@@ -23,38 +151,28 @@ def main():
 
     if args.canonize:
         with open(args.data, 'w') as f:
-            f.write(json.dumps(data, indent=4))
+            f.write(json.dumps(data, indent=4, sort_keys=True))
     else:
-        has_errors = False
-        def error(msg):
-            has_errors = True
-            print('{fg}{msg}{rs}'.format(msg=msg, fg=colorama.Fore.RED, rs=colorama.Style.RESET_ALL))
-
-        def info(msg):
-            print(msg)
-
-        def ok(msg):
-            print('{fg}{msg}{rs}'.format(msg=msg, fg=colorama.Fore.GREEN, rs=colorama.Style.RESET_ALL))
-
+        ctx = Context()
         with open(args.data) as f:
             canon_data = json.loads(f.read())
             keys = set(canon_data.keys())
             keys.update(data.keys())
-            for key in keys:
+            for key in sorted(keys):
                 if key not in canon_data:
-                    error('New key: {}'.format(key))
+                    ctx.error('New key: {}'.format(key))
                 elif key not in data:
-                    error('Missing key: {}'.format(key))
+                    ctx.error('Missing key: {}'.format(key))
                 elif data[key] > canon_data[key] * 1.2:
-                    error('Slower: {} (canonized: {}, actual: {})'.format(key, canon_data[key], data[key]))
+                    ctx.error('Slower: {} (canonized: {}, actual: {})'.format(key, canon_data[key], data[key]))
                 else:
-                    info('OK: {} (canonized: {}, actual: {})'.format(key, canon_data[key], data[key]))
+                    ctx.info('OK: {} (canonized: {}, actual: {})'.format(key, canon_data[key], data[key]))
 
-            if has_errors:
-                error('{} errors!'.format(len(errors)))
+            if ctx.num_errors:
+                ctx.error('{} errors!'.format(ctx.num_errors))
                 exit(1)
             else:
-                ok('OK')
+                ctx.ok('OK')
 
 
 if (__name__ == '__main__'):
