@@ -92,7 +92,14 @@ namespace java
 	}
 
 
-#define DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION do { if (env->ExceptionCheck()) JOINT_TERMINATE_EX("Joint.Java.Utils", "Got an exception from java while processing another one"); } while (false)
+#define DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION \
+		do { \
+			if (env->ExceptionCheck()) \
+			{ \
+				env->ExceptionDescribe(); \
+				JOINT_TERMINATE_EX("Joint.Java.Utils", "Got an exception from java while processing another one"); \
+			} \
+		} while (false)
 
 	inline devkit::ExceptionInfo GetJavaExceptionInfo(JNIEnv *env)
 	{
