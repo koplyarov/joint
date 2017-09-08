@@ -10,12 +10,18 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['valgrind']
-      env: DEFAULT_COMPILER=1
+      env: RUN_BENCHMARKS=1 BUILD_TYPE=RelWithDebInfo
+    - compiler: gcc
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['valgrind']
+      env: RUN_BENCHMARKS=0 BUILD_TYPE=Debug
     - compiler: clang
       addons:
         apt:
           packages: ['clang-3.5', 'valgrind']
-      env: DEFAULT_COMPILER=0 COMPILER=clang-3.5 COMPILERXX=clang++-3.5
+      env: RUN_BENCHMARKS=0 COMPILER=clang-3.5 COMPILERXX=clang++-3.5 BUILD_TYPE=Debug
 
 before_install:
   - sudo apt-get install -yq libboost-all-dev
@@ -25,8 +31,8 @@ before_install:
   - sudo pip install pyparsing jinja2
 
 script: 
-  - ( mkdir build && cd build && CC="$COMPILER" CXX="$COMPILERXX" cmake -DJOINT_TREAT_WARNINGS_AS_ERRORS=TRUE -DJOINT_VALGRIND=TRUE .. && make )
-  - valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test build/bin/c/Tests/Tests.jm
-  - valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test build/bin/cpp/Tests/Tests.jm
-  - PYTHONPATH="`pwd`/test/python:`pwd`/build/bin" valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test build/bin/python/Tests/Tests.jm
-  - test "$DEFAULT_COMPILER" -ne 1 || ( sudo ./build/bin/joint-benchmarks -c10 -v2 -t benchmarks/ci/template.py -o- > build/benchmarks/ci.py && python ./build/benchmarks/ci.py --data benchmarks/ci/canon_data.json )
+  - ( mkdir build && cd build && CC="$COMPILER" CXX="$COMPILERXX" cmake -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DJOINT_TREAT_WARNINGS_AS_ERRORS=TRUE -DJOINT_VALGRIND=TRUE .. && make )
+  - test "$RUN_BENCHMARKS" -eq 1 || ( valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test build/bin/c/Tests/Tests.jm )
+  - test "$RUN_BENCHMARKS" -eq 1 || ( valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test build/bin/cpp/Tests/Tests.jm )
+  - test "$RUN_BENCHMARKS" -eq 1 || ( PYTHONPATH="`pwd`/test/python:`pwd`/build/bin" valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test build/bin/python/Tests/Tests.jm )
+  - test "$RUN_BENCHMARKS" -ne 1 || ( sudo ./build/bin/joint-benchmarks -c10 -v2 -t benchmarks/ci/template.py -o- > build/benchmarks/ci.py && python ./build/benchmarks/ci.py --data benchmarks/ci/canon_data.json )
