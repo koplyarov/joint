@@ -21,7 +21,7 @@ namespace pyjoint
 	struct TypeDescriptor
 	{
 		PyObject_HEAD
-		std::vector<PyObject*>* objects;
+		std::vector<PyObjectHolder>* objects;
 		TypeDescriptorValue* descriptor;
 
 		const TypeDescriptorValue& GetDescriptor() const

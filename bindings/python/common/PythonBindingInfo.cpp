@@ -7,7 +7,7 @@ namespace joint {
 namespace python
 {
 
-	PythonBindingInfo::PythonBindingInfo(std::vector<PyObject*>& objects)
+	PythonBindingInfo::PythonBindingInfo(std::vector<PyObjectHolder>& objects)
 		: _objects(objects)
 	{ }
 
@@ -61,7 +61,7 @@ namespace python
 
 
 	PyObjectHolder PythonBindingInfo::GetMemberId(const StructUserData& structUserData, PyObject* memberNode) const
-	{ return RegisterObject(PyObjectHolder(PY_OBJ_CHECK(PyTuple_GetItem(memberNode, 0)))); }
+	{ return RegisterObject(PyObjectHolder::FromBorrowed(PY_OBJ_CHECK(PyTuple_GetItem(memberNode, 0)))); }
 
 
 	PyObject* PythonBindingInfo::GetMemberType(const StructUserData& structUserData, PyObject* memberNode) const

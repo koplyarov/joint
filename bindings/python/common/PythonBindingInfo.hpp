@@ -23,10 +23,10 @@ namespace python
 		struct MethodUserData { };
 
 	private:
-		std::vector<PyObject*>&   _objects;
+		std::vector<PyObjectHolder>&   _objects;
 
 	public:
-		PythonBindingInfo(std::vector<PyObject*>& objects);
+		PythonBindingInfo(std::vector<PyObjectHolder>& objects);
 
 		JointCore_TypeId GetJointTypeId(PyObject* typeNode) const;
 		JointCore_InterfaceChecksum GetInterfaceChecksum(PyObject* typeNode) const;

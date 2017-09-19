@@ -56,8 +56,8 @@ namespace pyjoint
 		0,                                           // tp_descr_set
 		0,                                           // tp_dictoffset
 		(initproc)TypeDescriptor_init,               // tp_init
-		PyType_GenericAlloc,                         // tp_alloc
-		PyType_GenericNew                            // tp_new
+		0,                         // tp_alloc
+		0                            // tp_new
 	};
 
 
@@ -68,7 +68,7 @@ namespace pyjoint
 		PyObject* py_desc;
 		PYTHON_CHECK(PyArg_ParseTuple(args, "O", &py_desc), "Could not parse arguments");
 
-		self->objects = new std::vector<PyObject*>();
+		self->objects = new std::vector<PyObjectHolder>();
 		self->descriptor = new TypeDescriptorValue(py_desc, PythonBindingInfo(*self->objects));
 
 		PYJOINT_CPP_WRAP_END(0, -1, Py_DECREF(self);)
@@ -81,8 +81,17 @@ namespace pyjoint
 
 		PyObject_GC_UnTrack(self);
 		Py_TRASHCAN_SAFE_BEGIN(self)
-		delete self->descriptor;
-		delete self->objects;
+
+		TypeDescriptorValue* tmp_descriptor = nullptr;
+		std::swap(self->descriptor, tmp_descriptor);
+		std::vector<PyObjectHolder>* tmp_objects = nullptr;
+		std::swap(self->objects, tmp_objects);
+
+		delete tmp_descriptor;
+		for (std::vector<PyObjectHolder>::reverse_iterator it = tmp_objects->rbegin(); it != tmp_objects->rend(); ++it)
+			(*it).Reset();
+		delete tmp_objects;
+
 		Py_TYPE(self)->tp_free((PyObject*)self);
 		Py_TRASHCAN_SAFE_END(self)
 

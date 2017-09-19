@@ -21,7 +21,7 @@ namespace pyjoint
 	struct InterfaceDescriptor
 	{
 		PyObject_HEAD
-		std::vector<PyObject*>* objects;
+		std::vector<PyObjectHolder>* objects;
 		InterfaceDescriptorValue* descriptor;
 
 		const InterfaceDescriptorValue& GetDescriptor() const
