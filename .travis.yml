@@ -10,18 +10,20 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['valgrind']
-      env: RUN_BENCHMARKS=1 BUILD_TYPE=RelWithDebInfo
+      env: RUN_BENCHMARKS=1 TEST_COVERAGE=0 BUILD_TYPE=RelWithDebInfo CMAKE_FLAGS="-DJOINT_VALGRIND"
+    - compiler: gcc
+      env: RUN_BENCHMARKS=0 TEST_COVERAGE=1 BUILD_TYPE=Debug CMAKE_FLAGS="-DJOINT_COVERAGE"
     - compiler: gcc
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['valgrind']
-      env: RUN_BENCHMARKS=0 BUILD_TYPE=Debug
+      env: RUN_BENCHMARKS=0 TEST_COVERAGE=0 BUILD_TYPE=Debug
     - compiler: clang
       addons:
         apt:
           packages: ['clang-3.5', 'valgrind']
-      env: RUN_BENCHMARKS=0 COMPILER=clang-3.5 COMPILERXX=clang++-3.5 BUILD_TYPE=Debug
+      env: RUN_BENCHMARKS=0 TEST_COVERAGE=0 COMPILER=clang-3.5 COMPILERXX=clang++-3.5 BUILD_TYPE=Debug
 
 before_install:
   - test "$RUN_BENCHMARKS" -ne 1 || sudo apt-get install -yq libboost-all-dev
@@ -30,9 +32,15 @@ before_install:
   - sudo apt-get install -yq python-pip
   - sudo pip install pyparsing jinja2
 
+install:
+  - sudo apt-get install lcov
+  - gem install coveralls-lcov
+
 script: 
-  - ( mkdir build && cd build && CC="$COMPILER" CXX="$COMPILERXX" cmake -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DJOINT_TREAT_WARNINGS_AS_ERRORS=TRUE -DJOINT_VALGRIND=TRUE .. && make -j2 )
-  - test "$RUN_BENCHMARKS" -eq 1 || ( valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test build/bin/c/Tests/Tests.jm )
-  - test "$RUN_BENCHMARKS" -eq 1 || ( valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test build/bin/cpp/Tests/Tests.jm )
-  - test "$RUN_BENCHMARKS" -eq 1 || ( PYTHONPATH="`pwd`/test/python:`pwd`/build/bin" valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 ./build/bin/joint-test build/bin/python/Tests/Tests.jm )
-  - test "$RUN_BENCHMARKS" -ne 1 || ( sudo PYTHONPATH="`pwd`/build/bin:`pwd`/benchmarks/implementations/swig" ./build/bin/joint-benchmarks -c10 -v2 -t benchmarks/ci/template.py -o- > build/benchmarks/ci.py && python ./build/benchmarks/ci.py --data benchmarks/ci/canon_data.json )
+  - ( mkdir build && cd build && CC="$COMPILER" CXX="$COMPILERXX" cmake -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DJOINT_TREAT_WARNINGS_AS_ERRORS=TRUE $CMAKE_FLAGS .. && make -j2 )
+  - test "$RUN_BENCHMARKS" -eq 1 -o "$SEND_TEST_COVERAGE" -eq 1 || ./ci/run_tests.sh
+  - test "$RUN_BENCHMARKS" -eq 1 -o "$SEND_TEST_COVERAGE" -ne 1 || ./ci/run_tests.sh --no-valgrind
+  - test "$RUN_BENCHMARKS" -ne 1 -o "$SEND_TEST_COVERAGE" -eq 1 || ./ci/run_benchmarks.sh
+
+after_success:
+  - test "$SEND_TEST_COVERAGE" -ne 1 || ./ci/send_coverage.sh

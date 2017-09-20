@@ -13,6 +13,16 @@ if (JOINT_TREAT_WARNINGS_AS_ERRORS)
 	endif()
 endif()
 
+if (JOINT_COVERAGE)
+	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+		message(STATUS "Using gcov for test coverage analysis")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+	else()
+		message(WARNING "No C/C++ coverage analysis support")
+	endif()
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/joint-gen/")
 
 include_directories(${CMAKE_SOURCE_DIR}/core)
