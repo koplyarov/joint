@@ -7,6 +7,7 @@
 #include <bindings/native/JointNative.h>
 #include <joint.cpp/Component.hpp>
 #include <joint.cpp/Ptr.hpp>
+#include <joint.cpp/detail/Config.hpp>
 #include <joint.cpp/detail/Dummy.hpp>
 #include <joint.cpp/detail/JointCall.hpp>
 
@@ -74,7 +75,7 @@ namespace joint
 			return *this;
 		}
 
-#if __cplusplus >= 201100L
+#if DETAIL_JOINT_CPP_MOVE_SUPPORTED
 		ModuleContext(ModuleContext&& other)
 			: _accessor(other._accessor)
 		{
@@ -139,10 +140,10 @@ namespace joint
 		JointCore_ModuleAccessor     _module;
 
 	public:
-		Module(const Manifest& manifest)
+		explicit Module(const Manifest& manifest)
 		{ Init(manifest); }
 
-		Module(const std::string& manifestLocation)
+		explicit Module(const std::string& manifestLocation)
 		{ Init(Manifest(manifestLocation)); }
 
 		Module()
@@ -151,7 +152,7 @@ namespace joint
 			_module.VTable = NULL;
 		}
 
-		Module(JointCore_ModuleAccessor module) : _module(module) { }
+		explicit Module(JointCore_ModuleAccessor module) : _module(module) { }
 
 		Module(const Module& other)
 			: _module(other._module)
@@ -164,7 +165,7 @@ namespace joint
 			return *this;
 		}
 
-#if __cplusplus >= 201100L
+#if DETAIL_JOINT_CPP_MOVE_SUPPORTED
 		Module(Module&& other)
 			: _module(other._module)
 		{
@@ -224,7 +225,7 @@ namespace joint
 			_binding.VTable = NULL;
 		}
 
-		Binding(JointCore_BindingAccessor binding)
+		explicit Binding(JointCore_BindingAccessor binding)
 			: _binding(binding)
 		{ }
 
@@ -239,7 +240,7 @@ namespace joint
 			return *this;
 		}
 
-#if __ReleaseBindingcplusplus >= 201100L
+#if DETAIL_JOINT_CPP_MOVE_SUPPORTED
 		Binding(Binding&& other)
 			: _binding(other._binding)
 		{ other._binding.Instance = NULL; }
@@ -274,7 +275,7 @@ namespace joint
 		{
 			JointCore_BindingAccessor binding_accessor;
 			JOINT_CALL( JointNative_MakeBinding(&binding_accessor) );
-			_binding = binding_accessor;
+			_binding = Binding(binding_accessor);
 			// TODO: _mainModule?
 		}
 

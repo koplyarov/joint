@@ -6,6 +6,7 @@
 
 #include <joint.cpp/Ptr.hpp>
 #include <joint.cpp/detail/ClassContentChecks.hpp>
+#include <joint.cpp/detail/Config.hpp>
 #include <joint.cpp/detail/JointCall.hpp>
 
 
@@ -176,16 +177,29 @@ namespace joint
 			: _handle(other._handle)
 		{ Joint_IncRefArray(_handle); }
 
-		~Array()
-		{ Joint_DecRefArray(_handle); }
-
-
 		Array& operator = (const Array& other)
 		{
 			Array tmp(other);
 			Swap(tmp);
 			return *this;
 		}
+
+#if DETAIL_JOINT_CPP_MOVE_SUPPORTED
+		Array(Array&& other)
+			: _handle(other._handle)
+		{ Joint_IncRefArray(_handle); }
+
+		Array& operator = (Array&& other)
+		{
+			Array tmp(other);
+			Swap(tmp);
+			return *this;
+		}
+#endif
+
+		~Array()
+		{ Joint_DecRefArray(_handle); }
+
 
 		T_ operator[] (size_t index) const
 		{ return Get(index); }

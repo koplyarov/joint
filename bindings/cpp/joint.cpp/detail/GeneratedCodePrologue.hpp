@@ -16,6 +16,7 @@
 #include <joint.cpp/Array.hpp>
 #include <joint.cpp/Ptr.hpp>
 #include <joint.cpp/TypeList.hpp>
+#include <joint.cpp/detail/Config.hpp>
 #include <joint.cpp/detail/JointCall.hpp>
 #include <joint.cpp/detail/RetValueGuard.hpp>
 
@@ -30,10 +31,10 @@ namespace detail
 {
 
 #if !defined(__GNUC__) && !defined(__clang__)
-	std::string Demangle(const std::string& s)
+	inline std::string Demangle(const std::string& s)
 	{ return s; }
 #else
-	std::string Demangle(const std::string& s)
+	inline std::string Demangle(const std::string& s)
 	{
 		int status = 0;
 		char * result = abi::__cxa_demangle(s.c_str(), 0, 0, &status);
