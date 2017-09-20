@@ -1,6 +1,7 @@
 project(test-python)
 
 joint_generate_adapters(python Tests_adapters.py
+	${IDL_DIR}/IStarterTests.idl
 	${IDL_DIR}/IBasicTests.idl
 	${IDL_DIR}/IEnumTests.idl
 	${IDL_DIR}/IObjectTests.idl

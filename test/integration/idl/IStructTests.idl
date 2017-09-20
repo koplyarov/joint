@@ -3,26 +3,54 @@ package test
 
 	struct S1
 	{
-		i32 i;
-		string s;
+		i32      i;
+		string   s;
 	}
+
+
+	struct S2L { i32 i; }
+	struct S2M { f32 f; }
+	struct S2R { string s; }
+
+	struct S2
+	{
+		i32      i;
+		S2L      s2l;
+		f32      f;
+		S2M      s2m;
+		string   s;
+		S2R      s2r;
+	}
+
 
 	interface IStructTestsCallback
 	{
 		S1 MakeS1(i32 i, string s);
-		string GetS(S1 s);
-		i32 GetI(S1 s);
+		i32 GetIFromS1(S1 s);
+		string GetSFromS1(S1 s);
+
+		S2 MakeS2(i32 i, S2L s2l, f32 f, S2M s2m, string s, S2R s2r);
+		i32 GetIFromS2(S2 s);
+		S2L GetS2LFromS2(S2 s);
+		f32 GetFFromS2(S2 s);
+		S2M GetS2MFromS2(S2 s);
+		string GetSFromS2(S2 s);
+		S2R GetS2RFromS2(S2 s);
 	}
 
-	interface IStructTests
+	interface IStructTests : IStructTestsCallback
 	{
-		S1 MakeS1(i32 i, string s);
-		string GetS(S1 s);
-		i32 GetI(S1 s);
-
 		S1 CallbackMakeS1(IStructTestsCallback cb, i32 i, string s);
-		string CallbackGetS(IStructTestsCallback cb, S1 s);
-		i32 CallbackGetI(IStructTestsCallback cb, S1 s);
+		string CallbackGetSFromS1(IStructTestsCallback cb, S1 s);
+		i32 CallbackGetIFromS1(IStructTestsCallback cb, S1 s);
+
+		S2 CallbackMakeS2(IStructTestsCallback cb, i32 i, S2L s2l, f32 f, S2M s2m, string s, S2R s2r);
+		i32 CallbackGetIFromS2(IStructTestsCallback cb, S2 s);
+		S2L CallbackGetS2LFromS2(IStructTestsCallback cb, S2 s);
+		f32 CallbackGetFFromS2(IStructTestsCallback cb, S2 s);
+		S2M CallbackGetS2MFromS2(IStructTestsCallback cb, S2 s);
+		string CallbackGetSFromS2(IStructTestsCallback cb, S2 s);
+		S2R CallbackGetS2RFromS2(IStructTestsCallback cb, S2 s);
 	}
 
 }

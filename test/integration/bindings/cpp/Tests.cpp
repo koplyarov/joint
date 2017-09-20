@@ -92,7 +92,11 @@ public:
 	~Tests()
 	{ }
 
+	////////////////////////////////////////////////////////////////////////////////
+
 	int32_t Increment(int32_t value) { return value + 1; }
+
+	////////////////////////////////////////////////////////////////////////////////
 
 	uint8_t   AddU8(uint8_t l, uint8_t r)     { return l + r; }
 	int8_t    AddI8(int8_t l, int8_t r)       { return l + r; }
@@ -124,6 +128,7 @@ public:
 	bool CallbackBool(const IBasicTestsCallbackBool_Ptr& cb, bool l, bool r) { return cb->And(l, r); }
 	std::string CallbackString(const IBasicTestsCallbackString_Ptr& cb, const std::string& l, const std::string& r) { return cb->Concat(l, r); }
 
+	////////////////////////////////////////////////////////////////////////////////
 
 	std::string StringRepresentation(Enum e)
 	{ return e.ToString(); }
@@ -140,6 +145,7 @@ public:
 		}
 	}
 
+	////////////////////////////////////////////////////////////////////////////////
 
 	ISomeObject_Ptr ReturnNull()
 	{ return ISomeObject_Ptr(); }
@@ -169,6 +175,7 @@ public:
 	void CollectGarbage()
 	{ }
 
+	////////////////////////////////////////////////////////////////////////////////
 
 	IInterface1_Ptr CastTo1(const IInterface0_Ptr& obj) { return Cast<IInterface1>(obj); }
 	IInterface2_Ptr CastTo2(const IInterface0_Ptr& obj) { return Cast<IInterface2>(obj); }
@@ -181,6 +188,7 @@ public:
 	IInterface0_Ptr Create017()
 	{ return _moduleContext.MakeComponent<IInterface0, CastComponent017>(); }
 
+	////////////////////////////////////////////////////////////////////////////////
 
 	void ThrowNative() { throw std::runtime_error("Requested exception"); }
 
@@ -198,6 +206,8 @@ public:
 	void LetThrough(const test::IExceptionTestsCallback_Ptr& cb)
 	{ cb->Method(); }
 
+	////////////////////////////////////////////////////////////////////////////////
+
 	IInterfaceCS1_Ptr Return1() { return _moduleContext.MakeComponent<IInterfaceCS1, InterfaceChecksumComponent1>(); }
 	IInterfaceCS2_Ptr Return2() { return _moduleContext.MakeComponent<IInterfaceCS2, InterfaceChecksumComponent2>(); }
 	IInterfaceCS1_Ptr Return12() { return _moduleContext.MakeComponent<IInterfaceCS1, InterfaceChecksumComponent12>(); }
@@ -206,13 +216,33 @@ public:
 	void AcceptCS2(const IInterfaceCS2_Ptr& obj) { }
 	void CastToCS2(const IInterfaceCS1_Ptr& obj) { Cast<IInterfaceCS2>(obj); }
 
+	////////////////////////////////////////////////////////////////////////////////
+
 	S1 MakeS1(int32_t i, const std::string& s) { return S1(i, s); }
-	std::string GetS(S1 s) { return s.s; }
-	int32_t GetI(S1 s) { return s.i; }
+	std::string GetSFromS1(const S1& s) { return s.s; }
+	int32_t GetIFromS1(const S1& s) { return s.i; }
+
+	S2 MakeS2(int32_t i, S2L s2l, float f, S2M s2m, const std::string& s, S2R s2r) { return S2(i, s2l, f, s2m, s, s2r); }
+	int32_t GetIFromS2(S2 s) { return s.i; }
+	S2L GetS2LFromS2(S2 s) { return s.s2l; }
+	float GetFFromS2(S2 s) { return s.f; }
+	S2M GetS2MFromS2(S2 s) { return s.s2m; }
+	std::string GetSFromS2(S2 s) { return s.s; }
+	S2R GetS2RFromS2(S2 s) { return s.s2r; }
 
 	S1 CallbackMakeS1(IStructTestsCallback_Ptr cb, int32_t i, const std::string& s) { return cb->MakeS1(i, s); }
-	std::string CallbackGetS(IStructTestsCallback_Ptr cb, S1 s) { return cb->GetS(s); }
-	int32_t CallbackGetI(IStructTestsCallback_Ptr cb, S1 s) { return cb->GetI(s); }
+	std::string CallbackGetSFromS1(IStructTestsCallback_Ptr cb, S1 s) { return cb->GetSFromS1(s); }
+	int32_t CallbackGetIFromS1(IStructTestsCallback_Ptr cb, S1 s) { return cb->GetIFromS1(s); }
+
+	S2 CallbackMakeS2(IStructTestsCallback_Ptr cb, int32_t i, S2L s2l, float f, S2M s2m, const std::string& s, S2R s2r) { return cb->MakeS2(i, s2l, f, s2m, s, s2r); }
+	int32_t CallbackGetIFromS2(IStructTestsCallback_Ptr cb, S2 s) { return cb->GetIFromS2(s); }
+	S2L CallbackGetS2LFromS2(IStructTestsCallback_Ptr cb, S2 s) { return cb->GetS2LFromS2(s); }
+	float CallbackGetFFromS2(IStructTestsCallback_Ptr cb, S2 s) { return cb->GetFFromS2(s); }
+	S2M CallbackGetS2MFromS2(IStructTestsCallback_Ptr cb, S2 s) { return cb->GetS2MFromS2(s); }
+	std::string CallbackGetSFromS2(IStructTestsCallback_Ptr cb, S2 s) { return cb->GetSFromS2(s); }
+	S2R CallbackGetS2RFromS2(IStructTestsCallback_Ptr cb, S2 s) { return cb->GetS2RFromS2(s); }
+
+	////////////////////////////////////////////////////////////////////////////////
 
 	Array<int32_t> MakeI32Array(int32_t len) { return Array<int32_t>(len); }
 	int32_t GetI32Element(const Array<int32_t>& array, int32_t index) { return array.Get(index); }

@@ -38,7 +38,8 @@ class InterfaceChecksumComponent2(test_IInterfaceCS2):
 class InterfaceChecksumComponent12(test_IInterfaceCS1, test_IInterfaceCS2):
     pass
 
-class Tests(test_IBasicTests,
+class Tests(test_IStarterTests,
+            test_IBasicTests,
             test_IObjectTests,
             test_IEnumTests,
             test_ILifetimeTests,
@@ -52,6 +53,13 @@ class Tests(test_IBasicTests,
         super(Tests, self).__init__()
         self.jointModule = jointModule
 
+    ### IStarterTests ###
+
+    def Increment(self, value):
+        return value + 1
+
+    ### IObjectTests ###
+
     def ReturnNull(self): return None
     def CheckNotNull(self, o): return o
     def CallbackReturn(self, cb): return cb.Return()
@@ -60,6 +68,8 @@ class Tests(test_IBasicTests,
     def ReturnNewObject(self): return self.jointModule.CreateComponent(test_ISomeObject, SomeObject)
     def ReturnSameObject(self, o): return o
     def InvokeObjectMethod(self, o): o.Method()
+
+    ### IBasicTests ###
 
     def AddU8(self, l, r):  return l + r
     def AddI8(self, l, r):  return l + r
@@ -87,15 +97,21 @@ class Tests(test_IBasicTests,
     def CallbackBool(self, cb, l, r): return cb.And(l, r)
     def CallbackString(self, cb, l, r): return cb.Concat(l, r)
 
+    ### IEnumTests ###
+
     def StringRepresentation(self, e): return str(e)
     def GetNextValueInRing(self, e):
         next_values = { test_Enum.Value1: test_Enum.Value2, test_Enum.Value2: test_Enum.Value3, test_Enum.Value3: test_Enum.Value4, test_Enum.Value4: test_Enum.Value1 }
         return next_values[e]
 
+    ### ILifetimeTests ###
+
     def CreateListenable(self):
         return self.jointModule.CreateComponent(test_ILifetimeListenable, LifetimeListenable)
     def CollectGarbage(self):
         gc.collect()
+
+    ### ICastTests ###
 
     def CastTo1(self, obj): return pyjoint.Cast(obj, test_IInterface1)
     def CastTo2(self, obj): return pyjoint.Cast(obj, test_IInterface2)
@@ -107,6 +123,8 @@ class Tests(test_IBasicTests,
 
     def Create017(self):
         return self.jointModule.CreateComponent(test_IInterface0, CastComponent017)
+
+    ### IExceptionTests ###
 
     def ThrowNative(self): raise RuntimeError('Requested exception')
 
@@ -120,6 +138,8 @@ class Tests(test_IBasicTests,
     def LetThrough(self, cb):
         cb.Method()
 
+    ### IInterfaceChecksumTests ###
+
     def Return1(self): return self.jointModule.CreateComponent(test_IInterfaceCS1, InterfaceChecksumComponent1)
     def Return2(self): return self.jointModule.CreateComponent(test_IInterfaceCS1, InterfaceChecksumComponent2)
     def Return12(self): return self.jointModule.CreateComponent(test_IInterfaceCS1, InterfaceChecksumComponent12)
@@ -128,12 +148,33 @@ class Tests(test_IBasicTests,
     def AcceptCS2(self, obj): pass
     def CastToCS2(self, obj): pyjoint.Cast(obj, test_IInterfaceCS2)
 
+    ### IStructTests ###
+
     def MakeS1(self, i, s): return test_S1(i, s)
-    def GetS(self, s): return s.s
-    def GetI(self, s): return s.i
+    def GetIFromS1(self, s): return s.i
+    def GetSFromS1(self, s): return s.s
+
+    def MakeS2(self, i, s2l, f, s2m, s, s2r): return test_S2(i, s2l, f, s2m, s, s2r)
+    def GetIFromS2(self, s): return s.i
+    def GetS2LFromS2(self, s): return s.s2l
+    def GetFFromS2(self, s): return s.f
+    def GetS2MFromS2(self, s): return s.s2m
+    def GetSFromS2(self, s): return s.s
+    def GetS2RFromS2(self, s): return s.s2r
+
     def CallbackMakeS1(self, cb, i, s): return cb.MakeS1(i, s)
-    def CallbackGetS(self, cb, s): return cb.GetS(s)
-    def CallbackGetI(self, cb, s): return cb.GetI(s)
+    def CallbackGetIFromS1(self, cb, s): return cb.GetIFromS1(s)
+    def CallbackGetSFromS1(self, cb, s): return cb.GetSFromS1(s)
+
+    def CallbackMakeS2(self, cb, i, s2l, f, s2m, s, s2r): return cb.MakeS2(i, s2l, f, s2m, s, s2r)
+    def CallbackGetIFromS2(self, cb, s): return cb.GetIFromS2(s)
+    def CallbackGetS2LFromS2(self, cb, s): return cb.GetS2LFromS2(s)
+    def CallbackGetFFromS2(self, cb, s): return cb.GetFFromS2(s)
+    def CallbackGetS2MFromS2(self, cb, s): return cb.GetS2MFromS2(s)
+    def CallbackGetSFromS2(self, cb, s): return cb.GetSFromS2(s)
+    def CallbackGetS2RFromS2(self, cb, s): return cb.GetS2RFromS2(s)
+
+    ### IArrayTests ###
 
     def MakeI32Array(self, len): return pyjoint.Array(pyjoint.TypeDescriptor((7,)), len)
     def GetI32Element(self, array, index): return array[index]

@@ -67,6 +67,8 @@ class Tests
 			this.module = module;
 		}
 
+		///// IBasicTests /////
+
 		public byte AddU8(byte l, byte r) { return (byte)(l + r); }
 		public byte AddI8(byte l, byte r) { return (byte)(l + r); }
 		public short AddU16(short l, short r) { return (short)(l + r); }
@@ -92,6 +94,7 @@ class Tests
 		public boolean CallbackBool(test_IBasicTestsCallbackBool cb, boolean l, boolean r) { return cb.And(l, r); }
 		public String CallbackString(test_IBasicTestsCallbackString cb, String l, String r) { return cb.Concat(l, r); }
 
+		///// IObjectTests /////
 
 		public test_ISomeObject ReturnNull() { return null; }
 		public boolean CheckNotNull(test_ISomeObject o) { return o != null; }
@@ -101,6 +104,7 @@ class Tests
 		public test_ISomeObject ReturnSameObject(test_ISomeObject o) { return o; }
 		public test_ISomeObject ReturnNewObject() { return test_ISomeObject.makeComponent(module, new SomeObject()); }
 
+		///// IEnumTests /////
 
 		public String StringRepresentation(test_Enum e) { return e.toString(); }
 
@@ -116,6 +120,7 @@ class Tests
 			}
 		}
 
+		///// ICastTests /////
 
 		public test_IInterface1 CastTo1(test_IInterface0 obj) { return test_IInterface1.cast(obj); }
 		public test_IInterface2 CastTo2(test_IInterface0 obj) { return test_IInterface2.cast(obj); }
@@ -126,6 +131,7 @@ class Tests
 		public test_IInterface7 CastTo7(test_IInterface0 obj) { return test_IInterface7.cast(obj); }
 		public test_IInterface0 Create017() { return test_IInterface0.makeComponent(module, new CastComponent017()); }
 
+		///// IExceptionTests /////
 
 		public void ThrowNative() { throw new RuntimeException("Requested exception"); }
 
@@ -143,13 +149,33 @@ class Tests
 		public void LetThrough(test_IExceptionTestsCallback cb)
 		{ cb.Method(); }
 
+		///// IStructTests /////
 
 		public test_S1 MakeS1(int i, String s) { return new test_S1(i, s); }
-		public String GetS(test_S1 s) { return s.s; }
-		public int GetI(test_S1 s) { return s.i; }
+		public int GetIFromS1(test_S1 s) { return s.i; }
+		public String GetSFromS1(test_S1 s) { return s.s; }
+
+		public test_S2 MakeS2(int i, test_S2L s2l, float f, test_S2M s2m, String s, test_S2R s2r) { return new test_S2(i, s2l, f, s2m, s, s2r); }
+		public int GetIFromS2(test_S2 s) { return s.i; }
+		public test_S2L GetS2LFromS2(test_S2 s) { return s.s2l; }
+		public float GetFFromS2(test_S2 s) { return s.f; }
+		public test_S2M GetS2MFromS2(test_S2 s) { return s.s2m; }
+		public String GetSFromS2(test_S2 s) { return s.s; }
+		public test_S2R GetS2RFromS2(test_S2 s) { return s.s2r; }
+
 		public test_S1 CallbackMakeS1(test_IStructTestsCallback cb, int i, String s) { return cb.MakeS1(i, s); }
-		public String CallbackGetS(test_IStructTestsCallback cb, test_S1 s) { return cb.GetS(s); }
-		public int CallbackGetI(test_IStructTestsCallback cb, test_S1 s) { return cb.GetI(s); }
+		public String CallbackGetSFromS1(test_IStructTestsCallback cb, test_S1 s) { return cb.GetSFromS1(s); }
+		public int CallbackGetIFromS1(test_IStructTestsCallback cb, test_S1 s) { return cb.GetIFromS1(s); }
+
+		public test_S2 CallbackMakeS2(test_IStructTestsCallback cb, int i, test_S2L s2l, float f, test_S2M s2m, String s, test_S2R s2r) { return cb.MakeS2(i, s2l, f, s2m, s, s2r); }
+		public int CallbackGetIFromS2(test_IStructTestsCallback cb, test_S2 s) { return cb.GetIFromS2(s); }
+		public test_S2L CallbackGetS2LFromS2(test_IStructTestsCallback cb, test_S2 s) { return cb.GetS2LFromS2(s); }
+		public float CallbackGetFFromS2(test_IStructTestsCallback cb, test_S2 s) { return cb.GetFFromS2(s); }
+		public test_S2M CallbackGetS2MFromS2(test_IStructTestsCallback cb, test_S2 s) { return cb.GetS2MFromS2(s); }
+		public String CallbackGetSFromS2(test_IStructTestsCallback cb, test_S2 s) { return cb.GetSFromS2(s); }
+		public test_S2R CallbackGetS2RFromS2(test_IStructTestsCallback cb, test_S2 s) { return cb.GetS2RFromS2(s); }
+
+		///// IArrayTests /////
 
 		public Array<Boxing.Integer> MakeI32Array(int len) { return Array.<Boxing.Integer>create(BuiltinTypes.I32, len); }
 		public int GetI32Element(Array<Boxing.Integer> array, int index) { return array.get(index).value; }

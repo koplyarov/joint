@@ -30,7 +30,9 @@ int main(int argc, const char* argv[])
 	std::cerr << "Module manifest: " << g_moduleManifest << std::endl;
 
 	try
-	{ test::RunAllTests(); }
+	{
+		test::RunAllTests();
+	}
 	catch (const std::exception& ex)
 	{
 		std::cerr << "Uncaught exception: " << ex.what() << std::endl;

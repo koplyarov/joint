@@ -123,6 +123,8 @@ JointCore_Error Tests_Deinit(Tests* self)
 	return JOINT_CORE_ERROR_NONE;
 }
 
+///// IBasicTests /////
+
 JointCore_Error Tests_AddU8(Tests* self, uint8_t l, uint8_t r, uint8_t* result, JointCore_ExceptionHandle* ex)
 { *result = l + r; return JOINT_CORE_ERROR_NONE; }
 
@@ -201,6 +203,7 @@ JointCore_Error Tests_CallbackBool(Tests* self, test_IBasicTestsCallbackBool cb,
 JointCore_Error Tests_CallbackString(Tests* self, test_IBasicTestsCallbackString cb, const char* l, const char* r, const char** result, JointCore_ExceptionHandle* ex)
 { return test_IBasicTestsCallbackString_Concat(cb, l, r, result, ex); }
 
+///// IEnumTests /////
 
 JointCore_Error Tests_StringRepresentation(Tests* self, test_Enum e, const char** result, JointCore_ExceptionHandle* ex)
 {
@@ -221,6 +224,7 @@ JointCore_Error Tests_GetNextValueInRing(Tests* self, test_Enum e, test_Enum* re
 	return JOINT_CORE_ERROR_NONE;
 }
 
+///// IObjectTests /////
 
 JointCore_Error Tests_ReturnNull(Tests* self, test_ISomeObject* result, JointCore_ExceptionHandle* ex)
 { JOINT_INIT_REF(*result); return JOINT_CORE_ERROR_NONE; }
@@ -256,6 +260,7 @@ JointCore_Error Tests_ReturnSameObject(Tests* self, test_ISomeObject o, test_ISo
 	return JOINT_CORE_ERROR_NONE;
 }
 
+///// ILifetimeTests /////
 
 JointCore_Error Tests_CreateListenable(Tests* self, test_ILifetimeListenable* result, JointCore_ExceptionHandle* ex)
 {
@@ -268,6 +273,7 @@ JointCore_Error Tests_CreateListenable(Tests* self, test_ILifetimeListenable* re
 JointCore_Error Tests_CollectGarbage(Tests* self, JointCore_ExceptionHandle* ex)
 { return JOINT_CORE_ERROR_NONE; }
 
+///// ICastTests /////
 
 JointCore_Error Tests_CastTo1(Tests* self, test_IInterface0 obj, test_IInterface1* result, JointCore_ExceptionHandle* ex)
 { JOINT_CAST(test_IInterface1, obj, result); return JOINT_CORE_ERROR_NONE; }
@@ -298,6 +304,8 @@ JointCore_Error Tests_Create017(Tests* self, test_IInterface0* result, JointCore
 	return JOINT_CORE_ERROR_NONE;
 }
 
+///// IExceptionTests /////
+
 JointCore_Error Tests_ThrowNative(Tests* self, JointCore_ExceptionHandle* ex)
 { return JOINT_THROW("Requested exception", ex); }
 
@@ -314,6 +322,7 @@ JointCore_Error Tests_CatchAll(Tests* self, test_IExceptionTestsCallback cb, Joi
 JointCore_Error Tests_LetThrough(Tests* self, test_IExceptionTestsCallback cb, JointCore_ExceptionHandle* ex)
 { return test_IExceptionTestsCallback_Method(cb, ex); }
 
+///// IInterfaceChecksumTests /////
 
 JointCore_Error Tests_Return1(Tests* self, test_IInterfaceCS1* result, JointCore_ExceptionHandle* ex)
 {
@@ -356,6 +365,7 @@ JointCore_Error Tests_CastToCS2(Tests* self, test_IInterfaceCS1 obj, JointCore_E
 	return JOINT_CORE_ERROR_NONE;
 }
 
+///// IStructTests /////
 
 JointCore_Error Tests_MakeS1(Tests* self, int32_t i, const char* s, test_S1* result, JointCore_ExceptionHandle* ex)
 {
@@ -364,27 +374,96 @@ JointCore_Error Tests_MakeS1(Tests* self, int32_t i, const char* s, test_S1* res
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Tests_GetS(Tests* self, test_S1 s, const char** result, JointCore_ExceptionHandle* ex)
+JointCore_Error Tests_GetSFromS1(Tests* self, test_S1 s, const char** result, JointCore_ExceptionHandle* ex)
 {
 	*result = Joint_CopyString(s.s);
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Tests_GetI(Tests* self, test_S1 s, int32_t* result, JointCore_ExceptionHandle* ex)
+JointCore_Error Tests_GetIFromS1(Tests* self, test_S1 s, int32_t* result, JointCore_ExceptionHandle* ex)
 {
 	*result = s.i;
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Tests_MakeS2(Tests* self, int32_t i, test_S2L s2l, float f, test_S2M s2m, const char* s, test_S2R s2r, test_S2* result, JointCore_ExceptionHandle* ex)
+{
+	result->i = i;
+	result->s2l = s2l;
+	result->f = f;
+	result->s2m = s2m;
+	result->s = Joint_CopyString(s);
+	result->s2r.s = Joint_CopyString(s2r.s);
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Tests_GetIFromS2(Tests* self, test_S2 s, int32_t* result, JointCore_ExceptionHandle* ex)
+{
+	*result = s.i;
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Tests_GetS2LFromS2(Tests* self, test_S2 s, test_S2L* result, JointCore_ExceptionHandle* ex)
+{
+	*result = s.s2l;
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Tests_GetFFromS2(Tests* self, test_S2 s, float* result, JointCore_ExceptionHandle* ex)
+{
+	*result = s.f;
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Tests_GetS2MFromS2(Tests* self, test_S2 s, test_S2M* result, JointCore_ExceptionHandle* ex)
+{
+	*result = s.s2m;
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Tests_GetSFromS2(Tests* self, test_S2 s, const char** result, JointCore_ExceptionHandle* ex)
+{
+	*result = Joint_CopyString(s.s);
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Tests_GetS2RFromS2(Tests* self, test_S2 s, test_S2R* result, JointCore_ExceptionHandle* ex)
+{
+	result->s = Joint_CopyString(s.s2r.s);
 	return JOINT_CORE_ERROR_NONE;
 }
 
 JointCore_Error Tests_CallbackMakeS1(Tests* self, test_IStructTestsCallback cb, int32_t i, const char* s, test_S1* result, JointCore_ExceptionHandle* ex)
 { return test_IStructTestsCallback_MakeS1(cb, i, s, result, ex); }
 
-JointCore_Error Tests_CallbackGetS(Tests* self, test_IStructTestsCallback cb, test_S1 s, const char** result, JointCore_ExceptionHandle* ex)
-{ return test_IStructTestsCallback_GetS(cb, s, result, ex); }
+JointCore_Error Tests_CallbackGetSFromS1(Tests* self, test_IStructTestsCallback cb, test_S1 s, const char** result, JointCore_ExceptionHandle* ex)
+{ return test_IStructTestsCallback_GetSFromS1(cb, s, result, ex); }
 
-JointCore_Error Tests_CallbackGetI(Tests* self, test_IStructTestsCallback cb, test_S1 s, int32_t* result, JointCore_ExceptionHandle* ex)
-{ return test_IStructTestsCallback_GetI(cb, s, result, ex); }
+JointCore_Error Tests_CallbackGetIFromS1(Tests* self, test_IStructTestsCallback cb, test_S1 s, int32_t* result, JointCore_ExceptionHandle* ex)
+{ return test_IStructTestsCallback_GetIFromS1(cb, s, result, ex); }
 
+JointCore_Error Tests_CallbackMakeS2(Tests* self, test_IStructTestsCallback cb, int32_t i, test_S2L s2l, float f, test_S2M s2m, const char* s, test_S2R s2r, test_S2* result, JointCore_ExceptionHandle* ex)
+{ return test_IStructTestsCallback_MakeS2(cb, i, s2l, f, s2m, s, s2r, result, ex); }
+
+JointCore_Error Tests_CallbackGetIFromS2(Tests* self, test_IStructTestsCallback cb, test_S2 s, int32_t* result, JointCore_ExceptionHandle* ex)
+{ return test_IStructTestsCallback_GetIFromS2(cb, s, result, ex); }
+
+JointCore_Error Tests_CallbackGetS2LFromS2(Tests* self, test_IStructTestsCallback cb, test_S2 s, test_S2L* result, JointCore_ExceptionHandle* ex)
+{ return test_IStructTestsCallback_GetS2LFromS2(cb, s, result, ex); }
+
+JointCore_Error Tests_CallbackGetFFromS2(Tests* self, test_IStructTestsCallback cb, test_S2 s, float* result, JointCore_ExceptionHandle* ex)
+{ return test_IStructTestsCallback_GetFFromS2(cb, s, result, ex); }
+
+JointCore_Error Tests_CallbackGetS2MFromS2(Tests* self, test_IStructTestsCallback cb, test_S2 s, test_S2M* result, JointCore_ExceptionHandle* ex)
+{ return test_IStructTestsCallback_GetS2MFromS2(cb, s, result, ex); }
+
+JointCore_Error Tests_CallbackGetSFromS2(Tests* self, test_IStructTestsCallback cb, test_S2 s, const char** result, JointCore_ExceptionHandle* ex)
+{ return test_IStructTestsCallback_GetSFromS2(cb, s, result, ex); }
+
+JointCore_Error Tests_CallbackGetS2RFromS2(Tests* self, test_IStructTestsCallback cb, test_S2 s, test_S2R* result, JointCore_ExceptionHandle* ex)
+{ return test_IStructTestsCallback_GetS2RFromS2(cb, s, result, ex); }
+
+///// IArrayTests /////
 
 JointCore_Error Tests_MakeI32Array(Tests* self, int32_t len, i32__Array* result, JointCore_ExceptionHandle* ex)
 { return i32__Array_Create(len, result, ex); }
