@@ -4,13 +4,14 @@
 #include <joint/devkit/Holder.hpp>
 #include <joint/devkit/Logger.hpp>
 #include <joint/devkit/ManifestReader.hpp>
+#include <joint/devkit/Singleton.hpp>
 
 #include <map>
 #include <memory>
 #include <mutex>
 
-#include <../bindings/native/JointNative.h>
 #include <../bindings/java/JointJava.h>
+#include <../bindings/native/JointNative.h>
 #include <../bindings/python/JointPython.h>
 
 
@@ -22,8 +23,10 @@ using namespace joint::devkit;
 extern "C"
 {
 
-	class Bindings
+	class Bindings : public Singleton<Bindings>
 	{
+		JOINT_DEVKIT_SINGLETON_INTERNALS(Bindings);
+
 		using BindingHolder = Holder<JointCore_BindingAccessor>;
 		using BindingsMap = std::map<std::string, BindingHolder>;
 
@@ -31,10 +34,12 @@ extern "C"
 		BindingsMap    _bindings;
 
 	public:
+		Bindings() { }
+
 		void AddBinding(std::string name, BindingHolder binding)
 		{ _bindings.emplace(name, std::move(binding)); }
 
-		JointCore_BindingAccessor GetBinding(const std::string& name)
+		JointCore_BindingAccessor GetBinding(const std::string& name) const
 		{
 			auto it = _bindings.find(name);
 			JOINT_CHECK(it != _bindings.end(), JOINT_CORE_ERROR_NO_SUCH_BINDING);
@@ -43,13 +48,11 @@ extern "C"
 	};
 
 
-	static std::once_flag g_bindingsDetectFlag;
-	static Bindings g_bindings;
-
-
 	JointCore_Error JointCore_InitLoader()
 	{
 		JOINT_CPP_WRAP_BEGIN
+
+		static std::once_flag g_bindingsDetectFlag;
 
 		std::call_once(g_bindingsDetectFlag,
 			[&]() {
@@ -62,17 +65,17 @@ extern "C"
 				static JointCore_BindingAccessor python_binding;
 				JointCore_Error ret = JointPython_MakeBinding(&python_binding);
 				JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
-				g_bindings.AddBinding("python", Holder<JointCore_BindingAccessor>(python_binding, release_binding));
+				Bindings::Instance().AddBinding("python", Holder<JointCore_BindingAccessor>(python_binding, release_binding));
 
 				static JointCore_BindingAccessor native_binding;
 				ret = JointNative_MakeBinding(&native_binding);
 				JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
-				g_bindings.AddBinding("native", Holder<JointCore_BindingAccessor>(native_binding, release_binding));
+				Bindings::Instance().AddBinding("native", Holder<JointCore_BindingAccessor>(native_binding, release_binding));
 
 				static JointCore_BindingAccessor java_binding;
 				ret = JointJava_MakeBinding(&java_binding);
 				JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
-				g_bindings.AddBinding("java", Holder<JointCore_BindingAccessor>(java_binding, release_binding));
+				Bindings::Instance().AddBinding("java", Holder<JointCore_BindingAccessor>(java_binding, release_binding));
 			});
 
 		JOINT_CPP_WRAP_END
@@ -92,7 +95,7 @@ extern "C"
 		ManifestReader::Read(moduleManifest, m);
 		auto binding_name = m.GetBindingName();
 
-		JointCore_BindingAccessor b = g_bindings.GetBinding(binding_name);
+		JointCore_BindingAccessor b = Bindings::ConstInstance().GetBinding(binding_name);
 		return b.VTable->LoadModule(b.Instance, moduleManifest, outModule);
 
 		JOINT_CPP_WRAP_END
