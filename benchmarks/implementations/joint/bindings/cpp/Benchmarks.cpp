@@ -30,7 +30,8 @@ public:
 		IBasicBenchmarks,
 		IEnumBenchmarks,
 		ICastBenchmarks,
-		IExceptionBenchmarks
+		IExceptionBenchmarks,
+		IStructBenchmarks
 	>;
 
 private:
@@ -105,7 +106,7 @@ public:
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToString100(); }
 
 
-	///// IBasicBenchmarks /////
+	///// IEnumBenchmarks /////
 
 
 	void EnumToVoid(Enum) { }
@@ -122,6 +123,48 @@ public:
 
 	void MeasureOutgoingVoidToEnum(IEnumInvokable_Ptr invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToEnum(); }
+
+
+	///// IStructBenchmarks /////
+
+
+	void NoStructToVoid(int32_t a, int32_t b, int32_t c, int32_t d) { }
+	void FlatStructToVoid(FlatStruct p) { }
+	FlatStruct VoidToFlatStruct() { return FlatStruct{1, 2, 3, 4}; }
+	void NestedStructToVoid(NestedStruct p) { }
+	NestedStruct VoidToNestedStruct() { return NestedStruct{1, NestedStruct2{2, NestedStruct3{3, NestedStruct4{4}}}}; }
+
+
+	void MeasureNativeNoStructToVoid(int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) NativeNoStructToVoid(1, 2, 3, 4); }
+
+	void MeasureNativeFlatStructToVoid(int64_t n)
+	{ NativeFlatStruct s{1, 2, 3, 4}; for (int64_t i = 0; i < n; ++i) NativeFlatStructToVoid(s); }
+
+	void MeasureNativeVoidToFlatStruct(int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) NativeVoidToFlatStruct(); }
+
+	void MeasureNativeNestedStructToVoid(int64_t n)
+	{ NativeNestedStruct s{1, NativeNestedStruct2{2, NativeNestedStruct3{3, NativeNestedStruct4{4}}}}; for (int64_t i = 0; i < n; ++i) NativeNestedStructToVoid(s); }
+
+	void MeasureNativeVoidToNestedStruct(int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) NativeVoidToNestedStruct(); }
+
+
+	void MeasureOutgoingNoStructToVoid(IStructInvokable_Ptr invokable, int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) invokable->NoStructToVoid(1, 2, 3, 4); }
+
+	void MeasureOutgoingFlatStructToVoid(IStructInvokable_Ptr invokable, int64_t n)
+	{ FlatStruct s{1, 2, 3, 4}; for (int64_t i = 0; i < n; ++i) invokable->FlatStructToVoid(s); }
+
+	void MeasureOutgoingVoidToFlatStruct(IStructInvokable_Ptr invokable, int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToFlatStruct(); }
+
+	void MeasureOutgoingNestedStructToVoid(IStructInvokable_Ptr invokable, int64_t n)
+	{ NestedStruct s{1, NestedStruct2{2, NestedStruct3{3, NestedStruct4{4}}}}; for (int64_t i = 0; i < n; ++i) invokable->NestedStructToVoid(s); }
+
+	void MeasureOutgoingVoidToNestedStruct(IStructInvokable_Ptr invokable, int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToNestedStruct(); }
 
 
 	///// ICastBenchmarks /////

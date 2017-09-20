@@ -28,6 +28,7 @@ class Benchmarks
 		implements
 			benchmarks_IBasicBenchmarks_impl,
 			benchmarks_IEnumBenchmarks_impl,
+			benchmarks_IStructBenchmarks_impl,
 			benchmarks_ICastBenchmarks_impl,
 			benchmarks_IExceptionBenchmarks_impl
 	{
@@ -39,6 +40,7 @@ class Benchmarks
 		{
 			benchmarks_IBasicBenchmarks.registerAccessors(this);
 			benchmarks_IEnumBenchmarks.registerAccessors(this);
+			benchmarks_IStructBenchmarks.registerAccessors(this);
 			benchmarks_ICastBenchmarks.registerAccessors(this);
 			benchmarks_IExceptionBenchmarks.registerAccessors(this);
 			this.module = module;
@@ -112,6 +114,7 @@ class Benchmarks
 
 		///// IEnumBenchmarks /////
 
+
 		public void EnumToVoid(benchmarks_Enum p) { }
 		public benchmarks_Enum VoidToEnum() { return benchmarks_Enum.A; }
 
@@ -126,6 +129,48 @@ class Benchmarks
 
 		public void MeasureOutgoingVoidToEnum(benchmarks_IEnumInvokable invokable, long n)
 		{ for (long i = 0; i < n; ++i) invokable.VoidToEnum(); }
+
+
+		///// IStructBenchmarks /////
+
+
+		public void NoStructToVoid(int a, int b, int c, int d) { }
+		public void FlatStructToVoid(benchmarks_FlatStruct p) { }
+		public benchmarks_FlatStruct VoidToFlatStruct() { return new benchmarks_FlatStruct(1, 2, 3, 4); }
+		public void NestedStructToVoid(benchmarks_NestedStruct p) { }
+		public benchmarks_NestedStruct VoidToNestedStruct() { return new benchmarks_NestedStruct(1, new benchmarks_NestedStruct2(2, new benchmarks_NestedStruct3(3, new benchmarks_NestedStruct4(4)))); }
+
+
+		public void MeasureNativeNoStructToVoid(long n)
+		{ throw new RuntimeException("Not implemented"); }
+
+		public void MeasureNativeFlatStructToVoid(long n)
+		{ throw new RuntimeException("Not implemented"); }
+
+		public void MeasureNativeVoidToFlatStruct(long n)
+		{ throw new RuntimeException("Not implemented"); }
+
+		public void MeasureNativeNestedStructToVoid(long n)
+		{ throw new RuntimeException("Not implemented"); }
+
+		public void MeasureNativeVoidToNestedStruct(long n)
+		{ throw new RuntimeException("Not implemented"); }
+
+
+		public void MeasureOutgoingNoStructToVoid(benchmarks_IStructInvokable invokable, long n)
+		{ for (long i = 0; i < n; ++i) invokable.NoStructToVoid(1, 2, 3, 4); }
+
+		public void MeasureOutgoingFlatStructToVoid(benchmarks_IStructInvokable invokable, long n)
+		{ benchmarks_FlatStruct s = new benchmarks_FlatStruct(1, 2, 3, 4); for (long i = 0; i < n; ++i) invokable.FlatStructToVoid(s); }
+
+		public void MeasureOutgoingVoidToFlatStruct(benchmarks_IStructInvokable invokable, long n)
+		{ for (long i = 0; i < n; ++i) invokable.VoidToFlatStruct(); }
+
+		public void MeasureOutgoingNestedStructToVoid(benchmarks_IStructInvokable invokable, long n)
+		{ benchmarks_NestedStruct s = new benchmarks_NestedStruct(1, new benchmarks_NestedStruct2(2, new benchmarks_NestedStruct3(3, new benchmarks_NestedStruct4(4)))); for (long i = 0; i < n; ++i) invokable.NestedStructToVoid(s); }
+
+		public void MeasureOutgoingVoidToNestedStruct(benchmarks_IStructInvokable invokable, long n)
+		{ for (long i = 0; i < n; ++i) invokable.VoidToNestedStruct(); }
 
 
 		///// ICastBenchmarks /////

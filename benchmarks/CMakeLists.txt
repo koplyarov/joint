@@ -43,6 +43,7 @@ if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PYTHONLIBS_FOUND AND JNI
 		implementations/joint/idl/ICastBenchmarks.idl
 		implementations/joint/idl/IEnumBenchmarks.idl
 		implementations/joint/idl/IExceptionBenchmarks.idl
+		implementations/joint/idl/IStructBenchmarks.idl
 	)
 
 	if (MSVC)

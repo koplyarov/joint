@@ -17,6 +17,7 @@
 #include <benchmarks/Cast.hpp>
 #include <benchmarks/Enum.hpp>
 #include <benchmarks/Exception.hpp>
+#include <benchmarks/Struct.hpp>
 #include <descriptors/joint.hpp>
 #include <descriptors/swig.hpp>
 
@@ -36,6 +37,7 @@ int main(int argc, char* argv[])
 		>();
 
 		s.RegisterBenchmarks<EnumBenchmarks, descriptors::joint::Desc>();
+		s.RegisterBenchmarks<StructBenchmarks, descriptors::joint::Desc>();
 
 		s.RegisterBenchmarks<CastBenchmarks, descriptors::joint::Desc>();
 		s.RegisterBenchmarks<ExceptionBenchmarks, descriptors::joint::Desc>();

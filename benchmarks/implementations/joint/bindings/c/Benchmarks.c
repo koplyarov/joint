@@ -22,12 +22,16 @@ typedef struct {
 
 JointCore_Error Benchmarks_Init(Benchmarks* self, Joint_ModuleContext moduleContext)
 {
+	InitOtherTranslationUnit();
 	self->moduleContext = moduleContext;
 	return JOINT_CORE_ERROR_NONE;
 }
 
 JointCore_Error Benchmarks_Deinit(Benchmarks* self)
-{ return JOINT_CORE_ERROR_NONE; }
+{
+	DeinitOtherTranslationUnit();
+	return JOINT_CORE_ERROR_NONE;
+}
 
 
 ///// IBasicBenchmarks /////
@@ -218,6 +222,136 @@ JointCore_Error Benchmarks_MeasureOutgoingVoidToEnum(Benchmarks* self, benchmark
 }
 
 
+///// IStructBenchmarks /////
+
+
+JointCore_Error Benchmarks_NoStructToVoid(Benchmarks* self, int32_t a, int32_t b, int32_t c, int32_t d, JointCore_ExceptionHandle* ex)
+{ return JOINT_CORE_ERROR_NONE; }
+
+JointCore_Error Benchmarks_FlatStructToVoid(Benchmarks* self, benchmarks_FlatStruct p, JointCore_ExceptionHandle* ex)
+{ return JOINT_CORE_ERROR_NONE; }
+
+JointCore_Error Benchmarks_VoidToFlatStruct(Benchmarks* self, benchmarks_FlatStruct* result, JointCore_ExceptionHandle* ex)
+{
+	result->a = 1;
+	result->b = 2;
+	result->c = 3;
+	result->d = 4;
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Benchmarks_NestedStructToVoid(Benchmarks* self, benchmarks_NestedStruct p, JointCore_ExceptionHandle* ex)
+{ return JOINT_CORE_ERROR_NONE; }
+
+JointCore_Error Benchmarks_VoidToNestedStruct(Benchmarks* self, benchmarks_NestedStruct* result, JointCore_ExceptionHandle* ex)
+{
+	result->a = 1;
+	result->next.b = 2;
+	result->next.next.c = 3;
+	result->next.next.next.d = 4;
+	return JOINT_CORE_ERROR_NONE;
+}
+
+
+JointCore_Error Benchmarks_MeasureNativeNoStructToVoid(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	for (i = 0; i < n; ++i) NativeNoStructToVoid(1, 2, 3, 4);
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Benchmarks_MeasureNativeFlatStructToVoid(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	NativeFlatStruct s = {1, 2, 3, 4};
+	for (i = 0; i < n; ++i)
+		NativeFlatStructToVoid(s);
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Benchmarks_MeasureNativeVoidToFlatStruct(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	for (i = 0; i < n; ++i)
+		NativeVoidToFlatStruct();
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Benchmarks_MeasureNativeNestedStructToVoid(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	NativeNestedStruct s;
+	s.a = 1;
+	s.next.b = 2;
+	s.next.next.c = 3;
+	s.next.next.next.d = 4;
+	for (i = 0; i < n; ++i)
+		NativeNestedStructToVoid(s);
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Benchmarks_MeasureNativeVoidToNestedStruct(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	for (i = 0; i < n; ++i)
+		NativeVoidToNestedStruct();
+	return JOINT_CORE_ERROR_NONE;
+}
+
+
+JointCore_Error Benchmarks_MeasureOutgoingNoStructToVoid(Benchmarks* self, benchmarks_IStructInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	for (i = 0; i < n; ++i)
+		benchmarks_IStructInvokable_NoStructToVoid(invokable, 1, 2, 3, 4, ex);
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Benchmarks_MeasureOutgoingFlatStructToVoid(Benchmarks* self, benchmarks_IStructInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	benchmarks_FlatStruct s;
+	s.a = 1;
+	s.b = 2;
+	s.c = 3;
+	s.d = 4;
+	for (i = 0; i < n; ++i)
+		benchmarks_IStructInvokable_FlatStructToVoid(invokable, s, ex);
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Benchmarks_MeasureOutgoingVoidToFlatStruct(Benchmarks* self, benchmarks_IStructInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	benchmarks_FlatStruct s;
+	for (i = 0; i < n; ++i)
+		benchmarks_IStructInvokable_VoidToFlatStruct(invokable, &s, ex);
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Benchmarks_MeasureOutgoingNestedStructToVoid(Benchmarks* self, benchmarks_IStructInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	benchmarks_NestedStruct s;
+	s.a = 1;
+	s.next.b = 2;
+	s.next.next.c = 3;
+	s.next.next.next.d = 4;
+	for (i = 0; i < n; ++i)
+		benchmarks_IStructInvokable_NestedStructToVoid(invokable, s, ex);
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Benchmarks_MeasureOutgoingVoidToNestedStruct(Benchmarks* self, benchmarks_IStructInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	benchmarks_NestedStruct s;
+	for (i = 0; i < n; ++i)
+		benchmarks_IStructInvokable_VoidToNestedStruct(invokable, &s, ex);
+	return JOINT_CORE_ERROR_NONE;
+}
+
+
 ///// ICastBenchmarks /////
 
 
@@ -274,6 +408,7 @@ JOINT_COMPONENT(
 	Benchmarks,
 	benchmarks_IBasicBenchmarks,
 	benchmarks_IEnumBenchmarks,
+	benchmarks_IStructBenchmarks,
 	benchmarks_ICastBenchmarks,
 	benchmarks_IExceptionBenchmarks
 );

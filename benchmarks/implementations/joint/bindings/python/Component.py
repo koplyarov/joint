@@ -6,9 +6,51 @@ class CastComponent(benchmarks_ICastInterface1, benchmarks_ICastInterface2):
     pass
 
 
+class FlatStruct(object):
+    __slots__ = ['a', 'b', 'c', 'd']
+
+    def __init__(self, a, b, c, d):
+        self.a = a
+        self.b = b
+        self.c = c
+        self.d = d
+
+
+class NestedStruct(object):
+    __slots__ = ['a', 'next']
+
+    def __init__(self, a, next):
+        self.a = a
+        self.next = next
+
+
+class NestedStruct2(object):
+    __slots__ = ['b', 'next']
+
+    def __init__(self, b, next):
+        self.b = b
+        self.next = next
+
+
+class NestedStruct3(object):
+    __slots__ = ['c', 'next']
+
+    def __init__(self, c, next):
+        self.c = c
+        self.next = next
+
+
+class NestedStruct4(object):
+    __slots__ = ['d']
+
+    def __init__(self, d):
+        self.d = d
+
+
 class Benchmarks(
         benchmarks_IBasicBenchmarks,
         benchmarks_IEnumBenchmarks,
+        benchmarks_IStructBenchmarks,
         benchmarks_ICastBenchmarks,
         benchmarks_IExceptionBenchmarks
     ):
@@ -74,6 +116,54 @@ class Benchmarks(
         for i in range(n): invokable.EnumToVoid(a)
     def MeasureOutgoingVoidToEnum(self, invokable, n):
         for i in range(n): invokable.VoidToEnum()
+
+    ### IStructBenchmarks ###
+
+    def NoStructToVoid(self, a, b, c, d): pass
+    def FlatStructToVoid(self, p): pass
+    def VoidToFlatStruct(self, ): return benchmarks_FlatStruct(1, 2, 3, 4)
+    def NestedStructToVoid(self, p): pass
+    def VoidToNestedStruct(self, ): return benchmarks_NestedStruct(1, benchmarks_NestedStruct2(2, benchmarks_NestedStruct3(3, benchmarks_NestedStruct4(4))))
+
+
+    def MeasureNativeNoStructToVoid(self, n):
+        for i in range(n): self.NoStructToVoid(1, 2, 3, 4)
+
+    def MeasureNativeFlatStructToVoid(self, n):
+        s = FlatStruct(1, 2, 3, 4)
+        for i in range(n):
+            self.FlatStructToVoid(s)
+
+    def MeasureNativeVoidToFlatStruct(self, n):
+        for i in range(n): self.VoidToFlatStruct()
+
+    def MeasureNativeNestedStructToVoid(self, n):
+        s = NestedStruct(1, NestedStruct2(2, NestedStruct3(3, NestedStruct4(4))))
+        for i in range(n):
+            self.NestedStructToVoid(s)
+
+    def MeasureNativeVoidToNestedStruct(self, n):
+        for i in range(n): self.VoidToNestedStruct()
+
+
+    def MeasureOutgoingNoStructToVoid(self, invokable, n):
+        for i in range(n): invokable.NoStructToVoid(1, 2, 3, 4)
+
+    def MeasureOutgoingFlatStructToVoid(self, invokable, n):
+        s = benchmarks_FlatStruct(1, 2, 3, 4)
+        for i in range(n):
+            invokable.FlatStructToVoid(s)
+
+    def MeasureOutgoingVoidToFlatStruct(self, invokable, n):
+        for i in range(n): invokable.VoidToFlatStruct()
+
+    def MeasureOutgoingNestedStructToVoid(self, invokable, n):
+        s = benchmarks_NestedStruct(1, benchmarks_NestedStruct2(2, benchmarks_NestedStruct3(3, benchmarks_NestedStruct4(4))))
+        for i in range(n):
+            invokable.NestedStructToVoid(s)
+
+    def MeasureOutgoingVoidToNestedStruct(self, invokable, n):
+        for i in range(n): invokable.VoidToNestedStruct()
 
     ### ICastBenchmarks ###
 

@@ -19,6 +19,7 @@ joint_generate_adapters(c++ Benchmarks_adapters.hpp
 	${BENCHMARKS_IDL_DIR}/ICastBenchmarks.idl
 	${BENCHMARKS_IDL_DIR}/IEnumBenchmarks.idl
 	${BENCHMARKS_IDL_DIR}/IExceptionBenchmarks.idl
+	${BENCHMARKS_IDL_DIR}/IStructBenchmarks.idl
 )
 
 add_library(benchmarks-cpp SHARED Benchmarks.cpp OtherTranslationUnit.cpp Benchmarks_adapters.hpp)
