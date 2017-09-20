@@ -1,3 +1,5 @@
+[ "$TEST_COVERAGE" -eq 0 ] && exit 0
+
 echo "Sending coverage info"
 
 lcov --directory . --capture --output-file coverage.info &&

@@ -1,10 +1,11 @@
-[ "$1" == "--no-valgrind" ] && NO_VALGRIND=1 || NO_VALGRIND=0
+[ "$RUN_BENCHMARKS" -ne 0 ] && exit 0
+[ "$TEST_COVERAGE" -ne 0 ] && NO_VALGRIND=1 || NO_VALGRIND=0
 
 VG() {
 	if [ "$NO_VALGRIND" -eq 0 ]; then
-		valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 -q ./build/bin/joint-test $@
-	else
 		./build/bin/joint-test $@
+	else
+		valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 -q ./build/bin/joint-test $@
 	fi
 }
 
