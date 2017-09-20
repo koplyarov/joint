@@ -12,7 +12,7 @@ matrix:
           packages: ['valgrind']
       env: RUN_BENCHMARKS=1 TEST_COVERAGE=0 BUILD_TYPE=RelWithDebInfo CMAKE_FLAGS="-DJOINT_VALGRIND"
     - compiler: gcc
-      env: RUN_BENCHMARKS=0 TEST_COVERAGE=1 BUILD_TYPE=Debug CMAKE_FLAGS="-DJOINT_COVERAGE"
+      env: RUN_BENCHMARKS=0 TEST_COVERAGE=1 BUILD_TYPE=Debug CMAKE_FLAGS="-DJOINT_COVERAGE=TRUE"
     - compiler: gcc
       addons:
         apt:
