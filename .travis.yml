@@ -38,9 +38,9 @@ install:
 
 script: 
   - ( mkdir build && cd build && CC="$COMPILER" CXX="$COMPILERXX" cmake -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DJOINT_TREAT_WARNINGS_AS_ERRORS=TRUE $CMAKE_FLAGS .. && make -j2 )
-  - test "$RUN_BENCHMARKS" -eq 1 -o "$SEND_TEST_COVERAGE" -eq 1 || ./ci/run_tests.sh
-  - test "$RUN_BENCHMARKS" -eq 1 -o "$SEND_TEST_COVERAGE" -ne 1 || ./ci/run_tests.sh --no-valgrind
-  - test "$RUN_BENCHMARKS" -ne 1 -o "$SEND_TEST_COVERAGE" -eq 1 || ./ci/run_benchmarks.sh
+  - test "$RUN_BENCHMARKS" -eq 1 -o "$TEST_COVERAGE" -eq 1 || ./ci/run_tests.sh
+  - test "$RUN_BENCHMARKS" -eq 1 -o "$TEST_COVERAGE" -ne 1 || ./ci/run_tests.sh --no-valgrind
+  - test "$RUN_BENCHMARKS" -ne 1 -o "$TEST_COVERAGE" -eq 1 || ./ci/run_benchmarks.sh
 
 after_success:
-  - test "$SEND_TEST_COVERAGE" -ne 1 || ./ci/send_coverage.sh
+  - test "$TEST_COVERAGE" -ne 1 || ./ci/send_coverage.sh
