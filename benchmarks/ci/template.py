@@ -111,28 +111,65 @@ class Context:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--canonize', action='store_true', help='Canonize benchmarks')
+    parser.add_argument('--canonize-keys', nargs='*', help='Keys for canonization')
+    parser.add_argument('--canonize-new', action='store_true', help='Keys for canonization')
     parser.add_argument('--data', required=True, help='Canonized data path')
     args = parser.parse_args()
 
-    if args.canonize:
-        with open(args.data, 'w') as f:
-            f.write(json.dumps(data, indent=4, sort_keys=True))
+    ctx = Context()
+
+    if args.canonize_keys or args.canonize_new:
+        with open(args.data) as f:
+            canon_data = json.loads(f.read())
+
+        for key in args.canonize_keys or []:
+            try:
+                canon_val = canon_data[key]
+            except KeyError:
+                ctx.error('Key "{}" not present in canonized data'.format(key))
+            else:
+                canon_data[key] = data[key]
+                ctx.info('Updated: "{}" ({} -> {})'.format(key, canon_val, data[key]))
+
+        if args.canonize_new:
+            added_keys = set(data.keys())
+            added_keys.difference_update(canon_data.keys())
+
+            removed_keys = set(canon_data)
+            removed_keys.difference_update(data.keys())
+
+            for key in removed_keys:
+                canon_val = canon_data.pop(key)
+                ctx.info('Removed: "{}" ({})'.format(key, canon_val))
+
+            for key in added_keys:
+                canon_data[key] = data[key]
+                ctx.info('Added: "{}" ({})'.format(key, data[key]))
+
+            if not added_keys and not removed_keys:
+                ctx.info('No added or removed keys')
+
+        if ctx.num_errors:
+            ctx.error('{} errors!'.format(ctx.num_errors))
+            exit(1)
+        else:
+            with open(args.data, 'w') as f:
+                f.write(json.dumps(canon_data, indent=4, sort_keys=True))
+            ctx.ok('OK')
     else:
-        ctx = Context()
         with open(args.data) as f:
             canon_data = json.loads(f.read())
             keys = set(canon_data.keys())
             keys.update(data.keys())
             for key in sorted(keys):
                 if key not in canon_data:
-                    ctx.error('New key: {}'.format(key))
+                    ctx.error('New key: "{}"'.format(key))
                 elif key not in data:
-                    ctx.error('Missing key: {}'.format(key))
+                    ctx.error('Missing key: "{}"'.format(key))
                 else:
                     d = data[key]
                     c = canon_data[key]
-                    msg = '{} (canonized: {}, actual: {})'.format(key, c, d)
+                    msg = '"{}" (canonized: {}, actual: {})'.format(key, c, d)
 
                     if d > c * 1.5:
                         ctx.error('Slower: {}'.format(msg))
@@ -143,11 +180,11 @@ def main():
                     else:
                         ctx.info('OK: {}'.format(msg))
 
-            if ctx.num_errors:
-                ctx.error('{} errors!'.format(ctx.num_errors))
-                exit(1)
-            else:
-                ctx.ok('OK')
+        if ctx.num_errors:
+            ctx.error('{} errors!'.format(ctx.num_errors))
+            exit(1)
+        else:
+            ctx.ok('OK')
 
 
 if (__name__ == '__main__'):
