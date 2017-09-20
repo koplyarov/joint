@@ -79,14 +79,14 @@ class CGenerator:
             if isinstance(m.type, BuiltinType) or isinstance(m.type, Enum):
                 payload_init = ''
             elif isinstance(m.type, Interface):
-                payload_init = '{}__checksum'.format(self._mangleType(m.type))
+                payload_init = '.interfaceChecksum = {}__checksum'.format(self._mangleType(m.type))
             elif isinstance(m.type, Struct):
-                payload_init = '{}::__GetStructDescriptor()'.format(self._mangleType(m.type))
+                payload_init = '.structDescriptor = {}__GetStructDescriptor()'.format(self._mangleType(m.type))
             else:
                 raise RuntimeError('Not implemented (type: {})!'.format(m.type))
             yield '\tmember_types[{}].id = (JointCore_TypeId){};'.format(i, m.type.index)
             if payload_init:
-                yield '\tmember_types[{}].payload = {};'.format(i, payload_init)
+                yield '\tmember_types[{}].payload{};'.format(i, payload_init)
         yield '\tstatic JointCore_StructDescriptor desc = {{ {}, member_types }};'.format(len(s.members))
         yield '\treturn &desc;'
         yield '}'
