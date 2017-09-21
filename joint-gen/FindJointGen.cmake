@@ -14,7 +14,7 @@ find_package_handle_standard_args(joint_gen
 if (JOINT_GEN_FOUND)
 	set(__JOINT_PRIVATE_IMPORT_DIRECTORIES "")
 	if (JOINT_COVERAGE)
-		set(__JOINT_PRIVATE_GEN_BINARY COVERAGE_FILE=${CMAKE_BINARY_DIR}/.coverage coverage run -a ${JOINT_GEN_SCRIPT})
+		set(__JOINT_PRIVATE_GEN_BINARY COVERAGE_FILE=${CMAKE_SOURCE_DIR}/.coverage coverage run -a ${JOINT_GEN_SCRIPT})
 	else()
 		set(__JOINT_PRIVATE_GEN_BINARY ${JOINT_GEN_SCRIPT})
 	endif()
