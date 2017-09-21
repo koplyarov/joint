@@ -7,7 +7,8 @@ ToCoveralls() {
 }
 
 ToCodecov() {
-	bash <(curl -s https://codecov.io/bash) || ( echo "Codecov did not collect coverage reports"; return 1 )
+	bash <(curl -s https://codecov.io/bash) || ( echo "Codecov did not collect C++ coverage reports"; return 1 )
+	( cd build && bash <(curl -s https://codecov.io/bash) -cF python ) || ( echo "Codecov did not collect Python coverage reports"; return 1 )
 }
 
 Upload() {
