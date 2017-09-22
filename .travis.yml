@@ -36,6 +36,7 @@ install:
   - sudo apt-get install lcov
   - gem install coveralls-lcov
   - sudo pip install codecov
+  - ./ci/setup_coverage.sh
 
 script: 
   - ( mkdir build && cd build && CC="$COMPILER" CXX="$COMPILERXX" cmake -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DJOINT_TREAT_WARNINGS_AS_ERRORS=TRUE $CMAKE_FLAGS .. && make -j2 )
