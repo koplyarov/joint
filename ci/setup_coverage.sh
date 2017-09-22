@@ -3,19 +3,20 @@
 COVERAGERC_PATH="$(pwd)/.coveragerc"
 
 Verbose() {
+	echo "$*" >&2
 	$@
 	if [ $? -ne 0 ]; then
-		echo "$* failed" >&2
+		echo "ERROR: $* failed" >&2
 		return 1
 	fi
 }
 
 InstallJinja2Coverage() {
-	Verbose mkdir thirdparty &&
+	Verbose mkdir -p thirdparty &&
 	Verbose cd thirdparty &&
 	Verbose git clone https://github.com/MrSenko/coverage-jinja-plugin.git &&
 	(
-		cd coverage-jinja-plugin &&
+		Verbose cd coverage-jinja-plugin &&
 		Verbose git checkout e074018d3e3854bf39a588ef62abc4936c43c2a4 &&
 		Verbose sudo python setup.py install
 	)
@@ -23,8 +24,7 @@ InstallJinja2Coverage() {
 
 MakeCoverageRc() {
 	echo "Creating $1" &&
-	Verbose echo \
-"[run]
+	echo "[run]
 plugins =
 	jinja_coverage
 
@@ -32,6 +32,6 @@ plugins =
 template_directory = $(pwd)/joint-gen/joint/templates" > "$1"
 }
 
-Verbose InstallJinja2Coverage &&
-Verbose MakeCoverageRc "$COVERAGERC_PATH" &&
+InstallJinja2Coverage &&
+MakeCoverageRc "$COVERAGERC_PATH" &&
 exit 1
