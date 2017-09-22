@@ -33,5 +33,5 @@ template_directory = $(pwd)/joint-gen/joint/templates" > "$1"
 }
 
 InstallJinja2Coverage &&
-MakeCoverageRc "$COVERAGERC_PATH" &&
+MakeCoverageRc "$COVERAGERC_PATH" ||
 exit 1
