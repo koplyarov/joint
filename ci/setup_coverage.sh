@@ -1,9 +1,11 @@
 [ "$TEST_COVERAGE" -eq 0 ] && exit 0
 
+COVERAGERC_PATH="$(pwd)/.coveragerc"
+
 Verbose() {
 	$@
 	if [ $? -ne 0 ]; then
-		echo "$* failed"
+		echo "$* failed" >&2
 		return 1
 	fi
 }
@@ -19,11 +21,17 @@ InstallJinja2Coverage() {
 	)
 }
 
-Verbose InstallJinja2Coverage &&
-Verbose echo "[run]
+MakeCoverageRc() {
+	echo "Creating $1" &&
+	Verbose echo \
+"[run]
 plugins =
-    jinja_coverage
+	jinja_coverage
 
 [jinja_coverage]
-template_directory = $(pwd)/joint-gen/joint/templates" > .coveragerc ||
+template_directory = $(pwd)/joint-gen/joint/templates" > "$1"
+}
+
+Verbose InstallJinja2Coverage &&
+Verbose MakeCoverageRc "$COVERAGERC_PATH" &&
 exit 1
