@@ -3,27 +3,25 @@ dist: trusty
 language: cpp
 cache: apt
 
+addons:
+  apt:
+    packages: ['valgrind']
+
 matrix:
   include:
     - compiler: gcc
-      addons:
-        apt:
-          sources: ['ubuntu-toolchain-r-test']
-          packages: ['valgrind']
-      env: RUN_BENCHMARKS=1 TEST_COVERAGE=0 BUILD_TYPE=RelWithDebInfo
+      env: RUN_BENCHMARKS=1 BUILD_TYPE=RelWithDebInfo
     - compiler: gcc
-      env: RUN_BENCHMARKS=0 TEST_COVERAGE=1 BUILD_TYPE=Debug CMAKE_FLAGS="-DJOINT_COVERAGE=TRUE"
+      env: COVERITY_BUILD=1 BUILD_TYPE=RelWithDebInfo
     - compiler: gcc
-      addons:
-        apt:
-          sources: ['ubuntu-toolchain-r-test']
-          packages: ['valgrind']
-      env: RUN_BENCHMARKS=0 TEST_COVERAGE=0 BUILD_TYPE=Debug
+      env: TEST_COVERAGE=1 BUILD_TYPE=Debug CMAKE_FLAGS="-DJOINT_COVERAGE=TRUE"
+    - compiler: gcc
+      env: USE_VALGRIND=1 BUILD_TYPE=Debug
     - compiler: clang
       addons:
         apt:
-          packages: ['clang-3.5', 'valgrind']
-      env: RUN_BENCHMARKS=0 TEST_COVERAGE=0 COMPILER=clang-3.5 COMPILERXX=clang++-3.5 BUILD_TYPE=Debug
+          packages: ['clang-3.5']
+      env: USE_VALGRIND=1 COMPILER=clang-3.5 COMPILERXX=clang++-3.5 BUILD_TYPE=Debug
 
 before_install:
   - test "$RUN_BENCHMARKS" -ne 1 || sudo apt-get install -yq libboost-all-dev
@@ -36,12 +34,10 @@ install:
   - sudo apt-get install lcov
   - gem install coveralls-lcov
   - sudo pip install codecov
-  - ./ci/setup_coverage.sh
+  - ./ci/do.sh prepare
 
 script: 
-  - ( mkdir build && cd build && CC="$COMPILER" CXX="$COMPILERXX" cmake -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DJOINT_TREAT_WARNINGS_AS_ERRORS=TRUE $CMAKE_FLAGS .. && make -j2 )
-  - ./ci/run_tests.sh
-  - ./ci/run_benchmarks.sh
+  - ./ci/do.sh run
 
 after_success:
-  - ./ci/send_coverage.sh
+  - ./ci/do.sh finalize
