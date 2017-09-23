@@ -4,6 +4,14 @@ UpdatePath() {
 	fi
 }
 
+Configure() {
+	(
+		[ "$COMPILER" ] && export CC="$COMPILER"
+		[ "$COMPILERXX" ] && export CXX="$COMPILERXX"
+		Verbose cmake -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DJOINT_TREAT_WARNINGS_AS_ERRORS=TRUE $CMAKE_FLAGS ..
+	)
+}
+
 Make() {
 	if [ "$COVERITY_BUILD" -ne 0 ]; then
 		Verbose cov-build --dir cov-int make -j2
@@ -15,7 +23,6 @@ Make() {
 Verbose UpdatePath &&
 Verbose mkdir build &&
 Verbose cd build && 
-Verbose CC="$COMPILER" CXX="$COMPILERXX" cmake -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DJOINT_TREAT_WARNINGS_AS_ERRORS=TRUE $CMAKE_FLAGS .. && 
-Verbose cmake -DCMAKE_BUILD_TYPE="$BUILD_TYPE" -DJOINT_TREAT_WARNINGS_AS_ERRORS=TRUE $CMAKE_FLAGS .. && 
+Verbose Configure &&
 Verbose Make &&
 exit 1
