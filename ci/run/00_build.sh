@@ -24,5 +24,5 @@ Verbose UpdatePath &&
 Verbose mkdir build &&
 Verbose cd build && 
 Verbose Configure &&
-Verbose Make &&
+Verbose Make ||
 exit 1
