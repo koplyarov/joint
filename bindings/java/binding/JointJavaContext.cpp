@@ -1,4 +1,7 @@
 #include <binding/JointJavaContext.hpp>
+
+#include <joint/devkit/system/CurrentLibraryPath.hpp>
+
 #include <jni/JNIHelpers.hpp>
 #include <utils/Utils.hpp>
 
@@ -12,8 +15,13 @@ namespace java
 
 	JointJavaContext::JointJavaContext()
 	{
-		std::string class_path_opt = "-Djava.class.path=/home/koplyarov/work/joint/build/bin/joint.jar";
-		std::string lib_path_opt = "-Djava.library.path=/home/koplyarov/work/joint/build/bin";
+		auto current_lib_path = joint::devkit::CurrentLibraryPath::Get();
+		auto last_slash_index = current_lib_path.find_last_of("/\\");
+		auto current_lib_dir = (last_slash_index == std::string::npos) ? std::string() : current_lib_path.substr(0, last_slash_index);
+
+		std::string lib_path_opt = "-Djava.library.path=" + current_lib_dir;
+		std::string class_path_opt = "-Djava.class.path=" + current_lib_dir +  "/joint.jar";
+
 		JavaVMOption opt[] = {
 			{ const_cast<char*>(class_path_opt.c_str()), nullptr },
 			{ const_cast<char*>(lib_path_opt.c_str()), nullptr }
