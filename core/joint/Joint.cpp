@@ -17,7 +17,7 @@
 #include <stdarg.h>
 
 
-#if JOINT_CORE_PLATFORM_POSIX
+#if JOINT_PLATFORM_POSIX
 #	include <dlfcn.h>
 #	include <unistd.h>
 #endif
@@ -34,7 +34,7 @@ static void DefaultLogCallback(JointCore_LogLevel logLevel, const char* subsyste
 {
 	const char* alignment = "        ";
 	const char* log_level_str = JointCore_LogLevelToString(logLevel);
-#if JOINT_CORE_PLATFORM_POSIX
+#if JOINT_PLATFORM_POSIX
 	if (isatty(2))
 	{
 		const char* subsystem_ns_color = "\33[0;32m";
@@ -504,7 +504,7 @@ extern "C"
 	}
 
 
-#ifdef JOINT_CORE_PLATFORM_POSIX
+#ifdef JOINT_PLATFORM_POSIX
 	const char* JointAux_GetModuleName(JointCore_FunctionPtr symbol)
 	{
 		Dl_info dl_info;

@@ -11,8 +11,8 @@
 #endif
 
 #if defined(__GNUC__) || defined(__clang)
-#	if !defined(JOINT_CORE_PLATFORM_POSIX)
-#		define JOINT_CORE_PLATFORM_POSIX 1
+#	if !defined(JOINT_PLATFORM_POSIX)
+#		define JOINT_PLATFORM_POSIX 1
 #	endif
 #	if !defined JOINT_CORE_WARN_UNUSED_RESULT
 #		define JOINT_CORE_WARN_UNUSED_RESULT(Result_) Result_ __attribute__((warn_unused_result))
