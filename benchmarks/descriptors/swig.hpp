@@ -6,9 +6,10 @@
 #include <joint/devkit/Logger.hpp>
 #include <joint/devkit/ManifestReader.hpp>
 #include <joint/devkit/StringBuilder.hpp>
+#include <joint/devkit/system/CurrentLibraryPath.hpp>
 
-#include <jni.h>
 #include <implementations/swig/ISwigBenchmarks.hpp>
+#include <jni.h>
 
 
 #if defined(_DEBUG)
@@ -96,8 +97,12 @@ namespace swig
 				{
 					using namespace ::joint::devkit;
 
+					auto current_lib_path = CurrentLibraryPath::Get();
+					auto last_slash_index = current_lib_path.find_last_of("/\\");
+					auto current_lib_dir = (last_slash_index == std::string::npos) ? std::string() : current_lib_path.substr(0, last_slash_index);
+
 					std::string class_path_opt = "-Djava.class.path=" + jar;
-					std::string lib_path_opt = "-Djava.library.path=/home/koplyarov/work/joint/build/bin";
+					std::string lib_path_opt = "-Djava.library.path=" + current_lib_dir;
 					JavaVMOption opt[] = {
 						{ const_cast<char*>(class_path_opt.c_str()), nullptr },
 						{ const_cast<char*>(lib_path_opt.c_str()), nullptr }
