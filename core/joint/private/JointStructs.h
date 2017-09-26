@@ -55,7 +55,7 @@ extern "C"
 }
 
 
-std::ostream& operator << (std::ostream& s, const JointCore_ManifestHandle m)
+inline std::ostream& operator << (std::ostream& s, const JointCore_ManifestHandle m)
 {
 	if (!m)
 		s << "null";

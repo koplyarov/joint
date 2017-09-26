@@ -41,11 +41,17 @@ if (FLEX_FOUND AND BISON_FOUND)
 endif()
 
 set(JOINT_CORE_SRC
-	joint/Joint.cpp
 	joint/private/Joint_Array.cpp
+	joint/private/JsonNode.cpp
 	joint/private/JsonObjectAssembler.cpp
 	joint/private/JsonParser.cpp
-	joint/private/JsonNode.cpp
+	joint/public/Array.cpp
+	joint/public/Assert.cpp
+	joint/public/Aux.cpp
+	joint/public/Error.cpp
+	joint/public/Exception.cpp
+	joint/public/Log.cpp
+	joint/public/Manifest.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/joint/JsonParser.l.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/joint/JsonParser.y.cpp
 )
