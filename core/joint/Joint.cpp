@@ -1,10 +1,10 @@
-#include <joint/JointConfig.h>
 #include <joint/devkit/CppWrappers.hpp>
 #include <joint/devkit/JointException.hpp>
 #include <joint/devkit/Logger.hpp>
 #include <joint/devkit/MakeUnique.hpp>
 #include <joint/private/JointStructs.h>
 #include <joint/private/JsonParser.hpp>
+#include <joint/public/JointConfig.h>
 
 #include <algorithm>
 #include <atomic>
@@ -147,28 +147,6 @@ extern "C"
 #undef DETAIL_JOINT_ERR_TO_STRING
 
 		return "Unknown error";
-	}
-
-
-	JointCore_Error Joint_MakeContext(JointCore_ContextHandle *outJointCtx)
-	{
-		JOINT_CPP_WRAP_BEGIN
-
-		*outJointCtx = new Joint_Context;
-
-		JOINT_CPP_WRAP_END
-	}
-
-
-	JointCore_Error Joint_ReleaseContext(JointCore_ContextHandle jointCtx)
-	{
-		JOINT_CPP_WRAP_BEGIN
-
-		JOINT_CHECK(jointCtx != JOINT_CORE_NULL_HANDLE, JOINT_CORE_ERROR_INVALID_PARAMETER);
-
-		delete jointCtx;
-
-		JOINT_CPP_WRAP_END
 	}
 
 

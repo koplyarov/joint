@@ -1,0 +1,12 @@
+#ifndef JOINT_JOINTCOREAPI_H
+#define JOINT_JOINTCOREAPI_H
+
+
+#ifdef joint_EXPORTS
+#	define JOINT_CORE_API JOINT_CORE_EXPORT
+#else
+#	define JOINT_CORE_API JOINT_CORE_IMPORT
+#endif
+
+
+#endif

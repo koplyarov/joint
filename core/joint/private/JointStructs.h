@@ -14,12 +14,6 @@
 extern "C"
 {
 
-	struct Joint_Context
-	{
-		int dummy;
-	};
-
-
 	struct Joint_ManifestNode : public joint::JsonNode
 	{
 		Joint_ManifestNode(Joint_ManifestNode&& other)
