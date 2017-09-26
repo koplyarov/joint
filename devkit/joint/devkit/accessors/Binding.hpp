@@ -2,7 +2,7 @@
 #define JOINT_DEVKIT_ACCESSORS_BINDING_HPP
 
 
-#include <joint/accessors/BindingAccessor.h>
+#include <joint/Joint.h>
 #include <joint/devkit/accessors/ImplBase.hpp>
 
 

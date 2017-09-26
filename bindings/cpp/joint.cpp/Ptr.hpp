@@ -2,7 +2,7 @@
 #define BINDINGS_CPP_JOINT_CPP_PTR_HPP
 
 
-#include <joint/accessors/ObjectAccessor.h>
+#include <joint/Joint.h>
 
 #include <cstddef>
 #include <joint.cpp/detail/JointCall.hpp>

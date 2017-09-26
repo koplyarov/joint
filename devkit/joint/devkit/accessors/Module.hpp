@@ -2,7 +2,7 @@
 #define JOINT_DEVKIT_ACCESSORS_MODULE_HPP
 
 
-#include <joint/accessors/ModuleAccessor.h>
+#include <joint/Joint.h>
 #include <joint/devkit/accessors/ImplBase.hpp>
 
 

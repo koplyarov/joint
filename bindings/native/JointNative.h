@@ -3,7 +3,6 @@
 
 
 #include <joint/Joint.h>
-#include <joint/accessors/BindingAccessor.h>
 
 
 #ifdef _MSC_VER

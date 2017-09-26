@@ -3,7 +3,6 @@
 
 
 #include <joint/Joint.h>
-#include <joint/accessors/ModuleAccessor.h>
 
 
 #ifdef joint_loader_EXPORTS
