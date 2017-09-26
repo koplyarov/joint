@@ -12,9 +12,6 @@
 
 JOINT_CORE_EXTERN_C_BEGIN
 
-	struct Joint_Array;
-	typedef struct Joint_Array* JointCore_ArrayHandle;
-
 	typedef struct JointCore_Parameter_s JointCore_Parameter;
 	typedef struct JointCore_RetValue_s JointCore_RetValue;
 
@@ -36,7 +33,7 @@ JOINT_CORE_EXTERN_C_BEGIN
 		int32_t                     e;
 		union _JointCore_Value_t*   members;
 		JointCore_ObjectAccessor    obj;
-		JointCore_ArrayHandle       array;
+		struct Joint_Array*         array;
 	} JointCore_Value;
 
 
