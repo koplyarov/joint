@@ -3,7 +3,7 @@
 
 
 #include <joint/devkit/Config.hpp>
-#include <joint/util/Assert.h>
+#include <joint/public/Assert.h>
 
 #include <atomic>
 

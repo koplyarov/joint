@@ -1,6 +1,11 @@
 #ifndef JOINT_UTIL_ASSERT_H
 #define JOINT_UTIL_ASSERT_H
 
+
+#include <joint/public/JointConfig.h>
+#include <joint/public/JointCoreApi.h>
+
+
 JOINT_CORE_EXTERN_C_BEGIN
 
 JOINT_CORE_API void JointCore_FatalImpl(const char* subsystem, const char* file, int line, const char* func, const char* format, ...);
