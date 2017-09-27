@@ -1,5 +1,5 @@
-#include <joint/devkit/InterfaceDescriptor.hpp>
-#include <joint/devkit/ValueMarshaller.hpp>
+#include <joint/devkit/marshalling/InterfaceDescriptor.hpp>
+#include <joint/devkit/marshalling/ValueMarshaller.hpp>
 #include <joint/devkit/util/Utils.hpp>
 
 #include <JointJNI.h>

@@ -1,7 +1,7 @@
 #include <joint/public/Manifest.h>
 
-#include <joint/devkit/CppWrappers.hpp>
-#include <joint/devkit/Logger.hpp>
+#include <joint/devkit/log/Logger.hpp>
+#include <joint/devkit/util/CppWrappers.hpp>
 #include <joint/private/JointStructs.h>
 #include <joint/private/JsonNode.hpp>
 #include <joint/private/JsonParser.hpp>

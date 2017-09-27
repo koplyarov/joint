@@ -2,7 +2,7 @@
 #define UTILS_JPTR_HPP
 
 
-#include <joint/devkit/Logger.hpp>
+#include <joint/devkit/log/Logger.hpp>
 #include <joint/devkit/util/Exceptions.hpp>
 
 #include <algorithm>

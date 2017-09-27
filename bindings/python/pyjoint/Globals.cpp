@@ -1,6 +1,6 @@
 #include <pyjoint/Globals.hpp>
 
-#include <joint/devkit/Logger.hpp>
+#include <joint/devkit/log/Logger.hpp>
 
 #include <pyjoint/ProxyBase.hpp>
 #include <utils/PyObjectHolder.hpp>

@@ -2,9 +2,9 @@
 #define CORE_JOINT_INTEROP_PYTHONMODULE_HPP
 
 
-#include <joint/devkit/Logger.hpp>
-#include <joint/devkit/ManifestReader.hpp>
 #include <joint/devkit/accessors/Module.hpp>
+#include <joint/devkit/log/Logger.hpp>
+#include <joint/devkit/manifest/ManifestReader.hpp>
 
 #include <string>
 

@@ -1,6 +1,6 @@
 #include <pyjoint/ProxyBase.hpp>
 
-#include <joint/devkit/Logger.hpp>
+#include <joint/devkit/log/Logger.hpp>
 #include <joint/devkit/util/StackStorage.hpp>
 
 #include <binding/Object.hpp>

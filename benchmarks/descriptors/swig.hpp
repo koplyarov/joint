@@ -2,8 +2,8 @@
 #define BENCHMARKS_DESCRIPTORS_SWIG_HPP
 
 
-#include <joint/devkit/Logger.hpp>
-#include <joint/devkit/ManifestReader.hpp>
+#include <joint/devkit/log/Logger.hpp>
+#include <joint/devkit/manifest/ManifestReader.hpp>
 #include <joint/devkit/system/CurrentLibraryPath.hpp>
 #include <joint/devkit/util/JointException.hpp>
 #include <joint/devkit/util/StringBuilder.hpp>

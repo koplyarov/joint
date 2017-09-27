@@ -3,8 +3,8 @@
 
 
 #include <joint/Joint.h>
-#include <joint/devkit/Logger.hpp>
 #include <joint/devkit/accessors/Binding.hpp>
+#include <joint/devkit/log/Logger.hpp>
 
 
 namespace joint {

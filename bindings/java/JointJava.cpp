@@ -1,7 +1,7 @@
 #include <JointJava.h>
 
-#include <joint/devkit/CppWrappers.hpp>
 #include <joint/devkit/accessors/MakeAccessor.hpp>
+#include <joint/devkit/util/CppWrappers.hpp>
 
 #include <memory>
 #include <string>

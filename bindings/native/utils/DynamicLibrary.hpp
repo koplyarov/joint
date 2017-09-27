@@ -2,7 +2,7 @@
 #define UTILS_DYNAMICLIBRARY_HPP
 
 
-#include <joint/devkit/Logger.hpp>
+#include <joint/devkit/log/Logger.hpp>
 
 #include <memory>
 

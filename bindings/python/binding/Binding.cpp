@@ -1,6 +1,6 @@
 #include <joint/Joint.h>
-#include <joint/devkit/CppWrappers.hpp>
 #include <joint/devkit/accessors/MakeAccessor.hpp>
+#include <joint/devkit/util/CppWrappers.hpp>
 #include <joint/devkit/util/Holder.hpp>
 #include <joint/devkit/util/ScopeExit.hpp>
 

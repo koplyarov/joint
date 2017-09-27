@@ -3,8 +3,8 @@
 
 
 #include <joint/Joint.h>
-#include <joint/devkit/InterfaceDescriptor.hpp>
-#include <joint/devkit/Logger.hpp>
+#include <joint/devkit/log/Logger.hpp>
+#include <joint/devkit/marshalling/InterfaceDescriptor.hpp>
 
 #include <vector>
 

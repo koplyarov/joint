@@ -1,7 +1,7 @@
 #include <pyjoint/Array.hpp>
 
-#include <joint/devkit/Logger.hpp>
-#include <joint/devkit/ValueMarshaller.hpp>
+#include <joint/devkit/log/Logger.hpp>
+#include <joint/devkit/marshalling/ValueMarshaller.hpp>
 
 #include <binding/Object.hpp>
 #include <common/Marshaller.hpp>

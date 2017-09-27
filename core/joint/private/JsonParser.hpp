@@ -2,7 +2,7 @@
 #define JOINT_PRIVATE_JSONPARSER_HPP
 
 
-#include <joint/devkit/Logger.hpp>
+#include <joint/devkit/log/Logger.hpp>
 #include <joint/private/JsonObjectAssembler.hpp>
 
 #include <fstream>

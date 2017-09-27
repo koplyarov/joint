@@ -1,7 +1,7 @@
 #include <pyjoint_loader/Globals.hpp>
 
 #include <joint/JointLoader.h>
-#include <joint/devkit/Logger.hpp>
+#include <joint/devkit/log/Logger.hpp>
 
 #include <pyjoint/Common.hpp>
 #include <utils/PythonUtils.hpp>

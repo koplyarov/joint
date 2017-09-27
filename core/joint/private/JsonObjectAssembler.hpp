@@ -2,7 +2,7 @@
 #define JOINT_PRIVATE_JSONOBJECTASSEMBLER_HPP
 
 
-#include <joint/devkit/Logger.hpp>
+#include <joint/devkit/log/Logger.hpp>
 #include <joint/private/JsonNode.hpp>
 
 #include <stack>

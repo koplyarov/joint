@@ -1,7 +1,7 @@
 #include <joint/public/Exception.h>
 
-#include <joint/devkit/CppWrappers.hpp>
-#include <joint/devkit/Logger.hpp>
+#include <joint/devkit/log/Logger.hpp>
+#include <joint/devkit/util/CppWrappers.hpp>
 #include <joint/devkit/util/JointException.hpp>
 #include <joint/private/JointStructs.h>
 

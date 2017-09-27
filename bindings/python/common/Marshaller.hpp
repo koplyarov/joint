@@ -2,7 +2,7 @@
 #define BINDING_MARSHALLER_HPP
 
 
-#include <joint/devkit/ValueMarshaller.hpp>
+#include <joint/devkit/marshalling/ValueMarshaller.hpp>
 #include <joint/devkit/util/StackStorage.hpp>
 
 #include <memory>

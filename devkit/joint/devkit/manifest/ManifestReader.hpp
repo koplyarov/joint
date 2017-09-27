@@ -2,7 +2,7 @@
 #define JOINT_DEVKIT_MANIFESTREADER_HPP
 
 
-#include <joint/devkit/Logger.hpp>
+#include <joint/devkit/log/Logger.hpp>
 #include <joint/devkit/util/JointException.hpp>
 #include <joint/devkit/util/Utils.hpp>
 

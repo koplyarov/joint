@@ -1,7 +1,7 @@
 #include <joint/public/Array.h>
 
-#include <joint/devkit/CppWrappers.hpp>
-#include <joint/devkit/Logger.hpp>
+#include <joint/devkit/log/Logger.hpp>
+#include <joint/devkit/util/CppWrappers.hpp>
 #include <joint/private/Joint_Array.hpp>
 
 

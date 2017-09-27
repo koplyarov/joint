@@ -1,7 +1,7 @@
 #include <binding/Module.hpp>
 
-#include <joint/devkit/CppWrappers.hpp>
-#include <joint/devkit/ManifestReader.hpp>
+#include <joint/devkit/manifest/ManifestReader.hpp>
+#include <joint/devkit/util/CppWrappers.hpp>
 
 
 namespace joint {

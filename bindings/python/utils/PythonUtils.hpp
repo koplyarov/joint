@@ -2,7 +2,7 @@
 #define JOINT_INTEROP_PYTHONUTILS_HPP
 
 
-#include <joint/devkit/StackFrameData.hpp>
+#include <joint/devkit/marshalling/StackFrameData.hpp>
 #include <joint/devkit/util/JointException.hpp>
 #include <joint/devkit/util/StringBuilder.hpp>
 

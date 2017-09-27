@@ -2,7 +2,7 @@
 #define UTILS_UTILS_HPP
 
 
-#include <joint/devkit/ExceptionInfo.hpp>
+#include <joint/devkit/marshalling/ExceptionInfo.hpp>
 #include <joint/devkit/util/JointException.hpp>
 #include <joint/devkit/util/ScopeExit.hpp>
 #include <joint/devkit/util/StringBuilder.hpp>

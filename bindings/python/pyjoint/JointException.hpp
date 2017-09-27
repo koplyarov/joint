@@ -2,7 +2,7 @@
 #define BINDINGS_PYTHON_PYJOINT_JOINTEXCEPTION_H
 
 
-#include <joint/devkit/StackFrameData.hpp>
+#include <joint/devkit/marshalling/StackFrameData.hpp>
 
 #include <string>
 #include <vector>

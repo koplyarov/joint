@@ -3,8 +3,8 @@
 
 
 #include <joint/Joint.h>
-#include <joint/devkit/Logger.hpp>
 #include <joint/devkit/accessors/Object.hpp>
+#include <joint/devkit/log/Logger.hpp>
 #include <joint/devkit/util/ArrayView.hpp>
 
 #include <vector>

@@ -3,7 +3,7 @@
 
 
 #include <joint/Joint.h>
-#include <joint/devkit/Logger.hpp>
+#include <joint/devkit/log/Logger.hpp>
 #include <joint/devkit/util/Singleton.hpp>
 
 #include <binding/JavaBindingInfo.hpp>

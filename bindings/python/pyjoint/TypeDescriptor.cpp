@@ -1,6 +1,6 @@
 #include <pyjoint/TypeDescriptor.hpp>
 
-#include <joint/devkit/Logger.hpp>
+#include <joint/devkit/log/Logger.hpp>
 
 #include <utils/PythonUtils.hpp>
 #include <binding/Object.hpp>

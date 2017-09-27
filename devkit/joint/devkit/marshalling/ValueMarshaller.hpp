@@ -3,7 +3,7 @@
 
 
 #include <joint/Joint.h>
-#include <joint/devkit/InterfaceDescriptor.hpp>
+#include <joint/devkit/marshalling/InterfaceDescriptor.hpp>
 #include <joint/devkit/util/JointException.hpp>
 
 #include <vector>

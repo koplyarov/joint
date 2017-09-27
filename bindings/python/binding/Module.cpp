@@ -1,9 +1,9 @@
 #include "Module.hpp"
 
 #include <joint/Joint.h>
-#include <joint/devkit/CppWrappers.hpp>
-#include <joint/devkit/ManifestReader.hpp>
+#include <joint/devkit/manifest/ManifestReader.hpp>
 #include <joint/devkit/util/ArrayView.hpp>
+#include <joint/devkit/util/CppWrappers.hpp>
 #include <joint/devkit/util/MakeUnique.hpp>
 
 #include <array>

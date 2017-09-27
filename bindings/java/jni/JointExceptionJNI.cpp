@@ -1,4 +1,4 @@
-#include <joint/devkit/ExceptionInfo.hpp>
+#include <joint/devkit/marshalling/ExceptionInfo.hpp>
 
 #include <JointJNI.h>
 #include <utils/Utils.hpp>
