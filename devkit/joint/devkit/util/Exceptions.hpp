@@ -2,7 +2,7 @@
 #define JOINT_DEVKIT_EXCEPTIONS_HPP
 
 
-#include <joint/devkit/JointException.hpp>
+#include <joint/devkit/util/JointException.hpp>
 
 #include <type_traits>
 

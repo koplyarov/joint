@@ -2,10 +2,10 @@
 #define BINDINGS_JAVA_BINDING_MODULE_HPP
 
 
-#include <joint/devkit/Holder.hpp>
 #include <joint/devkit/Logger.hpp>
 #include <joint/devkit/ManifestReader.hpp>
 #include <joint/devkit/accessors/Module.hpp>
+#include <joint/devkit/util/Holder.hpp>
 
 #include <string>
 

@@ -2,7 +2,7 @@
 #define BINDINGS_CPP_JOINT_CPP_DETAIL_GENERATEDCODEPROLOGUE_HPP
 
 
-#include <joint/devkit/ScopeExit.hpp>
+#include <joint/devkit/util/ScopeExit.hpp>
 
 #include <algorithm>
 #include <iterator>

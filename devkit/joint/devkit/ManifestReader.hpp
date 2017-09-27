@@ -2,9 +2,9 @@
 #define JOINT_DEVKIT_MANIFESTREADER_HPP
 
 
-#include <joint/devkit/JointException.hpp>
 #include <joint/devkit/Logger.hpp>
-#include <joint/devkit/Utils.hpp>
+#include <joint/devkit/util/JointException.hpp>
+#include <joint/devkit/util/Utils.hpp>
 
 #include <type_traits>
 #include <vector>

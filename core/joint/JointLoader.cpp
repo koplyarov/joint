@@ -1,10 +1,10 @@
 #include <joint/JointLoader.h>
 
 #include <joint/devkit/CppWrappers.hpp>
-#include <joint/devkit/Holder.hpp>
 #include <joint/devkit/Logger.hpp>
 #include <joint/devkit/ManifestReader.hpp>
-#include <joint/devkit/Singleton.hpp>
+#include <joint/devkit/util/Holder.hpp>
+#include <joint/devkit/util/Singleton.hpp>
 
 #include <map>
 #include <memory>

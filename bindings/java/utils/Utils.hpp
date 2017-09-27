@@ -3,9 +3,9 @@
 
 
 #include <joint/devkit/ExceptionInfo.hpp>
-#include <joint/devkit/JointException.hpp>
-#include <joint/devkit/ScopeExit.hpp>
-#include <joint/devkit/StringBuilder.hpp>
+#include <joint/devkit/util/JointException.hpp>
+#include <joint/devkit/util/ScopeExit.hpp>
+#include <joint/devkit/util/StringBuilder.hpp>
 
 #include <utils/JPtr.hpp>
 

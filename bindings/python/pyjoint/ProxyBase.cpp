@@ -1,7 +1,7 @@
 #include <pyjoint/ProxyBase.hpp>
 
 #include <joint/devkit/Logger.hpp>
-#include <joint/devkit/StackStorage.hpp>
+#include <joint/devkit/util/StackStorage.hpp>
 
 #include <binding/Object.hpp>
 #include <common/Marshaller.hpp>

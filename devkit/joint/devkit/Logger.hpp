@@ -3,8 +3,8 @@
 
 
 #include <joint/Joint.h>
-#include <joint/devkit/StorageFor.hpp>
-#include <joint/devkit/StringBuilder.hpp>
+#include <joint/devkit/util/StorageFor.hpp>
+#include <joint/devkit/util/StringBuilder.hpp>
 
 #include <string>
 #include <utility>

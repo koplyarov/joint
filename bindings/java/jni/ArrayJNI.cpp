@@ -1,6 +1,6 @@
 #include <joint/devkit/InterfaceDescriptor.hpp>
-#include <joint/devkit/Utils.hpp>
 #include <joint/devkit/ValueMarshaller.hpp>
+#include <joint/devkit/util/Utils.hpp>
 
 #include <JointJNI.h>
 #include <binding/Boxing.hpp>

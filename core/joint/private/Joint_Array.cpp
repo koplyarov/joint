@@ -1,6 +1,6 @@
 #include <joint/private/Joint_Array.hpp>
 
-#include <joint/devkit/JointException.hpp>
+#include <joint/devkit/util/JointException.hpp>
 
 #include <string.h>
 

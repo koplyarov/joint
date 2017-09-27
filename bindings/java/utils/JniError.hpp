@@ -2,7 +2,7 @@
 #define UTILS_JNIERROR_HPP
 
 
-#include <joint/devkit/StringBuilder.hpp>
+#include <joint/devkit/util/StringBuilder.hpp>
 
 #include <jni.h>
 

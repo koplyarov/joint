@@ -2,8 +2,8 @@
 #define JOINT_PRIVATE_JSONNODE_HPP
 
 
-#include <joint/devkit/JointException.hpp>
 #include <joint/devkit/Logger.hpp>
+#include <joint/devkit/util/JointException.hpp>
 
 #include <map>
 #include <memory>

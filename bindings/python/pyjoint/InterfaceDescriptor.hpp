@@ -3,7 +3,7 @@
 
 
 #include <joint/devkit/InterfaceDescriptor.hpp>
-#include <joint/devkit/JointException.hpp>
+#include <joint/devkit/util/JointException.hpp>
 
 #include <common/PythonBindingInfo.hpp>
 #include <pyjoint/Common.hpp>

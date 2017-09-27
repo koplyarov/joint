@@ -4,7 +4,7 @@
 
 #include <joint/Joint.h>
 #include <joint/devkit/InterfaceDescriptor.hpp>
-#include <joint/devkit/JointException.hpp>
+#include <joint/devkit/util/JointException.hpp>
 
 #include <vector>
 

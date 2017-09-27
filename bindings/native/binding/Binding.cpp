@@ -2,9 +2,9 @@
 
 #include <joint/Joint.h>
 #include <joint/devkit/CppWrappers.hpp>
-#include <joint/devkit/Holder.hpp>
 #include <joint/devkit/ManifestReader.hpp>
 #include <joint/devkit/accessors/MakeAccessor.hpp>
+#include <joint/devkit/util/Holder.hpp>
 
 #include <memory>
 #include <string.h>

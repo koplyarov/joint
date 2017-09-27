@@ -1,8 +1,8 @@
 #include <utils/DynamicLibrary.hpp>
 
-#include <joint/devkit/Holder.hpp>
-#include <joint/devkit/JointException.hpp>
-#include <joint/devkit/StringBuilder.hpp>
+#include <joint/devkit/util/Holder.hpp>
+#include <joint/devkit/util/JointException.hpp>
+#include <joint/devkit/util/StringBuilder.hpp>
 
 
 #ifdef _WIN32

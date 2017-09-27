@@ -2,9 +2,9 @@
 #define JOINT_DEVKIT_INTERFACEDESCRIPTOR_HPP
 
 
-#include <joint/devkit/ArrayHolder.hpp>
-#include <joint/devkit/JointException.hpp>
 #include <joint/devkit/Logger.hpp>
+#include <joint/devkit/util/ArrayHolder.hpp>
+#include <joint/devkit/util/JointException.hpp>
 
 #include <memory>
 

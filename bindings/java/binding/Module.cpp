@@ -1,7 +1,7 @@
 #include <binding/Module.hpp>
 
 #include <joint/devkit/CppWrappers.hpp>
-#include <joint/devkit/JointException.hpp>
+#include <joint/devkit/util/JointException.hpp>
 
 #include <binding/JointJavaContext.hpp>
 #include <utils/JniError.hpp>

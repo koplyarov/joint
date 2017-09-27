@@ -2,12 +2,12 @@
 #define JOINT_DEVKIT_EXCEPTIONINFO_HPP
 
 
-#include <joint/devkit/Holder.hpp>
-#include <joint/devkit/JointException.hpp>
 #include <joint/devkit/Logger.hpp>
-#include <joint/devkit/ScopeExit.hpp>
 #include <joint/devkit/StackFrameData.hpp>
-#include <joint/devkit/StackStorage.hpp>
+#include <joint/devkit/util/Holder.hpp>
+#include <joint/devkit/util/JointException.hpp>
+#include <joint/devkit/util/ScopeExit.hpp>
+#include <joint/devkit/util/StackStorage.hpp>
 
 #include <algorithm>
 #include <vector>
