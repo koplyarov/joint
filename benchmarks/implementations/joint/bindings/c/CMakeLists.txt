@@ -18,7 +18,7 @@ joint_generate_adapters(c Benchmarks_adapters.h
 )
 
 add_library(benchmarks-c SHARED Benchmarks.c OtherTranslationUnit.c Benchmarks_adapters.h)
-target_link_libraries(benchmarks-c joint)
+target_link_libraries(benchmarks-c ${JOINT_LIBRARIES})
 
 joint_make_module_package(benchmarks-component-c
 	PACKAGE_DIR ${JOINT_MODULE_OUTPUT_DIRECTORY}/c/Benchmarks

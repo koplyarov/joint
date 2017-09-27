@@ -1,3 +1,3 @@
-find_package(JointGen)
+find_package(Joint)
 
 add_subdirectory(bindings)

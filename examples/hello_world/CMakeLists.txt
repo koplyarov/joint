@@ -1,14 +1,13 @@
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/examples/hello-world")
 set(JOINT_MODULE_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 
-find_package(JointGen)
+find_package(Joint)
 
 ################################################################################
 
+include_directories(${JOINT_CPP_INCLUDE_DIRECTORIES})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-include_directories(${CMAKE_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/bindings/cpp)
 
 if (MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
@@ -21,7 +20,7 @@ joint_generate_adapters(c++ runner/adapters.hpp IGreeter.idl)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_executable(example-hello-world runner/adapters.hpp main.cpp)
-target_link_libraries(example-hello-world joint-loader)
+target_link_libraries(example-hello-world ${JOINT_LIBRARIES})
 
 ################################################################################
 

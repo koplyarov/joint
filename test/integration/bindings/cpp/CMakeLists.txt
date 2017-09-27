@@ -2,8 +2,7 @@ project(test-cpp)
 
 find_package(Threads)
 
-include_directories(${CMAKE_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/bindings/cpp)
+include_directories(${JOINT_CPP_INCLUDE_DIRECTORIES})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -31,7 +30,7 @@ joint_generate_adapters(c++ Tests_adapters.hpp
 )
 
 add_library(tests-cpp SHARED Tests.cpp Tests_adapters.hpp)
-target_link_libraries(tests-cpp joint ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(tests-cpp ${JOINT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 joint_make_module_package(tests-component-cpp
 	PACKAGE_DIR ${JOINT_MODULE_OUTPUT_DIRECTORY}/cpp/Tests

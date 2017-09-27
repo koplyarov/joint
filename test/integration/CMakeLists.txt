@@ -3,16 +3,15 @@ add_definitions(-D_GLIBCXX_DEBUG)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(JOINT_MODULE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-find_package(JointGen)
+find_package(Joint)
 
 add_subdirectory(bindings)
 
 find_package(Threads)
 
+include_directories(${JOINT_CPP_INCLUDE_DIRECTORIES})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/test/core)
-include_directories(${CMAKE_SOURCE_DIR}/bindings/cpp)
 
 if (MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
@@ -38,4 +37,4 @@ joint_generate_adapters(c++ Tests_adapters.hpp
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_executable(joint-test Tests_adapters.hpp test.cpp)
-target_link_libraries(joint-test test-core joint-loader)
+target_link_libraries(joint-test test-core ${JOINT_LIBRARIES})

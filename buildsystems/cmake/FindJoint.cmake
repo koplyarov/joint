@@ -1,7 +1,7 @@
 find_program(JOINT_GEN_SCRIPT
 	NAMES "joint-gen.py"
 	PATHS 
-	${CMAKE_CURRENT_LIST_DIR}
+	${CMAKE_CURRENT_LIST_DIR}/../../joint-gen
 )
 
 include(FindPackageHandleStandardArgs)
@@ -12,6 +12,11 @@ find_package_handle_standard_args(joint_gen
 
 
 if (JOINT_GEN_FOUND)
+	set(JOINT_C_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_LIST_DIR}/../../core;${CMAKE_CURRENT_LIST_DIR}/../../bindings/native;${CMAKE_CURRENT_LIST_DIR}/../../bindings/c)
+	set(JOINT_CPP_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_LIST_DIR}/../../core;${CMAKE_CURRENT_LIST_DIR}/../../bindings/native;${CMAKE_CURRENT_LIST_DIR}/../../bindings/cpp)
+
+	set(JOINT_LIBRARIES joint;joint-loader)
+
 	set(__JOINT_PRIVATE_IMPORT_DIRECTORIES "")
 	if (JOINT_COVERAGE)
 		set(__JOINT_PRIVATE_GEN_BINARY COVERAGE_FILE=${CMAKE_SOURCE_DIR}/.coverage coverage run --rcfile ${CMAKE_SOURCE_DIR}/.coveragerc -a ${JOINT_GEN_SCRIPT})

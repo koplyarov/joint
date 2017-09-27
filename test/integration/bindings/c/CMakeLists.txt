@@ -24,7 +24,7 @@ joint_generate_adapters(c Tests_adapters.h
 )
 
 add_library(tests-c SHARED Tests.c Tests_adapters.h)
-target_link_libraries(tests-c joint)
+target_link_libraries(tests-c ${JOINT_LIBRARIES})
 
 joint_make_module_package(tests-component-c
 	PACKAGE_DIR ${JOINT_MODULE_OUTPUT_DIRECTORY}/c/Tests

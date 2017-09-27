@@ -1,7 +1,6 @@
 find_package(Threads)
 
-include_directories(${CMAKE_SOURCE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/bindings/cpp)
+include_directories(${JOINT_CPP_INCLUDE_DIRECTORIES})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -23,7 +22,7 @@ joint_generate_adapters(c++ Benchmarks_adapters.hpp
 )
 
 add_library(benchmarks-cpp SHARED Benchmarks.cpp OtherTranslationUnit.cpp Benchmarks_adapters.hpp)
-target_link_libraries(benchmarks-cpp joint ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(benchmarks-cpp ${JOINT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 joint_make_module_package(benchmarks-component-cpp
 	PACKAGE_DIR ${JOINT_MODULE_OUTPUT_DIRECTORY}/cpp/Benchmarks

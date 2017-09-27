@@ -17,6 +17,8 @@ message (STATUS "JNI_FOUND: ${JNI_FOUND}")
 message (STATUS "JAVA_FOUND: ${JAVA_FOUND}")
 
 if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PYTHONLIBS_FOUND AND JNI_FOUND AND JAVA_FOUND)
+	find_package(Joint)
+
 	include(UseJava)
 
 	if (MSVC)
@@ -34,10 +36,8 @@ if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PYTHONLIBS_FOUND AND JNI
 	include_directories(${CMAKE_CURRENT_BINARY_DIR})
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/core)
-	include_directories(${CMAKE_SOURCE_DIR})
-	include_directories(${CMAKE_SOURCE_DIR}/bindings/cpp)
+	include_directories(${JOINT_CPP_INCLUDE_DIRECTORIES})
 
-	find_package(JointGen)
 	joint_generate_adapters(c++ Benchmarks_adapters.hpp
 		implementations/joint/idl/IBasicBenchmarks.idl
 		implementations/joint/idl/ICastBenchmarks.idl
@@ -53,5 +53,5 @@ if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PYTHONLIBS_FOUND AND JNI
 	endif()
 
 	add_executable(joint-benchmarks Benchmarks_adapters.hpp main.cpp)
-	target_link_libraries(joint-benchmarks swig_benchmarks_native benchmarks joint-loader ${PLATFORM_LIBS})
+	target_link_libraries(joint-benchmarks swig_benchmarks_native benchmarks ${JOINT_LIBRARIES} ${PLATFORM_LIBS})
 endif()

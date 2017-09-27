@@ -4,7 +4,7 @@
 
 #include <joint/JointLoader.h>
 
-#include <bindings/native/JointNative.h>
+#include <JointNative.h>
 #include <joint.cpp/Component.hpp>
 #include <joint.cpp/Ptr.hpp>
 #include <joint.cpp/detail/Config.hpp>
