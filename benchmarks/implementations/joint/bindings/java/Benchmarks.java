@@ -7,6 +7,19 @@ import adapters.Adapters.*;
 class Benchmarks
 {
 
+	static class Object
+		extends
+			AccessorsContainer
+		implements
+			joint_IObject_impl
+	{
+		Object()
+		{
+			joint_IObject.registerAccessors(this);
+		}
+	}
+
+
 	static class CastComponent
 		extends
 			AccessorsContainer
@@ -29,21 +42,26 @@ class Benchmarks
 			benchmarks_IBasicBenchmarks_impl,
 			benchmarks_IEnumBenchmarks_impl,
 			benchmarks_IStructBenchmarks_impl,
+			benchmarks_IObjectBenchmarks_impl,
 			benchmarks_ICastBenchmarks_impl,
 			benchmarks_IExceptionBenchmarks_impl
 	{
 		private java.util.Random r = new java.util.Random();
 		private ModuleContext module;
 		public int dummyInt = 0;
+		private joint_IObject obj;
 
 		Component(ModuleContext module)
 		{
 			benchmarks_IBasicBenchmarks.registerAccessors(this);
 			benchmarks_IEnumBenchmarks.registerAccessors(this);
 			benchmarks_IStructBenchmarks.registerAccessors(this);
+			benchmarks_IObjectBenchmarks.registerAccessors(this);
 			benchmarks_ICastBenchmarks.registerAccessors(this);
 			benchmarks_IExceptionBenchmarks.registerAccessors(this);
+
 			this.module = module;
+			this.obj = joint_IObject.makeComponent(module, new Object());
 		}
 
 		///// IBasicBenchmarks /////
@@ -129,6 +147,25 @@ class Benchmarks
 
 		public void MeasureOutgoingVoidToEnum(benchmarks_IEnumInvokable invokable, long n)
 		{ for (long i = 0; i < n; ++i) invokable.VoidToEnum(); }
+
+
+		///// IObjectBenchmarks /////
+
+
+		public void ObjectToVoid(joint_IObject p) { }
+		public joint_IObject VoidToObject() { return obj; }
+
+		public void MeasureNativeObjectToVoid(long n)
+		{ throw new RuntimeException("Not implemented"); }
+
+		public void MeasureNativeVoidToObject(long n)
+		{ throw new RuntimeException("Not implemented"); }
+
+		public void MeasureOutgoingObjectToVoid(benchmarks_IObjectInvokable invokable, long n)
+		{ for (long i = 0; i < n; ++i) invokable.ObjectToVoid(obj); }
+
+		public void MeasureOutgoingVoidToObject(benchmarks_IObjectInvokable invokable, long n)
+		{ for (long i = 0; i < n; ++i) invokable.VoidToObject(); }
 
 
 		///// IStructBenchmarks /////

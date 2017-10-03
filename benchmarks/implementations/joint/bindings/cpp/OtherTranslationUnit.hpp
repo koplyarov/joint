@@ -32,6 +32,18 @@ NativeEnum NativeVoidToEnum();
 
 ////////////////////////////////////////////////////////////////////////////////
 
+struct INativeObject
+{
+	virtual ~INativeObject() { }
+};
+using INativeObjectPtr = std::shared_ptr<INativeObject>;
+
+INativeObjectPtr MakeNativeObject();
+void NativeObjectToVoid(const INativeObjectPtr&);
+INativeObjectPtr NativeVoidToObject();
+
+////////////////////////////////////////////////////////////////////////////////
+
 
 struct NativeFlatStruct { int32_t a; int32_t b; int32_t c; int32_t d; };
 

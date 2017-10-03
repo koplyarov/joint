@@ -1,0 +1,19 @@
+package benchmarks
+{
+
+	interface IObjectInvokable
+	{
+		void ObjectToVoid(joint.IObject p);
+		joint.IObject VoidToObject();
+	}
+
+	interface IObjectBenchmarks : IObjectInvokable
+	{
+		void MeasureNativeObjectToVoid(i64 n);
+		void MeasureNativeVoidToObject(i64 n);
+
+		void MeasureOutgoingObjectToVoid(IObjectInvokable callback, i64 n);
+		void MeasureOutgoingVoidToObject(IObjectInvokable callback, i64 n);
+	}
+
+}

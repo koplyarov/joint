@@ -23,6 +23,13 @@ public:
 };
 
 
+class Object
+{
+public:
+	using JointInterfaces = TypeList<IObject>;
+};
+
+
 class Benchmarks
 {
 public:
@@ -31,6 +38,7 @@ public:
 		IEnumBenchmarks,
 		ICastBenchmarks,
 		IExceptionBenchmarks,
+		IObjectBenchmarks,
 		IStructBenchmarks
 	>;
 
@@ -38,12 +46,14 @@ private:
 	ModuleContext   _moduleContext;
 	std::string     _string3;
 	std::string     _string100;
+	IObject_Ptr     _obj;
 
 public:
 	Benchmarks(const ModuleContext& moduleContext)
 		: _moduleContext(moduleContext),
 		  _string3("abc"),
-		  _string100("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890")
+		  _string100("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"),
+		  _obj(moduleContext.MakeComponent<IObject, Object>())
 	{ }
 
 	~Benchmarks() { }
@@ -165,6 +175,25 @@ public:
 
 	void MeasureOutgoingVoidToNestedStruct(IStructInvokable_Ptr invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToNestedStruct(); }
+
+
+	///// IObjectBenchmarks /////
+
+
+	void ObjectToVoid(const IObject_Ptr&) { }
+	IObject_Ptr VoidToObject() { return _obj; }
+
+	void MeasureNativeObjectToVoid(int64_t n)
+	{ auto o = MakeNativeObject(); for (int64_t i = 0; i < n; ++i) NativeObjectToVoid(o); }
+
+	void MeasureNativeVoidToObject(int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) NativeVoidToObject(); }
+
+	void MeasureOutgoingObjectToVoid(IObjectInvokable_Ptr invokable, int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) invokable->ObjectToVoid(_obj); }
+
+	void MeasureOutgoingVoidToObject(IObjectInvokable_Ptr invokable, int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToObject(); }
 
 
 	///// ICastBenchmarks /////

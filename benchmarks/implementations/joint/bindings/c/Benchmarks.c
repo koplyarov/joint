@@ -16,14 +16,29 @@ JOINT_COMPONENT(CastComponent, benchmarks_ICastInterface1, benchmarks_ICastInter
 
 ////////////////////////////////////////////////////////////////////////////////
 
+typedef struct { int dummy; } Object;
+
+JointCore_Error Object_Deinit(Object* self)
+{ return JOINT_CORE_ERROR_NONE; }
+
+JOINT_COMPONENT(Object, joint_IObject);
+
+////////////////////////////////////////////////////////////////////////////////
+
 typedef struct {
 	Joint_ModuleContext moduleContext;
+	joint_IObject obj;
 } Benchmarks;
 
 JointCore_Error Benchmarks_Init(Benchmarks* self, Joint_ModuleContext moduleContext)
 {
 	InitOtherTranslationUnit();
+
 	self->moduleContext = moduleContext;
+
+	Object* impl;
+	JOINT_CREATE_COMPONENT(joint_IObject, Object, self->moduleContext, &self->obj, &impl);
+
 	return JOINT_CORE_ERROR_NONE;
 }
 
@@ -222,6 +237,43 @@ JointCore_Error Benchmarks_MeasureOutgoingVoidToEnum(Benchmarks* self, benchmark
 }
 
 
+///// IObjectBenchmarks /////
+
+
+JointCore_Error Benchmarks_ObjectToVoid(Benchmarks* self, joint_IObject p, JointCore_ExceptionHandle* ex)
+{ return JOINT_CORE_ERROR_NONE; }
+
+JointCore_Error Benchmarks_VoidToObject(Benchmarks* self, joint_IObject* result, JointCore_ExceptionHandle* ex)
+{ JOINT_INCREF(self->obj); *result = self->obj; return JOINT_CORE_ERROR_NONE; }
+
+JointCore_Error Benchmarks_MeasureNativeObjectToVoid(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+{ return JOINT_THROW("Not implemented", ex); }
+
+JointCore_Error Benchmarks_MeasureNativeVoidToObject(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+{ return JOINT_THROW("Not implemented", ex); }
+
+JointCore_Error Benchmarks_MeasureOutgoingObjectToVoid(Benchmarks* self, benchmarks_IObjectInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	for (i = 0; i < n; ++i)
+		benchmarks_IObjectInvokable_ObjectToVoid(invokable, self->obj, ex);
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Benchmarks_MeasureOutgoingVoidToObject(Benchmarks* self, benchmarks_IObjectInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	for (i = 0; i < n; ++i)
+	{
+		joint_IObject obj;
+		JOINT_INIT_REF(obj);
+		benchmarks_IObjectInvokable_VoidToObject(invokable, &obj, ex);
+		JOINT_DECREF(obj);
+	}
+	return JOINT_CORE_ERROR_NONE;
+}
+
+
 ///// IStructBenchmarks /////
 
 
@@ -409,6 +461,7 @@ JOINT_COMPONENT(
 	benchmarks_IBasicBenchmarks,
 	benchmarks_IEnumBenchmarks,
 	benchmarks_IStructBenchmarks,
+	benchmarks_IObjectBenchmarks,
 	benchmarks_ICastBenchmarks,
 	benchmarks_IExceptionBenchmarks
 );

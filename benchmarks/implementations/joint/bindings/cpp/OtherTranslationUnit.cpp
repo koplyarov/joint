@@ -27,6 +27,16 @@ NativeEnum NativeVoidToEnum() { return NativeEnum::A; }
 ////////////////////////////////////////////////////////////////////////////////
 
 
+static INativeObjectPtr g_obj = std::make_shared<INativeObject>();
+
+INativeObjectPtr MakeNativeObject() { return std::make_shared<INativeObject>(); }
+void NativeObjectToVoid(const INativeObjectPtr&) { }
+INativeObjectPtr NativeVoidToObject() { return g_obj; }
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
 static NativeFlatStruct g_nativeFlatStruct{1, 2, 3, 4};
 static NativeNestedStruct g_nativeNestedStruct{1, NativeNestedStruct2{2, NativeNestedStruct3{3, NativeNestedStruct4{4}}}};
 

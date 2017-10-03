@@ -18,14 +18,29 @@ namespace joint
 		using NestedStruct3 = benchmarks::NestedStruct3;
 		using NestedStruct4 = benchmarks::NestedStruct4;
 
+		class Object
+		{
+		public:
+			using JointInterfaces = ::joint::TypeList<::joint::IObject>;
+		};
+
 		class Invokable
 		{
 		public:
 			using JointInterfaces = ::joint::TypeList<
 				benchmarks::IBasicInvokable,
 				benchmarks::IEnumInvokable,
-				benchmarks::IStructInvokable
+				benchmarks::IStructInvokable,
+				benchmarks::IObjectInvokable
 			>;
+
+		private:
+			::joint::IObject_Ptr   _obj;
+
+		public:
+			Invokable(::joint::Context* ctx)
+				: _obj(ctx->MakeComponent<::joint::IObject, Object>())
+			{ }
 
 			void VoidToVoid() { }
 
@@ -38,6 +53,9 @@ namespace joint
 
 			void EnumToVoid(Enum) { }
 			Enum VoidToEnum() { return Enum(); }
+
+			void ObjectToVoid(const ::joint::IObject_Ptr&) { }
+			::joint::IObject_Ptr VoidToObject() { return _obj; }
 
 			void NoStructToVoid(int32_t a, int32_t b, int32_t c, int32_t d) { }
 			void FlatStructToVoid(FlatStruct p) { }
@@ -68,6 +86,7 @@ namespace joint
 		using CastBenchmarksPtr = benchmarks::ICastBenchmarks_Ptr;
 		using ExceptionBenchmarksPtr = benchmarks::IExceptionBenchmarks_Ptr;
 		using EnumBenchmarksPtr = benchmarks::IEnumBenchmarks_Ptr;
+		using ObjectBenchmarksPtr = benchmarks::IObjectBenchmarks_Ptr;
 		using StructBenchmarksPtr = benchmarks::IStructBenchmarks_Ptr;
 
 		using ICastInterface1 = benchmarks::ICastInterface1_Ptr;
@@ -99,23 +118,32 @@ namespace joint
 			benchmarks::IEnumBenchmarks_Ptr CreateEnumBenchmarks() const
 			{ return _module.GetRootObject<benchmarks::IEnumBenchmarks>("GetBenchmarks"); }
 
+			benchmarks::IObjectBenchmarks_Ptr CreateObjectBenchmarks() const
+			{ return _module.GetRootObject<benchmarks::IObjectBenchmarks>("GetBenchmarks"); }
+
 			benchmarks::IStructBenchmarks_Ptr CreateStructBenchmarks() const
 			{ return _module.GetRootObject<benchmarks::IStructBenchmarks>("GetBenchmarks"); }
 
 			benchmarks::IBasicInvokable_Ptr CreateLocalInvokable()
-			{ return _ctx.MakeComponent<benchmarks::IBasicInvokable, Invokable>(); }
+			{ return _ctx.MakeComponent<benchmarks::IBasicInvokable, Invokable>(&_ctx); }
 
 			benchmarks::ICastInterface1_Ptr CreateLocalCastComponent()
 			{ return _ctx.MakeComponent<benchmarks::ICastInterface1, CastComponent>(); }
 
 			benchmarks::IEnumInvokable_Ptr CreateLocalEnumInvokable()
-			{ return _ctx.MakeComponent<benchmarks::IEnumInvokable, Invokable>(); }
+			{ return _ctx.MakeComponent<benchmarks::IEnumInvokable, Invokable>(&_ctx); }
+
+			benchmarks::IObjectInvokable_Ptr CreateLocalObjectInvokable()
+			{ return _ctx.MakeComponent<benchmarks::IObjectInvokable, Invokable>(&_ctx); }
 
 			benchmarks::IStructInvokable_Ptr CreateLocalStructInvokable()
-			{ return _ctx.MakeComponent<benchmarks::IStructInvokable, Invokable>(); }
+			{ return _ctx.MakeComponent<benchmarks::IStructInvokable, Invokable>(&_ctx); }
 
 			benchmarks::IThrower_Ptr CreateLocalThrower()
 			{ return _ctx.MakeComponent<benchmarks::IThrower, Thrower>(); }
+
+			::joint::IObject_Ptr CreateObject()
+			{ return _ctx.MakeComponent<::joint::IObject, Object>(); }
 
 			template < typename Dst_, typename Src_ >
 			Dst_ Cast(const Src_& src) const

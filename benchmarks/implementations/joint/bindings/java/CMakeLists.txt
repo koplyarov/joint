@@ -8,6 +8,7 @@ joint_generate_adapters(java ${CMAKE_CURRENT_BINARY_DIR}/Adapters.java
 	${BENCHMARKS_IDL_DIR}/ICastBenchmarks.idl
 	${BENCHMARKS_IDL_DIR}/IEnumBenchmarks.idl
 	${BENCHMARKS_IDL_DIR}/IExceptionBenchmarks.idl
+	${BENCHMARKS_IDL_DIR}/IObjectBenchmarks.idl
 	${BENCHMARKS_IDL_DIR}/IStructBenchmarks.idl
 )
 

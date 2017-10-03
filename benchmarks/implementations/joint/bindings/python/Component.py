@@ -6,6 +6,10 @@ class CastComponent(benchmarks_ICastInterface1, benchmarks_ICastInterface2):
     pass
 
 
+class Object(joint_IObject):
+    pass
+
+
 class FlatStruct(object):
     __slots__ = ['a', 'b', 'c', 'd']
 
@@ -51,12 +55,14 @@ class Benchmarks(
         benchmarks_IBasicBenchmarks,
         benchmarks_IEnumBenchmarks,
         benchmarks_IStructBenchmarks,
+        benchmarks_IObjectBenchmarks,
         benchmarks_ICastBenchmarks,
         benchmarks_IExceptionBenchmarks
     ):
     def __init__(self, jointModule):
         super(Benchmarks, self).__init__()
         self.jointModule = jointModule
+        self.obj = self.jointModule.CreateComponent(joint_IObject, Object)
 
     ### IBasicBenchmarks ###
 
@@ -116,6 +122,23 @@ class Benchmarks(
         for i in range(n): invokable.EnumToVoid(a)
     def MeasureOutgoingVoidToEnum(self, invokable, n):
         for i in range(n): invokable.VoidToEnum()
+
+    ### IObjectBenchmarks ###
+
+    def ObjectToVoid(self, p): pass
+    def VoidToObject(self): return self.obj
+
+    def MeasureNativeObjectToVoid(self, n):
+        o = Object()
+        for i in range(n): self.ObjectToVoid(o)
+    def MeasureNativeVoidToObject(self, n):
+        for i in range(n): self.VoidToObject()
+
+    def MeasureOutgoingObjectToVoid(self, invokable, n):
+        o = self.jointModule.CreateComponent(joint_IObject, Object)
+        for i in range(n): invokable.ObjectToVoid(o)
+    def MeasureOutgoingVoidToObject(self, invokable, n):
+        for i in range(n): invokable.VoidToObject()
 
     ### IStructBenchmarks ###
 
