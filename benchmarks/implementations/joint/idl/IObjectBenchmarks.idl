@@ -5,15 +5,27 @@ package benchmarks
 	{
 		void ObjectToVoid(joint.IObject p);
 		joint.IObject VoidToObject();
+		joint.IObject VoidToNull();
 	}
 
 	interface IObjectBenchmarks : IObjectInvokable
 	{
+		joint.IObject CreateObject();
+		void MeasureNativeCreateObject(i64 n);
+		
+
 		void MeasureNativeObjectToVoid(i64 n);
 		void MeasureNativeVoidToObject(i64 n);
 
+		void MeasureNativeNullToVoid(i64 n);
+		void MeasureNativeVoidToNull(i64 n);
+
+
 		void MeasureOutgoingObjectToVoid(IObjectInvokable callback, i64 n);
 		void MeasureOutgoingVoidToObject(IObjectInvokable callback, i64 n);
+
+		void MeasureOutgoingNullToVoid(IObjectInvokable callback, i64 n);
+		void MeasureOutgoingVoidToNull(IObjectInvokable callback, i64 n);
 	}
 
 }

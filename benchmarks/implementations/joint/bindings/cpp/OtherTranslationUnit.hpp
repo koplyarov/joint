@@ -38,9 +38,10 @@ struct INativeObject
 };
 using INativeObjectPtr = std::shared_ptr<INativeObject>;
 
-INativeObjectPtr MakeNativeObject();
+INativeObjectPtr NativeCreateObject();
 void NativeObjectToVoid(const INativeObjectPtr&);
 INativeObjectPtr NativeVoidToObject();
+INativeObjectPtr NativeVoidToNull();
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -154,6 +154,9 @@ class Benchmarks
 
 		public void ObjectToVoid(joint_IObject p) { }
 		public joint_IObject VoidToObject() { return obj; }
+		public joint_IObject VoidToNull() { return null; }
+		public joint_IObject CreateObject() { return joint_IObject.makeComponent(module, new Object()); }
+
 
 		public void MeasureNativeObjectToVoid(long n)
 		{ throw new RuntimeException("Not implemented"); }
@@ -166,6 +169,23 @@ class Benchmarks
 
 		public void MeasureOutgoingVoidToObject(benchmarks_IObjectInvokable invokable, long n)
 		{ for (long i = 0; i < n; ++i) invokable.VoidToObject(); }
+
+
+		public void MeasureNativeNullToVoid(long n)
+		{ throw new RuntimeException("Not implemented"); }
+
+		public void MeasureNativeVoidToNull(long n)
+		{ throw new RuntimeException("Not implemented"); }
+
+		public void MeasureOutgoingNullToVoid(benchmarks_IObjectInvokable invokable, long n)
+		{ for (long i = 0; i < n; ++i) invokable.ObjectToVoid(null); }
+
+		public void MeasureOutgoingVoidToNull(benchmarks_IObjectInvokable invokable, long n)
+		{ for (long i = 0; i < n; ++i) invokable.VoidToNull(); }
+
+
+		public void MeasureNativeCreateObject(long n)
+		{ throw new RuntimeException("Not implemented"); }
 
 
 		///// IStructBenchmarks /////

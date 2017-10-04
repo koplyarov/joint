@@ -56,6 +56,7 @@ namespace joint
 
 			void ObjectToVoid(const ::joint::IObject_Ptr&) { }
 			::joint::IObject_Ptr VoidToObject() { return _obj; }
+			::joint::IObject_Ptr VoidToNull() { return nullptr; }
 
 			void NoStructToVoid(int32_t a, int32_t b, int32_t c, int32_t d) { }
 			void FlatStructToVoid(FlatStruct p) { }

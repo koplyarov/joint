@@ -29,9 +29,10 @@ NativeEnum NativeVoidToEnum() { return NativeEnum::A; }
 
 static INativeObjectPtr g_obj = std::make_shared<INativeObject>();
 
-INativeObjectPtr MakeNativeObject() { return std::make_shared<INativeObject>(); }
+INativeObjectPtr NativeCreateObject() { return std::make_shared<INativeObject>(); }
 void NativeObjectToVoid(const INativeObjectPtr&) { }
 INativeObjectPtr NativeVoidToObject() { return g_obj; }
+INativeObjectPtr NativeVoidToNull() { return nullptr; }
 
 
 ////////////////////////////////////////////////////////////////////////////////

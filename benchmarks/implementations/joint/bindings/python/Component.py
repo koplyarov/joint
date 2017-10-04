@@ -127,6 +127,9 @@ class Benchmarks(
 
     def ObjectToVoid(self, p): pass
     def VoidToObject(self): return self.obj
+    def VoidToNull(self): return None
+    def CreateObject(self): return self.jointModule.CreateComponent(joint_IObject, Object)
+
 
     def MeasureNativeObjectToVoid(self, n):
         o = Object()
@@ -139,6 +142,21 @@ class Benchmarks(
         for i in range(n): invokable.ObjectToVoid(o)
     def MeasureOutgoingVoidToObject(self, invokable, n):
         for i in range(n): invokable.VoidToObject()
+
+
+    def MeasureNativeNullToVoid(self, n):
+        for i in range(n): self.ObjectToVoid(None)
+    def MeasureNativeVoidToNull(self, n):
+        for i in range(n): self.VoidToNull()
+
+    def MeasureOutgoingNullToVoid(self, invokable, n):
+        for i in range(n): invokable.ObjectToVoid(None)
+    def MeasureOutgoingVoidToNull(self, invokable, n):
+        for i in range(n): invokable.VoidToNull()
+
+
+    def MeasureNativeCreateObject(self, n):
+        for i in range(n): Object()
 
     ### IStructBenchmarks ###
 

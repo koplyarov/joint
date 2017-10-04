@@ -182,9 +182,12 @@ public:
 
 	void ObjectToVoid(const IObject_Ptr&) { }
 	IObject_Ptr VoidToObject() { return _obj; }
+	IObject_Ptr VoidToNull() { return nullptr; }
+	IObject_Ptr CreateObject() { return _moduleContext.MakeComponent<IObject, Object>(); }
+
 
 	void MeasureNativeObjectToVoid(int64_t n)
-	{ auto o = MakeNativeObject(); for (int64_t i = 0; i < n; ++i) NativeObjectToVoid(o); }
+	{ auto o = NativeCreateObject(); for (int64_t i = 0; i < n; ++i) NativeObjectToVoid(o); }
 
 	void MeasureNativeVoidToObject(int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) NativeVoidToObject(); }
@@ -194,6 +197,23 @@ public:
 
 	void MeasureOutgoingVoidToObject(IObjectInvokable_Ptr invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToObject(); }
+
+
+	void MeasureNativeNullToVoid(int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) NativeObjectToVoid(nullptr); }
+
+	void MeasureNativeVoidToNull(int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) NativeVoidToNull(); }
+
+	void MeasureOutgoingNullToVoid(IObjectInvokable_Ptr invokable, int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) invokable->ObjectToVoid(nullptr); }
+
+	void MeasureOutgoingVoidToNull(IObjectInvokable_Ptr invokable, int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToNull(); }
+
+
+	void MeasureNativeCreateObject(int64_t n)
+	{ for (int64_t i = 0; i < n; ++i) NativeCreateObject(); }
 
 
 	///// ICastBenchmarks /////

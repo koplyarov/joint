@@ -246,6 +246,17 @@ JointCore_Error Benchmarks_ObjectToVoid(Benchmarks* self, joint_IObject p, Joint
 JointCore_Error Benchmarks_VoidToObject(Benchmarks* self, joint_IObject* result, JointCore_ExceptionHandle* ex)
 { JOINT_INCREF(self->obj); *result = self->obj; return JOINT_CORE_ERROR_NONE; }
 
+JointCore_Error Benchmarks_VoidToNull(Benchmarks* self, joint_IObject* result, JointCore_ExceptionHandle* ex)
+{ JOINT_INIT_REF(*result); return JOINT_CORE_ERROR_NONE; }
+
+JointCore_Error Benchmarks_CreateObject(Benchmarks* self, joint_IObject* result, JointCore_ExceptionHandle* ex)
+{
+	Object* impl;
+	JOINT_CREATE_COMPONENT(joint_IObject, Object, self->moduleContext, result, &impl);
+	return JOINT_CORE_ERROR_NONE;
+}
+
+
 JointCore_Error Benchmarks_MeasureNativeObjectToVoid(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
 { return JOINT_THROW("Not implemented", ex); }
 
@@ -273,6 +284,39 @@ JointCore_Error Benchmarks_MeasureOutgoingVoidToObject(Benchmarks* self, benchma
 	return JOINT_CORE_ERROR_NONE;
 }
 
+
+JointCore_Error Benchmarks_MeasureNativeNullToVoid(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+{ return JOINT_THROW("Not implemented", ex); }
+
+JointCore_Error Benchmarks_MeasureNativeVoidToNull(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+{ return JOINT_THROW("Not implemented", ex); }
+
+JointCore_Error Benchmarks_MeasureOutgoingNullToVoid(Benchmarks* self, benchmarks_IObjectInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	joint_IObject nullobj;
+	JOINT_INIT_REF(nullobj);
+	int64_t i;
+	for (i = 0; i < n; ++i)
+		benchmarks_IObjectInvokable_ObjectToVoid(invokable, nullobj, ex);
+	return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Benchmarks_MeasureOutgoingVoidToNull(Benchmarks* self, benchmarks_IObjectInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+{
+	int64_t i;
+	for (i = 0; i < n; ++i)
+	{
+		joint_IObject obj;
+		JOINT_INIT_REF(obj);
+		benchmarks_IObjectInvokable_VoidToNull(invokable, &obj, ex);
+		JOINT_DECREF(obj);
+	}
+	return JOINT_CORE_ERROR_NONE;
+}
+
+
+JointCore_Error Benchmarks_MeasureNativeCreateObject(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+{ return JOINT_THROW("Not implemented", ex); }
 
 ///// IStructBenchmarks /////
 
