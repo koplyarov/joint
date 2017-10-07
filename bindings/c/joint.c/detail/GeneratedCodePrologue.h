@@ -67,10 +67,10 @@ JointCore_Error JointC_ReleaseRetValue(JointCore_Type type, JointCore_Value valu
 					Joint_Log(JOINT_CORE_LOGLEVEL_WARNING, "Joint.C", "Invalid %s return value: %d", MethodName_, (int)(RetCode_)); \
 					snprintf(func_buf, 256, "C proxy of %s", MethodName_); \
 					func_buf[255] = '\0'; \
-					JointCore_StackFrame bt[] = { { JointAux_GetModuleName((void*)&JointC_ReleaseRetValue), "", 0, "", func_buf } }; \
-					JointCore_Error ret = Joint_MakeException("Unknown exception", bt, 1, &outRetValue->result.ex); \
+					JointCore_Exception_BacktraceEntry bt[] = { { "", "", 0, "", func_buf } }; \
+					JointCore_Error ret = JointCore_Exception_Create("Unknown exception", bt, 1, &outRetValue->result.ex); \
 					if (ret != JOINT_CORE_ERROR_NONE) \
-						Joint_Log(JOINT_CORE_LOGLEVEL_ERROR, "Joint.C", "Joint_MakeException failed: %s", JointCore_ErrorToString(ret)); \
+						Joint_Log(JOINT_CORE_LOGLEVEL_ERROR, "Joint.C", "JointCore_Exception_Create failed: %s", JointCore_ErrorToString(ret)); \
 				} \
 			}
 

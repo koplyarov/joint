@@ -52,26 +52,26 @@ JointCore_Error Benchmarks_Deinit(Benchmarks* self)
 ///// IBasicBenchmarks /////
 
 
-JointCore_Error Benchmarks_VoidToVoid(Benchmarks* self, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_VoidToVoid(Benchmarks* self, JointCore_Exception_Handle* ex)
 { return JOINT_CORE_ERROR_NONE; }
 
-JointCore_Error Benchmarks_I32ToVoid(Benchmarks* self, int32_t p, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_I32ToVoid(Benchmarks* self, int32_t p, JointCore_Exception_Handle* ex)
 { return JOINT_CORE_ERROR_NONE; }
 
-JointCore_Error Benchmarks_VoidToI32(Benchmarks* self, int32_t* result, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_VoidToI32(Benchmarks* self, int32_t* result, JointCore_Exception_Handle* ex)
 { *result = 0; return JOINT_CORE_ERROR_NONE; }
 
-JointCore_Error Benchmarks_StringToVoid(Benchmarks* self, const char* s, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_StringToVoid(Benchmarks* self, const char* s, JointCore_Exception_Handle* ex)
 { return JOINT_CORE_ERROR_NONE; }
 
-JointCore_Error Benchmarks_VoidToString3(Benchmarks* self, const char** result, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_VoidToString3(Benchmarks* self, const char** result, JointCore_Exception_Handle* ex)
 { char* r = malloc(3 + 1); strcpy(r, "abc"); *result = r; return JOINT_CORE_ERROR_NONE; }
 
-JointCore_Error Benchmarks_VoidToString100(Benchmarks* self, const char** result, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_VoidToString100(Benchmarks* self, const char** result, JointCore_Exception_Handle* ex)
 { char* r = malloc(100 + 1); strcpy(r, "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"); *result = r; return JOINT_CORE_ERROR_NONE; }
 
 
-JointCore_Error Benchmarks_MeasureNativeVoidToVoid(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeVoidToVoid(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -79,7 +79,7 @@ JointCore_Error Benchmarks_MeasureNativeVoidToVoid(Benchmarks* self, int64_t n, 
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureNativeI32ToVoid(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeI32ToVoid(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -87,7 +87,7 @@ JointCore_Error Benchmarks_MeasureNativeI32ToVoid(Benchmarks* self, int64_t n, J
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureNativeVoidToI32(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeVoidToI32(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -95,7 +95,7 @@ JointCore_Error Benchmarks_MeasureNativeVoidToI32(Benchmarks* self, int64_t n, J
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureNativeString3ToVoid(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeString3ToVoid(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -103,7 +103,7 @@ JointCore_Error Benchmarks_MeasureNativeString3ToVoid(Benchmarks* self, int64_t 
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureNativeVoidToString3(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeVoidToString3(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -111,7 +111,7 @@ JointCore_Error Benchmarks_MeasureNativeVoidToString3(Benchmarks* self, int64_t 
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureNativeString100ToVoid(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeString100ToVoid(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -119,7 +119,7 @@ JointCore_Error Benchmarks_MeasureNativeString100ToVoid(Benchmarks* self, int64_
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureNativeVoidToString100(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeVoidToString100(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -128,7 +128,7 @@ JointCore_Error Benchmarks_MeasureNativeVoidToString100(Benchmarks* self, int64_
 }
 
 
-JointCore_Error Benchmarks_MeasureOutgoingVoidToVoid(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingVoidToVoid(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -136,7 +136,7 @@ JointCore_Error Benchmarks_MeasureOutgoingVoidToVoid(Benchmarks* self, benchmark
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingI32ToVoid(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingI32ToVoid(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -144,7 +144,7 @@ JointCore_Error Benchmarks_MeasureOutgoingI32ToVoid(Benchmarks* self, benchmarks
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingVoidToI32(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingVoidToI32(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	int32_t v;
@@ -153,7 +153,7 @@ JointCore_Error Benchmarks_MeasureOutgoingVoidToI32(Benchmarks* self, benchmarks
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingString3ToVoid(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingString3ToVoid(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -161,7 +161,7 @@ JointCore_Error Benchmarks_MeasureOutgoingString3ToVoid(Benchmarks* self, benchm
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingVoidToString3(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingVoidToString3(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	const char* v;
@@ -173,7 +173,7 @@ JointCore_Error Benchmarks_MeasureOutgoingVoidToString3(Benchmarks* self, benchm
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingString100ToVoid(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingString100ToVoid(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -181,7 +181,7 @@ JointCore_Error Benchmarks_MeasureOutgoingString100ToVoid(Benchmarks* self, benc
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingVoidToString100(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingVoidToString100(Benchmarks* self, benchmarks_IBasicInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	const char* v;
@@ -197,13 +197,13 @@ JointCore_Error Benchmarks_MeasureOutgoingVoidToString100(Benchmarks* self, benc
 ///// IEnumBenchmarks /////
 
 
-JointCore_Error Benchmarks_EnumToVoid(Benchmarks* self, benchmarks_Enum p, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_EnumToVoid(Benchmarks* self, benchmarks_Enum p, JointCore_Exception_Handle* ex)
 { return JOINT_CORE_ERROR_NONE; }
 
-JointCore_Error Benchmarks_VoidToEnum(Benchmarks* self, benchmarks_Enum* result, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_VoidToEnum(Benchmarks* self, benchmarks_Enum* result, JointCore_Exception_Handle* ex)
 { *result = benchmarks_Enum_A; return JOINT_CORE_ERROR_NONE; }
 
-JointCore_Error Benchmarks_MeasureNativeEnumToVoid(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeEnumToVoid(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -211,7 +211,7 @@ JointCore_Error Benchmarks_MeasureNativeEnumToVoid(Benchmarks* self, int64_t n, 
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureNativeVoidToEnum(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeVoidToEnum(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -219,7 +219,7 @@ JointCore_Error Benchmarks_MeasureNativeVoidToEnum(Benchmarks* self, int64_t n, 
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingEnumToVoid(Benchmarks* self, benchmarks_IEnumInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingEnumToVoid(Benchmarks* self, benchmarks_IEnumInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -227,7 +227,7 @@ JointCore_Error Benchmarks_MeasureOutgoingEnumToVoid(Benchmarks* self, benchmark
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingVoidToEnum(Benchmarks* self, benchmarks_IEnumInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingVoidToEnum(Benchmarks* self, benchmarks_IEnumInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	benchmarks_Enum v;
@@ -240,16 +240,16 @@ JointCore_Error Benchmarks_MeasureOutgoingVoidToEnum(Benchmarks* self, benchmark
 ///// IObjectBenchmarks /////
 
 
-JointCore_Error Benchmarks_ObjectToVoid(Benchmarks* self, joint_IObject p, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_ObjectToVoid(Benchmarks* self, joint_IObject p, JointCore_Exception_Handle* ex)
 { return JOINT_CORE_ERROR_NONE; }
 
-JointCore_Error Benchmarks_VoidToObject(Benchmarks* self, joint_IObject* result, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_VoidToObject(Benchmarks* self, joint_IObject* result, JointCore_Exception_Handle* ex)
 { JOINT_INCREF(self->obj); *result = self->obj; return JOINT_CORE_ERROR_NONE; }
 
-JointCore_Error Benchmarks_VoidToNull(Benchmarks* self, joint_IObject* result, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_VoidToNull(Benchmarks* self, joint_IObject* result, JointCore_Exception_Handle* ex)
 { JOINT_INIT_REF(*result); return JOINT_CORE_ERROR_NONE; }
 
-JointCore_Error Benchmarks_CreateObject(Benchmarks* self, joint_IObject* result, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_CreateObject(Benchmarks* self, joint_IObject* result, JointCore_Exception_Handle* ex)
 {
 	Object* impl;
 	JOINT_CREATE_COMPONENT(joint_IObject, Object, self->moduleContext, result, &impl);
@@ -257,13 +257,13 @@ JointCore_Error Benchmarks_CreateObject(Benchmarks* self, joint_IObject* result,
 }
 
 
-JointCore_Error Benchmarks_MeasureNativeObjectToVoid(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeObjectToVoid(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 { return JOINT_THROW("Not implemented", ex); }
 
-JointCore_Error Benchmarks_MeasureNativeVoidToObject(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeVoidToObject(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 { return JOINT_THROW("Not implemented", ex); }
 
-JointCore_Error Benchmarks_MeasureOutgoingObjectToVoid(Benchmarks* self, benchmarks_IObjectInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingObjectToVoid(Benchmarks* self, benchmarks_IObjectInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -271,7 +271,7 @@ JointCore_Error Benchmarks_MeasureOutgoingObjectToVoid(Benchmarks* self, benchma
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingVoidToObject(Benchmarks* self, benchmarks_IObjectInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingVoidToObject(Benchmarks* self, benchmarks_IObjectInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -285,13 +285,13 @@ JointCore_Error Benchmarks_MeasureOutgoingVoidToObject(Benchmarks* self, benchma
 }
 
 
-JointCore_Error Benchmarks_MeasureNativeNullToVoid(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeNullToVoid(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 { return JOINT_THROW("Not implemented", ex); }
 
-JointCore_Error Benchmarks_MeasureNativeVoidToNull(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeVoidToNull(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 { return JOINT_THROW("Not implemented", ex); }
 
-JointCore_Error Benchmarks_MeasureOutgoingNullToVoid(Benchmarks* self, benchmarks_IObjectInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingNullToVoid(Benchmarks* self, benchmarks_IObjectInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	joint_IObject nullobj;
 	JOINT_INIT_REF(nullobj);
@@ -301,7 +301,7 @@ JointCore_Error Benchmarks_MeasureOutgoingNullToVoid(Benchmarks* self, benchmark
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingVoidToNull(Benchmarks* self, benchmarks_IObjectInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingVoidToNull(Benchmarks* self, benchmarks_IObjectInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -315,19 +315,19 @@ JointCore_Error Benchmarks_MeasureOutgoingVoidToNull(Benchmarks* self, benchmark
 }
 
 
-JointCore_Error Benchmarks_MeasureNativeCreateObject(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeCreateObject(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 { return JOINT_THROW("Not implemented", ex); }
 
 ///// IStructBenchmarks /////
 
 
-JointCore_Error Benchmarks_NoStructToVoid(Benchmarks* self, int32_t a, int32_t b, int32_t c, int32_t d, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_NoStructToVoid(Benchmarks* self, int32_t a, int32_t b, int32_t c, int32_t d, JointCore_Exception_Handle* ex)
 { return JOINT_CORE_ERROR_NONE; }
 
-JointCore_Error Benchmarks_FlatStructToVoid(Benchmarks* self, benchmarks_FlatStruct p, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_FlatStructToVoid(Benchmarks* self, benchmarks_FlatStruct p, JointCore_Exception_Handle* ex)
 { return JOINT_CORE_ERROR_NONE; }
 
-JointCore_Error Benchmarks_VoidToFlatStruct(Benchmarks* self, benchmarks_FlatStruct* result, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_VoidToFlatStruct(Benchmarks* self, benchmarks_FlatStruct* result, JointCore_Exception_Handle* ex)
 {
 	result->a = 1;
 	result->b = 2;
@@ -336,10 +336,10 @@ JointCore_Error Benchmarks_VoidToFlatStruct(Benchmarks* self, benchmarks_FlatStr
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_NestedStructToVoid(Benchmarks* self, benchmarks_NestedStruct p, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_NestedStructToVoid(Benchmarks* self, benchmarks_NestedStruct p, JointCore_Exception_Handle* ex)
 { return JOINT_CORE_ERROR_NONE; }
 
-JointCore_Error Benchmarks_VoidToNestedStruct(Benchmarks* self, benchmarks_NestedStruct* result, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_VoidToNestedStruct(Benchmarks* self, benchmarks_NestedStruct* result, JointCore_Exception_Handle* ex)
 {
 	result->a = 1;
 	result->next.b = 2;
@@ -349,14 +349,14 @@ JointCore_Error Benchmarks_VoidToNestedStruct(Benchmarks* self, benchmarks_Neste
 }
 
 
-JointCore_Error Benchmarks_MeasureNativeNoStructToVoid(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeNoStructToVoid(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i) NativeNoStructToVoid(1, 2, 3, 4);
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureNativeFlatStructToVoid(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeFlatStructToVoid(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	NativeFlatStruct s = {1, 2, 3, 4};
@@ -365,7 +365,7 @@ JointCore_Error Benchmarks_MeasureNativeFlatStructToVoid(Benchmarks* self, int64
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureNativeVoidToFlatStruct(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeVoidToFlatStruct(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -373,7 +373,7 @@ JointCore_Error Benchmarks_MeasureNativeVoidToFlatStruct(Benchmarks* self, int64
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureNativeNestedStructToVoid(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeNestedStructToVoid(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	NativeNestedStruct s;
@@ -386,7 +386,7 @@ JointCore_Error Benchmarks_MeasureNativeNestedStructToVoid(Benchmarks* self, int
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureNativeVoidToNestedStruct(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeVoidToNestedStruct(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -395,7 +395,7 @@ JointCore_Error Benchmarks_MeasureNativeVoidToNestedStruct(Benchmarks* self, int
 }
 
 
-JointCore_Error Benchmarks_MeasureOutgoingNoStructToVoid(Benchmarks* self, benchmarks_IStructInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingNoStructToVoid(Benchmarks* self, benchmarks_IStructInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
@@ -403,7 +403,7 @@ JointCore_Error Benchmarks_MeasureOutgoingNoStructToVoid(Benchmarks* self, bench
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingFlatStructToVoid(Benchmarks* self, benchmarks_IStructInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingFlatStructToVoid(Benchmarks* self, benchmarks_IStructInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	benchmarks_FlatStruct s;
@@ -416,7 +416,7 @@ JointCore_Error Benchmarks_MeasureOutgoingFlatStructToVoid(Benchmarks* self, ben
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingVoidToFlatStruct(Benchmarks* self, benchmarks_IStructInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingVoidToFlatStruct(Benchmarks* self, benchmarks_IStructInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	benchmarks_FlatStruct s;
@@ -425,7 +425,7 @@ JointCore_Error Benchmarks_MeasureOutgoingVoidToFlatStruct(Benchmarks* self, ben
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingNestedStructToVoid(Benchmarks* self, benchmarks_IStructInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingNestedStructToVoid(Benchmarks* self, benchmarks_IStructInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	benchmarks_NestedStruct s;
@@ -438,7 +438,7 @@ JointCore_Error Benchmarks_MeasureOutgoingNestedStructToVoid(Benchmarks* self, b
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureOutgoingVoidToNestedStruct(Benchmarks* self, benchmarks_IStructInvokable invokable, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureOutgoingVoidToNestedStruct(Benchmarks* self, benchmarks_IStructInvokable invokable, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	benchmarks_NestedStruct s;
@@ -451,17 +451,17 @@ JointCore_Error Benchmarks_MeasureOutgoingVoidToNestedStruct(Benchmarks* self, b
 ///// ICastBenchmarks /////
 
 
-JointCore_Error Benchmarks_GetCastComponent(Benchmarks* self, benchmarks_ICastInterface1* result, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_GetCastComponent(Benchmarks* self, benchmarks_ICastInterface1* result, JointCore_Exception_Handle* ex)
 {
 	CastComponent* impl;
 	JOINT_CREATE_COMPONENT(benchmarks_ICastInterface1, CastComponent, self->moduleContext, result, &impl);
 	return JOINT_CORE_ERROR_NONE;
 }
 
-JointCore_Error Benchmarks_MeasureNativeCast(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeCast(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 { return JOINT_THROW("Makes no sense", ex); }
 
-JointCore_Error Benchmarks_MeasureProxySideCast(Benchmarks* self, benchmarks_ICastInterface1 obj, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureProxySideCast(Benchmarks* self, benchmarks_ICastInterface1 obj, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	benchmarks_ICastInterface2 tmp;
@@ -480,21 +480,21 @@ JointCore_Error Benchmarks_MeasureProxySideCast(Benchmarks* self, benchmarks_ICa
 ///// IExceptionBenchmarks /////
 
 
-JointCore_Error Benchmarks_Throw(Benchmarks* self, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_Throw(Benchmarks* self, JointCore_Exception_Handle* ex)
 { return JOINT_THROW("Requested exception", ex); }
 
-JointCore_Error Benchmarks_MeasureNativeThrow(Benchmarks* self, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureNativeThrow(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 { return JOINT_THROW("Makes no sense", ex); }
 
-JointCore_Error Benchmarks_MeasureProxySideThrow(Benchmarks* self, benchmarks_IThrower thrower, int64_t n, JointCore_ExceptionHandle* ex)
+JointCore_Error Benchmarks_MeasureProxySideThrow(Benchmarks* self, benchmarks_IThrower thrower, int64_t n, JointCore_Exception_Handle* ex)
 {
 	int64_t i;
 	for (i = 0; i < n; ++i)
 	{
-		JointCore_ExceptionHandle ex_tmp;
+		JointCore_Exception_Handle ex_tmp;
 		benchmarks_IThrower_Throw(thrower, &ex_tmp);
 		if (ex_tmp)
-			Joint_ReleaseException(ex_tmp);
+			JointCore_Exception_DecRef(ex_tmp);
 	}
 	return JOINT_CORE_ERROR_NONE;
 }

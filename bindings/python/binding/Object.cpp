@@ -85,6 +85,8 @@ namespace binding
 
 			std::string msg = "<No message>";
 
+			JointCore_Exception_Handle joint_ex = JOINT_CORE_NULL_HANDLE;
+			auto sg(ScopeExit([&]{ JointCore_Exception_DecRef(joint_ex); }));
 			do
 			{
 				if (PyErr_GivenExceptionMatches(type, (PyObject*)&pyjoint::JointException_type))
@@ -93,8 +95,11 @@ namespace binding
 					if (PyObject_Type(value) == (PyObject*)&pyjoint::JointException_type)
 					{
 						ex = reinterpret_cast<pyjoint::JointException*>(value.Get());
-						if (ex->jointMessage)
-							msg = *ex->jointMessage;
+						if (ex->ex)
+						{
+							JointCore_Exception_IncRef(ex->ex);
+							joint_ex = ex->ex;
+						}
 						break;
 					}
 					else
@@ -102,30 +107,29 @@ namespace binding
 				}
 				else if (PyErr_GivenExceptionMatches(type, pyjoint::InvalidInterfaceChecksumException))
 					GetLogger().Error() << "Invalid interface checksum!";
+
 				std::string type_str;
 				GetPythonErrorMessage(value, msg);
 				if (PyObjectToStringNoExcept(type, type_str))
 					msg = type_str + " " + msg;
+
+				JointCore_Error ret = JointCore_Exception_Create(msg.c_str(), nullptr, 0, &joint_ex);
+				JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
 			} while (false);
 
 
 			std::vector<devkit::StackFrameData> bt;
 			GetPythonErrorBacktrace(traceback, bt);
 
-			std::vector<JointCore_StackFrame> c_bt;
-			c_bt.reserve(bt.size() + (ex && ex->backtrace ? ex->backtrace->size() : 0));
+			for (auto it = bt.rbegin(); it != bt.rend(); ++it)
+			{
+				JointCore_Exception_BacktraceEntry e{it->GetModule().c_str(), it->GetFilename().c_str(), it->GetLine(), it->GetCode().c_str(), it->GetFunction().c_str()};
+				JointCore_Error ret = JointCore_Exception_AppendBacktrace(joint_ex, e);
+				if (ret != JOINT_CORE_ERROR_NONE)
+					GetLogger().Warning() << "JointCore_Exception_AppendBacktrace failed: " << ret;
+			}
 
-			auto tr_f = [](const devkit::StackFrameData& sf) {
-					return JointCore_StackFrame{sf.GetModule().c_str(), sf.GetFilename().c_str(), sf.GetLine(), sf.GetCode().c_str(), sf.GetFunction().c_str()};
-				};
-
-			if (ex && ex->backtrace)
-				std::transform(ex->backtrace->begin(), ex->backtrace->end(), std::back_inserter(c_bt), tr_f);
-			std::transform(bt.rbegin(), bt.rend(), std::back_inserter(c_bt), tr_f);
-
-			JointCore_ExceptionHandle joint_ex;
-			JointCore_Error ret = Joint_MakeException(msg.c_str(), c_bt.data(), c_bt.size(), &joint_ex);
-			JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, std::string("Joint_MakeException failed: ") + JointCore_ErrorToString(ret));
+			sg.Cancel();
 			outRetValue->releaseValue = &Object::ReleaseRetValue;
 			outRetValue->result.ex = joint_ex;
 

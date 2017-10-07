@@ -16,10 +16,8 @@ namespace pyjoint
 	static PyObject* JointException_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
 	static int JointException_init(PyObject* self, PyObject* args, PyObject* kwds);
 	static void JointException_del(PyObject* self);
-	//static PyObject* JointException_GetRootObject(PyObject* self, PyObject* args, PyObject* kwds);
 
 	static PyMethodDef JointException_methods[] = {
-		//{"GetRootObject", (PyCFunction)JointException_GetRootObject, METH_VARARGS, "GetRootObject" },
 		{NULL}
 	};
 
@@ -70,8 +68,7 @@ namespace pyjoint
 		PYJOINT_CPP_WRAP_BEGIN
 
 		JointException* self = PY_OBJ_CHECK((JointException*)type->tp_base->tp_new(type, args, kwds));
-		self->jointMessage = nullptr;
-		self->backtrace = nullptr;
+		self->ex = JOINT_CORE_NULL_HANDLE;
 
 		PYJOINT_CPP_WRAP_END((PyObject*)self, NULL)
 	}
@@ -93,8 +90,7 @@ namespace pyjoint
 		PYJOINT_CPP_WRAP_BEGIN
 
 		auto ex = reinterpret_cast<JointException*>(self);
-		delete ex->jointMessage;
-		delete ex->backtrace;
+		JointCore_Exception_DecRef(ex->ex);
 
 #if PY_VERSION_HEX >= 0x03000000
 		Py_CLEAR(ex->dict);

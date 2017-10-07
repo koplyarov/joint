@@ -2,6 +2,7 @@
 
 #include <joint/devkit/system/CurrentLibraryPath.hpp>
 
+#include <binding/JointJavaCoreContext.hpp>
 #include <jni/JNIHelpers.hpp>
 #include <utils/Utils.hpp>
 
@@ -15,32 +16,7 @@ namespace java
 
 	JointJavaContext::JointJavaContext()
 	{
-		auto current_lib_path = joint::devkit::CurrentLibraryPath::Get();
-		auto last_slash_index = current_lib_path.find_last_of("/\\");
-		auto current_lib_dir = (last_slash_index == std::string::npos) ? std::string() : current_lib_path.substr(0, last_slash_index);
-
-		std::string lib_path_opt = "-Djava.library.path=" + current_lib_dir;
-		std::string class_path_opt = "-Djava.class.path=" + current_lib_dir +  "/joint.jar";
-
-		JavaVMOption opt[] = {
-			{ const_cast<char*>(class_path_opt.c_str()), nullptr },
-			{ const_cast<char*>(lib_path_opt.c_str()), nullptr }
-		};
-
-		JavaVMInitArgs vm_args = { };
-		vm_args.version = 0x00010006;
-		jint ret = JNI_GetDefaultJavaVMInitArgs(&vm_args);
-		JOINT_CHECK(ret == 0, StringBuilder() % "JNI_GetDefaultJavaVMInitArgs failed: " % JniErrorToString(ret));
-		vm_args.options = opt;
-		vm_args.nOptions = sizeof(opt) / sizeof(opt[0]);
-
-		JavaVM* jvm = nullptr;
-		JNIEnv* env = nullptr;
-		ret = JNI_CreateJavaVM(&jvm, reinterpret_cast<void**>(&env), &vm_args);
-		JOINT_CHECK(ret == 0, StringBuilder() % "JNI_CreateJavaVM failed: " % JniErrorToString(ret));
-		JOINT_CHECK(jvm, "JNI_CreateJavaVM failed!");
-
-		_jvm = Holder<JavaVM*>(jvm, [](JavaVM* jvm) { jvm->DestroyJavaVM(); });
+		auto env = GetJavaEnv(JointJavaCoreContext::GetJvm());
 
 #define DETAIL_JOINT_JAVA_INIT_SIMPLE_TYPE_STUFF(TypeName_, MangledType_) \
 			TypeName_##_cls = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/Boxing$" #TypeName_))); \
@@ -204,7 +180,7 @@ namespace java
 	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().InterfaceId_cls.Get(), ConstInstance().InterfaceId_String_ctor, id.Get()))); }
 
 
-	JObjLocalRef JointJavaContext::JointException::Make(JNIEnv* env, JointCore_ExceptionHandle handle)
+	JObjLocalRef JointJavaContext::JointException::Make(JNIEnv* env, JointCore_Exception_Handle handle)
 	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().JointException_cls.Get(), ConstInstance().JointException_long_ctor, (jlong)handle))); }
 
 

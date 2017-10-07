@@ -33,8 +33,6 @@ namespace java
 		};
 
 	public:
-		static JavaVM* GetJvm() { return Instance()._jvm.Get(); }
-
 		struct InterfaceDescriptor : public WrapperBase
 		{
 			using WrapperBase::WrapperBase;
@@ -107,7 +105,7 @@ namespace java
 
 		struct JointException : public WrapperBase
 		{
-			static JObjLocalRef Make(JNIEnv* env, JointCore_ExceptionHandle handle);
+			static JObjLocalRef Make(JNIEnv* env, JointCore_Exception_Handle handle);
 		};
 
 		struct Array : public WrapperBase
@@ -119,9 +117,6 @@ namespace java
 
 			static JObjLocalRef Make(JNIEnv* env, JObjTempRef elementType, JointCore_ArrayHandle handle);
 		};
-
-	private:
-		devkit::Holder<JavaVM*> _jvm;
 
 	public:
 #define DETAIL_JOINT_JAVA_SIMPLE_TYPE_STUFF(TypeName_) \

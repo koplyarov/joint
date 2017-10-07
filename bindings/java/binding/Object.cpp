@@ -37,7 +37,7 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		auto jvm = JointJavaContext::GetJvm();
+		auto jvm = JointJavaCoreContext::GetJvm();
 		auto env = GetJavaEnv(jvm);
 
 		auto iid = JointJavaContext::InterfaceId::Make(env, JStringLocalRef::StealLocal(env, JAVA_CALL(env->NewStringUTF(interfaceId))));
@@ -61,7 +61,7 @@ namespace binding
 
 		StackStorage<jvalue, 1024> params_storage;
 
-		auto jvm = JointJavaContext::GetJvm();
+		auto jvm = JointJavaCoreContext::GetJvm();
 		auto env = GetJavaEnv(jvm);
 
 		jvalue* jparams = nullptr;
@@ -130,7 +130,7 @@ namespace binding
 		}
 		else
 		{
-			outRetValue->result.ex = GetJavaExceptionInfo(env).MakeJointException().Release();
+			outRetValue->result.ex = GetJavaExceptionInfo(env).Release();
 			return JOINT_CORE_ERROR_EXCEPTION;
 		}
 

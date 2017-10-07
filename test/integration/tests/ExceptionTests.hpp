@@ -24,12 +24,12 @@ TEST_DEFINE_TEST(TestCtx, ExceptionTests)
 		return;
 	}
 
-	TEST_THROWS(joint::detail::JointCppException, t->ThrowNative());
+	TEST_THROWS(joint::Exception, t->ThrowNative());
 
 	auto throw_f = [] { throw std::runtime_error("Test exception"); };
 	auto throw_cb = Ctx.MakeComponent<test::IExceptionTestsCallback, ExceptionTestsCallback>(throw_f);
 	TEST_EQUALS(t->CatchAll(throw_cb), true);
-	TEST_THROWS(joint::detail::JointCppException, t->LetThrough(throw_cb));
+	TEST_THROWS(joint::Exception, t->LetThrough(throw_cb));
 
 	auto nothrow_f = [] { };
 	auto nothrow_cb = Ctx.MakeComponent<test::IExceptionTestsCallback, ExceptionTestsCallback>(nothrow_f);

@@ -107,7 +107,7 @@ class CGenerator:
         yield '\tJointCore_ObjectAccessor Accessor;'
         yield '}} {n};'.format(n=mangled_ifc)
         for m in ifc.methods:
-            yield 'JointCore_Error {n}_{m}({n} _obj{p}{r}, JointCore_ExceptionHandle* _ex);'.format(n=mangled_ifc, m=m.name, p=self._paramsDecl(m.params), r=self._retDecl(m.retType))
+            yield 'JointCore_Error {n}_{m}({n} _obj{p}{r}, JointCore_Exception_Handle* _ex);'.format(n=mangled_ifc, m=m.name, p=self._paramsDecl(m.params), r=self._retDecl(m.retType))
         yield ''
         yield 'typedef struct {'
         if not ifc.bases:
@@ -160,7 +160,7 @@ class CGenerator:
 
     def _generateMethodDefinition(self, ifc, m):
         mangled_ifc = self._mangleType(ifc)
-        yield 'JointCore_Error {n}_{m}({n} _obj{p}{r}, JointCore_ExceptionHandle* _ex)'.format(n=mangled_ifc, m=m.name, p=self._paramsDecl(m.params), r=self._retDecl(m.retType))
+        yield 'JointCore_Error {n}_{m}({n} _obj{p}{r}, JointCore_Exception_Handle* _ex)'.format(n=mangled_ifc, m=m.name, p=self._paramsDecl(m.params), r=self._retDecl(m.retType))
         yield '{'
         yield '\tJointCore_RetValue _ret_val;'
         if m.retType.needRelease:

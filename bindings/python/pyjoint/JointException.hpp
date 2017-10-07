@@ -25,8 +25,8 @@ namespace pyjoint
 		PyObject* args;
 		PyObject* message;
 #endif
-		std::string* jointMessage;
-		std::vector<devkit::StackFrameData>* backtrace;
+
+		JointCore_Exception_Handle ex;
 	};
 
 

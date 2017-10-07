@@ -50,7 +50,7 @@ JOINT_CORE_EXTERN_C_BEGIN
 		union
 		{
 			JointCore_Value               value;
-			JointCore_ExceptionHandle     ex;
+			JointCore_Exception_Handle    ex;
 		} result;
 		JointCore_ReleaseRetValue_Func*   releaseValue;
 	};

@@ -5,6 +5,7 @@
 #include <joint/devkit/util/JointException.hpp>
 #include <joint/private/JointStructs.h>
 
+#include <atomic>
 #include <string.h>
 #include <vector>
 
@@ -16,92 +17,146 @@ JOINT_DEVKIT_LOGGER(LoggerName)
 extern "C"
 {
 
-	JointCore_Error Joint_MakeException(const char* message, const JointCore_StackFrame* backtrace, JointCore_SizeT backtraceSize, JointCore_ExceptionHandle* outException)
+	struct JointCore_BacktraceEntry
+	{
+		std::string      module;
+		std::string      filename;
+		JointCore_SizeT  line;
+		std::string      code;
+		std::string      function;
+	};
+
+	struct JointCore_Exception
+	{
+	public:
+		using BacktraceEntries = std::vector<JointCore_BacktraceEntry>;
+
+	private:
+		std::atomic<int>   _refCount{1};
+		const std::string  _message;
+		BacktraceEntries   _backtrace;
+
+	public:
+		JointCore_Exception(std::string message, BacktraceEntries backtrace)
+			: _message(std::move(message)), _backtrace(std::move(backtrace))
+		{ }
+
+		JointCore_Exception(const JointCore_Exception&) = delete;
+		JointCore_Exception& operator=(const JointCore_Exception&) = delete;
+
+		const std::string& Message() const { return _message; }
+
+		BacktraceEntries& Backtrace() { return _backtrace; }
+		const BacktraceEntries& Backtrace() const { return _backtrace; }
+
+		void IncRef() { ++_refCount; }
+
+		void DecRef()
+		{
+			if (--_refCount == 0)
+				delete this;
+		}
+	};
+
+
+	JointCore_Error JointCore_Exception_Create(const char* message, const JointCore_Exception_BacktraceEntry* backtrace, JointCore_SizeT backtraceSize, JointCore_Exception_Handle* outException)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
 		JOINT_CHECK(outException, JOINT_CORE_ERROR_INVALID_PARAMETER);
 
-		std::vector<JointCore_StackFrameData> bt;
+		std::vector<JointCore_BacktraceEntry> bt;
 		bt.reserve(backtraceSize);
 		for (JointCore_SizeT i = 0; i < backtraceSize; ++i)
 		{
 			auto sf = backtrace[i];
-			bt.push_back(JointCore_StackFrameData{sf.module, sf.filename, sf.line, sf.code, sf.function});
+			bt.push_back(JointCore_BacktraceEntry{sf.module, sf.filename, sf.line, sf.code, sf.function});
 		}
-		*outException = new Joint_Exception{message, bt};
+		*outException = new JointCore_Exception(std::move(message), std::move(bt));
 
 		JOINT_CPP_WRAP_END
 	}
 
 
-	void Joint_ReleaseException(JointCore_ExceptionHandle handle)
+	void JointCore_Exception_IncRef(JointCore_Exception_Handle ex)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		JOINT_CHECK(handle != JOINT_CORE_NULL_HANDLE, JOINT_CORE_ERROR_INVALID_PARAMETER);
-
-		delete handle;
+		if (ex)
+			ex->IncRef();
 
 		JOINT_CPP_WRAP_END_VOID
 	}
 
 
-	JointCore_Error Joint_GetExceptionMessageSize(JointCore_ExceptionHandle handle, JointCore_SizeT* outSize)
+	void JointCore_Exception_DecRef(JointCore_Exception_Handle ex)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		JOINT_CHECK(handle != JOINT_CORE_NULL_HANDLE, JOINT_CORE_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(outSize, JOINT_CORE_ERROR_INVALID_PARAMETER);
+		if (ex)
+			ex->DecRef();
 
-		*outSize = handle->message.size() + 1;
+		JOINT_CPP_WRAP_END_VOID
+	}
+
+
+	JointCore_Error JointCore_Exception_GetMessage(JointCore_Exception_Handle ex, const char** outMessagePtr)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		JOINT_CHECK(ex != JOINT_CORE_NULL_HANDLE, JOINT_CORE_ERROR_INVALID_PARAMETER);
+		*outMessagePtr = ex->Message().c_str();
 
 		JOINT_CPP_WRAP_END
 	}
 
 
-	JointCore_Error Joint_GetExceptionMessage(JointCore_ExceptionHandle handle, char* buf, JointCore_SizeT bufSize)
+	JointCore_Error JointCore_Exception_AppendBacktrace(JointCore_Exception_Handle ex, JointCore_Exception_BacktraceEntry entry)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		JOINT_CHECK(handle != JOINT_CORE_NULL_HANDLE, JOINT_CORE_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(buf, JOINT_CORE_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(bufSize >= handle->message.size() + 1, JOINT_CORE_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(ex != JOINT_CORE_NULL_HANDLE, JOINT_CORE_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(entry.module, JOINT_CORE_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(entry.filename, JOINT_CORE_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(entry.code, JOINT_CORE_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(entry.function, JOINT_CORE_ERROR_INVALID_PARAMETER);
 
-		strcpy(buf, handle->message.c_str());
+		ex->Backtrace().push_back(JointCore_BacktraceEntry{entry.module, entry.filename, entry.line, entry.code, entry.function});
 
 		JOINT_CPP_WRAP_END
 	}
 
 
-	JointCore_Error Joint_GetExceptionBacktraceSize(JointCore_ExceptionHandle handle, JointCore_SizeT* outSize)
+	JointCore_Error JointCore_Exception_GetBacktraceSize(JointCore_Exception_Handle ex, JointCore_SizeT* outSize)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		JOINT_CHECK(handle != JOINT_CORE_NULL_HANDLE, JOINT_CORE_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(outSize, JOINT_CORE_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(ex != JOINT_CORE_NULL_HANDLE, JOINT_CORE_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outSize != JOINT_CORE_NULL_HANDLE, JOINT_CORE_ERROR_INVALID_PARAMETER);
 
-		*outSize = handle->backtrace.size();
+		*outSize = ex->Backtrace().size();
 
 		JOINT_CPP_WRAP_END
 	}
 
 
-	JointCore_Error Joint_GetExceptionBacktraceEntry(JointCore_ExceptionHandle handle, JointCore_SizeT index, JointCore_StackFrame* outStackFrame)
+	JointCore_Error JointCore_Exception_GetBacktraceEntry(JointCore_Exception_Handle ex, JointCore_SizeT index, JointCore_Exception_BacktraceEntry* outEntry)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		JOINT_CHECK(handle != JOINT_CORE_NULL_HANDLE, JOINT_CORE_ERROR_INVALID_PARAMETER);
-		JOINT_CHECK(index < handle->backtrace.size(), JOINT_CORE_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(ex != JOINT_CORE_NULL_HANDLE, JOINT_CORE_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(index < ex->Backtrace().size(), JOINT_CORE_ERROR_INVALID_PARAMETER);
+		JOINT_CHECK(outEntry != JOINT_CORE_NULL_HANDLE, JOINT_CORE_ERROR_INVALID_PARAMETER);
 
-		const auto& sf = handle->backtrace[index];
-		outStackFrame->module = sf.module.c_str();
-		outStackFrame->filename = sf.filename.c_str();
-		outStackFrame->line = sf.line;
-		outStackFrame->code = sf.code.c_str();
-		outStackFrame->function = sf.function.c_str();
+		const auto& entry = ex->Backtrace()[index];
+		outEntry->module   = entry.module.c_str();
+		outEntry->filename = entry.filename.c_str();
+		outEntry->line     = entry.line;
+		outEntry->code     = entry.code.c_str();
+		outEntry->function = entry.function.c_str();
 
 		JOINT_CPP_WRAP_END
 	}
+
 
 }

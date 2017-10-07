@@ -7,7 +7,9 @@
 #include <joint/devkit/util/ScopeExit.hpp>
 #include <joint/devkit/util/StringBuilder.hpp>
 
+#include <binding/JointJavaCoreContext.hpp>
 #include <utils/JPtr.hpp>
+#include <utils/TryOrTerminate.hpp>
 
 
 #define JNI_WRAP_CPP_BEGIN \
@@ -74,17 +76,11 @@ namespace java
 	inline void ThrowJavaException(JNIEnv* env, const std::string& msg)
 	{
 		const char* LoggerName = "Joint.Java.Utils";
+		const auto& c = JointJavaCoreContext::Instance();
 
 		auto jmsg = JStringLocalRef::StealLocal(env, env->NewStringUTF(msg.c_str()));
-		auto RuntimeException_cls = JClassLocalRef::StealLocal(env, env->FindClass("java/lang/RuntimeException"));
-		if (!RuntimeException_cls)
-			JOINT_TERMINATE("Could not find class java.lang.RuntimeException");
 
-		jmethodID RuntimeException_ctor_id = env->GetMethodID(RuntimeException_cls.Get(), "<init>", "(Ljava/lang/String;)V");
-		if (!RuntimeException_ctor_id)
-			JOINT_TERMINATE("Could not find java.lang.RuntimeException(java.lang.String) constructor");
-
-		auto ex = JThrowableLocalRef::StealLocal(env, reinterpret_cast<jthrowable>(env->NewObject(RuntimeException_cls.Get(), RuntimeException_ctor_id, jmsg.Get())));
+		auto ex = JThrowableLocalRef::StealLocal(env, reinterpret_cast<jthrowable>(env->NewObject(c.RuntimeException_cls.Get(), c.RuntimeException_ctor_id, jmsg.Get())));
 		if (!ex)
 			JOINT_TERMINATE("Could not create java.lang.RuntimeException object");
 
@@ -92,18 +88,13 @@ namespace java
 	}
 
 
-#define DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION \
-		do { \
-			if (env->ExceptionCheck()) \
-			{ \
-				env->ExceptionDescribe(); \
-				JOINT_TERMINATE_EX("Joint.Java.Utils", "Got an exception from java while processing another one"); \
-			} \
-		} while (false)
-
-	inline devkit::ExceptionInfo GetJavaExceptionInfo(JNIEnv *env)
+	inline devkit::ExceptionHolder GetJavaExceptionInfo(JNIEnv *env)
 	{
+		JOINT_DEVKIT_FUNCTION_LOCAL_LOGGER("Joint.Java.Utils");
+
 		using namespace devkit;
+
+		const auto& c = JointJavaCoreContext::Instance();
 
 		if (!env->ExceptionCheck())
 			JOINT_TERMINATE_EX("Joint.Java.Utils", "GetJavaExceptionInfo failed: no active java exception");
@@ -112,73 +103,46 @@ namespace java
 		env->ExceptionClear();
 		auto ex = JThrowableLocalRef::StealLocal(env, raw_throwable);
 
-		auto throwable_class = JClassLocalRef::StealLocal(env, env->FindClass("java/lang/Throwable"));
-		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
-		jmethodID toString_id = env->GetMethodID(throwable_class.Get(), "toString", "()Ljava/lang/String;");
-		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
-		jmethodID getStackTrace_id = env->GetMethodID(throwable_class.Get(), "getStackTrace", "()[Ljava/lang/StackTraceElement;");
-		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
-		auto jmsg = JStringLocalRef::StealLocal(env, env->CallObjectMethod(ex.Get(), toString_id));
-		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
-
-		auto ste_class = JClassLocalRef::StealLocal(env, env->FindClass("java/lang/StackTraceElement"));
-		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
-		jmethodID ste_getClassName_id = env->GetMethodID(ste_class.Get(), "getClassName", "()Ljava/lang/String;");
-		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
-		jmethodID ste_getFileName_id = env->GetMethodID(ste_class.Get(), "getFileName", "()Ljava/lang/String;");
-		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
-		jmethodID ste_getLineNumber_id = env->GetMethodID(ste_class.Get(), "getLineNumber", "()I");
-		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
-		jmethodID ste_getMethodName_id = env->GetMethodID(ste_class.Get(), "getMethodName", "()Ljava/lang/String;");
-		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
-		auto jst = JObjArrayLocalRef::StealLocal(env, env->CallObjectMethod(ex.Get(), getStackTrace_id));
-		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
+		auto jmsg = JOINT_JAVA_TRY_OR_TERMINATE(JStringLocalRef::StealLocal(env, env->CallObjectMethod(ex.Get(), c.Throwable_toString_id)));
+		auto jst = JOINT_JAVA_TRY_OR_TERMINATE(JObjArrayLocalRef::StealLocal(env, env->CallObjectMethod(ex.Get(), c.Throwable_getStackTrace_id)));
 
 		auto st_len = env->GetArrayLength(jst.Get());
-		ExceptionInfo::StackTrace st;
 
-		auto JointException_cls = JClassLocalRef::StealLocal(env, env->FindClass("org/joint/JointException"));
-		DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
-		if (env->IsInstanceOf(ex.Get(), JointException_cls.Get()))
+		JointCore_Exception_Handle joint_ex = JOINT_CORE_NULL_HANDLE;
+		if (env->IsInstanceOf(ex.Get(), c.JointException_cls.Get()))
+			joint_ex = (JointCore_Exception_Handle)(JOINT_JAVA_TRY_OR_TERMINATE(env->GetLongField(ex.Get(), c.JointException_nativeData_id)));
+
+		if (!joint_ex)
 		{
-			jfieldID nativeData_id = env->GetFieldID(JointException_cls.Get(), "nativeData", "J");
-			DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
-			auto ex_info = reinterpret_cast<const ExceptionInfo*>(env->GetLongField(ex.Get(), nativeData_id));
-			DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
-			if (ex_info)
-			{
-				st.reserve(st_len + ex_info->GetStackTrace().size());
-				std::copy(ex_info->GetStackTrace().begin(), ex_info->GetStackTrace().end(), std::back_inserter(st));
-			}
+			JointCore_Error ret = JointCore_Exception_Create(StringDataHolder(jmsg).GetData(), nullptr, 0, &joint_ex);
+			if (ret != JOINT_CORE_ERROR_NONE)
+				JOINT_CORE_FATAL("Joint.Java.Exception", "JointCore_Exception_Create failed: %s", JointCore_ErrorToString(ret));
 		}
-
-		st.reserve(st_len);
 
 		for (int i = 0; i < st_len; ++i)
 		{
-			auto ste = JObjLocalRef::StealLocal(env, env->GetObjectArrayElement(jst.Get(), i));
-			DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
-			auto class_name = JStringLocalRef::StealLocal(env, env->CallObjectMethod(ste.Get(), ste_getClassName_id));
-			DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
-			auto file_name = JStringLocalRef::StealLocal(env, env->CallObjectMethod(ste.Get(), ste_getFileName_id));
-			DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
-			jint line_num = env->CallIntMethod(ste.Get(), ste_getLineNumber_id);
-			DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
-			auto method_name = JStringLocalRef::StealLocal(env, env->CallObjectMethod(ste.Get(), ste_getMethodName_id));
-			DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION;
-			st.emplace_back(
+			auto ste = JOINT_JAVA_TRY_OR_TERMINATE(JObjLocalRef::StealLocal(env, env->GetObjectArrayElement(jst.Get(), i)));
+			auto class_name = JOINT_JAVA_TRY_OR_TERMINATE(JStringLocalRef::StealLocal(env, env->CallObjectMethod(ste.Get(), c.StackTraceElement_getClassName_id)));
+			auto file_name = JOINT_JAVA_TRY_OR_TERMINATE(JStringLocalRef::StealLocal(env, env->CallObjectMethod(ste.Get(), c.StackTraceElement_getFileName_id)));
+			jint line_num = JOINT_JAVA_TRY_OR_TERMINATE(env->CallIntMethod(ste.Get(), c.StackTraceElement_getLineNumber_id));
+			auto method_name = JOINT_JAVA_TRY_OR_TERMINATE(JStringLocalRef::StealLocal(env, env->CallObjectMethod(ste.Get(), c.StackTraceElement_getMethodName_id)));
+
+			JointCore_Error ret = JointCore_Exception_AppendBacktrace(
+				joint_ex,
+				JointCore_Exception_BacktraceEntry{
 					"",
 					StringDataHolder(file_name).GetData(),
-					line_num,
+					(JointCore_SizeT)line_num,
 					"",
-					StringBuilder() % StringDataHolder(class_name).GetData() % "." % StringDataHolder(method_name).GetData()
-				);
+					(StringBuilder() % StringDataHolder(class_name).GetData() % "." % StringDataHolder(method_name).GetData()).ToString().c_str()
+				}
+			);
+			if (ret != JOINT_CORE_ERROR_NONE)
+				JOINT_CORE_FATAL("Joint.Java.Exception", "JointCore_Exception_AppendBacktrace failed: %s", JointCore_ErrorToString(ret));
 		}
 
-		return ExceptionInfo(StringDataHolder(jmsg).GetData(), st);
+		return ExceptionHolder(joint_ex);
 	}
-
-#undef DETAIL_JOINT_JAVA_TERMINATE_ON_EXCEPTION
 
 
 	void ThrowExceptionFromJava(JNIEnv* env, const char* location);

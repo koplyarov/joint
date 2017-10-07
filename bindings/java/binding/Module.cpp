@@ -22,7 +22,7 @@ namespace binding
 		ManifestReader::Read(moduleManifest, _manifest);
 		auto location = ManifestReader::GetLocation(moduleManifest);
 
-		auto jvm = JointJavaContext::GetJvm();
+		auto jvm = JointJavaCoreContext::GetJvm();
 		auto env = GetJavaEnv(jvm);
 
 		const auto& jjc = JointJavaContext::ConstInstance();
@@ -60,7 +60,7 @@ namespace binding
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		auto jvm = JointJavaContext::GetJvm();
+		auto jvm = JointJavaCoreContext::GetJvm();
 		auto env = GetJavaEnv(jvm);
 
 		auto jm = JointJavaContext::ModuleContext::Make(env, AccessorFromSelf());

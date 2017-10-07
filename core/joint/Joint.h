@@ -2,7 +2,7 @@
 #define JOINT_JOINTCORE_H
 
 #include <joint/public/AccessorUtils.h>
-#include <joint/public/Aux.h>
+#include <joint/public/Assert.h>
 #include <joint/public/Log.h>
 
 #include <joint/public/BindingAccessor.h>

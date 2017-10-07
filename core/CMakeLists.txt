@@ -47,7 +47,6 @@ set(JOINT_CORE_SRC
 	joint/private/JsonParser.cpp
 	joint/public/Array.cpp
 	joint/public/Assert.cpp
-	joint/public/Aux.cpp
 	joint/public/Error.cpp
 	joint/public/Exception.cpp
 	joint/public/Log.cpp

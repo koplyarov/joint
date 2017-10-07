@@ -73,6 +73,7 @@ add_library(joint-java SHARED
 	binding/Binding.cpp
 	binding/JavaBindingInfo.cpp
 	binding/JointJavaContext.cpp
+	binding/JointJavaCoreContext.cpp
 	binding/Module.cpp
 	binding/Object.cpp
 	jni/ArrayJNI.cpp

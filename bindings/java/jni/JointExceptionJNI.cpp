@@ -12,6 +12,7 @@ JOINT_DEVKIT_LOGGER("Joint.Java.JNI")
 JNIEXPORT void JNICALL Java_org_joint_JointException_deinitNative(JNIEnv* env, jclass cls, jlong nativeData)
 {
 	JNI_WRAP_CPP_BEGIN
-	delete reinterpret_cast<ExceptionInfo*>(nativeData);
+	auto handle = reinterpret_cast<JointCore_Exception_Handle>(nativeData);
+	JointCore_Exception_DecRef(handle);
 	JNI_WRAP_CPP_END_VOID()
 }

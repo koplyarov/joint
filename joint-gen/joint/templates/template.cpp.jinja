@@ -231,7 +231,7 @@ namespace {{n}} {
 		params[{{p.index}}].value.{{p.type.variantName}} = {{to_joint_param(p.type, p.name).code}};
 		{% endfor -%}
 		{% endif -%}
-		JOINT_METHOD_CALL("{{i.fullname}}.{{m.name}}", _obj.VTable->InvokeMethod(_obj.Instance, {{m.index}}, {{'params' if m.params else 'nullptr'}}, {{m.params | length}}, &_ret_val));
+		JOINT_METHOD_CALL("C++ proxy for {{i.fullname}}.{{m.name}}", _obj.VTable->InvokeMethod(_obj.Instance, {{m.index}}, {{'params' if m.params else 'nullptr'}}, {{m.params | length}}, &_ret_val));
 		{% if m.retType.needRelease -%}
 		::joint::detail::RetValueGuard _rvg(_ret_val_type, _ret_val);
 		{%- endif %}
@@ -270,17 +270,17 @@ namespace {{n}} {
 				return JOINT_CORE_ERROR_GENERIC;
 			}
 		}
-		catch (const ::joint::detail::JointCppException& ex)
+		catch (::joint::Exception& ex)
 		{
 			{% if i.methods -%}
-			const char* method_names[] = { {% for m in i.methods %}"{{i.fullname}}.{{m.name}}"{{', ' if not loop.last}}{% endfor %} };
+			const char* method_names[] = { {% for m in i.methods %}"{{i.fullname}}.{{m.name}} of a C++ component "{{', ' if not loop.last}}{% endfor %} };
 			{% endif -%}
 			return ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, {{'method_names[methodId]' if i.methods else '""'}});
 		}
-		catch (const std::exception& ex)
+		catch (std::exception& ex)
 		{
 			{% if i.methods -%}
-			const char* method_names[] = { {% for m in i.methods %}"{{i.fullname}}.{{m.name}}"{{', ' if not loop.last}}{% endfor %} };
+			const char* method_names[] = { {% for m in i.methods %}"{{i.fullname}}.{{m.name}} of a C++ component "{{', ' if not loop.last}}{% endfor %} };
 			{% endif -%}
 			return ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, {{'method_names[methodId]' if i.methods else '""'}});
 		}

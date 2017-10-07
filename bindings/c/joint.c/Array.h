@@ -13,7 +13,7 @@
 
 #define DETAIL_JOINT_C_DEFINE_ARRAY(Name_, CppType_, JointType_, GetCode_, SetCode_) \
 	typedef struct { JointCore_ArrayHandle handle; } Name_##__Array; \
-	JointCore_Error Name_##__Array_Create(size_t size, Name_##__Array* array, JointCore_ExceptionHandle* ex) \
+	JointCore_Error Name_##__Array_Create(size_t size, Name_##__Array* array, JointCore_Exception_Handle* ex) \
 	{ \
 		JointCore_Type t; \
 		t.id = JointType_; \
@@ -22,7 +22,7 @@
 			return JOINT_THROW("Joint_MakeArray failed!", ex); \
 		return JOINT_CORE_ERROR_NONE; \
 	} \
-	JointCore_Error Name_##__Array_GetSize(Name_##__Array array, size_t* result, JointCore_ExceptionHandle* ex) \
+	JointCore_Error Name_##__Array_GetSize(Name_##__Array array, size_t* result, JointCore_Exception_Handle* ex) \
 	{ \
 		JointCore_SizeT size; \
 		JointCore_Error ret = Joint_ArrayGetSize(array.handle, &size); \
@@ -31,7 +31,7 @@
 		*result = size; \
 		return JOINT_CORE_ERROR_NONE; \
 	} \
-	JointCore_Error Name_##__Array_Get(Name_##__Array array, size_t index, CppType_* result, JointCore_ExceptionHandle* ex) \
+	JointCore_Error Name_##__Array_Get(Name_##__Array array, size_t index, CppType_* result, JointCore_Exception_Handle* ex) \
 	{ \
 		JointCore_Value result_v; \
 		JointCore_Error ret = Joint_ArrayGet(array.handle, index, &result_v); \
@@ -40,7 +40,7 @@
 		{ GetCode_; } \
 		return JOINT_CORE_ERROR_NONE; \
 	} \
-	JointCore_Error Name_##__Array_Set(Name_##__Array array, size_t index, CppType_ value, JointCore_ExceptionHandle* ex) \
+	JointCore_Error Name_##__Array_Set(Name_##__Array array, size_t index, CppType_ value, JointCore_Exception_Handle* ex) \
 	{ \
 		JointCore_Value value_v; \
 		{ SetCode_; } \

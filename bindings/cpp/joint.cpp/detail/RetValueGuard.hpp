@@ -28,20 +28,6 @@ namespace detail
 		}
 	};
 
-	class ExceptionGuard
-	{
-	private:
-		JointCore_ExceptionHandle _ex;
-
-	public:
-		ExceptionGuard(JointCore_ExceptionHandle ex)
-			: _ex(ex)
-		{ }
-
-		~ExceptionGuard()
-		{ Joint_ReleaseException(_ex); }
-	};
-
 
 }}
 

@@ -14,6 +14,7 @@
 #include <stdint.h>
 
 #include <joint.cpp/Array.hpp>
+#include <joint.cpp/Exception.hpp>
 #include <joint.cpp/Ptr.hpp>
 #include <joint.cpp/TypeList.hpp>
 #include <joint.cpp/detail/Config.hpp>
@@ -75,48 +76,51 @@ namespace detail
 	template < typename ExceptionType_ >
 	struct CppExceptionWrapper
 	{
-		static std::string GetMessage(const ExceptionType_& ex)
-		{ return ex.what(); }
-
-		static std::vector<JointCppStackFrame> GetBacktrace(const ExceptionType_& ex)
-		{ return std::vector<JointCppStackFrame>(); }
+		static JointCore_Error MakeException(const ExceptionType_& ex, JointCore_Exception_Handle* outHandle)
+		{ return JointCore_Exception_Create(ex.what(), NULL, 0, outHandle); }
 	};
 
 	template <  >
-	struct CppExceptionWrapper<JointCppException>
+	struct CppExceptionWrapper<Exception>
 	{
-		static std::string GetMessage(const JointCppException& ex)
-		{ return ex.GetMessage(); }
-
-		static std::vector<JointCppStackFrame> GetBacktrace(const JointCppException& ex)
-		{ return ex.GetBacktrace(); }
+		static JointCore_Error MakeException(Exception& ex, JointCore_Exception_Handle* outHandle)
+		{ *outHandle = ex.Release(); return JOINT_CORE_ERROR_NONE; }
 	};
 
 	template < typename ComponentImpl_, typename ExceptionType_ >
-	JointCore_Error WrapCppException(const ExceptionType_& ex, JointCore_RetValue* outRetValue, const char* methodName)
+	JointCore_Error WrapCppException(ExceptionType_& ex, JointCore_RetValue* outRetValue, const char* methodName)
 	{
-        outRetValue->releaseValue = &::joint::detail::_ReleaseRetValue;
+		JointCore_Exception_Handle joint_ex;
+		JointCore_Error ret = CppExceptionWrapper<ExceptionType_>::MakeException(ex, &joint_ex);
 
-		std::string msg = CppExceptionWrapper<ExceptionType_>::GetMessage(ex);
-		std::vector<JointCppStackFrame> bt = CppExceptionWrapper<ExceptionType_>::GetBacktrace(ex);
+		if (ret == JOINT_CORE_ERROR_NONE)
+		{
+			static const size_t local_buf_size = 256;
+			char buf[local_buf_size];
+			std::string str;
 
-		std::stringstream function_ss;
-		function_ss << methodName << " of a C++ component";
-		function_ss << " " << Demangle(typeid(ComponentImpl_).name());
-		bt.push_back(JointCppStackFrame(JointAux_GetModuleName((JointCore_FunctionPtr)&WrapCppException<ComponentImpl_, ExceptionType_>), "", 0, "", function_ss.str()));
+			const char* component_name = typeid(ComponentImpl_).name();
+			size_t method_name_size = strlen(methodName) + 1;
+			size_t component_name_size = strlen(component_name) + 1;
+			bool use_local_buf = (method_name_size + component_name_size) <= local_buf_size;
 
-		std::vector<JointCore_StackFrame> c_bt;
-		c_bt.reserve(bt.size());
-		std::transform(bt.begin(), bt.end(), std::back_inserter(c_bt), [](const JointCppStackFrame& sf) {
-				return JointCore_StackFrame{sf.GetModule().c_str(), sf.GetFilename().c_str(), sf.GetLine(), sf.GetCode().c_str(), sf.GetFunction().c_str()};
-			});
+			if (use_local_buf)
+				std::copy(component_name, component_name + component_name_size, std::copy(methodName, methodName + method_name_size, buf));
+			else
+			{
+				str = methodName;
+				str += component_name;
+			}
 
-		JointCore_ExceptionHandle joint_ex;
-		JointCore_Error ret = Joint_MakeException(msg.c_str(), c_bt.data(), c_bt.size(), &joint_ex);
+			JointCore_Exception_BacktraceEntry sf = { "", "", 0, "", use_local_buf ? buf : str.c_str() };
+			ret = JointCore_Exception_AppendBacktrace(joint_ex, sf);
+		}
+
 		if (ret != JOINT_CORE_ERROR_NONE)
 			return ret;
 
 		outRetValue->result.ex = joint_ex;
+        outRetValue->releaseValue = &::joint::detail::_ReleaseRetValue;
 		return JOINT_CORE_ERROR_EXCEPTION;
 	}
 

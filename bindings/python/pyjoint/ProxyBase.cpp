@@ -149,58 +149,13 @@ namespace pyjoint
 		}
 		else if (ret == JOINT_CORE_ERROR_EXCEPTION)
 		{
-			auto sg(ScopeExit([&]{ Joint_ReleaseException(ret_value.result.ex); }));
-
-			JointCore_SizeT buf_size = 0;
-			StackStorage<char, 256> buf_storage;
+			auto sg(ScopeExit([&]{ JointCore_Exception_DecRef(ret_value.result.ex); }));
 
 			auto ex = ret_value.result.ex;
 
-			JointCore_Error ret = Joint_GetExceptionMessageSize(ex, &buf_size);
-			if (ret != JOINT_CORE_ERROR_NONE)
-			{
-				Joint_Log(JOINT_CORE_LOGLEVEL_ERROR, "Joint.Python", "Joint_GetExceptionMessageSize failed: ", JointCore_ErrorToString(ret));
-				throw std::runtime_error("Could not obtain joint exception message!");
-			}
-
-			char* buf = buf_storage.Make(buf_size);
-			ret = Joint_GetExceptionMessage(ex, buf, buf_size);
-			if (ret != JOINT_CORE_ERROR_NONE)
-			{
-				Joint_Log(JOINT_CORE_LOGLEVEL_ERROR, "Joint.Python", "Joint_GetExceptionMessage failed: %s", JointCore_ErrorToString(ret));
-				throw std::runtime_error("Could not obtain joint exception message!");
-			}
-
 			PyObjectHolder py_ex(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&JointException_type, NULL)));
-			reinterpret_cast<JointException*>(py_ex.Get())->jointMessage = new std::string(buf);
-
-			JointCore_SizeT bt_size = 0;
-			ret = Joint_GetExceptionBacktraceSize(ex, &bt_size);
-			if (ret != JOINT_CORE_ERROR_NONE)
-			{
-				Joint_Log(JOINT_CORE_LOGLEVEL_WARNING, "Joint.Python", "Joint_GetExceptionBacktraceSize failed: %s", JointCore_ErrorToString(ret));
-				PyErr_SetObject((PyObject*)&JointException_type, py_ex);
-				return NULL;
-			}
-
-			std::vector<StackFrameData> bt;
-			bt.reserve(bt_size);
-			std::vector<PyObjectHolder> py_frames;
-
-			for (JointCore_SizeT i = 0; i < bt_size; ++i)
-			{
-				JointCore_StackFrame sf;
-				ret = Joint_GetExceptionBacktraceEntry(ex, i, &sf);
-				if (ret != JOINT_CORE_ERROR_NONE)
-				{
-					Joint_Log(JOINT_CORE_LOGLEVEL_WARNING, "Joint.Python", "Joint_GetExceptionBacktraceEntry failed: %s", JointCore_ErrorToString(ret));
-					continue;
-				}
-
-				bt.emplace_back(StackFrameData(sf.module, sf.filename, sf.line, sf.code, sf.function));
-			}
-
-			reinterpret_cast<JointException*>(py_ex.Get())->backtrace = new std::vector<StackFrameData>(bt);
+			sg.Cancel();
+			reinterpret_cast<JointException*>(py_ex.Get())->ex = ex;
 			PyErr_SetObject((PyObject*)&JointException_type, py_ex);
 
 			return NULL;

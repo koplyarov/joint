@@ -36,22 +36,6 @@ extern "C"
 		{ }
 	};
 
-
-	struct JointCore_StackFrameData
-	{
-		std::string      module;
-		std::string      filename;
-		JointCore_SizeT      line;
-		std::string      code;
-		std::string      function;
-	};
-
-	struct Joint_Exception
-	{
-		std::string                        message;
-		std::vector<JointCore_StackFrameData>  backtrace;
-	};
-
 }
 
 
