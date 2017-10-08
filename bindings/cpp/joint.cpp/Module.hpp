@@ -124,6 +124,13 @@ namespace joint
 			return joint::MakeComponent<Interface_, ComponentType_, Arg1_>(_accessor, arg1);
 		}
 
+		template < typename Interface_, typename ComponentType_, typename Arg1_, typename Arg2_ >
+		Ptr<Interface_> MakeComponent(const Arg1_& arg1, const Arg2_& arg2) const
+		{
+			DETAIL_JOINT_CPP_ASSERT_IMPLEMENTS_INTERFACE(ComponentType_, Interface_);
+			return joint::MakeComponent<Interface_, ComponentType_, Arg1_, Arg2_>(_accessor, arg1, arg2);
+		}
+
 		template < typename ComponentType_ >
 		ComponentImplPtr<ComponentType_> MakeComponentWrapper() const
 		{ return joint::MakeComponentWrapper<ComponentType_>(_accessor); }
@@ -306,6 +313,13 @@ namespace joint
 		{
 			DETAIL_JOINT_CPP_ASSERT_IMPLEMENTS_INTERFACE(ComponentType_, Interface_);
 			return _mainModule.MakeComponent<Interface_, ComponentType_, Arg1_>(arg1);
+		}
+
+		template < typename Interface_, typename ComponentType_, typename Arg1_, typename Arg2_ >
+		Ptr<Interface_> MakeComponent(const Arg1_& arg1, const Arg2_& arg2)
+		{
+			DETAIL_JOINT_CPP_ASSERT_IMPLEMENTS_INTERFACE(ComponentType_, Interface_);
+			return _mainModule.MakeComponent<Interface_, ComponentType_, Arg1_, Arg2_>(arg1, arg2);
 		}
 
 		template < typename ComponentType_ >

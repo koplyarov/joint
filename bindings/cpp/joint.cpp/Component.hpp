@@ -182,6 +182,11 @@ namespace joint
 			: _refCount(1), _componentImpl(arg1), _moduleAccessor(moduleAccessor, ModuleAccessorHolder::NewRefTag())
 		{ Init(); }
 
+		template < typename Arg1_, typename Arg2_ >
+		ComponentWrapper(JointCore_ModuleAccessor moduleAccessor, const Arg1_& arg1, const Arg2_& arg2)
+			: _refCount(1), _componentImpl(arg1, arg2), _moduleAccessor(moduleAccessor, ModuleAccessorHolder::NewRefTag())
+		{ Init(); }
+
 		ComponentImpl_& GetComponentImpl() { return _componentImpl; }
 		const ComponentImpl_& GetComponentImpl() const { return _componentImpl; }
 
@@ -297,6 +302,10 @@ namespace joint
 	ComponentImplPtr<ComponentType_> MakeComponentWrapper(JointCore_ModuleAccessor moduleAccessor, const Arg1_& arg1)
 	{ return ComponentImplPtr<ComponentType_>(new ComponentWrapper<ComponentType_>(moduleAccessor, arg1)); }
 
+	template < typename ComponentType_, typename Arg1_, typename Arg2_ >
+	ComponentImplPtr<ComponentType_> MakeComponentWrapper(JointCore_ModuleAccessor moduleAccessor, const Arg1_& arg1, const Arg2_& arg2)
+	{ return ComponentImplPtr<ComponentType_>(new ComponentWrapper<ComponentType_>(moduleAccessor, arg1, arg2)); }
+
 
 	template < typename Interface_, typename ComponentType_ >
 	Ptr<Interface_> MakeComponentProxy(const ComponentImplPtr<ComponentType_>& component)
@@ -314,6 +323,10 @@ namespace joint
 	template < typename Interface_, typename ComponentType_, typename Arg1_ >
 	Ptr<Interface_> MakeComponent(JointCore_ModuleAccessor moduleAccessor, const Arg1_& arg1)
 	{ return MakeComponentProxy<Interface_>(MakeComponentWrapper<ComponentType_>(moduleAccessor, arg1)); }
+
+	template < typename Interface_, typename ComponentType_, typename Arg1_, typename Arg2_ >
+	Ptr<Interface_> MakeComponent(JointCore_ModuleAccessor moduleAccessor, const Arg1_& arg1, const Arg2_& arg2)
+	{ return MakeComponentProxy<Interface_>(MakeComponentWrapper<ComponentType_>(moduleAccessor, arg1, arg2)); }
 
 
 	template < typename Interface_ >
