@@ -30,7 +30,8 @@ JOINT_CORE_EXTERN_C_BEGIN
 
 
 	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_ReadManifestFromFile(const char* path, JointCore_ManifestHandle* outManifest);
-	JOINT_CORE_API void Joint_DeleteManifest(JointCore_ManifestHandle handle);
+	JOINT_CORE_API void Joint_IncRefManifest(JointCore_ManifestHandle handle);
+	JOINT_CORE_API void Joint_DecRefManifest(JointCore_ManifestHandle handle);
 
 	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_GetManifestLocation(JointCore_ManifestHandle manifest, const char** outLocation);
 	JOINT_CORE_API JOINT_CORE_WARN_UNUSED_RESULT(JointCore_Error) Joint_GetManifestRootNode(JointCore_ManifestHandle manifest, JointCore_ManifestNodeHandle* outNode);

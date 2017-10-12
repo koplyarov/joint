@@ -168,7 +168,7 @@ namespace swig
 				JointCore_Error err = Joint_ReadManifestFromFile(module_manifest_path.c_str(), &m);
 				JOINT_CHECK(err == JOINT_CORE_ERROR_NONE, err);
 
-				auto sg = ScopeExit([&]{ Joint_DeleteManifest(m); });
+				auto sg = ScopeExit([&]{ Joint_DecRefManifest(m); });
 
 				ModuleManifestBase md;
 				ManifestReader::Read(m, md);

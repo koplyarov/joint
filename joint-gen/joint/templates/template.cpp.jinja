@@ -14,6 +14,12 @@ namespace {{n}} {
 {% endfor -%}
 {%- endmacro -%}
 
+{% macro method_names_var(interface) -%}
+{% if interface.methods -%}
+const char* method_names[] = { {% for m in interface.methods %}"{{interface.fullname}}.{{m.name}} of a C++ component "{{', ' if not loop.last}}{% endfor %} };
+{%- endif -%}
+{%- endmacro -%}
+
 
 #pragma once
 
@@ -164,8 +170,8 @@ namespace {{n}} {
 		static const char* _GetInterfaceId() { return "{{i.fullname}}"; }
 
 		{%- for m in i.methods %}
-		{{cpp_type(m.retType)}} {{m.name}}({{ m.params | map('param_decl') | join(', ') }});
-		{%- endfor -%}
+		JOINT_CPP_RET_TYPE({{cpp_type(m.retType)}}) {{m.name}}({{ m.params | map('param_decl') | join(', ') }});
+		{%- endfor %}
 	};
 
 	template <typename ComponentImpl_>
@@ -210,7 +216,7 @@ namespace {{n}} {
 {% call(p) for_each_package() %}
 {% for i in p.interfaces %}
 {% for m in i.methods %}
-	{{cpp_type(m.retType)}} {{i.name}}::{{m.name}}({{m.params | map('param_decl') | join(', ')}})
+	JOINT_CPP_RET_TYPE({{cpp_type(m.retType)}}) {{i.name}}::{{m.name}}({{m.params | map('param_decl') | join(', ')}})
 	{
 		using namespace ::joint::detail;
 		JointCore_RetValue _ret_val;
@@ -237,7 +243,9 @@ namespace {{n}} {
 		{%- endif %}
 		{% if m.retType.name != 'void' -%}
 		{{from_joint_retval(m.retType, '_ret_val.result.value').initialization | join('\n') | indent(8)}}
-		return {{from_joint_retval(m.retType, '_ret_val.result.value').code}};
+		JOINT_CPP_RETURN({{from_joint_retval(m.retType, '_ret_val.result.value').code}});
+		{%- else %}
+		JOINT_CPP_RETURN_VOID();
 		{%- endif %}
 	}
 {% endfor %}
@@ -245,7 +253,9 @@ namespace {{n}} {
 	template <typename ComponentImpl_>
 	JointCore_Error {{i.name}}_accessor<ComponentImpl_>::InvokeMethodImpl(ComponentImpl_* componentImpl, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_RetValue* outRetValue)
 	{
+#if !JOINT_CPP_CONFIG_NO_EXCEPTIONS
 		try
+#endif
 		{
 			switch(methodId)
 			{
@@ -257,11 +267,20 @@ namespace {{n}} {
 					{{cpp_type(p.type)}} p{{p.index}}({{from_joint_param(p.type, 'params[{}].value'.format(p.index)).code}});
 					{%- endfor -%}
 					{%- if m.retType.name != 'void' %}
-					{{cpp_type(m.retType)}} result(componentImpl->{{m.name}}({%- for p in m.params -%}p{{p.index}}{{', ' if not loop.last}}{%- endfor -%}));
-					{{to_joint_retval(m.retType, 'result').initialization | join('\n') | indent(20)}}
-					outRetValue->result.value.{{m.retType.variantName}} = {{to_joint_retval(m.retType, 'result').code}};
+					DETAIL_JOINT_CPP_INVOKE_METHOD({{cpp_type(m.retType)}}, (componentImpl->{{m.name}}({%- for p in m.params -%}p{{p.index}}{{', ' if not loop.last}}{%- endfor -%})));
 					{%- else %}
-					componentImpl->{{m.name}}({%- for p in m.params -%}p{{p.index}}{{', ' if not loop.last}}{%- endfor -%});
+					DETAIL_JOINT_CPP_INVOKE_VOID_METHOD((componentImpl->{{m.name}}({%- for p in m.params -%}p{{p.index}}{{', ' if not loop.last}}{%- endfor -%})));
+					{%- endif %}
+#if JOINT_CPP_CONFIG_NO_EXCEPTIONS
+					if (!result.Ok())
+					{
+						{{ method_names_var(i) }}
+						return ::joint::detail::WrapCppException<ComponentImpl_>(result.Exception(), outRetValue, {{'method_names[methodId]' if i.methods else '""'}});
+					}
+#endif
+					{%- if m.retType.name != 'void' %}
+					{{to_joint_retval(m.retType, 'DETAIL_JOINT_CPP_METHOD_RESULT').initialization | join('\n') | indent(20)}}
+					outRetValue->result.value.{{m.retType.variantName}} = {{to_joint_retval(m.retType, 'DETAIL_JOINT_CPP_METHOD_RESULT').code}};
 					{%- endif %}
 				}
 				break;
@@ -270,20 +289,18 @@ namespace {{n}} {
 				return JOINT_CORE_ERROR_GENERIC;
 			}
 		}
+#if !JOINT_CPP_CONFIG_NO_EXCEPTIONS
 		catch (::joint::Exception& ex)
 		{
-			{% if i.methods -%}
-			const char* method_names[] = { {% for m in i.methods %}"{{i.fullname}}.{{m.name}} of a C++ component "{{', ' if not loop.last}}{% endfor %} };
-			{% endif -%}
+			{{ method_names_var(i) }}
 			return ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, {{'method_names[methodId]' if i.methods else '""'}});
 		}
 		catch (std::exception& ex)
 		{
-			{% if i.methods -%}
-			const char* method_names[] = { {% for m in i.methods %}"{{i.fullname}}.{{m.name}} of a C++ component "{{', ' if not loop.last}}{% endfor %} };
-			{% endif -%}
+			{{ method_names_var(i) }}
 			return ::joint::detail::WrapCppException<ComponentImpl_>(ex, outRetValue, {{'method_names[methodId]' if i.methods else '""'}});
 		}
+#endif
 		outRetValue->releaseValue = &::joint::detail::_ReleaseRetValue;
 		return JOINT_CORE_ERROR_NONE;
 	}

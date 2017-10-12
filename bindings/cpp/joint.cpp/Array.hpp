@@ -5,6 +5,7 @@
 #include <joint/Joint.h>
 
 #include <joint.cpp/Ptr.hpp>
+#include <joint.cpp/Result.hpp>
 #include <joint.cpp/detail/ClassContentChecks.hpp>
 #include <joint.cpp/detail/Config.hpp>
 #include <joint.cpp/detail/JointCall.hpp>
@@ -31,11 +32,12 @@ namespace joint
 			static const int ArrayDepth = 1; \
 			static void FillType(JointCore_Type* storage) { storage->id = JointType_; } \
 			static CppType_ FromJointValue(JointCore_Value value) { return value.VariantMember_; } \
-			static void SetArrayElement(JointCore_ArrayHandle handle, JointCore_SizeT index, CppType_ value) \
+			static JOINT_CPP_RET_TYPE(void) SetArrayElement(JointCore_ArrayHandle handle, JointCore_SizeT index, CppType_ value) \
 			{ \
 				JointCore_Value jv; \
 				jv.VariantMember_ = value; \
 				JOINT_CALL(Joint_ArraySet(handle, index, jv)); \
+				JOINT_CPP_RETURN_VOID(); \
 			} \
 		}
 
@@ -64,11 +66,12 @@ namespace joint
 			static std::string FromJointValue(JointCore_Value value)
 			{ return value.utf8; }
 
-			static void SetArrayElement(JointCore_ArrayHandle handle, JointCore_SizeT index, const std::string& value)
+			static JOINT_CPP_RET_TYPE(void) SetArrayElement(JointCore_ArrayHandle handle, JointCore_SizeT index, const std::string& value)
 			{
 				JointCore_Value jv;
 				jv.utf8 = value.c_str();
 				JOINT_CALL(Joint_ArraySet(handle, index, jv));
+				JOINT_CPP_RETURN_VOID();
 			}
 		};
 
@@ -87,7 +90,7 @@ namespace joint
 			static T_ FromJointValue(JointCore_Value value)
 			{ return T_::_FromJointMembers(value.members); }
 
-			static void SetArrayElement(JointCore_ArrayHandle handle, JointCore_SizeT index, const T_& value)
+			static JOINT_CPP_RET_TYPE(void) SetArrayElement(JointCore_ArrayHandle handle, JointCore_SizeT index, const T_& value)
 			{
 				JointCore_Value members[T_::_RecursiveMembersCount];
 				value._FillMembers(members);
@@ -95,6 +98,7 @@ namespace joint
 				JointCore_Value jv;
 				jv.members = members;
 				JOINT_CALL(Joint_ArraySet(handle, index, jv));
+				JOINT_CPP_RETURN_VOID();
 			}
 		};
 
@@ -117,11 +121,12 @@ namespace joint
 				return Array<T_>(value.array);
 			}
 
-			static void SetArrayElement(JointCore_ArrayHandle handle, JointCore_SizeT index, const Array<T_>& value)
+			static JOINT_CPP_RET_TYPE(void) SetArrayElement(JointCore_ArrayHandle handle, JointCore_SizeT index, const Array<T_>& value)
 			{
 				JointCore_Value jv;
 				jv.array = value._GetArrayHandle();
 				JOINT_CALL(Joint_ArraySet(handle, index, jv));
+				JOINT_CPP_RETURN_VOID();
 			}
 		};
 
@@ -140,11 +145,12 @@ namespace joint
 				return Ptr<T_>(value.obj);
 			}
 
-			static void SetArrayElement(JointCore_ArrayHandle handle, JointCore_SizeT index, const Ptr<T_>& value)
+			static JOINT_CPP_RET_TYPE(void) SetArrayElement(JointCore_ArrayHandle handle, JointCore_SizeT index, const Ptr<T_>& value)
 			{
 				JointCore_Value jv;
 				jv.obj = value->_GetObjectHandle();
 				JOINT_CALL(Joint_ArraySet(handle, index, jv));
+				JOINT_CPP_RETURN_VOID();
 			}
 		};
 	}
@@ -163,12 +169,14 @@ namespace joint
 			: _handle(handle)
 		{ }
 
+#if !JOINT_CPP_CONFIG_NO_EXCEPTIONS
 		explicit Array(size_t size = 0)
 		{
 			JointCore_Type types_storage[Helper::ArrayDepth];
 			Helper::FillType(types_storage);
 			JOINT_CALL(Joint_MakeArray(types_storage[0], size, &_handle));
 		}
+#endif
 
 		explicit operator bool() const
 		{ return _handle; }
@@ -201,13 +209,23 @@ namespace joint
 		{ Joint_DecRefArray(_handle); }
 
 
+		static JOINT_CPP_RET_TYPE(Array) Create(size_t size = 0)
+		{
+			JointCore_Type types_storage[Helper::ArrayDepth];
+			Helper::FillType(types_storage);
+			JointCore_ArrayHandle handle;
+			JOINT_CALL(Joint_MakeArray(types_storage[0], size, &handle));
+			return Array(handle);
+		}
+
+
 		T_ operator[] (size_t index) const
 		{ return Get(index); }
 
 		JointCore_ArrayHandle _GetArrayHandle() const
 		{ return _handle; }
 
-		size_t GetSize() const
+		JOINT_CPP_RET_TYPE(size_t) GetSize() const
 		{
 			JointCore_SizeT result;
 			JOINT_CALL( Joint_ArrayGetSize(_handle, &result) );
@@ -218,7 +236,7 @@ namespace joint
 		{ std::swap(_handle, other._handle); }
 
 
-		T_ Get(size_t index) const
+		JOINT_CPP_RET_TYPE(T_) Get(size_t index) const
 		{
 			JointCore_Value v;
 			JOINT_CALL(Joint_ArrayGet(_handle, index, &v));

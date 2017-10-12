@@ -16,6 +16,7 @@
 #include <joint.cpp/Array.hpp>
 #include <joint.cpp/Exception.hpp>
 #include <joint.cpp/Ptr.hpp>
+#include <joint.cpp/Result.hpp>
 #include <joint.cpp/TypeList.hpp>
 #include <joint.cpp/detail/Config.hpp>
 #include <joint.cpp/detail/JointCall.hpp>
@@ -87,6 +88,16 @@ namespace detail
 		{ *outHandle = ex.Release(); return JOINT_CORE_ERROR_NONE; }
 	};
 
+#if JOINT_CPP_CONFIG_NO_EXCEPTIONS
+	template < typename T_ >
+	const char* GetTypeName()
+	{ return "<unknown>"; }
+#else
+	template < typename T_ >
+	const char* GetTypeName()
+	{ return typeid(T_).name(); }
+#endif
+
 	template < typename ComponentImpl_, typename ExceptionType_ >
 	JointCore_Error WrapCppException(ExceptionType_& ex, JointCore_RetValue* outRetValue, const char* methodName)
 	{
@@ -99,7 +110,7 @@ namespace detail
 			char buf[local_buf_size];
 			std::string str;
 
-			const char* component_name = typeid(ComponentImpl_).name();
+			const char* component_name = GetTypeName<ComponentImpl_>();
 			size_t method_name_size = strlen(methodName) + 1;
 			size_t component_name_size = strlen(component_name) + 1;
 			bool use_local_buf = (method_name_size + component_name_size) <= local_buf_size;

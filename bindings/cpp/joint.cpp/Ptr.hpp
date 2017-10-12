@@ -5,6 +5,7 @@
 #include <joint/Joint.h>
 
 #include <cstddef>
+#include <joint.cpp/Result.hpp>
 #include <joint.cpp/detail/JointCall.hpp>
 
 
@@ -18,7 +19,7 @@ namespace joint
 		typedef T_ Interface;
 
 	private:
-		mutable T_		_raw;
+		mutable T_ _raw;
 
 	public:
 		explicit Ptr(T_ raw = T_())
@@ -73,19 +74,16 @@ namespace joint
 		explicit operator bool() const
 		{ return _raw._GetObjectAccessor().Instance != NULL; }
 
-		//T_* Get() { return &_raw; }
 		T_* Get() const { return &_raw; }
 
-		//T_* operator -> () { return &_raw; }
 		T_* operator -> () const { return &_raw; }
 
-		//T_& operator * () { return _raw; }
 		T_& operator * () const { return _raw; }
 	};
 
 
 	template < typename Dst_, typename Src_ >
-	Ptr<Dst_> Cast(const Ptr<Src_>& src)
+	JOINT_CPP_RET_TYPE(Ptr<Dst_>) Cast(const Ptr<Src_>& src)
 	{
 		if (!src)
 			return Ptr<Dst_>();
@@ -98,7 +96,7 @@ namespace joint
 		else if (ret == JOINT_CORE_ERROR_CAST_FAILED)
 			return Ptr<Dst_>();
 		else
-			throw std::runtime_error(std::string("CastObject failed: ") + JointCore_ErrorToString(ret));
+			JOINT_CPP_THROW(Exception(std::string("CastObject failed: ") + JointCore_ErrorToString(ret)));
 	}
 
 }

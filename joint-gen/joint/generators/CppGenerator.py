@@ -170,7 +170,7 @@ def _from_joint_ret_value(type, jointValue):
     elif isinstance(type, Interface):
         return CodeWithInitialization('{}({}.{})'.format(_to_cpp_type(type), jointValue, type.variantName))
     elif isinstance(type, Enum):
-        return CodeWithInitialization('{}::_Value({}.{})'.format(_to_cpp_type(type), jointValue, type.variantName))
+        return CodeWithInitialization('{cpp}({cpp}::_Value({j}.{v}))'.format(cpp=_to_cpp_type(type), j=jointValue, v=type.variantName))
     elif isinstance(type, Struct):
         initialization = []
         member_values = []

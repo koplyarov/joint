@@ -12,7 +12,7 @@
 #include <joint.cpp/detail/Config.hpp>
 
 
-#if !DETAIL_JOINT_CPP_NO_EXCEPTIONS
+#if !JOINT_CPP_CONFIG_NO_EXCEPTIONS
 #	include <stdexcept>
 #endif
 
@@ -28,7 +28,7 @@ namespace joint
 		} while (false);
 
 	class Exception
-#if !DETAIL_JOINT_CPP_NO_EXCEPTIONS
+#if !JOINT_CPP_CONFIG_NO_EXCEPTIONS
 		: public std::exception
 #endif
 	{

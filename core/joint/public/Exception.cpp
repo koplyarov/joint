@@ -3,7 +3,6 @@
 #include <joint/devkit/log/Logger.hpp>
 #include <joint/devkit/util/CppWrappers.hpp>
 #include <joint/devkit/util/JointException.hpp>
-#include <joint/private/JointStructs.h>
 
 #include <atomic>
 #include <string.h>

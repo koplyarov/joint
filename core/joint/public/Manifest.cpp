@@ -2,9 +2,10 @@
 
 #include <joint/devkit/log/Logger.hpp>
 #include <joint/devkit/util/CppWrappers.hpp>
-#include <joint/private/JointStructs.h>
 #include <joint/private/JsonNode.hpp>
 #include <joint/private/JsonParser.hpp>
+
+#include <atomic>
 
 
 using namespace joint;
@@ -12,6 +13,44 @@ using namespace joint;
 
 static const char* LoggerName = "Joint.Core";
 JOINT_DEVKIT_LOGGER(LoggerName)
+
+extern "C"
+{
+
+	struct Joint_ManifestNode : public joint::JsonNode
+	{
+		Joint_ManifestNode(Joint_ManifestNode&& other)
+			: joint::JsonNode(std::move(other))
+		{ }
+
+		Joint_ManifestNode(joint::JsonNode&& other)
+			: joint::JsonNode(std::move(other))
+		{ }
+	};
+
+
+	struct Joint_Manifest
+	{
+		std::atomic<int>           refCount{1};
+		const Joint_ManifestNode   rootNode;
+		const std::string          location;
+
+		Joint_Manifest(Joint_ManifestNode&& rootNode, std::string location)
+			: rootNode(std::move(rootNode)), location(std::move(location))
+		{ }
+	};
+}
+
+
+inline std::ostream& operator << (std::ostream& s, const JointCore_ManifestHandle m)
+{
+	if (!m)
+		s << "null";
+	else
+		s << "{ location: " << m->location << ", root: " << m->rootNode << " }";
+	return s;
+}
+
 
 extern "C"
 {
@@ -37,11 +76,27 @@ extern "C"
 	}
 
 
-	void Joint_DeleteManifest(JointCore_ManifestHandle handle)
+	void Joint_IncRefManifest(JointCore_ManifestHandle handle)
 	{
 		JOINT_CPP_WRAP_BEGIN
 
-		if (handle)
+		if (!handle)
+			return;
+
+		++handle->refCount;
+
+		JOINT_CPP_WRAP_END_VOID
+	}
+
+
+	void Joint_DecRefManifest(JointCore_ManifestHandle handle)
+	{
+		JOINT_CPP_WRAP_BEGIN
+
+		if (!handle)
+			return;
+
+		if (--handle->refCount == 0)
 			delete handle;
 
 		JOINT_CPP_WRAP_END_VOID

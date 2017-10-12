@@ -7,6 +7,7 @@
 #include <JointNative.h>
 #include <joint.cpp/Component.hpp>
 #include <joint.cpp/Ptr.hpp>
+#include <joint.cpp/Result.hpp>
 #include <joint.cpp/detail/Config.hpp>
 #include <joint.cpp/detail/Dummy.hpp>
 #include <joint.cpp/detail/JointCall.hpp>
@@ -21,22 +22,43 @@ namespace joint
 		JointCore_ManifestHandle    _manifest;
 
 	public:
+#if !JOINT_CPP_CONFIG_NO_EXCEPTIONS
 		Manifest(const std::string& location)
 			: _manifest(JOINT_CORE_NULL_HANDLE)
 		{ JOINT_CALL( Joint_ReadManifestFromFile(location.c_str(), &_manifest) ); }
+#endif
+
+		Manifest(JointCore_ManifestHandle handle)
+			: _manifest(handle)
+		{ }
+
+		Manifest(const Manifest& other)
+			: _manifest(other._manifest)
+		{ Joint_IncRefManifest(_manifest); }
+
+		Manifest& operator = (const Manifest& other)
+		{
+			Manifest tmp(other);
+			Swap(tmp);
+			return *this;
+		}
 
 		~Manifest()
+		{ Joint_DecRefManifest(_manifest); }
+
+		static JOINT_CPP_RET_TYPE(Manifest) Create(const std::string& location)
 		{
-			if (_manifest != JOINT_CORE_NULL_HANDLE)
-				Joint_DeleteManifest(_manifest);
+			JointCore_ManifestHandle handle(JOINT_CORE_NULL_HANDLE);
+			JOINT_CALL( Joint_ReadManifestFromFile(location.c_str(), &handle) );
+			return Manifest(handle);
 		}
 
 		JointCore_ManifestHandle GetHandle() const
 		{ return _manifest; }
 
 	private:
-		Manifest(const Manifest&);
-		Manifest& operator = (const Manifest&);
+		void Swap(Manifest& other)
+		{ std::swap(_manifest, other._manifest); }
 	};
 
 
@@ -147,19 +169,25 @@ namespace joint
 		JointCore_ModuleAccessor     _module;
 
 	public:
+#if !JOINT_CPP_CONFIG_NO_EXCEPTIONS
 		explicit Module(const Manifest& manifest)
-		{ Init(manifest); }
+			: _module(CreateImpl(manifest))
+		{ }
 
 		explicit Module(const std::string& manifestLocation)
-		{ Init(Manifest(manifestLocation)); }
+			: _module(CreateImpl(Manifest(manifestLocation)))
+		{ }
+#endif
+
+		explicit Module(JointCore_ModuleAccessor accessor)
+			: _module(accessor)
+		{ }
 
 		Module()
 		{
 			_module.Instance = NULL;
 			_module.VTable = NULL;
 		}
-
-		explicit Module(JointCore_ModuleAccessor module) : _module(module) { }
 
 		Module(const Module& other)
 			: _module(other._module)
@@ -193,29 +221,47 @@ namespace joint
 				_module.VTable->Release(_module.Instance);
 		}
 
+		static JOINT_CPP_RET_TYPE(Module) Create(const Manifest& manifest)
+		{
+			JOINT_CPP_RET_TYPE(JointCore_ModuleAccessor) accessor(CreateImpl(manifest));
+			JOINT_CPP_RETHROW(accessor);
+			return Module(JOINT_CPP_RET_VALUE(accessor));
+		}
+
+		static JOINT_CPP_RET_TYPE(Module) Create(const std::string& manifestLocation)
+		{
+			JOINT_CPP_RET_TYPE(Manifest) manifest(Manifest::Create(manifestLocation));
+			JOINT_CPP_RETHROW(manifest);
+			JOINT_CPP_RET_TYPE(JointCore_ModuleAccessor) accessor(CreateImpl(JOINT_CPP_RET_VALUE(manifest)));
+			JOINT_CPP_RETHROW(accessor);
+			return Module(JOINT_CPP_RET_VALUE(accessor));
+		}
+
 		JointCore_ModuleAccessor GetAccessor() const
 		{ return _module; }
 
 		void Swap(Module& other)
 		{ std::swap(_module, other._module); }
 
-		joint::Ptr<joint::IObject> GetRootObject(const std::string& getterName) const
+		JOINT_CPP_RET_TYPE(Ptr<IObject>) GetRootObject(const std::string& getterName) const
 		{
 			JointCore_ObjectAccessor obj;
 			JOINT_CALL( _module.VTable->GetRootObject(_module.Instance, getterName.c_str(), &obj) );
-			return joint::Ptr<joint::IObject>(joint::IObject(obj));
+			return Ptr<IObject>(IObject(obj));
 		}
 
 		template < typename Interface_ >
-		joint::Ptr<Interface_> GetRootObject(const std::string& getterName, detail::Dummy d = detail::Dummy()) const
-		{ return joint::Cast<Interface_>(GetRootObject(getterName)); }
+		Ptr<Interface_> GetRootObject(const std::string& getterName, detail::Dummy d = detail::Dummy()) const
+		{ return Cast<Interface_>(GetRootObject(getterName)); }
 
 	private:
-		void Init(const Manifest& manifest)
+		static JOINT_CPP_RET_TYPE(JointCore_ModuleAccessor) CreateImpl(const Manifest& manifest)
 		{
-			_module.Instance = NULL;
-			_module.VTable = NULL;
-			JOINT_CALL( JointCore_LoadModule(manifest.GetHandle(), &_module) );
+			JointCore_ModuleAccessor module;
+			module.Instance = NULL;
+			module.VTable = NULL;
+			JOINT_CALL( JointCore_LoadModule(manifest.GetHandle(), &module) );
+			return module;
 		}
 	};
 
@@ -278,6 +324,7 @@ namespace joint
 		ModuleContext      _mainModule;
 
 	public:
+#if !JOINT_CPP_CONFIG_NO_EXCEPTIONS
 		Context()
 		{
 			JointCore_BindingAccessor binding_accessor;
@@ -285,14 +332,22 @@ namespace joint
 			_binding = Binding(binding_accessor);
 			// TODO: _mainModule?
 		}
+#endif
 
 		~Context()
 		{ }
 
+		static JOINT_CPP_RET_TYPE(Context) Create()
+		{
+			JointCore_BindingAccessor binding_accessor;
+			JOINT_CALL( JointNative_MakeBinding(&binding_accessor) );
+			return Context(Binding(binding_accessor)); // TODO: _mainModule?
+		}
+
 		ModuleContext GetMainModule() const { return _mainModule; }
 
-		Module LoadModule(const Manifest& manifest)
-		{ return Module(manifest); }
+		JOINT_CPP_RET_TYPE(Module) LoadModule(const Manifest& manifest)
+		{ return Module::Create(manifest); }
 
 		template < typename Interface_, typename ComponentType_ >
 		Ptr<Interface_> MakeComponentProxy(const ComponentImplPtr<ComponentType_>& component)
@@ -329,6 +384,11 @@ namespace joint
 		template < typename ComponentType_, typename Arg1_ >
 		ComponentImplPtr<ComponentType_> MakeComponentWrapper(const Arg1_& arg1)
 		{ return _mainModule.MakeComponentWrapper<ComponentType_, Arg1_>(arg1); }
+
+	private:
+		Context(const Binding& binding)
+			: _binding(binding)
+		{ }
 	};
 
 }

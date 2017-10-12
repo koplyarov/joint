@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <joint.cpp/Exception.hpp>
+#include <joint.cpp/Result.hpp>
 #include <joint.cpp/detail/RetValueGuard.hpp>
 
 
@@ -20,31 +21,27 @@ namespace detail
 		do { \
 			JointCore_Error ret = (__VA_ARGS__); \
 			if (ret != JOINT_CORE_ERROR_NONE) \
-				throw std::runtime_error(std::string(#__VA_ARGS__ " failed: ") + JointCore_ErrorToString(ret)); \
+				JOINT_CPP_THROW(::joint::Exception(std::string(#__VA_ARGS__ " failed: ") + JointCore_ErrorToString(ret))); \
 		} while (false)
 
 #define JOINT_METHOD_CALL(MethodName_, ...) \
 		do { \
 			JointCore_Error ret = (__VA_ARGS__); \
 			if (ret != JOINT_CORE_ERROR_NONE) \
-				::joint::detail::ThrowCppException(_ret_val.result.ex, MethodName_, ret); \
+				JOINT_CPP_THROW(::joint::detail::MakeCppException(_ret_val.result.ex, MethodName_, ret)); \
 		} while (false)
 
 
-	inline Exception MakeCppException(JointCore_Exception_Handle ex, const char* methodName)
-	{
-		JointCore_Exception_BacktraceEntry sf = { "", "", 0, "", methodName };
-		DETAIL_JOINT_CPP_EXCEPTION_TRY(JointCore_Exception_AppendBacktrace(ex, sf));
-		return Exception(ex);
-	}
-
-
-	inline void ThrowCppException(JointCore_Exception_Handle ex, const char* methodName, JointCore_Error ret)
+	inline Exception MakeCppException(JointCore_Exception_Handle ex, const char* methodName, JointCore_Error ret)
 	{
 		if (ret == JOINT_CORE_ERROR_EXCEPTION)
-			throw ::joint::detail::MakeCppException(ex, methodName);
+		{
+			JointCore_Exception_BacktraceEntry sf = { "", "", 0, "", methodName };
+			DETAIL_JOINT_CPP_EXCEPTION_TRY(JointCore_Exception_AppendBacktrace(ex, sf));
+			return Exception(ex);
+		}
 
-		throw std::runtime_error(std::string("Joint_InvokeMethod (") + methodName +") failed: " + JointCore_ErrorToString(ret));
+		return Exception(std::string("Joint_InvokeMethod (") + methodName +") failed: " + JointCore_ErrorToString(ret));
 	}
 
 }}
