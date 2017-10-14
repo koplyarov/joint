@@ -5,6 +5,13 @@
 | Component-side throw | ${exception.throwComponentSide.joint(lang:cpp)[main]} |
 | Proxy-side throw     | ${exception.throwProxySide.joint(lang:cpp)[main]} |
 
+# C++ (no exceptions)
+| Throw                | Time, ns |
+| -------------------- | -------: |
+| Native throw         | - |
+| Component-side throw | ${exception.throwComponentSide.joint(lang:cpp_ne)[main]} |
+| Proxy-side throw     | ${exception.throwProxySide.joint(lang:cpp_ne)[main]} |
+
 # C
 | Throw                | Time, ns |
 | -------------------- | -------: |

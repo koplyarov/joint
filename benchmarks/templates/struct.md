@@ -5,6 +5,13 @@
 | Incoming call | ${struct.invoke_void_noStruct.joint(lang:cpp)[main]} | ${struct.invoke_void_flatStruct.joint(lang:cpp)[main]} | ${struct.invoke_flatStruct_void.joint(lang:cpp)[main]} | ${struct.invoke_void_nestedStruct.joint(lang:cpp)[main]} | ${struct.invoke_nestedStruct_void.joint(lang:cpp)[main]} |
 | Outgoing call | ${struct.invokeOutgoing_void_noStruct.joint(lang:cpp)[main]} | ${struct.invokeOutgoing_void_flatStruct.joint(lang:cpp)[main]} | ${struct.invokeOutgoing_flatStruct_void.joint(lang:cpp)[main]} | ${struct.invokeOutgoing_void_nestedStruct.joint(lang:cpp)[main]} | ${struct.invokeOutgoing_nestedStruct_void.joint(lang:cpp)[main]} |
 
+# C++ (no exceptions)
+|               | void(i32, i32, i32, i32), ns | void(FlatStruct), ns | FlatStruct(void), ns | void(NestedStruct), ns | NestedStruct(void), ns |
+| ------------- | ---------------------------: | -------------------: | -------------------: | ---------------------: | ---------------------: |
+| Native call   | ${struct.invokeNative_void_noStruct.joint(lang:cpp_ne)[main]} | ${struct.invokeNative_void_flatStruct.joint(lang:cpp_ne)[main]} | ${struct.invokeNative_flatStruct_void.joint(lang:cpp_ne)[main]} | ${struct.invokeNative_void_nestedStruct.joint(lang:cpp_ne)[main]} | ${struct.invokeNative_nestedStruct_void.joint(lang:cpp_ne)[main]} |
+| Incoming call | ${struct.invoke_void_noStruct.joint(lang:cpp_ne)[main]} | ${struct.invoke_void_flatStruct.joint(lang:cpp_ne)[main]} | ${struct.invoke_flatStruct_void.joint(lang:cpp_ne)[main]} | ${struct.invoke_void_nestedStruct.joint(lang:cpp_ne)[main]} | ${struct.invoke_nestedStruct_void.joint(lang:cpp_ne)[main]} |
+| Outgoing call | ${struct.invokeOutgoing_void_noStruct.joint(lang:cpp_ne)[main]} | ${struct.invokeOutgoing_void_flatStruct.joint(lang:cpp_ne)[main]} | ${struct.invokeOutgoing_flatStruct_void.joint(lang:cpp_ne)[main]} | ${struct.invokeOutgoing_void_nestedStruct.joint(lang:cpp_ne)[main]} | ${struct.invokeOutgoing_nestedStruct_void.joint(lang:cpp_ne)[main]} |
+
 # C
 |               | void(i32, i32, i32, i32), ns | void(FlatStruct), ns | FlatStruct(void), ns | void(NestedStruct), ns | NestedStruct(void), ns |
 | ------------- | ---------------------------: | -------------------: | -------------------: | ---------------------: | ---------------------: |

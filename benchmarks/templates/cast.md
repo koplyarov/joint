@@ -5,6 +5,13 @@
 | Component-side cast | ${cast.castComponentSide.joint(lang:cpp)[main]} |
 | Proxy-side cast     | ${cast.castProxySide.joint(lang:cpp)[main]} |
 
+# C++ (no exceptions)
+| Cast                | Time, ns |
+| ------------------- | -------: |
+| Native cast         | - |
+| Component-side cast | ${cast.castComponentSide.joint(lang:cpp_ne)[main]} |
+| Proxy-side cast     | ${cast.castProxySide.joint(lang:cpp_ne)[main]} |
+
 # C
 | Cast                | Time, ns |
 | ------------------- | -------: |

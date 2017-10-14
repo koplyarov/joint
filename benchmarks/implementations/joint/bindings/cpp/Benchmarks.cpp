@@ -1,4 +1,3 @@
-#define JOINT_CPP_CONFIG_NO_EXCEPTIONS 1
 #include <Benchmarks_adapters.hpp>
 
 #include "OtherTranslationUnit.hpp"
@@ -225,9 +224,13 @@ public:
 
 	JOINT_CPP_RET_TYPE(void) MeasureNativeCast(int64_t n)
 	{
+#if !JOINT_CPP_CONFIG_NO_EXCEPTIONS
 		std::unique_ptr<INativeCastInterface1> c(MakeNativeCastComponent());
 		for (int64_t i = 0; i < n; ++i)
 			DoNotOptimizeAway(dynamic_cast<INativeCastInterface2*>(c.get()));
+#else
+		JOINT_CPP_THROW(Exception("Makes no sense"));
+#endif
 
 		JOINT_CPP_RETURN_VOID();
 	}
@@ -243,11 +246,15 @@ public:
 
 	JOINT_CPP_RET_TYPE(void) MeasureNativeThrow(int64_t n)
 	{
+#if !JOINT_CPP_CONFIG_NO_EXCEPTIONS
 		for (int64_t i = 0; i < n; ++i)
 		{
 			try { throw std::runtime_error(""); }
 			catch (const std::exception& ex) { }
 		}
+#else
+		JOINT_CPP_THROW(Exception("Makes no sense"));
+#endif
 
 		JOINT_CPP_RETURN_VOID();
 	}
@@ -256,8 +263,13 @@ public:
 	{
 		for (int64_t i = 0; i < n; ++i)
 		{
-			try { thrower->Throw(); }
-			catch (const std::exception& ex) { }
+#if !JOINT_CPP_CONFIG_NO_EXCEPTIONS
+			try {
+#endif
+			thrower->Throw();
+#if !JOINT_CPP_CONFIG_NO_EXCEPTIONS
+			} catch (const std::exception& ex) { }
+#endif
 		}
 
 		JOINT_CPP_RETURN_VOID();

@@ -5,6 +5,13 @@
 | Incoming call | ${enum.invoke_void_enum.joint(lang:cpp)[main]} | ${enum.invoke_enum_void.joint(lang:cpp)[main]} |
 | Outgoing call | ${enum.invokeOutgoing_void_enum.joint(lang:cpp)[main]} | ${enum.invokeOutgoing_enum_void.joint(lang:cpp)[main]} |
 
+# C++ (no exceptions)
+|               | void(enum), ns | enum(), ns |
+| ------------- | ------------: | --------: |
+| Native call   | ${enum.invokeNative_void_enum.joint(lang:cpp_ne)[main]} | ${enum.invokeNative_enum_void.joint(lang:cpp_ne)[main]} |
+| Incoming call | ${enum.invoke_void_enum.joint(lang:cpp_ne)[main]} | ${enum.invoke_enum_void.joint(lang:cpp_ne)[main]} |
+| Outgoing call | ${enum.invokeOutgoing_void_enum.joint(lang:cpp_ne)[main]} | ${enum.invokeOutgoing_enum_void.joint(lang:cpp_ne)[main]} |
+
 # C
 |               | void(enum), ns | enum(), ns |
 | ------------- | ------------: | --------: |

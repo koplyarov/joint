@@ -5,6 +5,13 @@
 | Component side | ${object.invoke_void_object.joint(lang:cpp)[main]} | ${object.invoke_object_void.joint(lang:cpp)[main]} | ${object.invoke_void_null.joint(lang:cpp)[main]} | ${object.invoke_null_void.joint(lang:cpp)[main]} | ${object.create_object.joint(lang:cpp)[main]} |
 | Proxy side     | ${object.invokeOutgoing_void_object.joint(lang:cpp)[main]} | ${object.invokeOutgoing_object_void.joint(lang:cpp)[main]} | ${object.invokeOutgoing_void_null.joint(lang:cpp)[main]} | ${object.invokeOutgoing_null_void.joint(lang:cpp)[main]} |
 
+# C++ (no exceptions)
+|                | void(object), ns | object(), ns | void(null), ns | null(), ns | create, ns |
+| -------------- | ------------: | --------: |
+| Native         | ${object.invokeNative_void_object.joint(lang:cpp_ne)[main]} | ${object.invokeNative_object_void.joint(lang:cpp_ne)[main]} | ${object.invokeNative_void_null.joint(lang:cpp_ne)[main]} | ${object.invokeNative_null_void.joint(lang:cpp_ne)[main]} | ${object.native_create_object.joint(lang:cpp_ne)[main]} |
+| Component side | ${object.invoke_void_object.joint(lang:cpp_ne)[main]} | ${object.invoke_object_void.joint(lang:cpp_ne)[main]} | ${object.invoke_void_null.joint(lang:cpp_ne)[main]} | ${object.invoke_null_void.joint(lang:cpp_ne)[main]} | ${object.create_object.joint(lang:cpp_ne)[main]} |
+| Proxy side     | ${object.invokeOutgoing_void_object.joint(lang:cpp_ne)[main]} | ${object.invokeOutgoing_object_void.joint(lang:cpp_ne)[main]} | ${object.invokeOutgoing_void_null.joint(lang:cpp_ne)[main]} | ${object.invokeOutgoing_null_void.joint(lang:cpp_ne)[main]} |
+
 # C
 |                | void(object), ns | object(), ns | void(null), ns | null(), ns | create, ns |
 | -------------- | ------------: | --------: |

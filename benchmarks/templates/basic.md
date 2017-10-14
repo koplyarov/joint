@@ -5,6 +5,13 @@
 | Incoming call | ${basic.invoke_void_void.joint(lang:cpp)[main]} | ${basic.invoke_void_i32.joint(lang:cpp)[main]} | ${basic.invoke_i32_void.joint(lang:cpp)[main]} | ${basic.invoke_void_string3.joint(lang:cpp)[main]} | ${basic.invoke_string3_void.joint(lang:cpp)[main]} | ${basic.invoke_void_string100.joint(lang:cpp)[main]} | ${basic.invoke_string100_void.joint(lang:cpp)[main]} |
 | Outgoing call | ${basic.invokeOutgoing_void_void.joint(lang:cpp)[main]} | ${basic.invokeOutgoing_void_i32.joint(lang:cpp)[main]} | ${basic.invokeOutgoing_i32_void.joint(lang:cpp)[main]} | ${basic.invokeOutgoing_void_string3.joint(lang:cpp)[main]} | ${basic.invokeOutgoing_string3_void.joint(lang:cpp)[main]} | ${basic.invokeOutgoing_void_string100.joint(lang:cpp)[main]} | ${basic.invokeOutgoing_string100_void.joint(lang:cpp)[main]} |
 
+# C++ (no exceptions)
+|               | void(), ns | void(i32), ns | i32(), ns | void(string-3), ns | string-3(), ns | void(string-100), ns | string-100(), ns |
+| ------------- | ---------: | ------------: | --------: | -----------------: | -------------: | -------------------: | ---------------: |
+| Native call   | ${basic.invokeNative_void_void.joint(lang:cpp_ne)[main]} | ${basic.invokeNative_void_i32.joint(lang:cpp_ne)[main]} | ${basic.invokeNative_i32_void.joint(lang:cpp_ne)[main]} | ${basic.invokeNative_void_string3.joint(lang:cpp_ne)[main]} | ${basic.invokeNative_string3_void.joint(lang:cpp_ne)[main]} | ${basic.invokeNative_void_string100.joint(lang:cpp_ne)[main]} | ${basic.invokeNative_string100_void.joint(lang:cpp_ne)[main]} |
+| Incoming call | ${basic.invoke_void_void.joint(lang:cpp_ne)[main]} | ${basic.invoke_void_i32.joint(lang:cpp_ne)[main]} | ${basic.invoke_i32_void.joint(lang:cpp_ne)[main]} | ${basic.invoke_void_string3.joint(lang:cpp_ne)[main]} | ${basic.invoke_string3_void.joint(lang:cpp_ne)[main]} | ${basic.invoke_void_string100.joint(lang:cpp_ne)[main]} | ${basic.invoke_string100_void.joint(lang:cpp_ne)[main]} |
+| Outgoing call | ${basic.invokeOutgoing_void_void.joint(lang:cpp_ne)[main]} | ${basic.invokeOutgoing_void_i32.joint(lang:cpp_ne)[main]} | ${basic.invokeOutgoing_i32_void.joint(lang:cpp_ne)[main]} | ${basic.invokeOutgoing_void_string3.joint(lang:cpp_ne)[main]} | ${basic.invokeOutgoing_string3_void.joint(lang:cpp_ne)[main]} | ${basic.invokeOutgoing_void_string100.joint(lang:cpp_ne)[main]} | ${basic.invokeOutgoing_string100_void.joint(lang:cpp_ne)[main]} |
+
 # C
 |               | void(), ns | void(i32), ns | i32(), ns | void(string-3), ns | string-3(), ns | void(string-100), ns | string-100(), ns |
 | ------------- | ---------: | ------------: | --------: | -----------------: | -------------: | -------------------: | ---------------: |
