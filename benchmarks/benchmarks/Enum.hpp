@@ -24,14 +24,14 @@ namespace benchmarks
 			using B = typename Desc_::EnumBenchmarksPtr;
 			using Enum = typename Desc_::Enum;
 
-			AddSimpleBenchmark("invokeNative_void_enum", [](C& ctx, i64 n, B b){ b->MeasureNativeEnumToVoid(n); });
-			AddSimpleBenchmark("invokeNative_enum_void", [](C& ctx, i64 n, B b){ b->MeasureNativeVoidToEnum(n); });
+			AddSimpleBenchmark("invokeNative_void_enum", [](C& ctx, i64 n, B b){ CALL( b->MeasureNativeEnumToVoid(n) ); });
+			AddSimpleBenchmark("invokeNative_enum_void", [](C& ctx, i64 n, B b){ CALL( b->MeasureNativeVoidToEnum(n) ); });
 
-			AddSimpleBenchmark("invoke_void_enum", [](C& ctx, i64 n, B b){ for (int64_t i = 0; i < n; ++i) b->EnumToVoid(Enum()); });
-			AddSimpleBenchmark("invoke_enum_void", [](C& ctx, i64 n, B b){ for (int64_t i = 0; i < n; ++i) b->VoidToEnum(); });
+			AddSimpleBenchmark("invoke_void_enum", [](C& ctx, i64 n, B b){ for (int64_t i = 0; i < n; ++i) CALL( b->EnumToVoid(Enum()) ); });
+			AddSimpleBenchmark("invoke_enum_void", [](C& ctx, i64 n, B b){ for (int64_t i = 0; i < n; ++i) CALL( b->VoidToEnum() ); });
 
-			AddSimpleBenchmark("invokeOutgoing_void_enum", [](C& ctx, i64 n, B b){ b->MeasureOutgoingEnumToVoid(ctx.CreateLocalEnumInvokable(), n); });
-			AddSimpleBenchmark("invokeOutgoing_enum_void", [](C& ctx, i64 n, B b){ b->MeasureOutgoingVoidToEnum(ctx.CreateLocalEnumInvokable(), n); });
+			AddSimpleBenchmark("invokeOutgoing_void_enum", [](C& ctx, i64 n, B b){ CALL( b->MeasureOutgoingEnumToVoid(ctx.CreateLocalEnumInvokable(), n) ); });
+			AddSimpleBenchmark("invokeOutgoing_enum_void", [](C& ctx, i64 n, B b){ CALL( b->MeasureOutgoingVoidToEnum(ctx.CreateLocalEnumInvokable(), n) ); });
 		}
 	};
 

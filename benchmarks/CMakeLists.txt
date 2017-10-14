@@ -53,6 +53,8 @@ if (BENCHMARKS_DEPENDENCIES_RESOLVED AND SWIG_FOUND AND PYTHONLIBS_FOUND AND JNI
 		set(PLATFORM_LIBS rt)
 	endif()
 
+	add_definitions(-DJOINT_CPP_CONFIG_NO_EXCEPTIONS=1)
+
 	add_executable(joint-benchmarks Benchmarks_adapters.hpp main.cpp)
 	target_link_libraries(joint-benchmarks swig_benchmarks_native benchmarks ${JOINT_LIBRARIES} ${PLATFORM_LIBS})
 endif()

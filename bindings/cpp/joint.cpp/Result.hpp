@@ -11,7 +11,6 @@
 namespace joint
 {
 
-#if JOINT_CPP_CONFIG_NO_EXCEPTIONS
 	template < typename T_ >
 	class Result
 	{
@@ -144,6 +143,7 @@ namespace joint
 	};
 
 
+#if JOINT_CPP_CONFIG_NO_EXCEPTIONS
 	namespace Detail
 	{
 		template < typename T_ >

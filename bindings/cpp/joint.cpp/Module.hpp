@@ -80,7 +80,10 @@ namespace joint
 
 		ModuleContext(JointCore_ModuleAccessor accessor, NewRefTag)
 			: _accessor(accessor)
-		{ _accessor.VTable->AddRef(_accessor.Instance); }
+		{
+			if (_accessor.Instance)
+				_accessor.VTable->AddRef(_accessor.Instance);
+		}
 
 		ModuleContext(JointCore_ModuleAccessor accessor, StealRefTag)
 			: _accessor(accessor)
@@ -88,7 +91,10 @@ namespace joint
 
 		ModuleContext(const ModuleContext& other)
 			: _accessor(other._accessor)
-		{ _accessor.VTable->AddRef(_accessor.Instance); }
+		{
+			if (_accessor.Instance)
+				_accessor.VTable->AddRef(_accessor.Instance);
+		}
 
 		ModuleContext& operator= (const ModuleContext& other)
 		{
@@ -251,8 +257,12 @@ namespace joint
 		}
 
 		template < typename Interface_ >
-		Ptr<Interface_> GetRootObject(const std::string& getterName, detail::Dummy d = detail::Dummy()) const
-		{ return Cast<Interface_>(GetRootObject(getterName)); }
+		JOINT_CPP_RET_TYPE(Ptr<Interface_>) GetRootObject(const std::string& getterName, detail::Dummy d = detail::Dummy()) const
+		{
+			JOINT_CPP_RET_TYPE(Ptr<IObject>) obj(GetRootObject(getterName));
+			JOINT_CPP_RETHROW(obj);
+			return Cast<Interface_>(JOINT_CPP_RET_VALUE(obj));
+		}
 
 	private:
 		static JOINT_CPP_RET_TYPE(JointCore_ModuleAccessor) CreateImpl(const Manifest& manifest)
