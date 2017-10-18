@@ -180,8 +180,8 @@ namespace java
 	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().InterfaceId_cls.Get(), ConstInstance().InterfaceId_String_ctor, id.Get()))); }
 
 
-	JObjLocalRef JointJavaContext::JointException::Make(JNIEnv* env, JointCore_Exception_Handle handle)
-	{ return JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().JointException_cls.Get(), ConstInstance().JointException_long_ctor, (jlong)handle))); }
+	JThrowableLocalRef JointJavaContext::JointException::Make(JNIEnv* env, JointCore_Exception_Handle handle)
+	{ return JThrowableLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(ConstInstance().JointException_cls.Get(), ConstInstance().JointException_long_ctor, (jlong)handle))); }
 
 
 	JObjLocalRef JointJavaContext::Array::Make(JNIEnv* env, JObjTempRef elementType, JointCore_ArrayHandle handle)

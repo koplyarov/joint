@@ -64,10 +64,8 @@ namespace
 		}
 		else if (ret == JOINT_CORE_ERROR_EXCEPTION)
 		{
-			auto JointException_cls = JClassLocalRef::StealLocal(env, JAVA_CALL(env->FindClass("Lorg/joint/JointException;")));
-			jmethodID JointException_ctor_id = JAVA_CALL(env->GetMethodID(JointException_cls.Get(), "<init>", "(J)V"));
 			auto sg = ScopeExit([&]{ JointCore_Exception_DecRef(ret_value.result.ex); });
-			auto ex = JThrowableLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(JointException_cls.Get(), JointException_ctor_id, ret_value.result.ex)));
+			auto ex = JointJavaContext::JointException::Make(env, ret_value.result.ex);
 			sg.Cancel();
 			env->Throw(ex.Get());
 			return JObjLocalRef();

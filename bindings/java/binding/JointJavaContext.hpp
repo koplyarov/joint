@@ -105,7 +105,7 @@ namespace java
 
 		struct JointException : public WrapperBase
 		{
-			static JObjLocalRef Make(JNIEnv* env, JointCore_Exception_Handle handle);
+			static JThrowableLocalRef Make(JNIEnv* env, JointCore_Exception_Handle handle);
 		};
 
 		struct Array : public WrapperBase
