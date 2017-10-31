@@ -116,7 +116,7 @@ public:
 
 	JOINT_CPP_RET_TYPE(bool) And(bool l, bool r) { return l && r; }
 
-	JOINT_CPP_RET_TYPE(std::string) Concat(const std::string& l, const std::string& r)
+	JOINT_CPP_RET_TYPE(String) Concat(StringRef l, StringRef r)
 	{ return l + r; }
 
 	JOINT_CPP_RET_TYPE(uint8_t) CallbackU8(const IBasicTestsCallbackU8_Ptr& cb, uint8_t l, uint8_t r) { return cb->AddU8(l, r); }
@@ -130,11 +130,11 @@ public:
 	JOINT_CPP_RET_TYPE(float) CallbackF32(const IBasicTestsCallbackF32_Ptr& cb, float l, float r) { return cb->AddF32(l, r); }
 	JOINT_CPP_RET_TYPE(double) CallbackF64(const IBasicTestsCallbackF64_Ptr& cb, double l, double r) { return cb->AddF64(l, r); }
 	JOINT_CPP_RET_TYPE(bool) CallbackBool(const IBasicTestsCallbackBool_Ptr& cb, bool l, bool r) { return cb->And(l, r); }
-	JOINT_CPP_RET_TYPE(std::string) CallbackString(const IBasicTestsCallbackString_Ptr& cb, const std::string& l, const std::string& r) { return cb->Concat(l, r); }
+	JOINT_CPP_RET_TYPE(String) CallbackString(const IBasicTestsCallbackString_Ptr& cb, StringRef l, StringRef r) { return cb->Concat(l, r); }
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	JOINT_CPP_RET_TYPE(std::string) StringRepresentation(Enum e)
+	JOINT_CPP_RET_TYPE(String) StringRepresentation(Enum e)
 	{ return e.ToString(); }
 
 	JOINT_CPP_RET_TYPE(Enum) GetNextValueInRing(Enum e)
@@ -225,28 +225,28 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	JOINT_CPP_RET_TYPE(S1) MakeS1(int32_t i, const std::string& s) { return S1(i, s); }
-	JOINT_CPP_RET_TYPE(std::string) GetSFromS1(const S1& s) { return s.s; }
+	JOINT_CPP_RET_TYPE(S1) MakeS1(int32_t i, StringRef s) { return S1(i, String(s)); }
+	JOINT_CPP_RET_TYPE(String) GetSFromS1(const S1& s) { return s.s; }
 	JOINT_CPP_RET_TYPE(int32_t) GetIFromS1(const S1& s) { return s.i; }
 
-	JOINT_CPP_RET_TYPE(S2) MakeS2(int32_t i, S2L s2l, float f, S2M s2m, const std::string& s, S2R s2r) { return S2(i, s2l, f, s2m, s, s2r); }
+	JOINT_CPP_RET_TYPE(S2) MakeS2(int32_t i, S2L s2l, float f, S2M s2m, StringRef s, S2R s2r) { return S2(i, s2l, f, s2m, String(s), s2r); }
 	JOINT_CPP_RET_TYPE(int32_t) GetIFromS2(S2 s) { return s.i; }
 	JOINT_CPP_RET_TYPE(S2L) GetS2LFromS2(S2 s) { return s.s2l; }
 	JOINT_CPP_RET_TYPE(float) GetFFromS2(S2 s) { return s.f; }
 	JOINT_CPP_RET_TYPE(S2M) GetS2MFromS2(S2 s) { return s.s2m; }
-	JOINT_CPP_RET_TYPE(std::string) GetSFromS2(S2 s) { return s.s; }
+	JOINT_CPP_RET_TYPE(String) GetSFromS2(S2 s) { return s.s; }
 	JOINT_CPP_RET_TYPE(S2R) GetS2RFromS2(S2 s) { return s.s2r; }
 
-	JOINT_CPP_RET_TYPE(S1) CallbackMakeS1(IStructTestsCallback_Ptr cb, int32_t i, const std::string& s) { return cb->MakeS1(i, s); }
-	JOINT_CPP_RET_TYPE(std::string) CallbackGetSFromS1(IStructTestsCallback_Ptr cb, S1 s) { return cb->GetSFromS1(s); }
+	JOINT_CPP_RET_TYPE(S1) CallbackMakeS1(IStructTestsCallback_Ptr cb, int32_t i, StringRef s) { return cb->MakeS1(i, s); }
+	JOINT_CPP_RET_TYPE(String) CallbackGetSFromS1(IStructTestsCallback_Ptr cb, S1 s) { return cb->GetSFromS1(s); }
 	JOINT_CPP_RET_TYPE(int32_t) CallbackGetIFromS1(IStructTestsCallback_Ptr cb, S1 s) { return cb->GetIFromS1(s); }
 
-	JOINT_CPP_RET_TYPE(S2) CallbackMakeS2(IStructTestsCallback_Ptr cb, int32_t i, S2L s2l, float f, S2M s2m, const std::string& s, S2R s2r) { return cb->MakeS2(i, s2l, f, s2m, s, s2r); }
+	JOINT_CPP_RET_TYPE(S2) CallbackMakeS2(IStructTestsCallback_Ptr cb, int32_t i, S2L s2l, float f, S2M s2m, StringRef s, S2R s2r) { return cb->MakeS2(i, s2l, f, s2m, s, s2r); }
 	JOINT_CPP_RET_TYPE(int32_t) CallbackGetIFromS2(IStructTestsCallback_Ptr cb, S2 s) { return cb->GetIFromS2(s); }
 	JOINT_CPP_RET_TYPE(S2L) CallbackGetS2LFromS2(IStructTestsCallback_Ptr cb, S2 s) { return cb->GetS2LFromS2(s); }
 	JOINT_CPP_RET_TYPE(float) CallbackGetFFromS2(IStructTestsCallback_Ptr cb, S2 s) { return cb->GetFFromS2(s); }
 	JOINT_CPP_RET_TYPE(S2M) CallbackGetS2MFromS2(IStructTestsCallback_Ptr cb, S2 s) { return cb->GetS2MFromS2(s); }
-	JOINT_CPP_RET_TYPE(std::string) CallbackGetSFromS2(IStructTestsCallback_Ptr cb, S2 s) { return cb->GetSFromS2(s); }
+	JOINT_CPP_RET_TYPE(String) CallbackGetSFromS2(IStructTestsCallback_Ptr cb, S2 s) { return cb->GetSFromS2(s); }
 	JOINT_CPP_RET_TYPE(S2R) CallbackGetS2RFromS2(IStructTestsCallback_Ptr cb, S2 s) { return cb->GetS2RFromS2(s); }
 
 	////////////////////////////////////////////////////////////////////////////////

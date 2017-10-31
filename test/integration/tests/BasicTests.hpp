@@ -34,7 +34,7 @@ public:
 
 	bool And(bool l, bool r) { return l && r; }
 
-	std::string Concat(const std::string& l, const std::string& r)
+	joint::String Concat(joint::StringRef l, joint::StringRef r)
 	{ return l + r; }
 };
 
@@ -61,7 +61,7 @@ TEST_DEFINE_TEST(TestCtx, BasicTests)
 	TEST_EQUALS(t->And(true, true), true);
 	TEST_EQUALS(t->And(true, false), false);
 
-	TEST_EQUALS(t->Concat("abc", "xyz"), std::string("abcxyz"));
+	TEST_EQUALS(t->Concat("abc", "xyz"), joint::String("abcxyz"));
 
 	auto cb = Ctx.MakeComponent<test::IBasicTestsCallbackU8, BasicTestsCallback>();
 	TEST_EQUALS(t->CallbackI8(joint::Cast<test::IBasicTestsCallbackI8>(cb), 2, 12), (int8_t)14);
@@ -78,7 +78,7 @@ TEST_DEFINE_TEST(TestCtx, BasicTests)
 	TEST_EQUALS(t->CallbackBool(joint::Cast<test::IBasicTestsCallbackBool>(cb), true, true), true);
 	TEST_EQUALS(t->CallbackBool(joint::Cast<test::IBasicTestsCallbackBool>(cb), true, false), false);
 
-	TEST_EQUALS(t->CallbackString(joint::Cast<test::IBasicTestsCallbackString>(cb), "abc", "xyz"), std::string("abcxyz"));
+	TEST_EQUALS(t->CallbackString(joint::Cast<test::IBasicTestsCallbackString>(cb), "abc", "xyz"), joint::String("abcxyz"));
 }
 
 #endif

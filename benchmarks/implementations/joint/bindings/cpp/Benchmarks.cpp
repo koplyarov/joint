@@ -44,8 +44,10 @@ public:
 
 private:
 	ModuleContext   _moduleContext;
-	std::string     _string3;
-	std::string     _string100;
+	String          _string3;
+	String          _string100;
+	std::string     _nativeString3;
+	std::string     _nativeString100;
 	IObject_Ptr     _obj;
 
 public:
@@ -53,6 +55,8 @@ public:
 		: _moduleContext(moduleContext),
 		  _string3("abc"),
 		  _string100("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"),
+		  _nativeString3("abc"),
+		  _nativeString100("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"),
 		  _obj(moduleContext.MakeComponent<IObject, Object>())
 	{ }
 
@@ -67,9 +71,9 @@ public:
 	JOINT_CPP_RET_TYPE(void) I32ToVoid(int32_t p) { JOINT_CPP_RETURN_VOID(); }
 	JOINT_CPP_RET_TYPE(int32_t) VoidToI32() { return 0; }
 
-	JOINT_CPP_RET_TYPE(void) StringToVoid(const std::string& s) { JOINT_CPP_RETURN_VOID(); }
-	JOINT_CPP_RET_TYPE(std::string) VoidToString3() { return _string3; }
-	JOINT_CPP_RET_TYPE(std::string) VoidToString100() { return _string100; }
+	JOINT_CPP_RET_TYPE(void) StringToVoid(StringRef s) { JOINT_CPP_RETURN_VOID(); }
+	JOINT_CPP_RET_TYPE(String) VoidToString3() { return _string3; }
+	JOINT_CPP_RET_TYPE(String) VoidToString100() { return _string100; }
 
 
 	JOINT_CPP_RET_TYPE(void) MeasureNativeVoidToVoid(int64_t n)
@@ -82,13 +86,13 @@ public:
 	{ for (int64_t i = 0; i < n; ++i) NativeVoidToI32(); JOINT_CPP_RETURN_VOID(); }
 
 	JOINT_CPP_RET_TYPE(void) MeasureNativeString3ToVoid(int64_t n)
-	{ for (int64_t i = 0; i < n; ++i) NativeStringToVoid(_string3); JOINT_CPP_RETURN_VOID(); }
+	{ for (int64_t i = 0; i < n; ++i) NativeStringToVoid(_nativeString3); JOINT_CPP_RETURN_VOID(); }
 
 	JOINT_CPP_RET_TYPE(void) MeasureNativeVoidToString3(int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) NativeVoidToString3(); JOINT_CPP_RETURN_VOID(); }
 
 	JOINT_CPP_RET_TYPE(void) MeasureNativeString100ToVoid(int64_t n)
-	{ for (int64_t i = 0; i < n; ++i) NativeStringToVoid(_string100); JOINT_CPP_RETURN_VOID(); }
+	{ for (int64_t i = 0; i < n; ++i) NativeStringToVoid(_nativeString100); JOINT_CPP_RETURN_VOID(); }
 
 	JOINT_CPP_RET_TYPE(void) MeasureNativeVoidToString100(int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) NativeVoidToString100(); JOINT_CPP_RETURN_VOID(); }

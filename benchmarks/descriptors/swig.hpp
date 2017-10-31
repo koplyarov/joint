@@ -46,6 +46,8 @@ namespace swig
 	{
 		JOINT_DEVKIT_LOGGER("Benchmarks.Swig");
 
+		using String = std::string;
+
 		class Invokable : public IBasicInvokable
 		{
 		public:

@@ -10,6 +10,7 @@ namespace joint
 
 	struct Desc
 	{
+		using String = ::joint::String;
 		using Enum = benchmarks::Enum;
 		using FlatStruct = benchmarks::FlatStruct;
 		using NestedStruct = benchmarks::NestedStruct;
@@ -46,9 +47,9 @@ namespace joint
 			JOINT_CPP_RET_TYPE(void) I32ToVoid(int32_t) { JOINT_CPP_RETURN_VOID(); }
 			JOINT_CPP_RET_TYPE(int32_t) VoidToI32() { return 0; }
 
-			JOINT_CPP_RET_TYPE(void) StringToVoid(const std::string& s) { JOINT_CPP_RETURN_VOID(); }
-			JOINT_CPP_RET_TYPE(std::string) VoidToString3() { return "abc"; }
-			JOINT_CPP_RET_TYPE(std::string) VoidToString100() { return "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"; }
+			JOINT_CPP_RET_TYPE(void) StringToVoid(::joint::StringRef s) { JOINT_CPP_RETURN_VOID(); }
+			JOINT_CPP_RET_TYPE(String) VoidToString3() { return "abc"; }
+			JOINT_CPP_RET_TYPE(String) VoidToString100() { return "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"; }
 
 			JOINT_CPP_RET_TYPE(void) EnumToVoid(Enum) { JOINT_CPP_RETURN_VOID(); }
 			JOINT_CPP_RET_TYPE(Enum) VoidToEnum() { return Enum(); }

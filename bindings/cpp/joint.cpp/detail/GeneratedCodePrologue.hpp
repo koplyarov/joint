@@ -17,6 +17,7 @@
 #include <joint.cpp/Exception.hpp>
 #include <joint.cpp/Ptr.hpp>
 #include <joint.cpp/Result.hpp>
+#include <joint.cpp/String.hpp>
 #include <joint.cpp/TypeList.hpp>
 #include <joint.cpp/detail/Config.hpp>
 #include <joint.cpp/detail/JointCall.hpp>
@@ -69,7 +70,7 @@ namespace detail
 		EnumClass_(_Value value = DefaultValue_) : _value(value) { } \
 		operator _Value() const { return _value; } \
 		_Value _RawValue() const { return _value; } \
-		std::string ToString() const; \
+		::joint::String ToString() const; \
 	private: \
 		_Value _value;
 

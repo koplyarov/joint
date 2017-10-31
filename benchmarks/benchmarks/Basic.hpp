@@ -23,6 +23,7 @@ namespace benchmarks
 			using i64 = int64_t;
 			using C = typename Desc_::BenchmarkCtx;
 			using B = typename Desc_::BenchmarksPtr;
+			using String = typename Desc_::String;
 
 			AddSimpleBenchmark("invokeNative_void_void", [](C& ctx, i64 n, B b){ CALL( b->MeasureNativeVoidToVoid(n) ); });
 			AddSimpleBenchmark("invokeNative_void_i32", [](C& ctx, i64 n, B b){ CALL( b->MeasureNativeI32ToVoid(n) ); });
@@ -37,11 +38,11 @@ namespace benchmarks
 			AddSimpleBenchmark("invoke_void_i32", [](C& ctx, i64 n, B b){ for (int64_t i = 0; i < n; ++i) CALL( b->I32ToVoid(0) ); });
 			AddSimpleBenchmark("invoke_i32_void", [](C& ctx, i64 n, B b){ for (int64_t i = 0; i < n; ++i) CALL( b->VoidToI32() ); });
 
-			std::string string3("abc");
+			String string3("abc");
 			AddSimpleBenchmark("invoke_void_string3", [=](C& ctx, i64 n, B b){ for (int64_t i = 0; i < n; ++i) CALL( b->StringToVoid(string3) ); });
 			AddSimpleBenchmark("invoke_string3_void", [=](C& ctx, i64 n, B b){ for (int64_t i = 0; i < n; ++i) CALL( b->VoidToString3() ); });
 
-			std::string string100("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
+			String string100("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
 			AddSimpleBenchmark("invoke_void_string100", [=](C& ctx, i64 n, B b){ for (int64_t i = 0; i < n; ++i) CALL( b->StringToVoid(string100) ); });
 			AddSimpleBenchmark("invoke_string100_void", [=](C& ctx, i64 n, B b){ for (int64_t i = 0; i < n; ++i) CALL( b->VoidToString100() ); });
 

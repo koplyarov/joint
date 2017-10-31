@@ -80,7 +80,7 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
 		{ }
 #endif
 		{% endif %}
-		std::string ToString() const;
+		::joint::String ToString() const;
 
 		static {{s.name}} _FromJointMembers(JointCore_Value* members)
 		{
@@ -102,7 +102,7 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
 			{% for m in s.members -%}
 			members[{{loop.index - 1}}].{{m.type.variantName}} =
 			{%- if type_name(m.type) == 'BuiltinType' -%}
-			{{m.name}}{{'.c_str()' if m.type.fullname == 'string'}}
+			{{m.name}}{{'.Utf8Bytes().data()' if m.type.fullname == 'string'}}
 			{%- elif type_name(m.type) == 'Enum' -%}
 			{{m.name}}._RawValue()
 			{%- elif type_name(m.type) == 'Interface' -%}
@@ -140,13 +140,13 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
 	{
 		return s << "{"
 		{% for m in s.members -%}
-		"{{- '\'' if m.type.fullname == 'string' -}}" << st.{{m.name}} << "{{- '\'' if m.type.fullname == 'string' -}}"
+		"{{- '\'' if m.type.fullname == 'string' -}}" << st.{{m.name}}{{- '.Utf8Bytes().data()' if m.type.fullname == 'string' -}} << "{{- '\'' if m.type.fullname == 'string' -}}"
 		{% endfor -%}
 		" }";
 	}
 
-	std::string {{s.name}}::ToString() const
-	{ std::stringstream s; s << *this; return s.str(); }
+	::joint::String {{s.name}}::ToString() const
+	{ std::stringstream s; s << *this; return ::joint::String(s.str()); }
 
 {% endfor %}
 {% endcall -%}
@@ -170,7 +170,7 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
 		static const char* _GetInterfaceId() { return "{{i.fullname}}"; }
 
 		{%- for m in i.methods %}
-		JOINT_CPP_RET_TYPE({{cpp_type(m.retType)}}) {{m.name}}({{ m.params | map('param_decl') | join(', ') }});
+		JOINT_CPP_RET_TYPE({{cpp_type(m.retType)}}) {{m.name}}({{ m.params | map('ref_param_decl') | join(', ') }});
 		{%- endfor %}
 	};
 
@@ -199,14 +199,14 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
 
 {% call(p) for_each_package() %}
 {% for e in p.enums %}
-	std::string {{e.name}}::ToString() const
+	::joint::String {{e.name}}::ToString() const
 	{
 		switch (_value)
 		{
 		{% for v in e.values -%}
-		case {{v.name}}: return "{{v.name}}";
+		case {{v.name}}: return ::joint::String("{{v.name}}");
 		{% endfor -%}
-		default: return "<Unknown {{e.name}} value>";
+		default: return ::joint::String("<Unknown {{e.name}} value>");
 		}
 	}
 {% endfor %}
@@ -216,7 +216,7 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
 {% call(p) for_each_package() %}
 {% for i in p.interfaces %}
 {% for m in i.methods %}
-	JOINT_CPP_RET_TYPE({{cpp_type(m.retType)}}) {{i.name}}::{{m.name}}({{m.params | map('param_decl') | join(', ')}})
+	JOINT_CPP_RET_TYPE({{cpp_type(m.retType)}}) {{i.name}}::{{m.name}}({{m.params | map('ref_param_decl') | join(', ')}})
 	{
 		using namespace ::joint::detail;
 		JointCore_RetValue _ret_val;
@@ -264,7 +264,7 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
 				{
 					{%- for p in m.params -%}
 					{{from_joint_param(p.type, 'params[{}].value'.format(p.index)).initialization | join('\n') | indent(20)}}
-					{{cpp_type(p.type)}} p{{p.index}}({{from_joint_param(p.type, 'params[{}].value'.format(p.index)).code}});
+					{{cpp_ref_param_type(p.type)}} p{{p.index}}({{from_joint_param(p.type, 'params[{}].value'.format(p.index)).code}});
 					{%- endfor -%}
 					{%- if m.retType.name != 'void' %}
 					DETAIL_JOINT_CPP_INVOKE_METHOD({{cpp_type(m.retType)}}, (componentImpl->{{m.name}}({%- for p in m.params -%}p{{p.index}}{{', ' if not loop.last}}{%- endfor -%})));

@@ -12,12 +12,17 @@ class CppGenerator:
         env = Environment(loader=PackageLoader('joint', 'templates'))
         env.filters['mangle_type'] = _mangle_type
         env.filters['param_decl'] = _to_cpp_param_decl
+        env.filters['ref_param_decl'] = _to_cpp_ref_param_decl
         result = env.get_template("template.cpp.jinja").render(
             hex=hex,
             packages=self.semanticGraph.packages,
             type_name=lambda x: type(x).__name__,
+            is_heavy_type=_is_heavy_type,
             cpp_type=_to_cpp_type,
+            cpp_param_type=_to_cpp_param_type,
+            cpp_ref_param_type=_to_cpp_ref_param_type,
             param_decl=_to_cpp_param_decl,
+            ref_param_decl=_to_cpp_ref_param_decl,
             mangle_type=_mangle_type,
             to_joint_param=_to_joint_param,
             to_joint_retval=_to_joint_ret_value,
@@ -27,8 +32,20 @@ class CppGenerator:
         for l in result.split('\n'):
             yield l
 
+
 def _is_heavy_type(type):
     return isinstance(type, Struct) or isinstance(type, Interface) or (isinstance(type, BuiltinType) and type.category == BuiltinTypeCategory.string)
+
+
+def _to_cpp_param_type(type):
+    return _to_cpp_type(type)
+
+
+def _to_cpp_ref_param_type(type):
+    if isinstance(type, BuiltinType) and type.category == BuiltinTypeCategory.string:
+        return '::joint::StringRef'
+    return _to_cpp_type(type)
+
 
 def _to_cpp_type(type):
     if isinstance(type, BuiltinType):
@@ -45,7 +62,7 @@ def _to_cpp_type(type):
                 return 'double'
             raise RuntimeError('Unsupported floatint point type (bits: {})'.format(type.bits))
         if type.category == BuiltinTypeCategory.string:
-            return '::std::string'
+            return '::joint::String'
         raise RuntimeError('Unknown type: {}'.format(type))
     elif isinstance(type, Interface):
         return '{}_Ptr'.format(_mangle_type(type));
@@ -56,19 +73,29 @@ def _to_cpp_type(type):
     else:
         raise RuntimeError('Not implemented (type: {})!'.format(type))
 
+
 def _mangle_type(ifc):
     return '::{}'.format('::'.join(ifc.packageNameList + [ ifc.name ]))
 
+
 def _to_cpp_param_decl(p):
-    param_type = _to_cpp_type(p.type)
+    param_type = _to_cpp_param_type(p.type)
     if _is_heavy_type(p.type):
         param_type = 'const {}&'.format(param_type)
     return '{} {}'.format(param_type, p.name)
 
+
+def _to_cpp_ref_param_decl(p):
+    param_type = _to_cpp_ref_param_type(p.type)
+    if _is_heavy_type(p.type) and not (isinstance(p.type, BuiltinType) and p.type.category == BuiltinTypeCategory.string):
+        param_type = 'const {}&'.format(param_type)
+    return '{} {}'.format(param_type, p.name)
+
+
 def _to_joint_param(type, cppValue):
     if isinstance(type, BuiltinType):
         if type.category == BuiltinTypeCategory.string:
-            return CodeWithInitialization('{}.c_str()'.format(cppValue))
+            return CodeWithInitialization('{}.Utf8Bytes().data()'.format(cppValue))
         else:
             return CodeWithInitialization(cppValue)
     elif isinstance(type, Interface):
@@ -92,13 +119,14 @@ def _to_joint_param(type, cppValue):
     else:
         raise RuntimeError('Not implemented (type: {})!'.format(type))
 
+
 def _to_joint_ret_value(type, cppValue):
     if isinstance(type, BuiltinType):
         if type.category == BuiltinTypeCategory.string:
             mangled_value = cppValue.replace('.', '_')
             initialization = [
-                'char* _{}_c_str = new char[{}.size() + 1];'.format(mangled_value, cppValue),
-                'strcpy(_{}_c_str, {}.c_str());'.format(mangled_value, cppValue)
+                'char* _{}_c_str = new char[{}.Utf8Bytes().size() + 1];'.format(mangled_value, cppValue),
+                'strcpy(_{}_c_str, {}.Utf8Bytes().data());'.format(mangled_value, cppValue)
             ]
             return CodeWithInitialization('_{}_c_str'.format(mangled_value), initialization)
         else:
@@ -126,6 +154,7 @@ def _to_joint_ret_value(type, cppValue):
     else:
         raise RuntimeError('Not implemented (type: {})!'.format(type))
 
+
 def _validate_joint_param(type, jointType):
     if isinstance(type, BuiltinType) or isinstance(type, Enum) or isinstance(type, Array):
         return
@@ -138,6 +167,7 @@ def _validate_joint_param(type, jointType):
                 yield l
     else:
         raise RuntimeError('Not implemented (type: {})!'.format(type))
+
 
 def _from_joint_param(type, jointValue):
     if isinstance(type, BuiltinType):
@@ -161,6 +191,7 @@ def _from_joint_param(type, jointValue):
     else:
         raise RuntimeError('Not implemented (type: {})!'.format(type))
 
+
 def _from_joint_ret_value(type, jointValue):
     if isinstance(type, BuiltinType):
         if type.category == BuiltinTypeCategory.bool:
@@ -183,4 +214,3 @@ def _from_joint_ret_value(type, jointValue):
         return CodeWithInitialization('{}({}.{})'.format(_to_cpp_type(type), jointValue, type.variantName))
     else:
         raise RuntimeError('Not implemented (type: {})!'.format(type))
-
