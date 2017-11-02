@@ -54,7 +54,7 @@ namespace joint
 			JOINT_CPP_RET_TYPE(void) EnumToVoid(Enum) { JOINT_CPP_RETURN_VOID(); }
 			JOINT_CPP_RET_TYPE(Enum) VoidToEnum() { return Enum(); }
 
-			JOINT_CPP_RET_TYPE(void) ObjectToVoid(const ::joint::IObject_Ptr&) { JOINT_CPP_RETURN_VOID(); }
+			JOINT_CPP_RET_TYPE(void) ObjectToVoid(::joint::IObject_Ref) { JOINT_CPP_RETURN_VOID(); }
 			JOINT_CPP_RET_TYPE(::joint::IObject_Ptr) VoidToObject() { return _obj; }
 			JOINT_CPP_RET_TYPE(::joint::IObject_Ptr) VoidToNull() { return nullptr; }
 

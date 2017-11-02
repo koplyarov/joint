@@ -98,25 +98,25 @@ public:
 	{ for (int64_t i = 0; i < n; ++i) NativeVoidToString100(); JOINT_CPP_RETURN_VOID(); }
 
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToVoid(IBasicInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToVoid(IBasicInvokable_Ref invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToVoid(); JOINT_CPP_RETURN_VOID(); }
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingI32ToVoid(IBasicInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingI32ToVoid(IBasicInvokable_Ref invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->I32ToVoid(0); JOINT_CPP_RETURN_VOID(); }
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToI32(IBasicInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToI32(IBasicInvokable_Ref invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToI32(); JOINT_CPP_RETURN_VOID(); }
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingString3ToVoid(IBasicInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingString3ToVoid(IBasicInvokable_Ref invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->StringToVoid(_string3); JOINT_CPP_RETURN_VOID(); }
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToString3(IBasicInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToString3(IBasicInvokable_Ref invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToString3(); JOINT_CPP_RETURN_VOID(); }
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingString100ToVoid(IBasicInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingString100ToVoid(IBasicInvokable_Ref invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->StringToVoid(_string100); JOINT_CPP_RETURN_VOID(); }
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToString100(IBasicInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToString100(IBasicInvokable_Ref invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToString100(); JOINT_CPP_RETURN_VOID(); }
 
 
@@ -132,10 +132,10 @@ public:
 	JOINT_CPP_RET_TYPE(void) MeasureNativeVoidToEnum(int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) NativeVoidToEnum(); JOINT_CPP_RETURN_VOID(); }
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingEnumToVoid(IEnumInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingEnumToVoid(IEnumInvokable_Ref invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->EnumToVoid(Enum()); JOINT_CPP_RETURN_VOID(); }
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToEnum(IEnumInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToEnum(IEnumInvokable_Ref invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToEnum(); JOINT_CPP_RETURN_VOID(); }
 
 
@@ -165,26 +165,26 @@ public:
 	{ for (int64_t i = 0; i < n; ++i) NativeVoidToNestedStruct(); JOINT_CPP_RETURN_VOID(); }
 
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingNoStructToVoid(IStructInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingNoStructToVoid(IStructInvokable_Ref invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->NoStructToVoid(1, 2, 3, 4); JOINT_CPP_RETURN_VOID(); }
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingFlatStructToVoid(IStructInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingFlatStructToVoid(IStructInvokable_Ref invokable, int64_t n)
 	{ FlatStruct s{1, 2, 3, 4}; for (int64_t i = 0; i < n; ++i) invokable->FlatStructToVoid(s); JOINT_CPP_RETURN_VOID(); }
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToFlatStruct(IStructInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToFlatStruct(IStructInvokable_Ref invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToFlatStruct(); JOINT_CPP_RETURN_VOID(); }
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingNestedStructToVoid(IStructInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingNestedStructToVoid(IStructInvokable_Ref invokable, int64_t n)
 	{ NestedStruct s{1, NestedStruct2{2, NestedStruct3{3, NestedStruct4{4}}}}; for (int64_t i = 0; i < n; ++i) invokable->NestedStructToVoid(s); JOINT_CPP_RETURN_VOID(); }
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToNestedStruct(IStructInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToNestedStruct(IStructInvokable_Ref invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToNestedStruct(); JOINT_CPP_RETURN_VOID(); }
 
 
 	///// IObjectBenchmarks /////
 
 
-	JOINT_CPP_RET_TYPE(void) ObjectToVoid(const IObject_Ptr&) { JOINT_CPP_RETURN_VOID(); }
+	JOINT_CPP_RET_TYPE(void) ObjectToVoid(IObject_Ref) { JOINT_CPP_RETURN_VOID(); }
 	JOINT_CPP_RET_TYPE(IObject_Ptr) VoidToObject() { return _obj; }
 	JOINT_CPP_RET_TYPE(IObject_Ptr) VoidToNull() { return nullptr; }
 	JOINT_CPP_RET_TYPE(IObject_Ptr) CreateObject() { return _moduleContext.MakeComponent<IObject, Object>(); }
@@ -196,10 +196,10 @@ public:
 	JOINT_CPP_RET_TYPE(void) MeasureNativeVoidToObject(int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) NativeVoidToObject(); JOINT_CPP_RETURN_VOID(); }
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingObjectToVoid(IObjectInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingObjectToVoid(IObjectInvokable_Ref invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->ObjectToVoid(_obj); JOINT_CPP_RETURN_VOID(); }
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToObject(IObjectInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToObject(IObjectInvokable_Ref invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToObject(); JOINT_CPP_RETURN_VOID(); }
 
 
@@ -209,10 +209,10 @@ public:
 	JOINT_CPP_RET_TYPE(void) MeasureNativeVoidToNull(int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) NativeVoidToNull(); JOINT_CPP_RETURN_VOID(); }
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingNullToVoid(IObjectInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingNullToVoid(IObjectInvokable_Ref invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->ObjectToVoid(nullptr); JOINT_CPP_RETURN_VOID(); }
 
-	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToNull(IObjectInvokable_Ptr invokable, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureOutgoingVoidToNull(IObjectInvokable_Ref invokable, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) invokable->VoidToNull(); JOINT_CPP_RETURN_VOID(); }
 
 
@@ -239,7 +239,7 @@ public:
 		JOINT_CPP_RETURN_VOID();
 	}
 
-	JOINT_CPP_RET_TYPE(void) MeasureProxySideCast(ICastInterface1_Ptr obj, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureProxySideCast(ICastInterface1_Ref obj, int64_t n)
 	{ for (int64_t i = 0; i < n; ++i) joint::Cast<ICastInterface2>(obj); JOINT_CPP_RETURN_VOID(); }
 
 
@@ -263,7 +263,7 @@ public:
 		JOINT_CPP_RETURN_VOID();
 	}
 
-	JOINT_CPP_RET_TYPE(void) MeasureProxySideThrow(IThrower_Ptr thrower, int64_t n)
+	JOINT_CPP_RET_TYPE(void) MeasureProxySideThrow(IThrower_Ref thrower, int64_t n)
 	{
 		for (int64_t i = 0; i < n; ++i)
 		{

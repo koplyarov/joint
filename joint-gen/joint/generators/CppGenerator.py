@@ -44,6 +44,8 @@ def _to_cpp_param_type(type):
 def _to_cpp_ref_param_type(type):
     if isinstance(type, BuiltinType) and type.category == BuiltinTypeCategory.string:
         return '::joint::StringRef'
+    if isinstance(type, Interface):
+        return '{}_Ref'.format(_mangle_type(type));
     return _to_cpp_type(type)
 
 
@@ -183,8 +185,7 @@ def _from_joint_param(type, jointValue):
             member_values.append('{}({})'.format(_to_cpp_type(m.type), member_code.code))
         return CodeWithInitialization(', '.join(member_values), initialization)
     elif isinstance(type, Interface):
-        initialization = [ 'JOINT_CORE_INCREF_ACCESSOR({}.{});'.format(jointValue, type.variantName) ]
-        return CodeWithInitialization('{}({}.{})'.format(_to_cpp_type(type), jointValue, type.variantName), initialization)
+        return CodeWithInitialization('{}({}.{})'.format(_to_cpp_ref_param_type(type), jointValue, type.variantName), [])
     elif isinstance(type, Array):
         initialization = [ 'Joint_IncRefArray({}.{});'.format(jointValue, type.variantName) ]
         return CodeWithInitialization('{}({}.{})'.format(_to_cpp_type(type), jointValue, type.variantName), initialization)

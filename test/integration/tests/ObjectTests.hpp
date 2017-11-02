@@ -32,7 +32,7 @@ public:
 	test::ISomeObject_Ptr Return()
 	{ return _obj; }
 
-	bool Method(test::ISomeObject_Ptr o)
+	bool Method(test::ISomeObject_Ref o)
 	{ return (bool)o; }
 };
 

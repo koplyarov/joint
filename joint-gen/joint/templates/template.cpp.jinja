@@ -47,6 +47,7 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
 {% for i in p.interfaces %}
 	class {{i.name}};
 	typedef ::joint::Ptr<{{i.name}}> {{i.name}}_Ptr;
+	typedef ::joint::Ref<{{i.name}}> {{i.name}}_Ref;
 	template <typename ComponentImpl_> class {{i.name}}_accessor;
 {% endfor %}
 {% endcall -%}
