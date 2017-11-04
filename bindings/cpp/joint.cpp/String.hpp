@@ -164,7 +164,8 @@ namespace joint
 		size_t Size() const { return _storage.size() + 1; }
 	};
 
-	inline std::ostream& operator<<(std::ostream& s, const String& str)
+	template < typename String_ >
+	std::ostream& operator<<(std::ostream& s, const detail::StringImpl<String_>& str)
 	{ return s << str.Utf8Bytes().data(); }
 
 	template < typename String1_, typename String2_ >
