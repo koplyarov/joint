@@ -1,5 +1,10 @@
 [ "$RUN_BENCHMARKS" -ne 0 ] || exit 0
 
-Verbose sudo PYTHONPATH="`pwd`/build/bin:`pwd`/benchmarks/implementations/swig" ./build/bin/joint-benchmarks -c10 -v3 -t benchmarks/ci/template.py -o- > build/benchmarks/ci.py && 
-Verbose python ./build/benchmarks/ci.py --data benchmarks/ci/canon_data.json ||
+[ "$BENCHMARKS_NUM_PASSES" ] || BENCHMARKS_NUM_PASSES=2
+
+Verbose "$SOURCE_DIR/benchmarks/ci/runner.py" \
+	--executable build/bin/joint-benchmarks \
+	--reference-executable joint-reference/build/bin/joint-benchmarks \
+	--benchmarks "$SOURCE_DIR/benchmarks/ci/benchmarks.json" \
+	--num-passes "$BENCHMARKS_NUM_PASSES" ||
 exit 1

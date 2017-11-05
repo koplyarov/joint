@@ -9,6 +9,7 @@ if (MSVC)
 else()
 	add_definitions(-Wall)
 	add_definitions(-std=c++11)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections -falign-functions=64")
 endif()
 
 joint_generate_adapters(c++ Benchmarks_adapters.hpp

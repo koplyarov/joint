@@ -10,6 +10,8 @@ addons:
 matrix:
   include:
     - compiler: gcc
+      env: RUN_BENCHMARKS=1 BENCHMARKS_NUM_PASSES=10 BUILD_TYPE=RelWithDebInfo
+    - compiler: gcc
       env: COVERITY_BUILD=1 BUILD_TYPE=RelWithDebInfo
     - compiler: gcc
       env: UPLOAD_COVERAGE=1 TEST_COVERAGE=1 BUILD_TYPE=Debug CMAKE_FLAGS="-DJOINT_COVERAGE=TRUE"

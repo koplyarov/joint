@@ -5,6 +5,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 if (NOT MSVC)
 	add_definitions(-Wall)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections -falign-functions=64")
 endif()
 
 ################################################################################

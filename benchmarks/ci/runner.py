@@ -4,7 +4,9 @@ from collections import defaultdict, namedtuple
 
 import argparse
 import colorama
+import copy
 import json
+import os
 import subprocess
 import traceback
 
@@ -13,7 +15,9 @@ ResultEntry = namedtuple("ResultEntry", "current, reference, error")
 
 
 def run(executable, num_passes, id, lang):
-    out_json = subprocess.check_output([executable, '-j', '-c', str(num_passes), '-b', id, '--params', 'lang:{}'.format(lang)])
+    env = copy.copy(os.environ)
+    env["PYTHONPATH"] = os.path.dirname(executable)
+    out_json = subprocess.check_output([executable, '-j', '-c', str(num_passes), '-b', id, '--params', 'lang:{}'.format(lang)], env=env)
     out = json.loads(out_json)
     return out['times']['main']
 
