@@ -1,6 +1,6 @@
 VG() {
 	if [ "$USE_VALGRIND" -ne 0 ]; then
-		valgrind --suppressions=etc/valgrind.sup --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 -q ./build/bin/joint-test $@
+		valgrind "--suppressions=$SOURCE_DIR/etc/valgrind.sup" --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 -q ./build/bin/joint-test $@
 	else
 		./build/bin/joint-test $@
 	fi

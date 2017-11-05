@@ -17,7 +17,7 @@ Upload() {
 	return $RET
 }
 
-Verbose lcov --directory . --capture --output-file coverage.info &&
+Verbose lcov --directory "$SOURCE_DIR" --capture --output-file coverage.info &&
 Verbose lcov --remove coverage.info '/usr/*' 'test/*' 'benchmarks/*' 'examples/*' 'build/core/joint/JsonParser.*.cpp' 'bindings/java/*' --output-file coverage.info &&
 Verbose lcov --list coverage.info && 
 Verbose Upload ||

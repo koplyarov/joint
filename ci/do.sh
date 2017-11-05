@@ -1,11 +1,16 @@
 #!/bin/bash
 
-MY_DIR="$(dirname $0)"
+MY_DIR="$(dirname $(readlink -f $0))"
 . "$MY_DIR/common.sh" || exit 1
 
 [ $# -eq 1 ] || Fail "Usage: $0 <target>"
 
+SOURCE_DIR="$MY_DIR/.."
+CI_WORKING_DIR="$MY_DIR/../.ci"
 TARGETS_DIR="$MY_DIR/$1"
+
+mkdir -p $CI_WORKING_DIR
+cd "$CI_WORKING_DIR"
 
 ZeroInit RUN_BENCHMARKS TEST_COVERAGE COVERITY_BUILD USE_VALGRIND
 
