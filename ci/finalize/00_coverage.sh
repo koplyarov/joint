@@ -1,5 +1,7 @@
 [ "$TEST_COVERAGE" -ne 0 ] || exit 0
 
+ZeroInit UPLOAD_COVERAGE
+
 echo "Sending coverage info"
 
 ToCoveralls() {
@@ -11,6 +13,10 @@ ToCodecov() {
 }
 
 Upload() {
+	if [ $UPLOAD_COVERAGE -eq 0 ]; then
+		Log "UPLOAD_COVERAGE not set, skipping upload"
+		return 0
+	fi
 	local RET=0
 	Verbose ToCodecov || RET=1
 	Verbose ToCoveralls || RET=1
