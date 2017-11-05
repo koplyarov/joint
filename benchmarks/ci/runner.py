@@ -12,8 +12,8 @@ import traceback
 ResultEntry = namedtuple("ResultEntry", "current, reference, error")
 
 
-def run(executable, id, lang):
-    out_json = subprocess.check_output([executable, '-j', '-c', '10', '-b', id, '--params', 'lang:{}'.format(lang)])
+def run(executable, num_passes, id, lang):
+    out_json = subprocess.check_output([executable, '-j', '-c', str(num_passes), '-b', id, '--params', 'lang:{}'.format(lang)])
     out = json.loads(out_json)
     return out['times']['main']
 
@@ -41,6 +41,7 @@ def main():
     parser.add_argument('--executable', help='joint-benchmarks executable', required=True)
     parser.add_argument('--reference-executable', help='joint-benchmarks reference executable', required=True)
     parser.add_argument('--benchmarks', help='benchmarks.json file', required=True)
+    parser.add_argument('--num-passes', help='number of joint-benchmarks passes required to measure performance', type=int, default=1)
     args = parser.parse_args()
 
     ctx = Context()
@@ -59,8 +60,8 @@ def main():
             current_number += 1
 
             try:
-                current = run(args.executable, id, lang)
-                reference = run(args.reference_executable, id, lang)
+                current = run(args.executable, args.num_passes, id, lang)
+                reference = run(args.reference_executable, args.num_passes, id, lang)
                 result[lang][id] = ResultEntry(reference=reference, current=current, error=None)
             except subprocess.CalledProcessError:
                 has_errors = True
