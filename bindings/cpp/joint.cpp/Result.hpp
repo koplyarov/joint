@@ -63,7 +63,7 @@ namespace joint
 		const T_& Value() const
 		{
 			if (!_ok)
-				JOINT_CORE_FATAL("Joint.C++.Result", "An exception occured!");
+				JOINT_CORE_FATAL("Joint.C++.Result", "An exception occured: %s", ExceptionStorage()->what());
 			return *ValueStorage();
 		}
 
