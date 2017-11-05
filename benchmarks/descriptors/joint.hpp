@@ -102,7 +102,7 @@ namespace joint
 		public:
 			BenchmarkCtx(const std::string& language)
 				: _ctx(JOINT_CPP_RET_VALUE(::joint::Context::Create())),
-				  _module(JOINT_CPP_RET_VALUE(_ctx.LoadModule(JOINT_CPP_RET_VALUE(::joint::Manifest::Create("build/bin/" + language + "/Benchmarks/Benchmarks.jm")))))
+				  _module(JOINT_CPP_RET_VALUE(_ctx.LoadModule(JOINT_CPP_RET_VALUE(::joint::Manifest::Create(g_benchmarksDir + "/" + language + "/Benchmarks/Benchmarks.jm")))))
 			{ }
 
 			BenchmarkCtx(const BenchmarkCtx&) = delete;

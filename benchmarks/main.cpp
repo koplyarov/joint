@@ -13,18 +13,24 @@
 
 #include <iostream>
 
+std::string g_benchmarksDir;
+
 #include <benchmarks/Basic.hpp>
 #include <benchmarks/Cast.hpp>
 #include <benchmarks/Enum.hpp>
 #include <benchmarks/Exception.hpp>
 #include <benchmarks/Object.hpp>
 #include <benchmarks/Struct.hpp>
+
 #include <descriptors/joint.hpp>
 #include <descriptors/swig.hpp>
 
 
 int main(int argc, char* argv[])
 {
+	std::string executablePath(argv[0]);
+	g_benchmarksDir = executablePath.substr(0, executablePath.find_last_of("/\\"));
+
 	try
 	{
 		using namespace benchmarks;

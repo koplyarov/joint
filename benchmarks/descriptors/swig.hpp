@@ -163,7 +163,7 @@ namespace swig
 		public:
 			BenchmarkCtx(const std::string& language)
 			{
-				std::string module_manifest_path = "benchmarks/implementations/swig/" + language + ".manifest";
+				std::string module_manifest_path = g_benchmarksDir + "/../../benchmarks/implementations/swig/" + language + ".manifest";
 				using namespace ::joint::devkit;
 
 				JointCore_ManifestHandle m;
