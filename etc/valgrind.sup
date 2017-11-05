@@ -1,5 +1,16 @@
 {
    <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:Py_EncodeLocale
+   ...
+   fun:Py_GetProgramFullPath
+   fun:_PySys_Init
+   ...
+}
+
+{
+   <insert_a_suppression_name_here>
    Memcheck:Value8
    ...
    fun:Py_Finalize
