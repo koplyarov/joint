@@ -15,9 +15,9 @@ Configure() {
 
 Make() {
 	if [ "$COVERITY_BUILD" -ne 0 ]; then
-		Verbose cov-build --dir cov-int make -j2
+		Verbose cov-build --dir cov-int make "-j$NUM_CORES"
 	else
-		Verbose make -j2
+		Verbose make "-j$NUM_CORES"
 	fi
 }
 

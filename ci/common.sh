@@ -1,3 +1,5 @@
+export NUM_CORES=$(grep -c ^processor /proc/cpuinfo)
+
 StringContains() {
 	[ -z "${1##*$2*}" ]
 }
