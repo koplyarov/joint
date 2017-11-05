@@ -8,10 +8,15 @@ import copy
 import json
 import os
 import subprocess
+import sys
 import traceback
 
 
 ResultEntry = namedtuple("ResultEntry", "current, reference, error")
+
+
+def eprint(msg):
+    sys.stderr.write("{}\n".format(msg))
 
 
 def run(executable, num_passes, id, lang):
@@ -28,16 +33,16 @@ class Context:
 
     def error(self, msg):
         self.num_errors += 1
-        print('{fg}{msg}{rs}'.format(msg=msg, fg=colorama.Fore.RED, rs=colorama.Style.RESET_ALL))
+        eprint('{fg}{msg}{rs}'.format(msg=msg, fg=colorama.Fore.RED, rs=colorama.Style.RESET_ALL))
 
     def warning(self,msg):
-        print('{fg}{msg}{rs}'.format(msg=msg, fg=colorama.Fore.YELLOW, rs=colorama.Style.RESET_ALL))
+        eprint('{fg}{msg}{rs}'.format(msg=msg, fg=colorama.Fore.YELLOW, rs=colorama.Style.RESET_ALL))
 
     def info(self,msg):
-        print(msg)
+        eprint(msg)
 
     def ok(self,msg):
-        print('{fg}{msg}{rs}'.format(msg=msg, fg=colorama.Fore.GREEN, rs=colorama.Style.RESET_ALL))
+        eprint('{fg}{msg}{rs}'.format(msg=msg, fg=colorama.Fore.GREEN, rs=colorama.Style.RESET_ALL))
 
 
 def main():
