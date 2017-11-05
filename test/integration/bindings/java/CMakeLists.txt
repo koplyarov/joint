@@ -15,7 +15,7 @@ add_jar(tests
 		${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
 
-#add_dependencies(tests joint-java)
+add_dependencies(tests joint-java)
 
 joint_generate_adapters(java ${CMAKE_CURRENT_BINARY_DIR}/Adapters.java
 	${IDL_DIR}/IBasicTests.idl
