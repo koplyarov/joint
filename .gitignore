@@ -2,6 +2,7 @@
 *.swo
 *.swp
 /.buildSettings
+/.ci
 /build
 /test/java/Adapters.java
 tags
