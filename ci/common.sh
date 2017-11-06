@@ -1,5 +1,13 @@
 export NUM_CORES=$(grep -c ^processor /proc/cpuinfo)
 
+NormalizePath() {
+	echo "$(readlink -m "$1")"
+}
+
+NormalizedDirName() {
+	echo "$(dirname "$(NormalizePath "$1")")"
+}
+
 StringContains() {
 	[ -z "${1##*$2*}" ]
 }

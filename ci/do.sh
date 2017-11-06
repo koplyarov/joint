@@ -1,15 +1,20 @@
 #!/bin/bash
 
-MY_DIR="$(dirname $(readlink -f $0))"
-. "$MY_DIR/common.sh" || exit 1
+. "$(dirname $0)/common.sh" || exit 1
 
 [ $# -eq 1 ] || Fail "Usage: $0 <target>"
 
-SOURCE_DIR="$MY_DIR/.."
-CI_WORKING_DIR="$MY_DIR/../.ci"
-TARGETS_DIR="$MY_DIR/$1"
+CI_SCRIPTS_DIR="$(NormalizedDirName "$0")"
+SOURCE_DIR="$CI_SCRIPTS_DIR/.."
+CI_WORKING_DIR="$(NormalizePath "$CI_SCRIPTS_DIR/../.ci")"
+TARGETS_DIR="$CI_SCRIPTS_DIR/$1"
 
-mkdir -p $CI_WORKING_DIR
+MAIN_DIR="$(NormalizePath "$CI_WORKING_DIR/0")"
+REFERENCE_JOINT_DIR="$(NormalizePath "$CI_WORKING_DIR/1")"
+
+mkdir -p "$CI_WORKING_DIR"
+mkdir -p "$MAIN_DIR"
+mkdir -p "$REFERENCE_JOINT_DIR"
 cd "$CI_WORKING_DIR"
 
 ZeroInit RUN_BENCHMARKS TEST_COVERAGE COVERITY_BUILD USE_VALGRIND

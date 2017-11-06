@@ -1,6 +1,6 @@
 [ "$RUN_BENCHMARKS" -ne 0 ] || exit 0
 
-REFERENCE_SOURCE_DIR="$(pwd)/joint-reference"
+REFERENCE_SOURCE_DIR="$REFERENCE_JOINT_DIR"
 REFERENCE_BUILD_DIR="$REFERENCE_SOURCE_DIR/build"
 
 ReadReferenceHash() {
@@ -8,8 +8,8 @@ ReadReferenceHash() {
 }
 
 CloneJoint() {
-	[ -d joint-reference ] ||
-	Verbose git clone https://github.com/koplyarov/joint.git joint-reference
+	[ -d "$REFERENCE_SOURCE_DIR/.git" ] ||
+	Verbose git clone https://github.com/koplyarov/joint.git "$REFERENCE_SOURCE_DIR"
 }
 
 CheckoutReferenceCommit() {
