@@ -23,6 +23,15 @@ if (JOINT_COVERAGE)
 	endif()
 endif()
 
+if (JOINT_NATIVE_FUNCTIONS_ALIGNMENT)
+	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -falign-functions=${JOINT_NATIVE_FUNCTIONS_ALIGNMENT}")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -falign-functions=${JOINT_NATIVE_FUNCTIONS_ALIGNMENT}")
+	else()
+		message(WARNING "No C/C++ aligned functions support")
+	endif()
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/buildsystems/cmake/")
 
 include_directories(${CMAKE_SOURCE_DIR}/core)
