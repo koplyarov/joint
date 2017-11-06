@@ -478,7 +478,7 @@ JOINT_COMPONENT(Tests, test_IBasicTests, test_IEnumTests, test_IObjectTests, tes
 
 JOINT_C_ROOT_OBJECT_GETTER(GetTests)
 {
-	joint_IObject result;
+	joint_IObject result = {{NULL, NULL}};
 	Tests* impl;
 	JOINT_CREATE_COMPONENT(joint_IObject, Tests, moduleContext, &result, &impl);
 	Tests_Init(impl, moduleContext);

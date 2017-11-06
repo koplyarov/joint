@@ -514,7 +514,7 @@ JOINT_COMPONENT(
 
 JOINT_C_ROOT_OBJECT_GETTER(GetBenchmarks)
 {
-	joint_IObject result;
+	joint_IObject result = {{NULL, NULL}};
 	Benchmarks* impl;
 	JOINT_CREATE_COMPONENT(joint_IObject, Benchmarks, moduleContext, &result, &impl);
 	Benchmarks_Init(impl, moduleContext);
