@@ -86,11 +86,11 @@ def main():
                 def msg(text):
                     return '{}(lang:{}): {} {} -> {} ({:.2f})'.format(id, lang, text, entry.reference, entry.current, float(entry.current) / entry.reference)
 
-                if entry.current < entry.reference * 0.95:
+                if entry.current < entry.reference * 0.8:
                     ctx.ok(msg('FASTER'))
-                elif entry.current < entry.reference * 1.05:
-                    ctx.info(msg('OK'))
                 elif entry.current < entry.reference * 1.1:
+                    ctx.info(msg('OK'))
+                elif entry.current < entry.reference * 1.25:
                     ctx.warning(msg('A BIT SLOWER'))
                 else:
                     ctx.error(msg('SLOWER'))
