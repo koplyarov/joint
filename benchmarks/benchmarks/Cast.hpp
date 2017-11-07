@@ -23,13 +23,13 @@ namespace benchmarks
 			using C = typename Desc_::BenchmarkCtx;
 			using B = typename Desc_::CastBenchmarksPtr;
 
-			AddSimpleBenchmark("castNative", [](C& ctx, i64 n, B b){ CALL( b->MeasureNativeCast(n) ); });
-			AddSimpleBenchmark("castComponentSide", [](C& ctx, i64 n, B b){
+			AddSimpleBenchmark("native", [](C& ctx, i64 n, B b){ CALL( b->MeasureNativeCast(n) ); });
+			AddSimpleBenchmark("component", [](C& ctx, i64 n, B b){
 				auto c = CALL( b->GetCastComponent() );
 				for (int64_t i = 0; i < n; ++i)
 					CALL( ctx.template Cast<typename Desc_::ICastInterface2>(c) );
 			});
-			AddSimpleBenchmark("castProxySide", [](C& ctx, i64 n, B b){ CALL( b->MeasureProxySideCast(ctx.CreateLocalCastComponent(), n) ); });
+			AddSimpleBenchmark("proxy", [](C& ctx, i64 n, B b){ CALL( b->MeasureProxySideCast(ctx.CreateLocalCastComponent(), n) ); });
 		}
 	};
 

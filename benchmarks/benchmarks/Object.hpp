@@ -24,24 +24,24 @@ namespace benchmarks
 			using B = typename Desc_::ObjectBenchmarksPtr;
 
 
-			AddSimpleBenchmark("invokeNative_void_object", [](C& ctx, i64 n, B b){ CALL( b->MeasureNativeObjectToVoid(n) ); });
-			AddSimpleBenchmark("invokeNative_object_void", [](C& ctx, i64 n, B b){ CALL( b->MeasureNativeVoidToObject(n) ); });
+			AddSimpleBenchmark("native_void_object", [](C& ctx, i64 n, B b){ CALL( b->MeasureNativeObjectToVoid(n) ); });
+			AddSimpleBenchmark("native_object_void", [](C& ctx, i64 n, B b){ CALL( b->MeasureNativeVoidToObject(n) ); });
 
-			AddSimpleBenchmark("invoke_void_object", [](C& ctx, i64 n, B b){ auto o = ctx.CreateObject(); for (int64_t i = 0; i < n; ++i) CALL( b->ObjectToVoid(o) ); });
-			AddSimpleBenchmark("invoke_object_void", [](C& ctx, i64 n, B b){ for (int64_t i = 0; i < n; ++i) CALL( b->VoidToObject() ); });
+			AddSimpleBenchmark("component_void_object", [](C& ctx, i64 n, B b){ auto o = ctx.CreateObject(); for (int64_t i = 0; i < n; ++i) CALL( b->ObjectToVoid(o) ); });
+			AddSimpleBenchmark("component_object_void", [](C& ctx, i64 n, B b){ for (int64_t i = 0; i < n; ++i) CALL( b->VoidToObject() ); });
 
-			AddSimpleBenchmark("invokeOutgoing_void_object", [](C& ctx, i64 n, B b){ CALL( b->MeasureOutgoingObjectToVoid(ctx.CreateLocalObjectInvokable(), n) ); });
-			AddSimpleBenchmark("invokeOutgoing_object_void", [](C& ctx, i64 n, B b){ CALL( b->MeasureOutgoingVoidToObject(ctx.CreateLocalObjectInvokable(), n) ); });
+			AddSimpleBenchmark("proxy_void_object", [](C& ctx, i64 n, B b){ CALL( b->MeasureOutgoingObjectToVoid(ctx.CreateLocalObjectInvokable(), n) ); });
+			AddSimpleBenchmark("proxy_object_void", [](C& ctx, i64 n, B b){ CALL( b->MeasureOutgoingVoidToObject(ctx.CreateLocalObjectInvokable(), n) ); });
 
 
-			AddSimpleBenchmark("invokeNative_void_null", [](C& ctx, i64 n, B b){ CALL( b->MeasureNativeNullToVoid(n) ); });
-			AddSimpleBenchmark("invokeNative_null_void", [](C& ctx, i64 n, B b){ CALL( b->MeasureNativeVoidToNull(n) ); });
+			AddSimpleBenchmark("native_void_null", [](C& ctx, i64 n, B b){ CALL( b->MeasureNativeNullToVoid(n) ); });
+			AddSimpleBenchmark("native_null_void", [](C& ctx, i64 n, B b){ CALL( b->MeasureNativeVoidToNull(n) ); });
 
-			AddSimpleBenchmark("invoke_void_null", [](C& ctx, i64 n, B b){ for (int64_t i = 0; i < n; ++i) CALL( b->ObjectToVoid(nullptr) ); });
-			AddSimpleBenchmark("invoke_null_void", [](C& ctx, i64 n, B b){ for (int64_t i = 0; i < n; ++i) CALL( b->VoidToNull() ); });
+			AddSimpleBenchmark("component_void_null", [](C& ctx, i64 n, B b){ for (int64_t i = 0; i < n; ++i) CALL( b->ObjectToVoid(nullptr) ); });
+			AddSimpleBenchmark("component_null_void", [](C& ctx, i64 n, B b){ for (int64_t i = 0; i < n; ++i) CALL( b->VoidToNull() ); });
 
-			AddSimpleBenchmark("invokeOutgoing_void_null", [](C& ctx, i64 n, B b){ CALL( b->MeasureOutgoingNullToVoid(ctx.CreateLocalObjectInvokable(), n) ); });
-			AddSimpleBenchmark("invokeOutgoing_null_void", [](C& ctx, i64 n, B b){ CALL( b->MeasureOutgoingVoidToNull(ctx.CreateLocalObjectInvokable(), n) ); });
+			AddSimpleBenchmark("proxy_void_null", [](C& ctx, i64 n, B b){ CALL( b->MeasureOutgoingNullToVoid(ctx.CreateLocalObjectInvokable(), n) ); });
+			AddSimpleBenchmark("proxy_null_void", [](C& ctx, i64 n, B b){ CALL( b->MeasureOutgoingVoidToNull(ctx.CreateLocalObjectInvokable(), n) ); });
 
 
 			AddSimpleBenchmark("native_create_object", [](C& ctx, i64 n, B b){ CALL( b->MeasureNativeCreateObject(n) ); });

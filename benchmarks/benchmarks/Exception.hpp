@@ -23,15 +23,15 @@ namespace benchmarks
 			using C = typename Desc_::BenchmarkCtx;
 			using B = typename Desc_::ExceptionBenchmarksPtr;
 
-			AddSimpleBenchmark("throwNative", [](C& ctx, i64 n, B b){ CALL( b->MeasureNativeThrow(n) ); });
-			AddSimpleBenchmark("throwComponentSide", [](C& ctx, i64 n, B b){
+			AddSimpleBenchmark("native_throw", [](C& ctx, i64 n, B b){ CALL( b->MeasureNativeThrow(n) ); });
+			AddSimpleBenchmark("component_throw", [](C& ctx, i64 n, B b){
 				for (int64_t i = 0; i < n; ++i)
 				{
 					try { b->Throw(); } // Not using CALL macro to avoid measuring slow C++ exceptions runtime here
 					catch (const std::exception&) { }
 				}
 			});
-			AddSimpleBenchmark("throwProxySide", [](C& ctx, i64 n, B b){ CALL( b->MeasureProxySideThrow(ctx.CreateLocalThrower(), n) ); });
+			AddSimpleBenchmark("proxy_throw", [](C& ctx, i64 n, B b){ CALL( b->MeasureProxySideThrow(ctx.CreateLocalThrower(), n) ); });
 		}
 	};
 
