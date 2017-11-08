@@ -80,6 +80,7 @@ def main():
                 has_errors = True
                 result[lang][id] = ResultEntry(reference=None, current=None, error=traceback.format_exc())
 
+    min_ratio, max_ratio = 1.0, 1.0
     for lang in sorted(result):
         lang_result = result[lang]
         for id in sorted(lang_result):
@@ -87,8 +88,12 @@ def main():
             if entry.error:
                 ctx.error('{}(lang:{}):\n{}'.format(id, lang, entry.error))
             else:
+                ratio = float(entry.current) / entry.reference
+                min_ratio = min(min_ratio, ratio)
+                max_ratio = max(max_ratio, ratio)
+
                 def msg(text):
-                    return '{}(lang:{}): {} {} -> {} ({:.2f})'.format(id, lang, text, entry.reference, entry.current, float(entry.current) / entry.reference)
+                    return '{}(lang:{}): {} {} -> {} ({:.2f})'.format(id, lang, text, entry.reference, entry.current, ratio)
 
                 if entry.current < entry.reference * 0.8:
                     ctx.ok(msg('FASTER'))
@@ -99,6 +104,7 @@ def main():
                 else:
                     ctx.error(msg('SLOWER'))
 
+    ctx.info('min ratio: {:.2f}, max ratio: {:.2f}'.format(min_ratio, max_ratio))
     if ctx.num_errors:
         ctx.error('{} errors!'.format(ctx.num_errors))
 
