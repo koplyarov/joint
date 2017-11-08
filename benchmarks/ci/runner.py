@@ -19,10 +19,10 @@ def eprint(msg):
     sys.stderr.write("{}\n".format(msg))
 
 
-def run(executable, num_passes, id, lang):
+def run(executable, id, lang):
     env = copy.copy(os.environ)
     env["PYTHONPATH"] = os.path.dirname(executable)
-    out_json = subprocess.check_output([executable, '-j', '-c', str(num_passes), '-b', id, '--params', 'lang:{}'.format(lang)], env=env)
+    out_json = subprocess.check_output([executable, '-j', '-c1', '-b', id, '--params', 'lang:{}'.format(lang)], env=env)
     out = json.loads(out_json)
     return out['times']['main']
 
@@ -69,8 +69,12 @@ def main():
             current_number += 1
 
             try:
-                current = run(args.executable, args.num_passes, id, lang)
-                reference = run(args.reference_executable, args.num_passes, id, lang)
+                current_list = []
+                reference_list = []
+                for i in range(args.num_passes):
+                    current_list.append(run(args.executable, id, lang))
+                    reference_list.append(run(args.reference_executable, id, lang))
+                _, current, reference = min(((abs(c - r), c, r) for c, r in zip(sorted(current_list), sorted(reference_list))), key=lambda (d, c, r): d)
                 result[lang][id] = ResultEntry(reference=reference, current=current, error=None)
             except subprocess.CalledProcessError:
                 has_errors = True
