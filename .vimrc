@@ -1,3 +1,7 @@
+set tabstop=4
+set shiftwidth=4
+set expandtab
+
 set complete-=i
 let g:cpp_plugin.indexer.builder.autoBuild = 1
 call g:cpp_plugin.indexer.builder.addCustomRegex('c++', '/[ \t]*using[ \t]*([A-Za-z0-9_]*)[ \t]*=/\1/t/')
