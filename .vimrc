@@ -22,33 +22,33 @@ set path+=build/benchmarks
 let g:include_directories = [ 'core', 'devkit', 'bindings/cpp', 'bindings/java', 'bindings/python', 'build', 'benchmarks/core', 'benchmarks' ]
 
 function! GetCppNamespaceFromPath(path)
-	let res = []
-	if len(a:path) > 1 && a:path[0] == 'devkit'
-		call add(res, 'joint')
-		call add(res, 'devkit')
-		if len(a:path) > 4 && index(['detail', 'accessors', 'proxy'], a:path[3]) >= 0
-			call add(res, a:path[3])
-		endif
-	endif
-	if len(a:path) > 1 && a:path[0] == 'core'
-		call add(res, 'joint')
-		if len(a:path) > 3 && a:path[2] == 'detail'
-			call add(res, a:path[2])
-		endif
-	endif
-	if len(a:path) > 1 && a:path[0] == 'bindings'
-		if len(a:path) > 2 && a:path[1] == 'cpp'
-			call add(res, 'joint')
-			if len(a:path) > 4 && a:path[3] == 'detail'
-				call add(res, 'detail')
-			endif
-		endif
-	endif
-	return res
+    let res = []
+    if len(a:path) > 1 && a:path[0] == 'devkit'
+        call add(res, 'joint')
+        call add(res, 'devkit')
+        if len(a:path) > 4 && index(['detail', 'accessors', 'proxy'], a:path[3]) >= 0
+            call add(res, a:path[3])
+        endif
+    endif
+    if len(a:path) > 1 && a:path[0] == 'core'
+        call add(res, 'joint')
+        if len(a:path) > 3 && a:path[2] == 'detail'
+            call add(res, a:path[2])
+        endif
+    endif
+    if len(a:path) > 1 && a:path[0] == 'bindings'
+        if len(a:path) > 2 && a:path[1] == 'cpp'
+            call add(res, 'joint')
+            if len(a:path) > 4 && a:path[3] == 'detail'
+                call add(res, 'detail')
+            endif
+        endif
+    endif
+    return res
 endf
 
 if exists('g:c_std_includes') && exists('g:cpp_std_includes') && exists('g:platform_includes')
-	let g:include_priorities = [ 'joint/.*', 'benchmarks/.*', 'cxxtest/.*', g:platform_includes, 'boost/.*', g:cpp_std_includes, g:c_std_includes ]
+    let g:include_priorities = [ 'joint/.*', 'benchmarks/.*', 'cxxtest/.*', g:platform_includes, 'boost/.*', g:cpp_std_includes, g:c_std_includes ]
 end
 
 au BufNew,BufRead *.c,*.cpp,*.h,*.hpp match Error /^\(#\)\@!.*\S *\zs\t\+/

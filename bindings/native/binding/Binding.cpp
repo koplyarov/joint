@@ -20,16 +20,16 @@ namespace native {
 namespace binding
 {
 
-	using namespace devkit;
+    using namespace devkit;
 
 
-	JointCore_Error Binding::LoadModule(JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule) JOINT_DEVKIT_NOEXCEPT
-	{
-		JOINT_CPP_WRAP_BEGIN
+    JointCore_Error Binding::LoadModule(JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule) JOINT_DEVKIT_NOEXCEPT
+    {
+        JOINT_CPP_WRAP_BEGIN
 
-		*outModule = accessors::MakeAccessor<Module>(moduleManifest);
+        *outModule = accessors::MakeAccessor<Module>(moduleManifest);
 
-		JOINT_CPP_WRAP_END
-	}
+        JOINT_CPP_WRAP_END
+    }
 
 }}}

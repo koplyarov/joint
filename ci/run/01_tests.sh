@@ -1,11 +1,11 @@
 BUILD_DIR="$MAIN_DIR/build"
 
 VG() {
-	if [ "$USE_VALGRIND" -ne 0 ]; then
-		valgrind "--suppressions=$SOURCE_DIR/etc/valgrind.sup" --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 -q "$BUILD_DIR/bin/joint-test" $@
-	else
-		"$BUILD_DIR/bin/joint-test" $@
-	fi
+    if [ "$USE_VALGRIND" -ne 0 ]; then
+        valgrind "--suppressions=$SOURCE_DIR/etc/valgrind.sup" --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 -q "$BUILD_DIR/bin/joint-test" $@
+    else
+        "$BUILD_DIR/bin/joint-test" $@
+    fi
 }
 
 HAS_ERRORS=0

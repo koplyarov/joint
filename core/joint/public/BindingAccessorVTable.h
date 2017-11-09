@@ -10,12 +10,12 @@
 
 JOINT_CORE_EXTERN_C_BEGIN
 
-	typedef struct JointCore_BindingAccessorVTable_s
-	{
-		void (*AddRef)(void* binding);
-		void (*Release)(void* binding);
-		JointCore_Error (*LoadModule)(void* binding, JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule);
-	} JointCore_BindingAccessorVTable;
+    typedef struct JointCore_BindingAccessorVTable_s
+    {
+        void (*AddRef)(void* binding);
+        void (*Release)(void* binding);
+        JointCore_Error (*LoadModule)(void* binding, JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule);
+    } JointCore_BindingAccessorVTable;
 
 JOINT_CORE_EXTERN_C_END
 

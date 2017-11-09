@@ -16,23 +16,23 @@ namespace python {
 namespace pyjoint
 {
 
-	using InterfaceDescriptorValue = devkit::InterfaceDescriptor<PythonBindingInfo>;
+    using InterfaceDescriptorValue = devkit::InterfaceDescriptor<PythonBindingInfo>;
 
-	struct InterfaceDescriptor
-	{
-		PyObject_HEAD
-		std::vector<PyObjectHolder>* objects;
-		InterfaceDescriptorValue* descriptor;
+    struct InterfaceDescriptor
+    {
+        PyObject_HEAD
+        std::vector<PyObjectHolder>* objects;
+        InterfaceDescriptorValue* descriptor;
 
-		const InterfaceDescriptorValue& GetDescriptor() const
-		{
-			NATIVE_CHECK(descriptor, "Invalid InterfaceDescriptor object");
-			return *descriptor;
-		}
-	};
+        const InterfaceDescriptorValue& GetDescriptor() const
+        {
+            NATIVE_CHECK(descriptor, "Invalid InterfaceDescriptor object");
+            return *descriptor;
+        }
+    };
 
 
-	extern PyTypeObject InterfaceDescriptor_type;
+    extern PyTypeObject InterfaceDescriptor_type;
 
 }}}
 

@@ -18,40 +18,40 @@ namespace python {
 namespace binding
 {
 
-	class ModuleManifest : public devkit::ModuleManifestBase
-	{
-	private:
-		std::string     _moduleName;
+    class ModuleManifest : public devkit::ModuleManifestBase
+    {
+    private:
+        std::string     _moduleName;
 
-	public:
-		std::string GetModuleName() const { return _moduleName; }
+    public:
+        std::string GetModuleName() const { return _moduleName; }
 
-		template < typename Archive_ >
-		void Deserialize(const Archive_& ar)
-		{
-			devkit::ModuleManifestBase::Deserialize(ar);
-			ar.Deserialize("module", _moduleName);
-		}
-	};
+        template < typename Archive_ >
+        void Deserialize(const Archive_& ar)
+        {
+            devkit::ModuleManifestBase::Deserialize(ar);
+            ar.Deserialize("module", _moduleName);
+        }
+    };
 
 
-	class Module : public joint::devkit::accessors::Module<Module>
-	{
-		JOINT_DEVKIT_LOGGER("Joint.Python.Module")
+    class Module : public joint::devkit::accessors::Module<Module>
+    {
+        JOINT_DEVKIT_LOGGER("Joint.Python.Module")
 
-	private:
-		PyObjectHolder  _pyModule;
-		ModuleManifest  _manifest;
+    private:
+        PyObjectHolder  _pyModule;
+        ModuleManifest  _manifest;
 
-	public:
-		Module(JointCore_ManifestHandle moduleManifest);
-		~Module();
+    public:
+        Module(JointCore_ManifestHandle moduleManifest);
+        ~Module();
 
-		JointCore_Error GetRootObject(const char* getterName, JointCore_ObjectAccessor* outObject) JOINT_DEVKIT_NOEXCEPT;
+        JointCore_Error GetRootObject(const char* getterName, JointCore_ObjectAccessor* outObject) JOINT_DEVKIT_NOEXCEPT;
 
-	private:
-		PyObjectHolder InvokeFunction(const std::string& functionName, const PyObjectHolder& jointModule);
-	};
+    private:
+        PyObjectHolder InvokeFunction(const std::string& functionName, const PyObjectHolder& jointModule);
+    };
 
 }}}
 

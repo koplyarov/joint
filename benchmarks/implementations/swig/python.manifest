@@ -1,4 +1,4 @@
 {
-	"binding": "python",
-	"module": "swig_benchmarks"
+    "binding": "python",
+    "module": "swig_benchmarks"
 }

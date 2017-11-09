@@ -10,8 +10,8 @@ namespace python {
 namespace pyjoint
 {
 
-	extern PyObject* InvalidInterfaceChecksumException;
-	PyObject* Cast(PyObject* self, PyObject* args, PyObject* kwds);
+    extern PyObject* InvalidInterfaceChecksumException;
+    PyObject* Cast(PyObject* self, PyObject* args, PyObject* kwds);
 
 }}}
 

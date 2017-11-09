@@ -6,19 +6,19 @@
 
 
 #ifdef _MSC_VER
-#	ifdef joint_native_EXPORTS
-#		define JOINT_NATIVE_CORE_API __declspec(dllexport)
-#	else
-#		define JOINT_NATIVE_CORE_API __declspec(dllimport)
-#	endif
+#   ifdef joint_native_EXPORTS
+#       define JOINT_NATIVE_CORE_API __declspec(dllexport)
+#   else
+#       define JOINT_NATIVE_CORE_API __declspec(dllimport)
+#   endif
 #else
-#	define JOINT_NATIVE_CORE_API
+#   define JOINT_NATIVE_CORE_API
 #endif
 
 
 extern "C"
 {
-	JOINT_NATIVE_CORE_API JointCore_Error JointNative_MakeBinding(JointCore_BindingAccessor* outBinding);
+    JOINT_NATIVE_CORE_API JointCore_Error JointNative_MakeBinding(JointCore_BindingAccessor* outBinding);
 }
 
 #endif

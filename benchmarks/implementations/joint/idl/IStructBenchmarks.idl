@@ -1,43 +1,43 @@
 package benchmarks
 {
 
-	struct FlatStruct
-	{
-		i32 a;
-		i32 b;
-		i32 c;
-		i32 d;
-	}
+    struct FlatStruct
+    {
+        i32 a;
+        i32 b;
+        i32 c;
+        i32 d;
+    }
 
-	struct NestedStruct4 { i32 d; }
-	struct NestedStruct3 { i32 c; NestedStruct4 next; }
-	struct NestedStruct2 { i32 b; NestedStruct3 next; }
-	struct NestedStruct { i32 a; NestedStruct2 next; }
-
-
-	interface IStructInvokable
-	{
-		void NoStructToVoid(i32 a, i32 b, i32 c, i32 d);
-		void FlatStructToVoid(FlatStruct p);
-		FlatStruct VoidToFlatStruct();
-		void NestedStructToVoid(NestedStruct p);
-		NestedStruct VoidToNestedStruct();
-	}
+    struct NestedStruct4 { i32 d; }
+    struct NestedStruct3 { i32 c; NestedStruct4 next; }
+    struct NestedStruct2 { i32 b; NestedStruct3 next; }
+    struct NestedStruct { i32 a; NestedStruct2 next; }
 
 
-	interface IStructBenchmarks : IStructInvokable
-	{
-		void MeasureNativeNoStructToVoid(i64 n);
-		void MeasureNativeFlatStructToVoid(i64 n);
-		void MeasureNativeVoidToFlatStruct(i64 n);
-		void MeasureNativeNestedStructToVoid(i64 n);
-		void MeasureNativeVoidToNestedStruct(i64 n);
+    interface IStructInvokable
+    {
+        void NoStructToVoid(i32 a, i32 b, i32 c, i32 d);
+        void FlatStructToVoid(FlatStruct p);
+        FlatStruct VoidToFlatStruct();
+        void NestedStructToVoid(NestedStruct p);
+        NestedStruct VoidToNestedStruct();
+    }
 
-		void MeasureOutgoingNoStructToVoid(IStructInvokable invokable, i64 n);
-		void MeasureOutgoingFlatStructToVoid(IStructInvokable invokable, i64 n);
-		void MeasureOutgoingVoidToFlatStruct(IStructInvokable invokable, i64 n);
-		void MeasureOutgoingNestedStructToVoid(IStructInvokable invokable, i64 n);
-		void MeasureOutgoingVoidToNestedStruct(IStructInvokable invokable, i64 n);
-	}
+
+    interface IStructBenchmarks : IStructInvokable
+    {
+        void MeasureNativeNoStructToVoid(i64 n);
+        void MeasureNativeFlatStructToVoid(i64 n);
+        void MeasureNativeVoidToFlatStruct(i64 n);
+        void MeasureNativeNestedStructToVoid(i64 n);
+        void MeasureNativeVoidToNestedStruct(i64 n);
+
+        void MeasureOutgoingNoStructToVoid(IStructInvokable invokable, i64 n);
+        void MeasureOutgoingFlatStructToVoid(IStructInvokable invokable, i64 n);
+        void MeasureOutgoingVoidToFlatStruct(IStructInvokable invokable, i64 n);
+        void MeasureOutgoingNestedStructToVoid(IStructInvokable invokable, i64 n);
+        void MeasureOutgoingVoidToNestedStruct(IStructInvokable invokable, i64 n);
+    }
 
 }

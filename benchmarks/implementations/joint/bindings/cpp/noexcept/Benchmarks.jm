@@ -1,4 +1,4 @@
 {
-	"binding": "native",
-	"library": "benchmarks-cpp-noexcept"
+    "binding": "native",
+    "library": "benchmarks-cpp-noexcept"
 }

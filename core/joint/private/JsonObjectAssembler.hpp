@@ -11,41 +11,41 @@
 namespace joint
 {
 
-	class JsonObjectAssembler
-	{
-		JOINT_DEVKIT_LOGGER("Joint.Core.JsonObjectAssembler");
+    class JsonObjectAssembler
+    {
+        JOINT_DEVKIT_LOGGER("Joint.Core.JsonObjectAssembler");
 
-		struct StackEntry
-		{
-			JsonNode::Builder   NodeBuilder;
-			std::string         NextPropertyName;
+        struct StackEntry
+        {
+            JsonNode::Builder   NodeBuilder;
+            std::string         NextPropertyName;
 
-			void AddChild(JsonNode node);
-		};
+            void AddChild(JsonNode node);
+        };
 
-		using NodesStack = std::stack<StackEntry>;
+        using NodesStack = std::stack<StackEntry>;
 
-	private:
-		NodesStack     _nodesStack;
-		JsonNode       _result;
+    private:
+        NodesStack     _nodesStack;
+        JsonNode       _result;
 
-	public:
-		void BeginObject();
-		void EndObject();
+    public:
+        void BeginObject();
+        void EndObject();
 
-		void BeginArray();
-		void EndArray();
+        void BeginArray();
+        void EndArray();
 
-		void SetBooleanValue(bool value);
-		void SetIntValue(int64_t value);
-		void SetFloatValue(double value);
-		void SetStringValue(const std::string& value);
-		void SetNullValue();
+        void SetBooleanValue(bool value);
+        void SetIntValue(int64_t value);
+        void SetFloatValue(double value);
+        void SetStringValue(const std::string& value);
+        void SetNullValue();
 
-		void SetObjectKey(const std::string& name);
+        void SetObjectKey(const std::string& name);
 
-		JsonNode GetAssembledObject() && { return std::move(_result); }
-	};
+        JsonNode GetAssembledObject() && { return std::move(_result); }
+    };
 
 }
 

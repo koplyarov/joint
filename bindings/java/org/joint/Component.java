@@ -3,5 +3,5 @@ package org.joint;
 
 public interface Component
 {
-	Accessor cast(InterfaceId interfaceId);
+    Accessor cast(InterfaceId interfaceId);
 }

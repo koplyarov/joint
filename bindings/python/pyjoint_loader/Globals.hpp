@@ -10,7 +10,7 @@ namespace python {
 namespace pyjoint_loader
 {
 
-	PyObject* LoadModule(PyObject* self, PyObject* args, PyObject* kwds);
+    PyObject* LoadModule(PyObject* self, PyObject* args, PyObject* kwds);
 
 }}}
 

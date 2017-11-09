@@ -15,23 +15,23 @@ namespace python {
 namespace binding
 {
 
-	class Binding : public joint::devkit::accessors::Binding<Binding>
-	{
-		JOINT_DEVKIT_LOGGER("Joint.Python.Binding")
+    class Binding : public joint::devkit::accessors::Binding<Binding>
+    {
+        JOINT_DEVKIT_LOGGER("Joint.Python.Binding")
 
-	private:
-		PythonContext    _pyCtx;
+    private:
+        PythonContext    _pyCtx;
 
-	public:
-		Binding();
-		~Binding();
+    public:
+        Binding();
+        ~Binding();
 
-		JointCore_Error LoadModule(JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule) JOINT_DEVKIT_NOEXCEPT;
+        JointCore_Error LoadModule(JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule) JOINT_DEVKIT_NOEXCEPT;
 
-	private:
-		static PyObjectHolder FindBaseById(PyObject* type, const char* interfaceId);
-		static void FromPyValue(const JointCore_Type& type, PyObject* pyObj, JointCore_Value& outValue);
-	};
+    private:
+        static PyObjectHolder FindBaseById(PyObject* type, const char* interfaceId);
+        static void FromPyValue(const JointCore_Type& type, PyObject* pyObj, JointCore_Value& outValue);
+    };
 
 }}}
 

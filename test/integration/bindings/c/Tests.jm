@@ -1,4 +1,4 @@
 {
-	"binding": "native",
-	"library": "tests-c"
+    "binding": "native",
+    "library": "tests-c"
 }

@@ -16,23 +16,23 @@ namespace python {
 namespace pyjoint
 {
 
-	using TypeDescriptorValue = devkit::TypeDescriptor<PythonBindingInfo>;
+    using TypeDescriptorValue = devkit::TypeDescriptor<PythonBindingInfo>;
 
-	struct TypeDescriptor
-	{
-		PyObject_HEAD
-		std::vector<PyObjectHolder>* objects;
-		TypeDescriptorValue* descriptor;
+    struct TypeDescriptor
+    {
+        PyObject_HEAD
+        std::vector<PyObjectHolder>* objects;
+        TypeDescriptorValue* descriptor;
 
-		const TypeDescriptorValue& GetDescriptor() const
-		{
-			NATIVE_CHECK(descriptor, "Invalid TypeDescriptor object");
-			return *descriptor;
-		}
-	};
+        const TypeDescriptorValue& GetDescriptor() const
+        {
+            NATIVE_CHECK(descriptor, "Invalid TypeDescriptor object");
+            return *descriptor;
+        }
+    };
 
 
-	extern PyTypeObject TypeDescriptor_type;
+    extern PyTypeObject TypeDescriptor_type;
 
 }}}
 

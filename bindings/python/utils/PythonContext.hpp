@@ -9,30 +9,30 @@ namespace joint {
 namespace python
 {
 
-	class PythonContext
-	{
-		JOINT_DEVKIT_LOGGER("Joint.Python.PythonContext");
+    class PythonContext
+    {
+        JOINT_DEVKIT_LOGGER("Joint.Python.PythonContext");
 
-	private:
-		bool    _needFinalize;
+    private:
+        bool    _needFinalize;
 
-	public:
-		PythonContext()
-			: _needFinalize(Py_IsInitialized() == 0)
-		{
-			if (_needFinalize)
-				Py_Initialize();
-		}
+    public:
+        PythonContext()
+            : _needFinalize(Py_IsInitialized() == 0)
+        {
+            if (_needFinalize)
+                Py_Initialize();
+        }
 
-		~PythonContext()
-		{
-			if (_needFinalize)
-				Py_Finalize();
-		}
+        ~PythonContext()
+        {
+            if (_needFinalize)
+                Py_Finalize();
+        }
 
-		PythonContext(const PythonContext&) = delete;
-		PythonContext& operator = (const PythonContext&) = delete;
-	};
+        PythonContext(const PythonContext&) = delete;
+        PythonContext& operator = (const PythonContext&) = delete;
+    };
 
 }}
 

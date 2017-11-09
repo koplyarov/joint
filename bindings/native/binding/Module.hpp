@@ -16,19 +16,19 @@ namespace native {
 namespace binding
 {
 
-	class Module : public joint::devkit::accessors::Module<Module>
-	{
-		JOINT_DEVKIT_LOGGER("Joint.Native.Module")
+    class Module : public joint::devkit::accessors::Module<Module>
+    {
+        JOINT_DEVKIT_LOGGER("Joint.Native.Module")
 
-	private:
-		std::unique_ptr<DynamicLibrary> _dl;
+    private:
+        std::unique_ptr<DynamicLibrary> _dl;
 
-	public:
-		Module(JointCore_ManifestHandle moduleManifest);
-		~Module();
+    public:
+        Module(JointCore_ManifestHandle moduleManifest);
+        ~Module();
 
-		JointCore_Error GetRootObject(const char* getterName, JointCore_ObjectAccessor* outObject) JOINT_DEVKIT_NOEXCEPT;
-	};
+        JointCore_Error GetRootObject(const char* getterName, JointCore_ObjectAccessor* outObject) JOINT_DEVKIT_NOEXCEPT;
+    };
 
 }}}
 

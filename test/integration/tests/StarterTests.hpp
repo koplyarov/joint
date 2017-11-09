@@ -4,9 +4,9 @@
 
 TEST_DEFINE_TEST(TestCtx, StarterTests)
 {
-	auto t = Module.GetRootObject<test::IStarterTests>("GetTests");
-	if (t)
-		TEST_EQUALS(t->Increment(12), (int32_t)13);
+    auto t = Module.GetRootObject<test::IStarterTests>("GetTests");
+    if (t)
+        TEST_EQUALS(t->Increment(12), (int32_t)13);
 }
 
 

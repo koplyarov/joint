@@ -4,35 +4,35 @@
 #include <string>
 
 #if JOINT_PLATFORM_POSIX
-#	include <dlfcn.h>
+#   include <dlfcn.h>
 #endif
 
 namespace joint {
 namespace devkit
 {
 
-	namespace
-	{
-		class CurrentLibraryPath
-		{
-		private:
-			static int s_dummy;
+    namespace
+    {
+        class CurrentLibraryPath
+        {
+        private:
+            static int s_dummy;
 
-		public:
-			static std::string Get()
-			{
+        public:
+            static std::string Get()
+            {
 #if JOINT_PLATFORM_POSIX
-				Dl_info dl_info;
-				dladdr((void*)&s_dummy, &dl_info);
-				return dl_info.dli_fname;
+                Dl_info dl_info;
+                dladdr((void*)&s_dummy, &dl_info);
+                return dl_info.dli_fname;
 #else
-				#error Not implemented
+                #error Not implemented
 #endif
-			}
-		};
+            }
+        };
 
-		int CurrentLibraryPath::s_dummy(0);
-	}
+        int CurrentLibraryPath::s_dummy(0);
+    }
 
 }}
 

@@ -1,8 +1,8 @@
 package test
 {
-	interface IArrayTests
-	{
-		i32[] MakeI32Array(i32 len);
-		i32 GetI32Element(i32[] array, i32 index);
-	}
+    interface IArrayTests
+    {
+        i32[] MakeI32Array(i32 len);
+        i32 GetI32Element(i32[] array, i32 index);
+    }
 }

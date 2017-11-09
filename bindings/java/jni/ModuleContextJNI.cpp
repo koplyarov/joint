@@ -15,13 +15,13 @@ JOINT_DEVKIT_LOGGER("Joint.Java.JNI")
 
 JNIEXPORT jobject JNICALL Java_org_joint_ModuleContext_doRegister(JNIEnv* env, jclass cls, jlong accessorVTableLong, jlong accessorInstanceLong, jobject jaccessor)
 {
-	JNI_WRAP_CPP_BEGIN
+    JNI_WRAP_CPP_BEGIN
 
-	JavaVM* jvm = nullptr;
-	JNI_CALL( env->GetJavaVM(&jvm) );
+    JavaVM* jvm = nullptr;
+    JNI_CALL( env->GetJavaVM(&jvm) );
 
-	JointCore_ObjectAccessor native_accessor = accessors::MakeAccessor<binding::Object>(env, JObjGlobalRef::StealLocal(env, jaccessor));
-	JObjLocalRef result = JointJavaContext::JointObject::Make(env, native_accessor);
+    JointCore_ObjectAccessor native_accessor = accessors::MakeAccessor<binding::Object>(env, JObjGlobalRef::StealLocal(env, jaccessor));
+    JObjLocalRef result = JointJavaContext::JointObject::Make(env, native_accessor);
 
-	JNI_WRAP_CPP_END(result.Release(), 0)
+    JNI_WRAP_CPP_END(result.Release(), 0)
 }

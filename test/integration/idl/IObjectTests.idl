@@ -1,27 +1,27 @@
 package test
 {
-	interface ISomeObject
-	{
-		void Method();
-		i32 GetInvokationsCount();
-	}
+    interface ISomeObject
+    {
+        void Method();
+        i32 GetInvokationsCount();
+    }
 
-	interface IObjectTestsCallbackReturn
-	{ ISomeObject Return(); }
+    interface IObjectTestsCallbackReturn
+    { ISomeObject Return(); }
 
-	interface IObjectTestsCallbackParam
-	{ bool Method(ISomeObject o); }
+    interface IObjectTestsCallbackParam
+    { bool Method(ISomeObject o); }
 
-	interface IObjectTests
-	{
-		ISomeObject ReturnNull();
-		bool CheckNotNull(ISomeObject o);
+    interface IObjectTests
+    {
+        ISomeObject ReturnNull();
+        bool CheckNotNull(ISomeObject o);
 
-		ISomeObject CallbackReturn(IObjectTestsCallbackReturn cb);
-		bool CallbackParam(IObjectTestsCallbackParam cb, ISomeObject o);
+        ISomeObject CallbackReturn(IObjectTestsCallbackReturn cb);
+        bool CallbackParam(IObjectTestsCallbackParam cb, ISomeObject o);
 
-		ISomeObject ReturnNewObject();
-		ISomeObject ReturnSameObject(ISomeObject o);
-		void InvokeObjectMethod(ISomeObject o);
-	}
+        ISomeObject ReturnNewObject();
+        ISomeObject ReturnSameObject(ISomeObject o);
+        void InvokeObjectMethod(ISomeObject o);
+    }
 }

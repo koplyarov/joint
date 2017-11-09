@@ -14,8 +14,8 @@ JOINT_CORE_EXTERN_C_BEGIN
 #define JOINT_CORE_TRUE 1
 #define JOINT_CORE_FALSE 0
 
-	typedef int32_t JointCore_Bool;
-	typedef uint32_t JointCore_SizeT;
+    typedef int32_t JointCore_Bool;
+    typedef uint32_t JointCore_SizeT;
 
 JOINT_CORE_EXTERN_C_END
 

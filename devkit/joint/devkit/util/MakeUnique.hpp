@@ -8,9 +8,9 @@
 namespace joint
 {
 
-	template < typename T_, typename... Args_ >
-	std::unique_ptr<T_> MakeUnique(Args_&&... args)
-	{ return std::unique_ptr<T_>(new T_(std::forward<Args_>(args)...)); }
+    template < typename T_, typename... Args_ >
+    std::unique_ptr<T_> MakeUnique(Args_&&... args)
+    { return std::unique_ptr<T_>(new T_(std::forward<Args_>(args)...)); }
 
 }
 

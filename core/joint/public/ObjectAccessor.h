@@ -7,11 +7,11 @@
 
 JOINT_CORE_EXTERN_C_BEGIN
 
-	typedef struct
-	{
-		const struct JointCore_ObjectAccessorVTable_s*   VTable;
-		void*                                            Instance;
-	} JointCore_ObjectAccessor;
+    typedef struct
+    {
+        const struct JointCore_ObjectAccessorVTable_s*   VTable;
+        void*                                            Instance;
+    } JointCore_ObjectAccessor;
 
 JOINT_CORE_EXTERN_C_END
 

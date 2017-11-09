@@ -28,34 +28,34 @@ std::string g_benchmarksDir;
 
 int main(int argc, char* argv[])
 {
-	std::string executablePath(argv[0]);
-	g_benchmarksDir = executablePath.substr(0, executablePath.find_last_of("/\\"));
+    std::string executablePath(argv[0]);
+    g_benchmarksDir = executablePath.substr(0, executablePath.find_last_of("/\\"));
 
-	try
-	{
-		using namespace benchmarks;
+    try
+    {
+        using namespace benchmarks;
 
-		BenchmarkSuite s;
+        BenchmarkSuite s;
 
-		s.RegisterBenchmarks<
-			BasicBenchmarks,
-			descriptors::joint::Desc,
-			descriptors::swig::Desc
-		>();
+        s.RegisterBenchmarks<
+            BasicBenchmarks,
+            descriptors::joint::Desc,
+            descriptors::swig::Desc
+        >();
 
-		s.RegisterBenchmarks<EnumBenchmarks, descriptors::joint::Desc>();
-		s.RegisterBenchmarks<ObjectBenchmarks, descriptors::joint::Desc>();
-		s.RegisterBenchmarks<StructBenchmarks, descriptors::joint::Desc>();
+        s.RegisterBenchmarks<EnumBenchmarks, descriptors::joint::Desc>();
+        s.RegisterBenchmarks<ObjectBenchmarks, descriptors::joint::Desc>();
+        s.RegisterBenchmarks<StructBenchmarks, descriptors::joint::Desc>();
 
-		s.RegisterBenchmarks<CastBenchmarks, descriptors::joint::Desc>();
-		s.RegisterBenchmarks<ExceptionBenchmarks, descriptors::joint::Desc>();
+        s.RegisterBenchmarks<CastBenchmarks, descriptors::joint::Desc>();
+        s.RegisterBenchmarks<ExceptionBenchmarks, descriptors::joint::Desc>();
 
-		return BenchmarkApp(s).Run(argc, argv);
-	}
-	catch (const std::exception& ex)
-	{
-		std::cerr << "Uncaught exception: " << ex.what() << std::endl;
-		return 1;
-	}
-	return 0;
+        return BenchmarkApp(s).Run(argc, argv);
+    }
+    catch (const std::exception& ex)
+    {
+        std::cerr << "Uncaught exception: " << ex.what() << std::endl;
+        return 1;
+    }
+    return 0;
 }

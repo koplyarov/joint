@@ -3,91 +3,91 @@
 
 namespace joint
 {
-	class NoneType;
+    class NoneType;
 
-	struct YesType { char dummy; };
-	struct NoType { YesType dummy[2]; };
-
-
-	template < typename T_ >
-	struct RemoveReference
-	{ typedef T_ ValueT; };
-
-	template < typename T_ >
-	struct RemoveReference<T_&>
-	{ typedef T_ ValueT; };
+    struct YesType { char dummy; };
+    struct NoType { YesType dummy[2]; };
 
 
-	template < int Value_ >
-	struct IntConstant
-	{ static const int Value = Value_; };
+    template < typename T_ >
+    struct RemoveReference
+    { typedef T_ ValueT; };
 
-	struct TrueConstant
-	{ static const bool Value = true; };
-
-	struct FalseConstant
-	{ static const bool Value = false; };
+    template < typename T_ >
+    struct RemoveReference<T_&>
+    { typedef T_ ValueT; };
 
 
-	template < typename A_, typename B_ >
-	struct IsSame
-	{ static const bool Value = false; };
+    template < int Value_ >
+    struct IntConstant
+    { static const int Value = Value_; };
 
-	template < typename T_ >
-	struct IsSame<T_, T_>
-	{ static const bool Value = true; };
+    struct TrueConstant
+    { static const bool Value = true; };
 
-
-	template < bool Condition_, typename IfResult_, typename ElseResult_ >
-	struct IfElse { typedef IfResult_ ValueT; };
-
-	template < typename IfResult_, typename ElseResult_ >
-	struct IfElse<false, IfResult_, ElseResult_> { typedef ElseResult_ ValueT; };
+    struct FalseConstant
+    { static const bool Value = false; };
 
 
-	template < typename Base_, typename Derived_ >
-	class IsBaseOf
-	{
-		static YesType Test(const Base_*);
-		static NoType Test(const void*);
-		static NoType Test(...);
+    template < typename A_, typename B_ >
+    struct IsSame
+    { static const bool Value = false; };
 
-	public:
-		static const bool Value =
-			sizeof(Test((const Derived_*)0)) == sizeof(YesType) &&
-			!IsSame<Derived_, void>::Value;
-	};
-
-	template < bool Cond_, class T_ = void > struct EnableIf;
-	template < class T_> struct EnableIf<true, T_> { typedef T_    ValueT; };
-
-	template < typename > struct ToVoid { typedef void ValueT; };
-
-	template < typename T_, typename Enabler_ = void >
-	struct IsClass
-	{ static const bool Value = false; };
-
-	template < typename T_ >
-	struct IsClass<T_, typename ToVoid<int T_::*>::ValueT >
-	{ static const bool Value = true; };
+    template < typename T_ >
+    struct IsSame<T_, T_>
+    { static const bool Value = true; };
 
 
-	template < bool Condition_ >
-	class StaticAssert;
+    template < bool Condition_, typename IfResult_, typename ElseResult_ >
+    struct IfElse { typedef IfResult_ ValueT; };
 
-	template < >
-	class StaticAssert<true> { };
+    template < typename IfResult_, typename ElseResult_ >
+    struct IfElse<false, IfResult_, ElseResult_> { typedef ElseResult_ ValueT; };
+
+
+    template < typename Base_, typename Derived_ >
+    class IsBaseOf
+    {
+        static YesType Test(const Base_*);
+        static NoType Test(const void*);
+        static NoType Test(...);
+
+    public:
+        static const bool Value =
+            sizeof(Test((const Derived_*)0)) == sizeof(YesType) &&
+            !IsSame<Derived_, void>::Value;
+    };
+
+    template < bool Cond_, class T_ = void > struct EnableIf;
+    template < class T_> struct EnableIf<true, T_> { typedef T_    ValueT; };
+
+    template < typename > struct ToVoid { typedef void ValueT; };
+
+    template < typename T_, typename Enabler_ = void >
+    struct IsClass
+    { static const bool Value = false; };
+
+    template < typename T_ >
+    struct IsClass<T_, typename ToVoid<int T_::*>::ValueT >
+    { static const bool Value = true; };
+
+
+    template < bool Condition_ >
+    class StaticAssert;
+
+    template < >
+    class StaticAssert<true> { };
 
 
 #if DETAIL_JOINT_CPP_STATIC_ASSERT_SUPPORTED
-#	define JOINT_CPP_PORTABLE_STATIC_ASSERT(Expr_, TextMsg_, VarMsg_) \
-		static_assert((Expr_), TextMsg_)
+#   define JOINT_CPP_PORTABLE_STATIC_ASSERT(Expr_, TextMsg_, VarMsg_) \
+        static_assert((Expr_), TextMsg_)
 #else
-#	define JOINT_CPP_PORTABLE_STATIC_ASSERT(Expr_, TextMsg_, VarMsg_) \
-		do { \
-			::joint::StaticAssert<(Expr_)> ERROR__##VarMsg_; \
-			(void)ERROR__##VarMsg_; \
-		} while (false)
+#   define JOINT_CPP_PORTABLE_STATIC_ASSERT(Expr_, TextMsg_, VarMsg_) \
+        do { \
+            ::joint::StaticAssert<(Expr_)> ERROR__##VarMsg_; \
+            (void)ERROR__##VarMsg_; \
+        } while (false)
 #endif
 
 }

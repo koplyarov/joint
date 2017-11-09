@@ -1,4 +1,4 @@
 {
-	"binding": "native",
-	"library": "tests-cpp"
+    "binding": "native",
+    "library": "tests-cpp"
 }

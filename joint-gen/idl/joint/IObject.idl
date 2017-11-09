@@ -1,6 +1,6 @@
 package joint
 {
-	interface IObject
-	{
-	}
+    interface IObject
+    {
+    }
 }

@@ -21,23 +21,23 @@
 
 int main(int argc, const char* argv[])
 {
-	if (argc != 2)
-	{
-		std::cerr << "Usage: " << argv[0] << " <module manifest>" << std::endl;
-		return 1;
-	}
-	g_moduleManifest = argv[1];
-	std::cerr << "Module manifest: " << g_moduleManifest << std::endl;
+    if (argc != 2)
+    {
+        std::cerr << "Usage: " << argv[0] << " <module manifest>" << std::endl;
+        return 1;
+    }
+    g_moduleManifest = argv[1];
+    std::cerr << "Module manifest: " << g_moduleManifest << std::endl;
 
-	try
-	{
-		test::RunAllTests();
-	}
-	catch (const std::exception& ex)
-	{
-		std::cerr << "Uncaught exception: " << ex.what() << std::endl;
-		return 1;
-	}
+    try
+    {
+        test::RunAllTests();
+    }
+    catch (const std::exception& ex)
+    {
+        std::cerr << "Uncaught exception: " << ex.what() << std::endl;
+        return 1;
+    }
 
-	return 0;
+    return 0;
 }

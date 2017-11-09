@@ -4,29 +4,29 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 if (NOT MSVC)
-	add_definitions(-Wall)
+    add_definitions(-Wall)
 endif()
 
 ################################################################################
 
 joint_generate_adapters(c Benchmarks_adapters.h
-	${BENCHMARKS_IDL_DIR}/IBasicBenchmarks.idl
-	${BENCHMARKS_IDL_DIR}/ICastBenchmarks.idl
-	${BENCHMARKS_IDL_DIR}/IEnumBenchmarks.idl
-	${BENCHMARKS_IDL_DIR}/IExceptionBenchmarks.idl
-	${BENCHMARKS_IDL_DIR}/IObjectBenchmarks.idl
-	${BENCHMARKS_IDL_DIR}/IStructBenchmarks.idl
+    ${BENCHMARKS_IDL_DIR}/IBasicBenchmarks.idl
+    ${BENCHMARKS_IDL_DIR}/ICastBenchmarks.idl
+    ${BENCHMARKS_IDL_DIR}/IEnumBenchmarks.idl
+    ${BENCHMARKS_IDL_DIR}/IExceptionBenchmarks.idl
+    ${BENCHMARKS_IDL_DIR}/IObjectBenchmarks.idl
+    ${BENCHMARKS_IDL_DIR}/IStructBenchmarks.idl
 )
 
 add_library(benchmarks-c SHARED Benchmarks.c OtherTranslationUnit.c Benchmarks_adapters.h)
 target_link_libraries(benchmarks-c ${JOINT_LIBRARIES})
 
 joint_make_module_package(benchmarks-component-c
-	PACKAGE_DIR ${JOINT_MODULE_OUTPUT_DIRECTORY}/c/Benchmarks
-	MANIFEST Benchmarks.jm
+    PACKAGE_DIR ${JOINT_MODULE_OUTPUT_DIRECTORY}/c/Benchmarks
+    MANIFEST Benchmarks.jm
 )
 
 joint_add_module_content(benchmarks-component-c
-	DIRECTORY .
-	LIBRARIES benchmarks-c
+    DIRECTORY .
+    LIBRARIES benchmarks-c
 )

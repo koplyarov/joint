@@ -11,27 +11,27 @@ namespace joint {
 namespace native
 {
 
-	class DynamicLibrary
-	{
-		JOINT_DEVKIT_LOGGER("Joint.Native.DynamicLibrary");
+    class DynamicLibrary
+    {
+        JOINT_DEVKIT_LOGGER("Joint.Native.DynamicLibrary");
 
-		class Impl;
-		using FuncPtr = void (*)();
+        class Impl;
+        using FuncPtr = void (*)();
 
-	private:
-		std::unique_ptr<Impl>    _impl;
+    private:
+        std::unique_ptr<Impl>    _impl;
 
-	public:
-		DynamicLibrary(const std::string& searchPath, const std::string& name);
-		~DynamicLibrary();
+    public:
+        DynamicLibrary(const std::string& searchPath, const std::string& name);
+        ~DynamicLibrary();
 
-		template < typename Signature_ >
-		Signature_* GetFunction(const std::string& name)
-		{ return reinterpret_cast<Signature_*>(GetFunctionImpl(name)); }
+        template < typename Signature_ >
+        Signature_* GetFunction(const std::string& name)
+        { return reinterpret_cast<Signature_*>(GetFunctionImpl(name)); }
 
-	private:
-		FuncPtr GetFunctionImpl(const std::string& name);
-	};
+    private:
+        FuncPtr GetFunctionImpl(const std::string& name);
+    };
 
 }}
 

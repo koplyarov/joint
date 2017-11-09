@@ -10,15 +10,15 @@ namespace python {
 namespace pyjoint
 {
 
-	struct Array
-	{
-		PyObject_HEAD
-		PyObject*             elementTypeDesc;
-		JointCore_ArrayHandle     handle;
-	};
+    struct Array
+    {
+        PyObject_HEAD
+        PyObject*             elementTypeDesc;
+        JointCore_ArrayHandle     handle;
+    };
 
 
-	extern PyTypeObject Array_type;
+    extern PyTypeObject Array_type;
 
 }}}
 

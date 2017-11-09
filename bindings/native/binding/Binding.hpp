@@ -12,13 +12,13 @@ namespace native {
 namespace binding
 {
 
-	class Binding : public joint::devkit::accessors::Binding<Binding>
-	{
-		JOINT_DEVKIT_LOGGER("Joint.Native.Binding")
+    class Binding : public joint::devkit::accessors::Binding<Binding>
+    {
+        JOINT_DEVKIT_LOGGER("Joint.Native.Binding")
 
-	public:
-		JointCore_Error LoadModule(JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule) JOINT_DEVKIT_NOEXCEPT;
-	};
+    public:
+        JointCore_Error LoadModule(JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule) JOINT_DEVKIT_NOEXCEPT;
+    };
 
 }}}
 

@@ -7,38 +7,38 @@
 namespace joint
 {
 
-	using namespace joint::devkit;
+    using namespace joint::devkit;
 
 
-	void JsonParser::ParserContext::SetError(YYLTYPE *loc, const char *str)
-	{ _errorMessage = StringBuilder() % loc->first_line % "-" % loc->last_line % ":" % loc->first_column % "-" % loc->last_column % ": " % str; }
+    void JsonParser::ParserContext::SetError(YYLTYPE *loc, const char *str)
+    { _errorMessage = StringBuilder() % loc->first_line % "-" % loc->last_line % ":" % loc->first_column % "-" % loc->last_column % ": " % str; }
 
 
-	void JsonParser::ParserContext::CheckError() const
-	{ if (!_errorMessage.empty()) JOINT_THROW(StringBuilder() % "JsonParser parsing error: " % _errorMessage); }
+    void JsonParser::ParserContext::CheckError() const
+    { if (!_errorMessage.empty()) JOINT_THROW(StringBuilder() % "JsonParser parsing error: " % _errorMessage); }
 
 
-	////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////
 
 
-	JsonNode JsonParser::Parse(const std::string& path)
-	{
-		void* yy_scanner = NULL;
+    JsonNode JsonParser::Parse(const std::string& path)
+    {
+        void* yy_scanner = NULL;
 
-		std::ifstream file(path);
-		JOINT_CHECK(file, StringBuilder() % "Could not open file '" % path % "'");
+        std::ifstream file(path);
+        JOINT_CHECK(file, StringBuilder() % "Could not open file '" % path % "'");
 
-		LexerContext lexer_ctx(file);
-		::Detail_Joint_JsonParser_lex_init_extra(&lexer_ctx, &yy_scanner);
+        LexerContext lexer_ctx(file);
+        ::Detail_Joint_JsonParser_lex_init_extra(&lexer_ctx, &yy_scanner);
 
-		ParserContext parser_ctx(yy_scanner);
-		::Detail_Joint_JsonParser_parse(&parser_ctx);
-		::Detail_Joint_JsonParser_lex_destroy(yy_scanner);
+        ParserContext parser_ctx(yy_scanner);
+        ::Detail_Joint_JsonParser_parse(&parser_ctx);
+        ::Detail_Joint_JsonParser_lex_destroy(yy_scanner);
 
-		parser_ctx.CheckError();
+        parser_ctx.CheckError();
 
-		return std::move(parser_ctx.GetObjectAssembler()).GetAssembledObject();
-	}
+        return std::move(parser_ctx.GetObjectAssembler()).GetAssembledObject();
+    }
 
 
 }

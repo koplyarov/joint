@@ -5,7 +5,7 @@ namespace joint {
 namespace detail
 {
 
-	class Dummy { };
+    class Dummy { };
 
 }}
 

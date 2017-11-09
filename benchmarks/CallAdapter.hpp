@@ -12,22 +12,22 @@
 template < typename RetType_ >
 struct CallAdapter
 {
-	template < typename Func_ >
-	static RetType_ Call(const Func_& f)
-	{ return f(); }
+    template < typename Func_ >
+    static RetType_ Call(const Func_& f)
+    { return f(); }
 };
 
 template < typename RetType_ >
 struct CallAdapter<joint::Result<RetType_>>
 {
-	template < typename Func_ >
-	static RetType_ Call(const Func_& f)
-	{
-		joint::Result<RetType_> ret(f());
-		if (!ret.Ok())
-			throw std::runtime_error(ret.Exception().what());
-		return ret.Value();
-	}
+    template < typename Func_ >
+    static RetType_ Call(const Func_& f)
+    {
+        joint::Result<RetType_> ret(f());
+        if (!ret.Ok())
+            throw std::runtime_error(ret.Exception().what());
+        return ret.Value();
+    }
 };
 
 #endif

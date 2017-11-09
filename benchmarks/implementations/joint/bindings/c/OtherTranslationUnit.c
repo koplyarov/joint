@@ -13,16 +13,16 @@ void NativeStringToVoid(const char* s) { }
 
 char* NativeVoidToString3()
 {
-	char* result = malloc(3 + 1);
-	strcpy(result, "abc");
-	return result;
+    char* result = malloc(3 + 1);
+    strcpy(result, "abc");
+    return result;
 }
 
 char* NativeVoidToString100()
 {
-	char* result = malloc(100 + 1);
-	strcpy(result, "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
-	return result;
+    char* result = malloc(100 + 1);
+    strcpy(result, "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
+    return result;
 }
 
 
@@ -51,15 +51,15 @@ NativeNestedStruct NativeVoidToNestedStruct() { return g_nativeNestedStruct; }
 
 void InitOtherTranslationUnit()
 {
-	g_nativeFlatStruct.a = 1;
-	g_nativeFlatStruct.b = 2;
-	g_nativeFlatStruct.c = 3;
-	g_nativeFlatStruct.d = 4;
+    g_nativeFlatStruct.a = 1;
+    g_nativeFlatStruct.b = 2;
+    g_nativeFlatStruct.c = 3;
+    g_nativeFlatStruct.d = 4;
 
-	g_nativeNestedStruct.a = 1;
-	g_nativeNestedStruct.next.b = 2;
-	g_nativeNestedStruct.next.next.c = 3;
-	g_nativeNestedStruct.next.next.next.d = 4;
+    g_nativeNestedStruct.a = 1;
+    g_nativeNestedStruct.next.b = 2;
+    g_nativeNestedStruct.next.next.c = 3;
+    g_nativeNestedStruct.next.next.next.d = 4;
 }
 
 

@@ -18,28 +18,28 @@ namespace java {
 namespace binding
 {
 
-	class Object : public joint::devkit::accessors::Object<Object>
-	{
-		JOINT_DEVKIT_LOGGER("Joint.Java.Object")
+    class Object : public joint::devkit::accessors::Object<Object>
+    {
+        JOINT_DEVKIT_LOGGER("Joint.Java.Object")
 
-	private:
-		JObjGlobalRef              _accessor;
-		JObjGlobalRef              _obj;
-		JObjGlobalRef              _interfaceDesc;
-		JavaInterfaceDescriptor*   _nativeInterfaceDesc;
+    private:
+        JObjGlobalRef              _accessor;
+        JObjGlobalRef              _obj;
+        JObjGlobalRef              _interfaceDesc;
+        JavaInterfaceDescriptor*   _nativeInterfaceDesc;
 
-	public:
-		Object(JNIEnv* env, JObjGlobalRef accessor);
-		~Object();
+    public:
+        Object(JNIEnv* env, JObjGlobalRef accessor);
+        ~Object();
 
-		JObjWeakRef GetAccessor(JNIEnv* env) const { return _accessor.Weak(env); }
+        JObjWeakRef GetAccessor(JNIEnv* env) const { return _accessor.Weak(env); }
 
-		JointCore_Error CastObject(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, JointCore_ObjectAccessor* outAccessor) JOINT_DEVKIT_NOEXCEPT;
-		JointCore_Error InvokeMethod(JointCore_SizeT methodId, const JointCore_Parameter* paramsPtr, JointCore_SizeT paramsCount, JointCore_RetValue* outRetValue) JOINT_DEVKIT_NOEXCEPT;
+        JointCore_Error CastObject(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, JointCore_ObjectAccessor* outAccessor) JOINT_DEVKIT_NOEXCEPT;
+        JointCore_Error InvokeMethod(JointCore_SizeT methodId, const JointCore_Parameter* paramsPtr, JointCore_SizeT paramsCount, JointCore_RetValue* outRetValue) JOINT_DEVKIT_NOEXCEPT;
 
-	public:
-		static JointCore_Error ReleaseRetValue(JointCore_Type type, JointCore_Value value);
-	};
+    public:
+        static JointCore_Error ReleaseRetValue(JointCore_Type type, JointCore_Value value);
+    };
 
 }}}
 

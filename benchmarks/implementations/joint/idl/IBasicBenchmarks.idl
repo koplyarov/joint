@@ -1,35 +1,35 @@
 package benchmarks
 {
 
-	interface IBasicInvokable
-	{
-		void VoidToVoid();
+    interface IBasicInvokable
+    {
+        void VoidToVoid();
 
-		void I32ToVoid(i32 p);
-		i32 VoidToI32();
+        void I32ToVoid(i32 p);
+        i32 VoidToI32();
 
-		void StringToVoid(string s);
-		string VoidToString3();
-		string VoidToString100();
-	}
+        void StringToVoid(string s);
+        string VoidToString3();
+        string VoidToString100();
+    }
 
-	interface IBasicBenchmarks : IBasicInvokable
-	{
-		void MeasureNativeVoidToVoid(i64 n);
-		void MeasureNativeI32ToVoid(i64 n);
-		void MeasureNativeVoidToI32(i64 n);
-		void MeasureNativeString3ToVoid(i64 n);
-		void MeasureNativeVoidToString3(i64 n);
-		void MeasureNativeString100ToVoid(i64 n);
-		void MeasureNativeVoidToString100(i64 n);
+    interface IBasicBenchmarks : IBasicInvokable
+    {
+        void MeasureNativeVoidToVoid(i64 n);
+        void MeasureNativeI32ToVoid(i64 n);
+        void MeasureNativeVoidToI32(i64 n);
+        void MeasureNativeString3ToVoid(i64 n);
+        void MeasureNativeVoidToString3(i64 n);
+        void MeasureNativeString100ToVoid(i64 n);
+        void MeasureNativeVoidToString100(i64 n);
 
-		void MeasureOutgoingVoidToVoid(IBasicInvokable callback, i64 n);
-		void MeasureOutgoingI32ToVoid(IBasicInvokable callback, i64 n);
-		void MeasureOutgoingVoidToI32(IBasicInvokable callback, i64 n);
-		void MeasureOutgoingString3ToVoid(IBasicInvokable callback, i64 n);
-		void MeasureOutgoingVoidToString3(IBasicInvokable callback, i64 n);
-		void MeasureOutgoingString100ToVoid(IBasicInvokable callback, i64 n);
-		void MeasureOutgoingVoidToString100(IBasicInvokable callback, i64 n);
-	}
+        void MeasureOutgoingVoidToVoid(IBasicInvokable callback, i64 n);
+        void MeasureOutgoingI32ToVoid(IBasicInvokable callback, i64 n);
+        void MeasureOutgoingVoidToI32(IBasicInvokable callback, i64 n);
+        void MeasureOutgoingString3ToVoid(IBasicInvokable callback, i64 n);
+        void MeasureOutgoingVoidToString3(IBasicInvokable callback, i64 n);
+        void MeasureOutgoingString100ToVoid(IBasicInvokable callback, i64 n);
+        void MeasureOutgoingVoidToString100(IBasicInvokable callback, i64 n);
+    }
 
 }

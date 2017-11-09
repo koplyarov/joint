@@ -11,16 +11,16 @@ namespace python {
 namespace pyjoint
 {
 
-	struct ProxyBase
-	{
-		PyObject_HEAD
-		JointCore_ObjectAccessor obj;
-		JointCore_InterfaceChecksum checksum;
-		PyObject* ifcDesc;
-	};
+    struct ProxyBase
+    {
+        PyObject_HEAD
+        JointCore_ObjectAccessor obj;
+        JointCore_InterfaceChecksum checksum;
+        PyObject* ifcDesc;
+    };
 
 
-	extern PyTypeObject ProxyBase_type;
+    extern PyTypeObject ProxyBase_type;
 
 }}}
 

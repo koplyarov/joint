@@ -1,18 +1,18 @@
 package test
 {
-	interface ILifetimeListener
-	{
-		void OnDestroyed();
-	}
+    interface ILifetimeListener
+    {
+        void OnDestroyed();
+    }
 
-	interface ILifetimeListenable
-	{
-		void SetListener(ILifetimeListener l);
-	}
+    interface ILifetimeListenable
+    {
+        void SetListener(ILifetimeListener l);
+    }
 
-	interface ILifetimeTests
-	{
-		ILifetimeListenable CreateListenable();
-		void CollectGarbage();
-	}
+    interface ILifetimeTests
+    {
+        ILifetimeListenable CreateListenable();
+        void CollectGarbage();
+    }
 }

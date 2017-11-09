@@ -8,9 +8,9 @@
 
 static inline const char* Joint_CopyString(const char* str)
 {
-	char* tmp = malloc(strlen(str) + 1);
-	strcpy(tmp, str);
-	return tmp;
+    char* tmp = malloc(strlen(str) + 1);
+    strcpy(tmp, str);
+    return tmp;
 }
 
 static inline void Joint_ReleaseString(const char* str)

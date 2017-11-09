@@ -5,15 +5,15 @@ namespace joint {
 namespace detail
 {
 
-	class NonCopyable
-	{
-	protected:
-		NonCopyable() { }
+    class NonCopyable
+    {
+    protected:
+        NonCopyable() { }
 
-	private:
-		NonCopyable(const NonCopyable&);
-		NonCopyable& operator = (const NonCopyable&);
-	};
+    private:
+        NonCopyable(const NonCopyable&);
+        NonCopyable& operator = (const NonCopyable&);
+    };
 
 }}
 

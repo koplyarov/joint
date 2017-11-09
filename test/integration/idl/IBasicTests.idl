@@ -1,46 +1,46 @@
 package test
 {
-	interface IBasicTestsCallbackU8 { u8 AddU8(u8 l, u8 r); }
-	interface IBasicTestsCallbackI8 { i8 AddI8(i8 l, i8 r); }
-	interface IBasicTestsCallbackU16 { u16 AddU16(u16 l, u16 r); }
-	interface IBasicTestsCallbackI16 { i16 AddI16(i16 l, i16 r); }
-	interface IBasicTestsCallbackU32 { u32 AddU32(u32 l, u32 r); }
-	interface IBasicTestsCallbackI32 { i32 AddI32(i32 l, i32 r); }
-	interface IBasicTestsCallbackU64 { u64 AddU64(u64 l, u64 r); }
-	interface IBasicTestsCallbackI64 { i64 AddI64(i64 l, i64 r); }
-	interface IBasicTestsCallbackF32 { f32 AddF32(f32 l, f32 r); }
-	interface IBasicTestsCallbackF64 { f64 AddF64(f64 l, f64 r); }
-	interface IBasicTestsCallbackBool { bool And(bool l, bool r); }
-	interface IBasicTestsCallbackString { string Concat(string l, string r); }
+    interface IBasicTestsCallbackU8 { u8 AddU8(u8 l, u8 r); }
+    interface IBasicTestsCallbackI8 { i8 AddI8(i8 l, i8 r); }
+    interface IBasicTestsCallbackU16 { u16 AddU16(u16 l, u16 r); }
+    interface IBasicTestsCallbackI16 { i16 AddI16(i16 l, i16 r); }
+    interface IBasicTestsCallbackU32 { u32 AddU32(u32 l, u32 r); }
+    interface IBasicTestsCallbackI32 { i32 AddI32(i32 l, i32 r); }
+    interface IBasicTestsCallbackU64 { u64 AddU64(u64 l, u64 r); }
+    interface IBasicTestsCallbackI64 { i64 AddI64(i64 l, i64 r); }
+    interface IBasicTestsCallbackF32 { f32 AddF32(f32 l, f32 r); }
+    interface IBasicTestsCallbackF64 { f64 AddF64(f64 l, f64 r); }
+    interface IBasicTestsCallbackBool { bool And(bool l, bool r); }
+    interface IBasicTestsCallbackString { string Concat(string l, string r); }
 
-	interface IBasicTests
-	{
-		u8 AddU8(u8 l, u8 r);
-		i8 AddI8(i8 l, i8 r);
-		u16 AddU16(u16 l, u16 r);
-		i16 AddI16(i16 l, i16 r);
-		u32 AddU32(u32 l, u32 r);
-		i32 AddI32(i32 l, i32 r);
-		u64 AddU64(u64 l, u64 r);
-		i64 AddI64(i64 l, i64 r);
-		f32 AddF32(f32 l, f32 r);
-		f64 AddF64(f64 l, f64 r);
+    interface IBasicTests
+    {
+        u8 AddU8(u8 l, u8 r);
+        i8 AddI8(i8 l, i8 r);
+        u16 AddU16(u16 l, u16 r);
+        i16 AddI16(i16 l, i16 r);
+        u32 AddU32(u32 l, u32 r);
+        i32 AddI32(i32 l, i32 r);
+        u64 AddU64(u64 l, u64 r);
+        i64 AddI64(i64 l, i64 r);
+        f32 AddF32(f32 l, f32 r);
+        f64 AddF64(f64 l, f64 r);
 
-		bool And(bool l, bool r);
-		string Concat(string l, string r);
+        bool And(bool l, bool r);
+        string Concat(string l, string r);
 
-		u8 CallbackU8(IBasicTestsCallbackU8 cb, u8 l, u8 r);
-		i8 CallbackI8(IBasicTestsCallbackI8 cb, i8 l, i8 r);
-		u16 CallbackU16(IBasicTestsCallbackU16 cb, u16 l, u16 r);
-		i16 CallbackI16(IBasicTestsCallbackI16 cb, i16 l, i16 r);
-		u32 CallbackU32(IBasicTestsCallbackU32 cb, u32 l, u32 r);
-		i32 CallbackI32(IBasicTestsCallbackI32 cb, i32 l, i32 r);
-		u64 CallbackU64(IBasicTestsCallbackU64 cb, u64 l, u64 r);
-		i64 CallbackI64(IBasicTestsCallbackI64 cb, i64 l, i64 r);
-		f32 CallbackF32(IBasicTestsCallbackF32 cb, f32 l, f32 r);
-		f64 CallbackF64(IBasicTestsCallbackF64 cb, f64 l, f64 r);
+        u8 CallbackU8(IBasicTestsCallbackU8 cb, u8 l, u8 r);
+        i8 CallbackI8(IBasicTestsCallbackI8 cb, i8 l, i8 r);
+        u16 CallbackU16(IBasicTestsCallbackU16 cb, u16 l, u16 r);
+        i16 CallbackI16(IBasicTestsCallbackI16 cb, i16 l, i16 r);
+        u32 CallbackU32(IBasicTestsCallbackU32 cb, u32 l, u32 r);
+        i32 CallbackI32(IBasicTestsCallbackI32 cb, i32 l, i32 r);
+        u64 CallbackU64(IBasicTestsCallbackU64 cb, u64 l, u64 r);
+        i64 CallbackI64(IBasicTestsCallbackI64 cb, i64 l, i64 r);
+        f32 CallbackF32(IBasicTestsCallbackF32 cb, f32 l, f32 r);
+        f64 CallbackF64(IBasicTestsCallbackF64 cb, f64 l, f64 r);
 
-		bool CallbackBool(IBasicTestsCallbackBool cb, bool l, bool r);
-		string CallbackString(IBasicTestsCallbackString cb, string l, string r);
-	}
+        bool CallbackBool(IBasicTestsCallbackBool cb, bool l, bool r);
+        string CallbackString(IBasicTestsCallbackString cb, string l, string r);
+    }
 }

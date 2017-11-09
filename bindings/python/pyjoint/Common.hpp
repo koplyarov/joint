@@ -17,24 +17,24 @@ namespace pyjoint
 {
 
 #define PYJOINT_CPP_WRAP_BEGIN \
-			try { \
+            try { \
 
 #define PYJOINT_CPP_WRAP_END(RetSuccess_, RetError_, ...) \
-				return RetSuccess_; \
-			} \
-			catch (const std::exception& ex) { \
-				GetLogger().Error() << __func__ << " failed: " << ex; \
-				PyErr_SetString(PyExc_RuntimeError, ex.what()); \
-				__VA_ARGS__ \
-				return RetError_; \
-			}
+                return RetSuccess_; \
+            } \
+            catch (const std::exception& ex) { \
+                GetLogger().Error() << __func__ << " failed: " << ex; \
+                PyErr_SetString(PyExc_RuntimeError, ex.what()); \
+                __VA_ARGS__ \
+                return RetError_; \
+            }
 
 #define PYJOINT_CPP_WRAP_END_VOID(...) \
-			} \
-			catch (const std::exception& ex) { \
-				GetLogger().Error() << __func__ << " failed: " << ex; \
-				__VA_ARGS__ \
-			}
+            } \
+            catch (const std::exception& ex) { \
+                GetLogger().Error() << __func__ << " failed: " << ex; \
+                __VA_ARGS__ \
+            }
 
 }}}
 

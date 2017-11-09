@@ -7,19 +7,19 @@ namespace devkit {
 namespace accessors
 {
 
-	template < typename VTable_, typename VTableInitializer_ >
-	class VTableStorage
-	{
-	private:
-		VTable_    _vTable;
+    template < typename VTable_, typename VTableInitializer_ >
+    class VTableStorage
+    {
+    private:
+        VTable_    _vTable;
 
-	public:
-		VTableStorage()
-		{ VTableInitializer_::InitVTable(_vTable); }
+    public:
+        VTableStorage()
+        { VTableInitializer_::InitVTable(_vTable); }
 
-		const VTable_* GetVTablePtr() const
-		{ return &_vTable; }
-	};
+        const VTable_* GetVTablePtr() const
+        { return &_vTable; }
+    };
 
 
 }}}

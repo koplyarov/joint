@@ -16,9 +16,9 @@
 
 
 #if defined(_MSC_VER) && _MSC_VER < 1900
-#	define DETAIL_JOINT_ALIGNOF __alignof
+#   define DETAIL_JOINT_ALIGNOF __alignof
 #else
-#	define DETAIL_JOINT_ALIGNOF alignof
+#   define DETAIL_JOINT_ALIGNOF alignof
 #endif
 
 
@@ -26,38 +26,38 @@ namespace joint {
 namespace devkit
 {
 
-	template < typename T_ >
-	class StorageFor
-	{
-	public:
-		struct NoConstructTag { };
+    template < typename T_ >
+    class StorageFor
+    {
+    public:
+        struct NoConstructTag { };
 
-	private:
-		using Storage = typename std::aligned_storage<sizeof(T_), DETAIL_JOINT_ALIGNOF(T_)>::type;
+    private:
+        using Storage = typename std::aligned_storage<sizeof(T_), DETAIL_JOINT_ALIGNOF(T_)>::type;
 
-	private:
-		Storage		obj;
+    private:
+        Storage     obj;
 
-	public:
-		StorageFor() { }
-		~StorageFor() { }
+    public:
+        StorageFor() { }
+        ~StorageFor() { }
 
-		template < typename... Args_ >
-		void Construct(Args_&&... args)
-		{ new(&obj) T_(std::forward<Args_>(args)...); }
+        template < typename... Args_ >
+        void Construct(Args_&&... args)
+        { new(&obj) T_(std::forward<Args_>(args)...); }
 
-		void Destruct()
-		{ Ref().~T_(); }
+        void Destruct()
+        { Ref().~T_(); }
 
-		T_& Ref() { return *reinterpret_cast<T_*>(&obj); }
-		const T_& Ref() const { return *reinterpret_cast<const T_*>(&obj); }
+        T_& Ref() { return *reinterpret_cast<T_*>(&obj); }
+        const T_& Ref() const { return *reinterpret_cast<const T_*>(&obj); }
 
-		T_& operator * () { return Ref(); }
-		const T_& operator * () const { return Ref(); }
+        T_& operator * () { return Ref(); }
+        const T_& operator * () const { return Ref(); }
 
-		T_* operator -> () { return &Ref(); }
-		const T_* operator -> () const { return &Ref(); }
-	};
+        T_* operator -> () { return &Ref(); }
+        const T_* operator -> () const { return &Ref(); }
+    };
 
 }}
 

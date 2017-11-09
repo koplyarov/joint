@@ -15,22 +15,22 @@ namespace python {
 namespace pyjoint
 {
 
-	struct JointException
-	{
+    struct JointException
+    {
 #if PY_VERSION_HEX >= 0x03000000
-		PyException_HEAD
+        PyException_HEAD
 #else
-		PyObject_HEAD
-		PyObject* dict;
-		PyObject* args;
-		PyObject* message;
+        PyObject_HEAD
+        PyObject* dict;
+        PyObject* args;
+        PyObject* message;
 #endif
 
-		JointCore_Exception_Handle ex;
-	};
+        JointCore_Exception_Handle ex;
+    };
 
 
-	extern PyTypeObject JointException_type;
+    extern PyTypeObject JointException_type;
 
 }}}
 

@@ -34,7 +34,7 @@ NativeEnum NativeVoidToEnum();
 
 struct INativeObject
 {
-	virtual ~INativeObject() { }
+    virtual ~INativeObject() { }
 };
 using INativeObjectPtr = std::shared_ptr<INativeObject>;
 

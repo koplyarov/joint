@@ -1,5 +1,5 @@
 {
-	"binding": "java",
-	"jars": [ "tests.jar" ],
-	"class": "test.Tests"
+    "binding": "java",
+    "jars": [ "tests.jar" ],
+    "class": "test.Tests"
 }

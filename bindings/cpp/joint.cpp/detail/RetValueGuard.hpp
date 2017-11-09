@@ -9,24 +9,24 @@ namespace joint {
 namespace detail
 {
 
-	class RetValueGuard
-	{
-	private:
-		const JointCore_Type&  _type;
-		JointCore_RetValue&    _retValue;
+    class RetValueGuard
+    {
+    private:
+        const JointCore_Type&  _type;
+        JointCore_RetValue&    _retValue;
 
-	public:
-		RetValueGuard(const JointCore_Type& type, JointCore_RetValue& retValue)
-			: _type(type), _retValue(retValue)
-		{ }
+    public:
+        RetValueGuard(const JointCore_Type& type, JointCore_RetValue& retValue)
+            : _type(type), _retValue(retValue)
+        { }
 
-		~RetValueGuard()
-		{
-			JointCore_Error ret = _retValue.releaseValue(_type, _retValue.result.value);
-			if (ret != JOINT_CORE_ERROR_NONE)
-				Joint_Log(JOINT_CORE_LOGLEVEL_ERROR, "Joint.C++", "JointCore_RetValue::releaseValue failed: %s", JointCore_ErrorToString(ret));
-		}
-	};
+        ~RetValueGuard()
+        {
+            JointCore_Error ret = _retValue.releaseValue(_type, _retValue.result.value);
+            if (ret != JOINT_CORE_ERROR_NONE)
+                Joint_Log(JOINT_CORE_LOGLEVEL_ERROR, "Joint.C++", "JointCore_RetValue::releaseValue failed: %s", JointCore_ErrorToString(ret));
+        }
+    };
 
 
 }}

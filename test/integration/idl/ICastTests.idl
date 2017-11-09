@@ -1,25 +1,25 @@
 package test
 {
-	interface IInterface0 { }
-	interface IInterface1 { i8 Method1(i8 i); }
-	interface IInterface2 { u8 Method2(u8 i); }
+    interface IInterface0 { }
+    interface IInterface1 { i8 Method1(i8 i); }
+    interface IInterface2 { u8 Method2(u8 i); }
 
-	interface IInterface3 { i16 Method3(i16 i); }
-	interface IInterface4 { u16 Method4(u16 i); }
-	interface IInterface5 : IInterface3, IInterface4 { i32 Method5(i32 i); }
-	interface IInterface6 { u32 Method6(u32 i); }
-	interface IInterface7 : IInterface5, IInterface6 { i64 Method7(i64 i); }
+    interface IInterface3 { i16 Method3(i16 i); }
+    interface IInterface4 { u16 Method4(u16 i); }
+    interface IInterface5 : IInterface3, IInterface4 { i32 Method5(i32 i); }
+    interface IInterface6 { u32 Method6(u32 i); }
+    interface IInterface7 : IInterface5, IInterface6 { i64 Method7(i64 i); }
 
-	interface ICastTests
-	{
-		IInterface1 CastTo1(IInterface0 obj);
-		IInterface2 CastTo2(IInterface0 obj);
-		IInterface3 CastTo3(IInterface0 obj);
-		IInterface4 CastTo4(IInterface0 obj);
-		IInterface5 CastTo5(IInterface0 obj);
-		IInterface6 CastTo6(IInterface0 obj);
-		IInterface7 CastTo7(IInterface0 obj);
+    interface ICastTests
+    {
+        IInterface1 CastTo1(IInterface0 obj);
+        IInterface2 CastTo2(IInterface0 obj);
+        IInterface3 CastTo3(IInterface0 obj);
+        IInterface4 CastTo4(IInterface0 obj);
+        IInterface5 CastTo5(IInterface0 obj);
+        IInterface6 CastTo6(IInterface0 obj);
+        IInterface7 CastTo7(IInterface0 obj);
 
-		IInterface0 Create017();
-	}
+        IInterface0 Create017();
+    }
 }

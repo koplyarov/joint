@@ -10,15 +10,15 @@ JOINT_DEVKIT_LOGGER("Joint.Java.JNI")
 
 JNIEXPORT jlong JNICALL Java_org_joint_InterfaceDescriptor_initNative(JNIEnv* env, jobject self)
 {
-	JNI_WRAP_CPP_BEGIN
-	auto result = new JavaInterfaceDescriptor(JObjTempRef(env, self), JavaBindingInfo());
-	JNI_WRAP_CPP_END(reinterpret_cast<jlong>(result), 0)
+    JNI_WRAP_CPP_BEGIN
+    auto result = new JavaInterfaceDescriptor(JObjTempRef(env, self), JavaBindingInfo());
+    JNI_WRAP_CPP_END(reinterpret_cast<jlong>(result), 0)
 }
 
 
 JNIEXPORT void JNICALL Java_org_joint_InterfaceDescriptor_deinitNative(JNIEnv* env, jclass cls, jlong native)
 {
-	JNI_WRAP_CPP_BEGIN
-	delete reinterpret_cast<JavaInterfaceDescriptor*>(native);
-	JNI_WRAP_CPP_END_VOID()
+    JNI_WRAP_CPP_BEGIN
+    delete reinterpret_cast<JavaInterfaceDescriptor*>(native);
+    JNI_WRAP_CPP_END_VOID()
 }

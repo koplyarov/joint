@@ -24,22 +24,22 @@ namespace python {
 namespace binding
 {
 
-	using namespace devkit;
+    using namespace devkit;
 
 
-	Binding::Binding()
-	{ GetLogger().Debug() << "Created"; }
+    Binding::Binding()
+    { GetLogger().Debug() << "Created"; }
 
 
-	Binding::~Binding()
-	{ GetLogger().Debug() << "Destroying"; }
+    Binding::~Binding()
+    { GetLogger().Debug() << "Destroying"; }
 
 
-	JointCore_Error Binding::LoadModule(JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule) JOINT_DEVKIT_NOEXCEPT
-	{
-		JOINT_CPP_WRAP_BEGIN
-		*outModule = accessors::MakeAccessor<Module>(moduleManifest);
-		JOINT_CPP_WRAP_END
-	}
+    JointCore_Error Binding::LoadModule(JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule) JOINT_DEVKIT_NOEXCEPT
+    {
+        JOINT_CPP_WRAP_BEGIN
+        *outModule = accessors::MakeAccessor<Module>(moduleManifest);
+        JOINT_CPP_WRAP_END
+    }
 
 }}}

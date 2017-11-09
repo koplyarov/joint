@@ -1,4 +1,4 @@
 {
-	"binding": "python",
-	"module": "Package"
+    "binding": "python",
+    "module": "Package"
 }

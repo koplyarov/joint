@@ -12,17 +12,17 @@ namespace java {
 namespace Detail
 {
 
-	template < typename T_ >
-	T_ TryOrTerminate(T_ val, JNIEnv* env, const char* LoggerName, const char* msg)
-	{
-		if (env->ExceptionCheck())
-		{
-			env->ExceptionDescribe();
-			JOINT_TERMINATE(msg);
-		}
+    template < typename T_ >
+    T_ TryOrTerminate(T_ val, JNIEnv* env, const char* LoggerName, const char* msg)
+    {
+        if (env->ExceptionCheck())
+        {
+            env->ExceptionDescribe();
+            JOINT_TERMINATE(msg);
+        }
 
-		return val;
-	}
+        return val;
+    }
 
 }}}
 

@@ -1,15 +1,15 @@
 package test
 {
-	interface IExceptionTestsCallback
-	{
-		void Method();
-	}
+    interface IExceptionTestsCallback
+    {
+        void Method();
+    }
 
-	interface IExceptionTests
-	{
-		void ThrowNative();
-		bool CatchAll(IExceptionTestsCallback cb);
-		void LetThrough(IExceptionTestsCallback cb);
-	}
+    interface IExceptionTests
+    {
+        void ThrowNative();
+        bool CatchAll(IExceptionTestsCallback cb);
+        void LetThrough(IExceptionTestsCallback cb);
+    }
 }
 

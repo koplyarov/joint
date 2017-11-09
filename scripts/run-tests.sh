@@ -4,7 +4,7 @@ SCRIPT_DIR="$(dirname $(readlink -f $0))"
 ROOT_DIR="$SCRIPT_DIR/.."
 
 VG() {
-	valgrind "--suppressions=$ROOT_DIR/etc/valgrind.sup" --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 -q "$ROOT_DIR/build/bin/joint-test" $@
+    valgrind "--suppressions=$ROOT_DIR/etc/valgrind.sup" --tool=memcheck --leak-check=full --gen-suppressions=all --error-exitcode=1 -q "$ROOT_DIR/build/bin/joint-test" $@
 }
 
 export PYTHONPATH="$ROOT_DIR/build/bin"

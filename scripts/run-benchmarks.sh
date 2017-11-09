@@ -4,8 +4,8 @@ SCRIPT_DIR="$(dirname $(readlink -f $0))"
 ROOT_DIR="$SCRIPT_DIR/.."
 
 if [ $# -ne 1 ]; then
-	echo "Usage: $0 <template file>" >&2
-	exit 1
+    echo "Usage: $0 <template file>" >&2
+    exit 1
 fi
 
 TEMPLATE="$1"

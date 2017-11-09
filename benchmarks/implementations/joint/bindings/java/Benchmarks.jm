@@ -1,5 +1,5 @@
 {
-	"binding": "java",
-	"jars": [ "benchmarks-java.jar" ],
-	"class": "benchmarks.Benchmarks"
+    "binding": "java",
+    "jars": [ "benchmarks-java.jar" ],
+    "class": "benchmarks.Benchmarks"
 }

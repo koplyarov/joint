@@ -5,23 +5,23 @@ import java.util.ArrayList;
 
 public class AccessorsContainer implements Component
 {
-	private ArrayList<Accessor> accessors;
+    private ArrayList<Accessor> accessors;
 
-	public AccessorsContainer()
-	{ this.accessors = new ArrayList<Accessor>(); }
+    public AccessorsContainer()
+    { this.accessors = new ArrayList<Accessor>(); }
 
-	public AccessorsContainer addAccessor(Accessor accessor)
-	{
-		accessors.add(accessor);
-		return this;
-	}
+    public AccessorsContainer addAccessor(Accessor accessor)
+    {
+        accessors.add(accessor);
+        return this;
+    }
 
-	public Accessor cast(InterfaceId interfaceId)
-	{
-		for (Accessor a : accessors)
-			if (a.implementsInterface(interfaceId))
-				return a;
+    public Accessor cast(InterfaceId interfaceId)
+    {
+        for (Accessor a : accessors)
+            if (a.implementsInterface(interfaceId))
+                return a;
 
-		return null;
-	}
+        return null;
+    }
 }

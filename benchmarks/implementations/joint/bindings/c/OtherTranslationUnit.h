@@ -23,9 +23,9 @@ char* NativeVoidToString100();
 
 typedef enum
 {
-	NATIVE_ENUM_A,
-	NATIVE_ENUM_B,
-	NATIVE_ENUM_C
+    NATIVE_ENUM_A,
+    NATIVE_ENUM_B,
+    NATIVE_ENUM_C
 } NativeEnum;
 
 void NativeEnumToVoid(NativeEnum p);
