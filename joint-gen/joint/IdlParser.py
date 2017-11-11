@@ -1,40 +1,42 @@
-from pyparsing import *
-import os
+from pyparsing import Empty, Group, Keyword, LineEnd, Optional, ParseException, ParseSyntaxException, SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas, cppStyleComment, nums
+
 
 class IdlParserException(Exception):
     def __init__(self, message, location):
+        super(IdlParserException, self).__init__(message)
         self.message = message
         self.location = location
 
-class IdlParser:
+
+class IdlParser(object):
     def __init__(self):
-        self.locator = Empty().setParseAction(self.locatorParseAction)('location')
+        self.locator = Empty().setParseAction(self.locator_parse_action)('location')
 
         import_entry = Group(Suppress(Keyword('import')) - self.locator + SkipTo(LineEnd())('path'))
         imports = ZeroOrMore(import_entry)('imports')
 
         array = Group(Suppress('[') + Suppress(']'))
-        type = Group(self.locator + (Word(alphas, alphanums) + ZeroOrMore(Suppress('.') - Word(alphas, alphanums)))('name') - ZeroOrMore(array)('array'))
+        type_ = Group(self.locator + (Word(alphas, alphanums) + ZeroOrMore(Suppress('.') - Word(alphas, alphanums)))('name') - ZeroOrMore(array)('array'))
         identifier = Word(alphas, alphanums)
 
-        param = Group(self.locator + type('type') + identifier('name'))
-        paramsList = Group(Optional(param + ZeroOrMore(Suppress(',') + param)))
-        method = Group(self.locator + type('retType') + identifier('name') + Suppress('(') + paramsList('params') + Suppress(');'))
-        methodList = Group(ZeroOrMore(method))
+        param = Group(self.locator + type_('type') + identifier('name'))
+        params_list = Group(Optional(param + ZeroOrMore(Suppress(',') + param)))
+        method = Group(self.locator + type_('ret_type') + identifier('name') + Suppress('(') + params_list('params') + Suppress(');'))
+        method_list = Group(ZeroOrMore(method))
 
         package = Group(identifier + ZeroOrMore(Suppress('.') + identifier))
 
-        basesList = type + ZeroOrMore(Suppress(',') + type)
-        interface = Group(self.locator + Keyword('interface')('kind') - identifier('name') + Optional(Suppress(':') - basesList)('bases') + Suppress('{') + methodList('methods') + Suppress('}'))
+        bases_list = type_ + ZeroOrMore(Suppress(',') + type_)
+        interface = Group(self.locator + Keyword('interface')('kind') - identifier('name') + Optional(Suppress(':') - bases_list)('bases') + Suppress('{') + method_list('methods') + Suppress('}'))
 
-        integerConstant = Word(nums).setParseAction(lambda s, l, t: int(t[0]))
-        enumValue = Group(self.locator + identifier('name') - Optional(Suppress('=') + integerConstant('value')))
-        enumValuesList = Group(Optional(enumValue + ZeroOrMore(Suppress(',') + enumValue)))
-        enum = Group(self.locator + Keyword('enum')('kind') - identifier('name') + Suppress('{') + enumValuesList('values') + Suppress('}'))
+        integer_constant = Word(nums).setParseAction(lambda s, l, t: int(t[0]))
+        enum_value = Group(self.locator + identifier('name') - Optional(Suppress('=') + integer_constant('value')))
+        enum_values_list = Group(Optional(enum_value + ZeroOrMore(Suppress(',') + enum_value)))
+        enum = Group(self.locator + Keyword('enum')('kind') - identifier('name') + Suppress('{') + enum_values_list('values') + Suppress('}'))
 
-        structMember = Group(self.locator + type('type') + identifier('name') + Suppress(';'))
-        structMembersList = Group(ZeroOrMore(structMember))
-        struct = Group(self.locator + Keyword('struct')('kind') - identifier('name') + Suppress('{') + structMembersList('members') + Suppress('}'))
+        struct_member = Group(self.locator + type_('type') + identifier('name') + Suppress(';'))
+        struct_members_list = Group(ZeroOrMore(struct_member))
+        struct = Group(self.locator + Keyword('struct')('kind') - identifier('name') + Suppress('{') + struct_members_list('members') + Suppress('}'))
 
         package = Suppress(Keyword('package')) + package('package') + Suppress('{') + Group(ZeroOrMore(interface | enum | struct))('types') + Suppress('}')
 
@@ -42,15 +44,15 @@ class IdlParser:
         self.grammar.ignore(cppStyleComment)
         self.grammar.parseWithTabs()
 
-    def locatorParseAction(self, s, l, t):
+    def locator_parse_action(self, s, l, t):
         str_head = s[:l]
-        return { 'lineno': str_head.count('\n') + 1, 'col': len(str_head) - str_head.rfind('\n'), 'file': self._file }
+        return {'lineno': str_head.count('\n') + 1, 'col': len(str_head) - str_head.rfind('\n'), 'file': self._file}
 
-    def parseFile(self, file):
+    def parse_file(self, file_):
         try:
-            self._file = file
-            return self.grammar.parseFile(file).asDict()
+            self._file = file_
+            return self.grammar.parseFile(file_).asDict()
         except (ParseException, ParseSyntaxException) as e:
-            raise IdlParserException(str(e), { 'lineno': e.lineno, 'file': file, 'col': e.col})
+            raise IdlParserException(str(e), {'lineno': e.lineno, 'file': file_, 'col': e.col})
         finally:
             self._file = None

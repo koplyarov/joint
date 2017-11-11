@@ -1,4 +1,4 @@
-class CodeWithInitialization:
-    def __init__(self, code, initialization = []):
+class CodeWithInitialization(object):
+    def __init__(self, code, initialization=None):
         self.code = code
-        self.initialization = initialization
+        self.initialization = initialization or []

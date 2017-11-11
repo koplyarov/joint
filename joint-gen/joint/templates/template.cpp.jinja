@@ -1,11 +1,11 @@
 {% macro open_ns(package) -%}
-{%- for n in package.nameList %}
+{%- for n in package.name_list %}
 namespace {{n}} {
 {%- endfor %}
 {%- endmacro -%}
 
 {% macro close_ns(package) -%}
-{% for n in package.nameList -%} } {%- endfor %}
+{% for n in package.name_list -%} } {%- endfor %}
 {%- endmacro -%}
 
 {% macro for_each_package() -%}
@@ -105,7 +105,7 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
         void _FillMembers(JointCore_Value* members) const
         {
             {% for m in s.members -%}
-            members[{{loop.index - 1}}].{{m.type.variantName}} =
+            members[{{loop.index - 1}}].{{m.type.variant_name}} =
             {%- if type_name(m.type) == 'BuiltinType' -%}
             {{m.name}}{{'.Utf8Bytes().data()' if m.type.fullname == 'string'}}
             {%- elif type_name(m.type) == 'Enum' -%}
@@ -175,7 +175,7 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
         static const char* _GetInterfaceId() { return "{{i.fullname}}"; }
 
         {%- for m in i.methods %}
-        JOINT_CPP_RET_TYPE({{cpp_type(m.retType).cpp_type}}) {{m.name}}({{ m.params | map('ref_param_decl') | join(', ') }});
+        JOINT_CPP_RET_TYPE({{cpp_type(m.ret_type).cpp_type}}) {{m.name}}({{ m.params | map('ref_param_decl') | join(', ') }});
         {%- endfor %}
     };
 
@@ -221,34 +221,34 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
 {% call(p) for_each_package() %}
 {% for i in p.interfaces %}
 {% for m in i.methods %}
-    JOINT_CPP_RET_TYPE({{cpp_type(m.retType).cpp_type}}) {{i.name}}::{{m.name}}({{m.params | map('ref_param_decl') | join(', ')}})
+    JOINT_CPP_RET_TYPE({{cpp_type(m.ret_type).cpp_type}}) {{i.name}}::{{m.name}}({{m.params | map('ref_param_decl') | join(', ')}})
     {
         using namespace ::joint::detail;
         JointCore_RetValue _ret_val;
-        {% if m.retType.needRelease -%}
+        {% if m.ret_type.need_release -%}
         JointCore_Type _ret_val_type;
-        _ret_val_type.id = (JointCore_TypeId){{m.retType.index}};
-        {% if type_name(m.retType) == 'Interface' -%}
-        _ret_val_type.payload.interfaceChecksum = {{mangle_type(m.retType)}}::_GetInterfaceChecksum();
+        _ret_val_type.id = (JointCore_TypeId){{m.ret_type.index}};
+        {% if type_name(m.ret_type) == 'Interface' -%}
+        _ret_val_type.payload.interfaceChecksum = {{mangle_type(m.ret_type)}}::_GetInterfaceChecksum();
         {% endif -%}
-        {% if type_name(m.retType) == 'Struct' -%}
-        _ret_val_type.payload.structDescriptor = {{mangle_type(m.retType)}}::_GetStructDescriptor();
+        {% if type_name(m.ret_type) == 'Struct' -%}
+        _ret_val_type.payload.structDescriptor = {{mangle_type(m.ret_type)}}::_GetStructDescriptor();
         {% endif -%}
         {% endif -%}
         {% if m.params -%}
         JointCore_Parameter params[{{m.params | length}}];
         {% for p in m.params -%}
         {{to_joint_param(p.type, p.name).initialization | join('\n') | indent(8)}}
-        params[{{p.index}}].value.{{p.type.variantName}} = {{to_joint_param(p.type, p.name).code}};
+        params[{{p.index}}].value.{{p.type.variant_name}} = {{to_joint_param(p.type, p.name).code}};
         {% endfor -%}
         {% endif -%}
         JOINT_METHOD_CALL("C++ proxy for {{i.fullname}}.{{m.name}}", _obj.VTable->InvokeMethod(_obj.Instance, {{m.index}}, {{'params' if m.params else 'nullptr'}}, {{m.params | length}}, &_ret_val));
-        {% if m.retType.needRelease -%}
+        {% if m.ret_type.need_release -%}
         ::joint::detail::RetValueGuard _rvg(_ret_val_type, _ret_val);
         {%- endif %}
-        {% if m.retType.name != 'void' -%}
-        {{from_joint_retval(m.retType, '_ret_val.result.value').initialization | join('\n') | indent(8)}}
-        JOINT_CPP_RETURN({{from_joint_retval(m.retType, '_ret_val.result.value').code}});
+        {% if m.ret_type.name != 'void' -%}
+        {{from_joint_retval(m.ret_type, '_ret_val.result.value').initialization | join('\n') | indent(8)}}
+        JOINT_CPP_RETURN({{from_joint_retval(m.ret_type, '_ret_val.result.value').code}});
         {%- else %}
         JOINT_CPP_RETURN_VOID();
         {%- endif %}
@@ -271,8 +271,8 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
                     {{from_joint_param(p.type, 'params[{}].value'.format(p.index)).initialization | join('\n') | indent(20)}}
                     {{cpp_type(p.type).joint_ref_type.cpp_type}} p{{p.index}}({{from_joint_param(p.type, 'params[{}].value'.format(p.index)).code}});
                     {%- endfor -%}
-                    {%- if m.retType.name != 'void' %}
-                    DETAIL_JOINT_CPP_INVOKE_METHOD({{cpp_type(m.retType).cpp_type}}, (componentImpl->{{m.name}}({%- for p in m.params -%}p{{p.index}}{{', ' if not loop.last}}{%- endfor -%})));
+                    {%- if m.ret_type.name != 'void' %}
+                    DETAIL_JOINT_CPP_INVOKE_METHOD({{cpp_type(m.ret_type).cpp_type}}, (componentImpl->{{m.name}}({%- for p in m.params -%}p{{p.index}}{{', ' if not loop.last}}{%- endfor -%})));
                     {%- else %}
                     DETAIL_JOINT_CPP_INVOKE_VOID_METHOD((componentImpl->{{m.name}}({%- for p in m.params -%}p{{p.index}}{{', ' if not loop.last}}{%- endfor -%})));
                     {%- endif %}
@@ -283,9 +283,9 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
                         return ::joint::detail::WrapCppException<ComponentImpl_>(result.Exception(), outRetValue, {{'method_names[methodId]' if i.methods else '""'}});
                     }
 #endif
-                    {%- if m.retType.name != 'void' %}
-                    {{to_joint_retval(m.retType, 'DETAIL_JOINT_CPP_METHOD_RESULT').initialization | join('\n') | indent(20)}}
-                    outRetValue->result.value.{{m.retType.variantName}} = {{to_joint_retval(m.retType, 'DETAIL_JOINT_CPP_METHOD_RESULT').code}};
+                    {%- if m.ret_type.name != 'void' %}
+                    {{to_joint_retval(m.ret_type, 'DETAIL_JOINT_CPP_METHOD_RESULT').initialization | join('\n') | indent(20)}}
+                    outRetValue->result.value.{{m.ret_type.variant_name}} = {{to_joint_retval(m.ret_type, 'DETAIL_JOINT_CPP_METHOD_RESULT').code}};
                     {%- endif %}
                 }
                 break;
