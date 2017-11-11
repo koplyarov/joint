@@ -4,25 +4,149 @@ from ..GeneratorHelpers import CodeWithInitialization
 from jinja2 import Environment, PackageLoader
 
 
-class CppGenerator:
+class CppType(object):
+    def __init__(self, cpp_type, heavy=False, ref_type=None):
+        self.cpp_type = cpp_type
+        self.heavy = heavy
+        self.ref_type = ref_type
+
+    @staticmethod
+    def from_ast_type(t):
+        if isinstance(t, BuiltinType):
+            if t.category == BuiltinTypeCategory.void:
+                return CppType('void')
+            if t.category == BuiltinTypeCategory.int:
+                return CppType('{}int{}_t'.format('' if t.signed else 'u', t.bits))
+            if t.category == BuiltinTypeCategory.bool:
+                return CppType('bool')
+            if t.category == BuiltinTypeCategory.float:
+                if t.bits == 32:
+                    return CppType('float')
+                if t.bits == 64:
+                    return CppType('double')
+                raise RuntimeError('Unsupported floatint point type (bits: {})'.format(t.bits))
+            if t.category == BuiltinTypeCategory.string:
+                return CppType('::joint::String', heavy=True, ref_type=CppType('::joint::StringRef'))
+            raise RuntimeError('Unknown type: {}'.format(t))
+        elif isinstance(t, Interface):
+            return CppType(
+                '{}_Ptr'.format(_mangle_type(t)),
+                heavy=True,
+                ref_type=CppType('{}_Ref'.format(_mangle_type(t)))
+            )
+        elif isinstance(t, Enum):
+            return CppType('{}'.format(_mangle_type(t)))
+        elif isinstance(t, Struct):
+            return CppType('{}'.format(_mangle_type(t)), heavy=True)
+        elif isinstance(t, Array):
+            return CppType('::joint::Array<{}>'.format(CppType.from_ast_type(t.elementType).cpp_type), heavy=True)
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(t))
+
+    @property
+    def cpp_param_type(self):
+        return "const {}&".format(self.cpp_type) if self.heavy else self.cpp_type
+
+    @property
+    def joint_ref_type(self):
+        return self.ref_type or self
+
+
+class CppMarshaller(object):
+    def __init__(self, ast_type):
+        self.ast_type = ast_type
+
+    def to_joint(self, cpp_value, is_ret_value):
+        CWI = CodeWithInitialization
+        type = self.ast_type
+        if isinstance(type, BuiltinType):
+            if type.category == BuiltinTypeCategory.string:
+                if is_ret_value:
+                    mangled_value = cpp_value.replace('.', '_')
+                    initialization = [
+                        'char* _{}_c_str = new char[{}.Utf8Bytes().size() + 1];'.format(mangled_value, cpp_value),
+                        'strcpy(_{}_c_str, {}.Utf8Bytes().data());'.format(mangled_value, cpp_value)
+                    ]
+                    return CWI('_{}_c_str'.format(mangled_value), initialization)
+                else:
+                    return CWI('{}.Utf8Bytes().data()'.format(cpp_value))
+            else:
+                return CWI(cpp_value)
+        elif isinstance(type, Interface):
+            initialization = [ 'JOINT_CORE_INCREF_ACCESSOR({}->_GetObjectAccessor());'.format(cpp_value), ] if is_ret_value else []
+            return CWI('{}->_GetObjectAccessor()'.format(cpp_value), initialization)
+        elif isinstance(type, Enum):
+            return CWI('{}._RawValue()'.format(cpp_value))
+        elif isinstance(type, Struct):
+            mangled_value = cpp_value.replace('.', '_')
+            initialization = []
+            member_values = []
+            for m in type.members:
+                member_val = CppMarshaller(m.type).to_joint('{}.{}'.format(cpp_value, m.name), is_ret_value)
+                initialization += member_val.initialization
+                member_values.append(member_val.code);
+            if is_ret_value:
+                initialization.append('JointCore_Value* {}_members = new JointCore_Value[{}];'.format(mangled_value, len(type.members)))
+            else:
+                initialization.append('JointCore_Value {}_members[{}];'.format(mangled_value, len(type.members)))
+            for i,m in enumerate(member_values):
+                initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, type.members[i].type.variantName, m))
+            return CWI('{}_members'.format(mangled_value), initialization)
+        elif isinstance(type, Array):
+            initialization = [ 'Joint_IncRefArray({}._GetArrayHandle());'.format(cpp_value), ] if is_ret_value else []
+            return CWI('{}._GetArrayHandle()'.format(cpp_value), initialization)
+        else:
+            raise RuntimeError('Not implemented (type: {})!'.format(type))
+
+    def from_joint(self, joint_value, is_ret_value, recursive=False, omit_type=False):
+        CWI = CodeWithInitialization
+        type = self.ast_type
+        cpp_type_obj = CppType.from_ast_type(type)
+        cpp_type = (cpp_type_obj if is_ret_value or recursive else cpp_type_obj.joint_ref_type).cpp_type
+        v = '{}.{}'.format(joint_value, type.variantName)
+        def ctor_params():
+            if isinstance(type, BuiltinType):
+                if type.category == BuiltinTypeCategory.bool:
+                    return CWI('{} != 0'.format(v))
+                else:
+                    return CWI(v)
+            elif isinstance(type, Enum):
+                return CWI('{}::_Value({})'.format(cpp_type, v))
+            elif isinstance(type, Interface):
+                return CWI(v)
+            elif isinstance(type, Struct):
+                initialization = []
+                member_values = []
+                for i,m in enumerate(type.members):
+                    member_code = CppMarshaller(m.type).from_joint('{}.members[{}]'.format(joint_value, i), is_ret_value, recursive=True)
+                    initialization += member_code.initialization
+                    member_values.append(member_code.code)
+                return CWI(', '.join(member_values), initialization)
+            elif isinstance(type, Array):
+                initialization = [] if is_ret_value else ['Joint_IncRefArray({});'.format(v)]
+                return CWI(v, initialization)
+            else:
+                raise RuntimeError('Not implemented (type: {})!'.format(type))
+
+        result = ctor_params()
+        if not omit_type:
+            result.code = '{}({})'.format(cpp_type, result.code)
+        return result
+
+
+class CppGenerator(object):
     def __init__(self, semanticGraph):
         self.semanticGraph = semanticGraph
 
     def generate(self):
         env = Environment(loader=PackageLoader('joint', 'templates'))
         env.filters['mangle_type'] = _mangle_type
-        env.filters['param_decl'] = _to_cpp_param_decl
         env.filters['ref_param_decl'] = _to_cpp_ref_param_decl
         result = env.get_template("template.cpp.jinja").render(
             hex=hex,
             packages=self.semanticGraph.packages,
             type_name=lambda x: type(x).__name__,
-            is_heavy_type=_is_heavy_type,
-            cpp_type=_to_cpp_type,
-            cpp_param_type=_to_cpp_param_type,
-            cpp_ref_param_type=_to_cpp_ref_param_type,
-            param_decl=_to_cpp_param_decl,
-            ref_param_decl=_to_cpp_ref_param_decl,
+            cpp_type=CppType.from_ast_type,
             mangle_type=_mangle_type,
             to_joint_param=_to_joint_param,
             to_joint_retval=_to_joint_ret_value,
@@ -33,185 +157,25 @@ class CppGenerator:
             yield l
 
 
-def _is_heavy_type(type):
-    return isinstance(type, Struct) or isinstance(type, Interface) or (isinstance(type, BuiltinType) and type.category == BuiltinTypeCategory.string)
-
-
-def _to_cpp_param_type(type):
-    return _to_cpp_type(type)
-
-
-def _to_cpp_ref_param_type(type):
-    if isinstance(type, BuiltinType) and type.category == BuiltinTypeCategory.string:
-        return '::joint::StringRef'
-    if isinstance(type, Interface):
-        return '{}_Ref'.format(_mangle_type(type));
-    return _to_cpp_type(type)
-
-
-def _to_cpp_type(type):
-    if isinstance(type, BuiltinType):
-        if type.category == BuiltinTypeCategory.void:
-            return 'void'
-        if type.category == BuiltinTypeCategory.int:
-            return '{}int{}_t'.format('' if type.signed else 'u', type.bits)
-        if type.category == BuiltinTypeCategory.bool:
-            return 'bool'
-        if type.category == BuiltinTypeCategory.float:
-            if type.bits == 32:
-                return 'float'
-            if type.bits == 64:
-                return 'double'
-            raise RuntimeError('Unsupported floatint point type (bits: {})'.format(type.bits))
-        if type.category == BuiltinTypeCategory.string:
-            return '::joint::String'
-        raise RuntimeError('Unknown type: {}'.format(type))
-    elif isinstance(type, Interface):
-        return '{}_Ptr'.format(_mangle_type(type));
-    elif isinstance(type, Enum) or isinstance(type, Struct):
-        return '{}'.format(_mangle_type(type));
-    elif isinstance(type, Array):
-        return '::joint::Array<{}>'.format(_to_cpp_type(type.elementType))
-    else:
-        raise RuntimeError('Not implemented (type: {})!'.format(type))
-
-
 def _mangle_type(ifc):
     return '::{}'.format('::'.join(ifc.packageNameList + [ ifc.name ]))
 
 
-def _to_cpp_param_decl(p):
-    param_type = _to_cpp_param_type(p.type)
-    if _is_heavy_type(p.type):
-        param_type = 'const {}&'.format(param_type)
-    return '{} {}'.format(param_type, p.name)
-
-
 def _to_cpp_ref_param_decl(p):
-    param_type = _to_cpp_ref_param_type(p.type)
-    if _is_heavy_type(p.type) and not (isinstance(p.type, BuiltinType) and p.type.category == BuiltinTypeCategory.string):
-        param_type = 'const {}&'.format(param_type)
-    return '{} {}'.format(param_type, p.name)
+    return '{} {}'.format(CppType.from_ast_type(p.type).joint_ref_type.cpp_param_type, p.name)
 
 
 def _to_joint_param(type, cppValue):
-    if isinstance(type, BuiltinType):
-        if type.category == BuiltinTypeCategory.string:
-            return CodeWithInitialization('{}.Utf8Bytes().data()'.format(cppValue))
-        else:
-            return CodeWithInitialization(cppValue)
-    elif isinstance(type, Interface):
-        return CodeWithInitialization('{}->_GetObjectAccessor()'.format(cppValue))
-    elif isinstance(type, Enum):
-        return CodeWithInitialization('{}._RawValue()'.format(cppValue))
-    elif isinstance(type, Struct):
-        mangled_value = cppValue.replace('.', '_')
-        initialization = []
-        member_values = []
-        for m in type.members:
-            member_val = _to_joint_param(m.type, '{}.{}'.format(cppValue, m.name))
-            initialization += member_val.initialization
-            member_values.append(member_val.code);
-        initialization.append('JointCore_Value {}_members[{}];'.format(mangled_value, len(type.members)))
-        for i,m in enumerate(member_values):
-            initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, type.members[i].type.variantName, m))
-        return CodeWithInitialization('{}_members'.format(mangled_value), initialization)
-    elif isinstance(type, Array):
-        return CodeWithInitialization('{}._GetArrayHandle()'.format(cppValue))
-    else:
-        raise RuntimeError('Not implemented (type: {})!'.format(type))
+    return CppMarshaller(type).to_joint(cppValue, is_ret_value=False)
 
 
 def _to_joint_ret_value(type, cppValue):
-    if isinstance(type, BuiltinType):
-        if type.category == BuiltinTypeCategory.string:
-            mangled_value = cppValue.replace('.', '_')
-            initialization = [
-                'char* _{}_c_str = new char[{}.Utf8Bytes().size() + 1];'.format(mangled_value, cppValue),
-                'strcpy(_{}_c_str, {}.Utf8Bytes().data());'.format(mangled_value, cppValue)
-            ]
-            return CodeWithInitialization('_{}_c_str'.format(mangled_value), initialization)
-        else:
-            return CodeWithInitialization(cppValue)
-    elif isinstance(type, Interface):
-        initialization = [ 'JOINT_CORE_INCREF_ACCESSOR({}->_GetObjectAccessor());'.format(cppValue), ]
-        return CodeWithInitialization('{}->_GetObjectAccessor()'.format(cppValue), initialization)
-    elif isinstance(type, Enum):
-        return CodeWithInitialization('{}._RawValue()'.format(cppValue))
-    elif isinstance(type, Struct):
-        mangled_value = cppValue.replace('.', '_')
-        initialization = []
-        member_values = []
-        for m in type.members:
-            member_val = _to_joint_ret_value(m.type, '{}.{}'.format(cppValue, m.name))
-            initialization += member_val.initialization
-            member_values.append(member_val.code);
-        initialization.append('JointCore_Value* {}_members = new JointCore_Value[{}];'.format(mangled_value, len(type.members)))
-        for i,m in enumerate(member_values):
-            initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, type.members[i].type.variantName, m))
-        return CodeWithInitialization('{}_members'.format(mangled_value), initialization)
-    elif isinstance(type, Array):
-        initialization = [ 'Joint_IncRefArray({}._GetArrayHandle());'.format(cppValue), ]
-        return CodeWithInitialization('{}._GetArrayHandle()'.format(cppValue), initialization)
-    else:
-        raise RuntimeError('Not implemented (type: {})!'.format(type))
-
-
-def _validate_joint_param(type, jointType):
-    if isinstance(type, BuiltinType) or isinstance(type, Enum) or isinstance(type, Array):
-        return
-    elif isinstance(type, Interface):
-        yield 'if ({}.payload.interfaceChecksum != {}::_GetInterfaceChecksum())'.format(jointType, _mangle_type(type))
-        yield '\treturn JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM;'
-    elif isinstance(type, Struct):
-        for i,m in enumerate(type.members):
-            for l in _validate_joint_param(m.type, '{}.memberTypes[{}]'.format(jointType, i)):
-                yield l
-    else:
-        raise RuntimeError('Not implemented (type: {})!'.format(type))
+    return CppMarshaller(type).to_joint(cppValue, is_ret_value=True)
 
 
 def _from_joint_param(type, jointValue):
-    if isinstance(type, BuiltinType):
-        return CodeWithInitialization('{}.{}'.format(jointValue, type.variantName))
-    elif isinstance(type, Enum):
-        return CodeWithInitialization('{}({}.{})'.format('{}::_Value'.format(_mangle_type(type)), jointValue, type.variantName))
-    elif isinstance(type, Struct):
-        initialization = []
-        member_values = []
-        for i,m in enumerate(type.members):
-            member_code = _from_joint_param(m.type, '{}.members[{}]'.format(jointValue, i))
-            initialization += member_code.initialization
-            member_values.append('{}({})'.format(_to_cpp_type(m.type), member_code.code))
-        return CodeWithInitialization(', '.join(member_values), initialization)
-    elif isinstance(type, Interface):
-        return CodeWithInitialization('{}({}.{})'.format(_to_cpp_ref_param_type(type), jointValue, type.variantName), [])
-    elif isinstance(type, Array):
-        initialization = [ 'Joint_IncRefArray({}.{});'.format(jointValue, type.variantName) ]
-        return CodeWithInitialization('{}({}.{})'.format(_to_cpp_type(type), jointValue, type.variantName), initialization)
-    else:
-        raise RuntimeError('Not implemented (type: {})!'.format(type))
+    return CppMarshaller(type).from_joint(jointValue, is_ret_value=False, omit_type=True)
 
 
 def _from_joint_ret_value(type, jointValue):
-    if isinstance(type, BuiltinType):
-        if type.category == BuiltinTypeCategory.bool:
-            return CodeWithInitialization('{}.{} != 0'.format(jointValue, type.variantName))
-        else:
-            return CodeWithInitialization('{}({}.{})'.format(_to_cpp_type(type), jointValue, type.variantName))
-    elif isinstance(type, Interface):
-        return CodeWithInitialization('{}({}.{})'.format(_to_cpp_type(type), jointValue, type.variantName))
-    elif isinstance(type, Enum):
-        return CodeWithInitialization('{cpp}({cpp}::_Value({j}.{v}))'.format(cpp=_to_cpp_type(type), j=jointValue, v=type.variantName))
-    elif isinstance(type, Struct):
-        initialization = []
-        member_values = []
-        for i,m in enumerate(type.members):
-            member_code = _from_joint_ret_value(m.type, '{}.members[{}]'.format(jointValue, i))
-            initialization += member_code.initialization
-            member_values.append(member_code.code)
-        return CodeWithInitialization('{}({})'.format(_to_cpp_type(type), ', '.join(member_values)), initialization)
-    elif isinstance(type, Array):
-        return CodeWithInitialization('{}({}.{})'.format(_to_cpp_type(type), jointValue, type.variantName))
-    else:
-        raise RuntimeError('Not implemented (type: {})!'.format(type))
+    return CppMarshaller(type).from_joint(jointValue, is_ret_value=True)

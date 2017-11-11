@@ -58,7 +58,7 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
     struct {{s.name}}
     {
         {%- for m in s.members %}
-        {{ cpp_type(m.type) }} {{m.name}};
+        {{ cpp_type(m.type).cpp_type }} {{m.name}};
         {%- endfor %}
 
         {{s.name}}() { }
@@ -66,7 +66,7 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
 #if DETAIL_JOINT_CPP_MOVE_SUPPORTED
         {{s.name}}(
             {%- for m in s.members -%}
-            {{ cpp_type(m.type) }} {{m.name}} {{-", " if not loop.last}}
+            {{ cpp_type(m.type).cpp_type }} {{m.name}} {{-", " if not loop.last}}
             {%- endfor -%}
         )
             : {% for m in s.members -%}
@@ -74,7 +74,11 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
             {%- endfor %}
         { }
 #else
-        {{s.name}}({{ s.members | map('param_decl') | join(', ') }})
+        {{s.name}}(
+            {%- for m in s.members -%}
+            {{ cpp_type(m.type).cpp_param_type }} {{m.name}} {{-", " if not loop.last}}
+            {%- endfor -%}
+        )
             : {% for m in s.members -%}
             {{m.name}}({{m.name}}){{", " if not loop.last}}
             {%- endfor %}
@@ -171,7 +175,7 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
         static const char* _GetInterfaceId() { return "{{i.fullname}}"; }
 
         {%- for m in i.methods %}
-        JOINT_CPP_RET_TYPE({{cpp_type(m.retType)}}) {{m.name}}({{ m.params | map('ref_param_decl') | join(', ') }});
+        JOINT_CPP_RET_TYPE({{cpp_type(m.retType).cpp_type}}) {{m.name}}({{ m.params | map('ref_param_decl') | join(', ') }});
         {%- endfor %}
     };
 
@@ -217,7 +221,7 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
 {% call(p) for_each_package() %}
 {% for i in p.interfaces %}
 {% for m in i.methods %}
-    JOINT_CPP_RET_TYPE({{cpp_type(m.retType)}}) {{i.name}}::{{m.name}}({{m.params | map('ref_param_decl') | join(', ')}})
+    JOINT_CPP_RET_TYPE({{cpp_type(m.retType).cpp_type}}) {{i.name}}::{{m.name}}({{m.params | map('ref_param_decl') | join(', ')}})
     {
         using namespace ::joint::detail;
         JointCore_RetValue _ret_val;
@@ -265,10 +269,10 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
                 {
                     {%- for p in m.params -%}
                     {{from_joint_param(p.type, 'params[{}].value'.format(p.index)).initialization | join('\n') | indent(20)}}
-                    {{cpp_ref_param_type(p.type)}} p{{p.index}}({{from_joint_param(p.type, 'params[{}].value'.format(p.index)).code}});
+                    {{cpp_type(p.type).joint_ref_type.cpp_type}} p{{p.index}}({{from_joint_param(p.type, 'params[{}].value'.format(p.index)).code}});
                     {%- endfor -%}
                     {%- if m.retType.name != 'void' %}
-                    DETAIL_JOINT_CPP_INVOKE_METHOD({{cpp_type(m.retType)}}, (componentImpl->{{m.name}}({%- for p in m.params -%}p{{p.index}}{{', ' if not loop.last}}{%- endfor -%})));
+                    DETAIL_JOINT_CPP_INVOKE_METHOD({{cpp_type(m.retType).cpp_type}}, (componentImpl->{{m.name}}({%- for p in m.params -%}p{{p.index}}{{', ' if not loop.last}}{%- endfor -%})));
                     {%- else %}
                     DETAIL_JOINT_CPP_INVOKE_VOID_METHOD((componentImpl->{{m.name}}({%- for p in m.params -%}p{{p.index}}{{', ' if not loop.last}}{%- endfor -%})));
                     {%- endif %}
