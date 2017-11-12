@@ -25,8 +25,8 @@ matrix:
 
 before_install:
   - test "0$RUN_BENCHMARKS" -eq 0 || sudo apt-get install -yq libboost-all-dev
-  - sudo apt-get install -yq swig python-dev python-pip python-coverage
-  - sudo pip install pyparsing jinja2
+  - sudo apt-get install -yq swig python-dev python-pip python-coverage pylint pep8
+  - sudo pip install pyparsing jinja2 pylint-quotes
 
 install:
   - sudo apt-get install lcov
