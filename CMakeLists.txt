@@ -32,6 +32,7 @@ if (JOINT_NATIVE_FUNCTIONS_ALIGNMENT)
     endif()
 endif()
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/buildsystems/cmake/")
 
 include_directories(${CMAKE_SOURCE_DIR}/core)

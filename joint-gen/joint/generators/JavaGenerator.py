@@ -1,3 +1,7 @@
+"""
+Java code generator
+"""
+
 from ..SemanticGraph import Interface, Enum, BuiltinType, BuiltinTypeCategory, Struct, Array
 
 
@@ -147,7 +151,13 @@ def _generate_interface_proxy(ifc):
     yield '\tpublic static InterfaceDescriptor desc = new InterfaceDescriptor('
     impl_class = '{}_impl.class'.format(_mangle_type(ifc))
     for i, m in enumerate(ifc.methods):
-        yield '\t\tnew MethodDescriptor({}, "{}", {}, new TypeDescriptor[]{{ {} }}){}'.format(impl_class, m.name, _to_type_descriptor(m.ret_type), ', '.join(_to_type_descriptor(p.type) for p in m.params), ',' if i < len(ifc.methods) - 1 else '')
+        yield '\t\tnew MethodDescriptor({}, "{}", {}, new TypeDescriptor[]{{ {} }}){}'.format(
+            impl_class,
+            m.name,
+            _to_type_descriptor(m.ret_type),
+            ', '.join(_to_type_descriptor(p.type) for p in m.params),
+            ',' if i < len(ifc.methods) - 1 else ''
+        )
     yield '\t);'
     yield '}'
 
@@ -200,6 +210,7 @@ def _to_boxed_type(t):
         return _to_java_type(t)
 
 
+# pylint: disable=too-many-return-statements
 def _to_java_type(t):
     if isinstance(t, BuiltinType):
         if t.category == BuiltinTypeCategory.void:

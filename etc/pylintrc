@@ -423,3 +423,9 @@ known-third-party=enchant
 # Exceptions that will emit a warning when being caught. Defaults to
 # "Exception"
 overgeneral-exceptions=Exception
+
+
+[pylint-quotes]
+string-quote=single
+triple-quote=double
+docstring-quote=double

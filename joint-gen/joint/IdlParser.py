@@ -1,3 +1,7 @@
+"""
+Joint IDL parser
+"""
+
 from pyparsing import Empty, Group, Keyword, LineEnd, Optional, ParseException, ParseSyntaxException, SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas, cppStyleComment, nums
 
 
@@ -9,6 +13,7 @@ class IdlParserException(Exception):
 
 
 class IdlParser(object):
+    # pylint: disable=too-many-locals
     def __init__(self):
         self.locator = Empty().setParseAction(self.locator_parse_action)('location')
 
@@ -44,10 +49,12 @@ class IdlParser(object):
         self.grammar.ignore(cppStyleComment)
         self.grammar.parseWithTabs()
 
+    # pylint: disable=unused-argument
     def locator_parse_action(self, s, l, t):
         str_head = s[:l]
         return {'lineno': str_head.count('\n') + 1, 'col': len(str_head) - str_head.rfind('\n'), 'file': self._file}
 
+    # pylint: disable=attribute-defined-outside-init
     def parse_file(self, file_):
         try:
             self._file = file_

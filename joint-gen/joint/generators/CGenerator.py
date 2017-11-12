@@ -1,3 +1,7 @@
+"""
+C code generator
+"""
+
 from ..SemanticGraph import BuiltinType, BuiltinTypeCategory, Interface, Enum, Struct, Array
 from ..GeneratorHelpers import CodeWithInitialization
 
@@ -213,7 +217,8 @@ def _generate_accessor_invoke_method(ifc):
     yield '#define DETAIL_DEFINE_INVOKE_METHOD__{}(ComponentImpl, IfcPrefix) \\'.format(mangled_ifc)
     for b in ifc.bases:
         yield 'DETAIL_DEFINE_INVOKE_METHOD__{}(ComponentImpl, IfcPrefix##__##{}) \\'.format(_mangle_type(b), mangled_ifc)
-    yield 'JointCore_Error Detail__##ComponentImpl##IfcPrefix##__{}__InvokeMethod(void* componentWrapper, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_RetValue* outRetValue) \\'.format(mangled_ifc)
+    yield 'JointCore_Error Detail__##ComponentImpl##IfcPrefix##__{}__InvokeMethod( \\'.format(mangled_ifc)
+    yield '\tvoid* componentWrapper, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_RetValue* outRetValue) \\'
     yield '{ \\'
     yield '\tComponentImpl##__wrapper* w = (ComponentImpl##__wrapper*)componentWrapper; \\'
     yield '\t(void)w; \\'
@@ -256,6 +261,7 @@ def _generate_accessor_invoke_method(ifc):
     yield '}'
 
 
+# pylint: disable=too-many-return-statements
 def _to_c_type(t):
     if isinstance(t, BuiltinType):
         if t.category == BuiltinTypeCategory.void:
@@ -370,6 +376,7 @@ def _from_joint_param(t, joint_value):
         raise RuntimeError('Not implemented (type: {})!'.format(t))
 
 
+# pylint: disable=too-many-return-statements
 def _from_joint_ret_value(t, joint_value):
     if isinstance(t, BuiltinType):
         if t.category == BuiltinTypeCategory.bool:

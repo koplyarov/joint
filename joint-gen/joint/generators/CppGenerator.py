@@ -1,3 +1,7 @@
+"""
+C++ code generator
+"""
+
 from jinja2 import Environment, PackageLoader
 
 from ..SemanticGraph import BuiltinType, BuiltinTypeCategory, Interface, Enum, Struct, Array
@@ -10,6 +14,7 @@ class CppType(object):
         self.heavy = heavy
         self.ref_type = ref_type
 
+    # pylint: disable=too-many-return-statements, too-many-branches
     @staticmethod
     def from_ast_type(t):
         if isinstance(t, BuiltinType):
@@ -56,6 +61,7 @@ class CppMarshaller(object):
     def __init__(self, ast_type):
         self.ast_type = ast_type
 
+    # pylint: disable=too-many-return-statements
     def to_joint(self, cpp_value, is_ret_value):
         cwi = CodeWithInitialization
         t = self.ast_type
@@ -107,8 +113,7 @@ class CppMarshaller(object):
             if isinstance(t, BuiltinType):
                 if t.category == BuiltinTypeCategory.bool:
                     return cwi('{} != 0'.format(v))
-                else:
-                    return cwi(v)
+                return cwi(v)
             elif isinstance(t, Enum):
                 return cwi('{}::_Value({})'.format(cpp_type, v))
             elif isinstance(t, Interface):

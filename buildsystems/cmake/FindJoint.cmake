@@ -1,5 +1,5 @@
 find_program(JOINT_GEN_SCRIPT
-    NAMES "joint-gen.py"
+    NAMES "joint_gen.py"
     PATHS 
     ${CMAKE_CURRENT_LIST_DIR}/../../joint-gen
 )

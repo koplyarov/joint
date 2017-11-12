@@ -1,3 +1,7 @@
+"""
+Joint IDL semantic graph
+"""
+
 import binascii
 import copy
 import os
@@ -5,6 +9,7 @@ from .IdlParser import IdlParser
 
 
 class TypeBase(object):
+    # pylint: disable=too-many-arguments
     def __init__(self, name, package_name_list, location, variant_name, index, need_release):
         self.name = name
         self.package_name_list = package_name_list
@@ -89,10 +94,11 @@ class Interface(TypeBase):
 
     def calculate_checksum(self):
         ifc_str = self._ifc_str()
-        self.checksum = int(binascii.crc32(ifc_str)) % (1 << 32)
+        self.checksum = int(binascii.crc32(ifc_str)) % (1 << 32)  # pylint: disable=attribute-defined-outside-init
 
     def _ifc_str(self):
-        return'{}({}){{{}}}'.format(self.fullname, ','.join('{}'.format(b._ifc_str()) for b in self.bases), ','.join(self._method_str(m) for m in self.methods))
+        # pylint: disable=protected-access
+        return '{}({}){{{}}}'.format(self.fullname, ','.join('{}'.format(b._ifc_str()) for b in self.bases), ','.join(self._method_str(m) for m in self.methods))
 
     def _method_str(self, m):
         return '{} {}({})'.format(self._type_str(m.ret_type), m.name, ','.join(self._param_str(p) for p in m.params))
@@ -147,7 +153,9 @@ class BuiltinTypeCategory(object):
     string = BuiltinTypeCategoryValue(True)
 
 
+# pylint: disable=too-many-instance-attributes
 class BuiltinType(TypeBase):
+    # pylint: disable=too-many-arguments
     def __init__(self, name, variant_name, index, category, bits=0, signed=False):
         super(BuiltinType, self).__init__(name, [], location=None, variant_name=variant_name, index=index, need_release=category.need_release)
         self.name = name
@@ -219,6 +227,7 @@ class SemanticGraphBuilder(object):
         self._idl_parser = IdlParser()
         self._predefined_imports = ['joint/IObject.idl']
 
+    # pylint: disable=too-many-locals, too-many-nested-blocks, too-many-branches
     def build(self, filenames):
         semantic_graph = SemanticGraph()
         files = self._get_files(filenames)

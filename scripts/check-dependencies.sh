@@ -23,6 +23,18 @@ CheckLinuxPackage() {
     esac
 }
 
+CheckPymodule() {
+    if ! which python >/dev/null 2>/dev/null; then
+        echo "python interpreter not found!" >&2
+        return 2
+    fi
+    python -c "import $1" >/dev/null 2>/dev/null
+}
+
+REQUIRED_PYMODULES="
+    pylint_quotes
+"
+
 case `GetLinuxDistributorId` in
 "Ubuntu")
     REQUIRED_PACKAGES="
@@ -34,6 +46,8 @@ case `GetLinuxDistributorId` in
         git
         libboost-all-dev
         openjdk-8-jdk;openjdk-9-jdk
+        pep8
+        pylint
         python-colorama
         python-coverage
         python-dev
@@ -75,6 +89,26 @@ if [ "$MISSING_PACKAGES" ]; then
         echo "$MISSING_PACKAGES"
         ;;
     esac
-else
+fi
+
+MISSING_PYMODULES=""
+for PYMODULE in $REQUIRED_PYMODULES; do
+    if ! CheckPymodule "$PYMODULE"; then
+        MISSING_PYMODULES="$MISSING_PYMODULES$PYMODULE "
+    fi
+done
+
+if [ "$MISSING_PYMODULES" ]; then
+    echo "Some python modules are missing, type the following to install them:"
+    case `GetLinuxDistributorId` in
+    "Ubuntu") echo "sudo pip install $MISSING_PYMODULES" ;;
+    *)
+        echo "Unknown linux distribution, here are the modules"
+        echo "$MISSING_PYMODULES"
+        ;;
+    esac
+fi
+
+if [ -z "$MISSING_PACKAGES" -a -z "$MISSING_PYMODULES" ]; then
     echo "You have all the dependencies installed"
 fi

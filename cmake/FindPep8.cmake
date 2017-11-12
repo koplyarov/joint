@@ -1,0 +1,10 @@
+find_program(PEP8_EXECUTABLE pep8 PATHS /usr/bin)
+
+if (PEP8_EXECUTABLE)
+    execute_process(COMMAND ${PEP8_EXECUTABLE} --version OUTPUT_VARIABLE PEP8_VERSION ERROR_QUIET)
+endif()
+
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Pep8 DEFAULT_MSG PEP8_EXECUTABLE)
+
+mark_as_advanced(PEP8_EXECUTABLE PEP8_VERSION)

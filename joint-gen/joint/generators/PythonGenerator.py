@@ -1,3 +1,7 @@
+"""
+Python code generator
+"""
+
 from ..SemanticGraph import Interface, Enum, BuiltinType, BuiltinTypeCategory, Struct, Array
 
 
