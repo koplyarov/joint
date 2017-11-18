@@ -13,11 +13,16 @@ import joint
 import joint.generators
 
 
+MYPY = False
+if MYPY:
+    import typing  # pylint: disable=import-error, unused-import
+
+
 class CmdLineException(Exception):
     pass
 
 
-def parse_args():
+def parse_args():  # type () -> argparse.Namespace
     parser = argparse.ArgumentParser(description='Joint adapters generator')
     parser.add_argument('--language', '-l', dest='language_id', help='Output language', required=True)
     parser.add_argument('--import-dir', '-I', action='append', help='A directory for imported IDLs lookup')
@@ -27,7 +32,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def print_idl_processing_error(e):
+def print_idl_processing_error(e):  # type: (typing.Union[joint.IdlParserException, joint.SemanticGraphException]) -> None
     if e.location:
         err_f = e.location['file']
         err_l = e.location['lineno']
@@ -42,13 +47,21 @@ def print_idl_processing_error(e):
         print(e.message)
 
 
-def main():
+def make_generator(language_id, semantic_graph):  # type: (str, joint.SemanticGraph) -> joint.generators.CodeGeneratorBase
     generators = {
         'python': joint.generators.PythonGenerator,
         'c++': joint.generators.CppGenerator,
         'c': joint.generators.CGenerator,
         'java': joint.generators.JavaGenerator
     }
+
+    if language_id not in generators:
+        raise CmdLineException('Unknown language id: {}'.format(language_id))
+
+    return generators[language_id](semantic_graph)  # type: ignore
+
+
+def main():  # type: () -> None
 
     args = parse_args()
 
@@ -57,19 +70,16 @@ def main():
     import_dirs.append('/usr/share/joint/idl')
 
     try:
-        if args.language_id not in generators:
-            raise CmdLineException('Unknown language id: {}'.format(args.language_id))
-
         semantic_graph_builder = joint.SemanticGraphBuilder(import_dirs)
 
-        gen = generators[args.language_id](semantic_graph_builder.build(args.input))
+        gen = make_generator(args.language_id, semantic_graph_builder.build(args.input))
         code = list(gen.generate())
         out_dir = os.path.dirname(args.output)
         if out_dir and not os.path.exists(out_dir):
             os.makedirs(out_dir)
         out_file = open(args.output, 'w')
         for l in code:
-            out_file.write(l)
+            out_file.write(l.encode('utf-8'))
             out_file.write('\n')
 
     except (joint.IdlParserException, joint.SemanticGraphException) as e:

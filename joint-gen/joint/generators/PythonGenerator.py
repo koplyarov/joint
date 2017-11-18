@@ -2,14 +2,20 @@
 Python code generator
 """
 
-from ..SemanticGraph import Interface, Enum, BuiltinType, BuiltinTypeCategory, Struct, Array
+from .CodeGeneratorBase import CodeGeneratorBase
+from ..SemanticGraph import Array, BuiltinType, BuiltinTypeCategory, Enum, Interface, Method, Package, Parameter, SemanticGraph, Struct, TypeBase
 
 
-class PythonGenerator(object):
-    def __init__(self, semantic_graph):
+MYPY = False
+if MYPY:
+    import typing
+
+
+class PythonGenerator(CodeGeneratorBase):
+    def __init__(self, semantic_graph):  # type: (SemanticGraph) -> None
         self.semantic_graph = semantic_graph
 
-    def generate(self,):
+    def generate(self):  # type: () -> typing.Iterable[unicode]
         yield 'import atexit'
         yield 'import pyjoint'
         yield 'import sys'
@@ -65,7 +71,7 @@ class PythonGenerator(object):
         yield '\tpass'
 
 
-def _generate_package(p):
+def _generate_package(p):  # type: (Package) -> typing.Iterable[unicode]
     if p.enums:
         yield ''
     if p.enums:
@@ -95,7 +101,7 @@ def _generate_package(p):
         yield ''
 
 
-def _type_descriptor(t):
+def _type_descriptor(t):  # type: (TypeBase) -> unicode
     if isinstance(t, BuiltinType):
         return _tuple([str(t.index)])
     if isinstance(t, Enum):
@@ -110,7 +116,7 @@ def _type_descriptor(t):
         raise RuntimeError('Not implemented (type: {})!'.format(t))
 
 
-def _generate_interface_descriptor(ifc):
+def _generate_interface_descriptor(ifc):  # type: (Interface) -> typing.Iterable[unicode]
     methods = []
     for m in ifc.methods:
         params = [_type_descriptor(p.type) for p in m.params]
@@ -118,7 +124,7 @@ def _generate_interface_descriptor(ifc):
     yield '{}.descriptor = pyjoint.InterfaceDescriptor({})'.format(_mangle_type(ifc), _tuple(methods))
 
 
-def _generate_struct(s):
+def _generate_struct(s):  # type: (Struct) -> typing.Iterable[unicode]
     yield 'class {}(object):'.format(_mangle_type(s))
     yield '\t__slots__ = [{}]'.format(', '.join('\'{}\''.format(m.name) for m in s.members))
     yield '\tdef __init__(self{}):'.format(''.join(', {} = {}'.format(m.name, _default_member_value(m.type)) for m in s.members))
@@ -129,7 +135,7 @@ def _generate_struct(s):
     yield ''
 
 
-def _default_member_value(t):
+def _default_member_value(t):  # type: (TypeBase) -> unicode
     if isinstance(t, BuiltinType):
         if t.category == BuiltinTypeCategory.string:
             return '\'\''
@@ -146,7 +152,7 @@ def _default_member_value(t):
         raise RuntimeError('Not implemented (type: {})!'.format(t))
 
 
-def _generate_interface_accessor(ifc):
+def _generate_interface_accessor(ifc):  # type: (Interface) -> typing.Iterable[unicode]
     yield 'class {}_accessor(object):'.format(_mangle_type(ifc))
     yield '\t__slots__ = [\'obj\', \'methods\', \'descriptor\']'
     yield '\tdef __init__(self, obj):'
@@ -155,7 +161,7 @@ def _generate_interface_accessor(ifc):
     yield '\t\tself.methods = {}'.format(_tuple(['obj.{}'.format(m.name) for m in ifc.methods]))
 
 
-def _generate_interface_proxy(ifc):
+def _generate_interface_proxy(ifc):  # type: (Interface) -> typing.Iterable[unicode]
     yield 'class {}_proxy(pyjoint.ProxyBase):'.format(_mangle_type(ifc))
     yield '\t__slots__ = []'
     yield '\tinterfaceChecksum = {}'.format(hex(ifc.checksum))
@@ -167,10 +173,10 @@ def _generate_interface_proxy(ifc):
         yield '\t\treturn self({}{})'.format(m.index, ''.join(', {}'.format(p.name) for p in m.params))
 
 
-def _generate_interface(ifc):
+def _generate_interface(ifc):  # type: (Interface) -> typing.Iterable[unicode]
     mangled_name = _mangle_type(ifc)
     if mangled_name == 'joint_IObject':
-        bases = ['object']
+        bases = [u'object']
     else:
         bases = [_mangle_type(b) for b in ifc.bases]
     yield 'class {}({}):'.format(mangled_name, ', '.join(bases))
@@ -181,19 +187,19 @@ def _generate_interface(ifc):
     yield '\tproxy = {}_proxy'.format(mangled_name)
 
 
-def _tuple(values):
+def _tuple(values):  # type: (typing.Sequence[unicode]) -> unicode
     if not values:
         return 'tuple()'
     return '({}{})'.format(', '.join(values), ',' if len(values) == 1 else '')
 
 
-def _generate_enum_py3(e):
+def _generate_enum_py3(e):  # type: (Enum) -> typing.Iterable[unicode]
     yield 'class {}(enum.Enum):'.format(_mangle_type(e))
     for v in e.values:
         yield '\t{} = {}'.format(v.name, v.value)
 
 
-def _generate_enum_py2(e):
+def _generate_enum_py2(e):  # type: (Enum) -> typing.Iterable[unicode]
     yield 'class {}(_Enum):'.format(_mangle_type(e))
     yield '\t__slots__ = []'
     yield '\t__values_to_names__ = {}'
@@ -204,5 +210,5 @@ def _generate_enum_py2(e):
         yield '\t\tcls.{n} = cls({v})'.format(n=v.name, v=v.value)
 
 
-def _mangle_type(t):
+def _mangle_type(t):  # type: (TypeBase) -> unicode
     return '{}_{}'.format('_'.join(t.package_name_list), t.name)

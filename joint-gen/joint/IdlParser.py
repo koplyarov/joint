@@ -2,11 +2,16 @@
 Joint IDL parser
 """
 
-from pyparsing import Empty, Group, Keyword, LineEnd, Optional, ParseException, ParseSyntaxException, SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas, cppStyleComment, nums
+from pyparsing import Empty, Group, Keyword, LineEnd, Optional, ParseException, ParseSyntaxException, SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas, cppStyleComment, nums  # type: ignore
+
+
+MYPY = False
+if MYPY:
+    import typing
 
 
 class IdlParserException(Exception):
-    def __init__(self, message, location):
+    def __init__(self, message, location):  # type: (str, dict) -> None
         super(IdlParserException, self).__init__(message)
         self.message = message
         self.location = location
@@ -50,12 +55,12 @@ class IdlParser(object):
         self.grammar.parseWithTabs()
 
     # pylint: disable=unused-argument
-    def locator_parse_action(self, s, l, t):
+    def locator_parse_action(self, s, l, t):  # type: (str, int, typing.List[str]) -> dict
         str_head = s[:l]
         return {'lineno': str_head.count('\n') + 1, 'col': len(str_head) - str_head.rfind('\n'), 'file': self._file}
 
     # pylint: disable=attribute-defined-outside-init
-    def parse_file(self, file_):
+    def parse_file(self, file_):  # type: (str) -> dict
         try:
             self._file = file_
             return self.grammar.parseFile(file_).asDict()

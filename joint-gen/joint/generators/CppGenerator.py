@@ -4,19 +4,25 @@ C++ code generator
 
 from jinja2 import Environment, PackageLoader
 
-from ..SemanticGraph import BuiltinType, BuiltinTypeCategory, Interface, Enum, Struct, Array
+from .CodeGeneratorBase import CodeGeneratorBase
+from ..SemanticGraph import Array, BuiltinType, BuiltinTypeCategory, Enum, Interface, Parameter, SemanticGraph, Struct, TypeBase
 from ..GeneratorHelpers import CodeWithInitialization
 
 
+MYPY = False
+if MYPY:
+    import typing
+
+
 class CppType(object):
-    def __init__(self, cpp_type, heavy=False, ref_type=None):
+    def __init__(self, cpp_type, heavy=False, ref_type=None):  # type: (unicode, bool, CppType) -> None
         self.cpp_type = cpp_type
         self.heavy = heavy
         self.ref_type = ref_type
 
     # pylint: disable=too-many-return-statements, too-many-branches
     @staticmethod
-    def from_ast_type(t):
+    def from_ast_type(t):  # type: (TypeBase) -> CppType
         if isinstance(t, BuiltinType):
             if t.category == BuiltinTypeCategory.void:
                 return CppType('void')
@@ -49,20 +55,20 @@ class CppType(object):
             raise RuntimeError('Not implemented (type: {})!'.format(t))
 
     @property
-    def cpp_param_type(self):
+    def cpp_param_type(self):  # type: () -> unicode
         return "const {}&".format(self.cpp_type) if self.heavy else self.cpp_type
 
     @property
-    def joint_ref_type(self):
+    def joint_ref_type(self):  # type: () -> CppType
         return self.ref_type or self
 
 
 class CppMarshaller(object):
-    def __init__(self, ast_type):
+    def __init__(self, ast_type):  # type: (TypeBase) -> None
         self.ast_type = ast_type
 
     # pylint: disable=too-many-return-statements
-    def to_joint(self, cpp_value, is_ret_value):
+    def to_joint(self, cpp_value, is_ret_value):  # type: (unicode, bool) -> CodeWithInitialization
         cwi = CodeWithInitialization
         t = self.ast_type
         if isinstance(t, BuiltinType):
@@ -70,8 +76,8 @@ class CppMarshaller(object):
                 if is_ret_value:
                     mangled_value = cpp_value.replace('.', '_')
                     initialization = [
-                        'char* _{}_c_str = new char[{}.Utf8Bytes().size() + 1];'.format(mangled_value, cpp_value),
-                        'strcpy(_{}_c_str, {}.Utf8Bytes().data());'.format(mangled_value, cpp_value)
+                        u'char* _{}_c_str = new char[{}.Utf8Bytes().size() + 1];'.format(mangled_value, cpp_value),
+                        u'strcpy(_{}_c_str, {}.Utf8Bytes().data());'.format(mangled_value, cpp_value)
                     ]
                     return cwi('_{}_c_str'.format(mangled_value), initialization)
                 return cwi('{}.Utf8Bytes().data()'.format(cpp_value))
@@ -93,8 +99,8 @@ class CppMarshaller(object):
                 initialization.append('JointCore_Value* {}_members = new JointCore_Value[{}];'.format(mangled_value, len(t.members)))
             else:
                 initialization.append('JointCore_Value {}_members[{}];'.format(mangled_value, len(t.members)))
-            for i, m in enumerate(member_values):
-                initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, t.members[i].type.variant_name, m))
+            for i, mv in enumerate(member_values):
+                initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, t.members[i].type.variant_name, mv))
             return cwi('{}_members'.format(mangled_value), initialization)
         elif isinstance(t, Array):
             initialization = ['Joint_IncRefArray({}._GetArrayHandle());'.format(cpp_value)] if is_ret_value else []
@@ -102,14 +108,14 @@ class CppMarshaller(object):
         else:
             raise RuntimeError('Not implemented (type: {})!'.format(t))
 
-    def from_joint(self, joint_value, is_ret_value, recursive=False, omit_type=False):
+    def from_joint(self, joint_value, is_ret_value, recursive=False, omit_type=False):  # type: (unicode, bool, bool, bool) -> CodeWithInitialization
         cwi = CodeWithInitialization
         t = self.ast_type
         cpp_type_obj = CppType.from_ast_type(t)
         cpp_type = (cpp_type_obj if is_ret_value or recursive else cpp_type_obj.joint_ref_type).cpp_type
         v = '{}.{}'.format(joint_value, t.variant_name)
 
-        def ctor_params():
+        def ctor_params():  # type: () -> CodeWithInitialization
             if isinstance(t, BuiltinType):
                 if t.category == BuiltinTypeCategory.bool:
                     return cwi('{} != 0'.format(v))
@@ -119,7 +125,7 @@ class CppMarshaller(object):
             elif isinstance(t, Interface):
                 return cwi(v)
             elif isinstance(t, Struct):
-                initialization = []
+                initialization = []  # type: typing.List[unicode]
                 member_values = []
                 for i, m in enumerate(t.members):
                     member_code = CppMarshaller(m.type).from_joint('{}.members[{}]'.format(joint_value, i), is_ret_value, recursive=True)
@@ -138,11 +144,11 @@ class CppMarshaller(object):
         return result
 
 
-class CppGenerator(object):
-    def __init__(self, semantic_graph):
+class CppGenerator(CodeGeneratorBase):
+    def __init__(self, semantic_graph):  # type: (SemanticGraph) -> None
         self.semantic_graph = semantic_graph
 
-    def generate(self):
+    def generate(self):  # type: () -> typing.Iterable[unicode]
         env = Environment(loader=PackageLoader('joint', 'templates'))
         env.filters['mangle_type'] = _mangle_type
         env.filters['ref_param_decl'] = _to_cpp_ref_param_decl
@@ -161,25 +167,25 @@ class CppGenerator(object):
             yield l
 
 
-def _mangle_type(ifc):
-    return '::{}'.format('::'.join(ifc.package_name_list + [ifc.name]))
+def _mangle_type(t):  # type: (TypeBase) -> unicode
+    return '::{}'.format('::'.join(t.package_name_list + [t.name]))
 
 
-def _to_cpp_ref_param_decl(p):
+def _to_cpp_ref_param_decl(p):  # type: (Parameter) -> unicode
     return '{} {}'.format(CppType.from_ast_type(p.type).joint_ref_type.cpp_param_type, p.name)
 
 
-def _to_joint_param(type_, cpp_value):
+def _to_joint_param(type_, cpp_value):  # type: (TypeBase, unicode) -> CodeWithInitialization
     return CppMarshaller(type_).to_joint(cpp_value, is_ret_value=False)
 
 
-def _to_joint_ret_value(type_, cpp_value):
+def _to_joint_ret_value(type_, cpp_value):  # type: (TypeBase, unicode) -> CodeWithInitialization
     return CppMarshaller(type_).to_joint(cpp_value, is_ret_value=True)
 
 
-def _from_joint_param(type_, joint_value):
+def _from_joint_param(type_, joint_value):  # type: (TypeBase, unicode) -> CodeWithInitialization
     return CppMarshaller(type_).from_joint(joint_value, is_ret_value=False, omit_type=True)
 
 
-def _from_joint_ret_value(type_, joint_value):
+def _from_joint_ret_value(type_, joint_value):  # type: (TypeBase, unicode) -> CodeWithInitialization
     return CppMarshaller(type_).from_joint(joint_value, is_ret_value=True)

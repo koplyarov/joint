@@ -12,6 +12,7 @@ REQUIRED_PACKAGES="
     g++
     git
     libboost-all-dev
+    mypy
     openjdk-7-jdk;openjdk-8-jdk;openjdk-9-jdk
     pep8
     pylint

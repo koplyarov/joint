@@ -2,14 +2,20 @@
 Java code generator
 """
 
-from ..SemanticGraph import Interface, Enum, BuiltinType, BuiltinTypeCategory, Struct, Array
+from .CodeGeneratorBase import CodeGeneratorBase
+from ..SemanticGraph import Array, BuiltinType, BuiltinTypeCategory, Enum, Interface, Method, Package, Parameter, SemanticGraph, Struct, TypeBase
 
 
-class JavaGenerator(object):
-    def __init__(self, semantic_graph):
+MYPY = False
+if MYPY:
+    import typing
+
+
+class JavaGenerator(CodeGeneratorBase):
+    def __init__(self, semantic_graph):  # type: (SemanticGraph) -> None
         self.semantic_graph = semantic_graph
 
-    def generate(self,):
+    def generate(self):  # type: () -> typing.Iterable[unicode]
         yield 'package adapters;'
         yield ''
         yield 'import org.joint.*;'
@@ -23,7 +29,7 @@ class JavaGenerator(object):
         yield '}'
 
 
-def _generate_package(p):
+def _generate_package(p):  # type: (Package) -> typing.Iterable[unicode]
     for e in p.enums:
         yield ''
         for l in _generate_enum(e):
@@ -45,7 +51,7 @@ def _generate_package(p):
         yield ''
 
 
-def _generate_struct(s):
+def _generate_struct(s):  # type: (Struct) -> typing.Iterable[unicode]
     yield 'public static class {}'.format(_mangle_type(s))
     yield '{'
     for m in s.members:
@@ -69,7 +75,7 @@ def _generate_struct(s):
     yield '}'
 
 
-def _generate_enum(e):
+def _generate_enum(e):  # type: (Enum) -> typing.Iterable[unicode]
     yield 'public static enum {}'.format(_mangle_type(e))
     yield '{'
     for i, v in enumerate(e.values):
@@ -92,7 +98,7 @@ def _generate_enum(e):
     yield '}'
 
 
-def _generate_interface_accessor(ifc):
+def _generate_interface_accessor(ifc):  # type: (Interface) -> typing.Iterable[unicode]
     yield 'public static class {}_accessor extends AccessorBase implements Accessor'.format(_mangle_type(ifc))
     yield '{'
     yield '\tprivate {}_impl obj;'.format(_mangle_type(ifc))
@@ -110,7 +116,7 @@ def _generate_interface_accessor(ifc):
     yield '}'
 
 
-def _generate_interface_proxy(ifc):
+def _generate_interface_proxy(ifc):  # type: (Interface) -> typing.Iterable[unicode]
     yield 'public static class {} implements ComponentProxy'.format(_mangle_type(ifc))
     yield '{'
     yield '\tpublic static <T extends AccessorsContainer & {n}_impl> void registerAccessors(T component)'.format(n=_mangle_type(ifc))
@@ -162,10 +168,10 @@ def _generate_interface_proxy(ifc):
     yield '}'
 
 
-def _generate_interface_impl(ifc):
+def _generate_interface_impl(ifc):  # type: (Interface) -> typing.Iterable[unicode]
     mangled_name = _mangle_type(ifc)
     if mangled_name == 'joint_IObject':
-        bases = []
+        bases = []  # type: typing.List[unicode]
     else:
         bases = ['{}_impl'.format(_mangle_type(b)) for b in ifc.bases]
     yield 'public static interface {}_impl{}{}'.format(mangled_name, ' extends ' if bases else '', ', '.join(bases))
@@ -175,7 +181,7 @@ def _generate_interface_impl(ifc):
     yield '}'
 
 
-def _joint_boxing(var):
+def _joint_boxing(var):  # type: (Parameter) -> unicode
     t = var.type
 
     def box(boxed_type):
@@ -189,13 +195,13 @@ def _joint_boxing(var):
         return var.name
 
 
-def _joint_unboxing(t, value):
+def _joint_unboxing(t, value):  # type: (TypeBase, unicode) -> unicode
     if isinstance(t, BuiltinType) and (t.category in [BuiltinTypeCategory.int, BuiltinTypeCategory.bool, BuiltinTypeCategory.float]):
         return '(({})({})).value'.format(_to_boxed_type(t), value)
     return '({})({})'.format(_to_boxed_type(t), value)
 
 
-def _to_boxed_type(t):
+def _to_boxed_type(t):  # type: (TypeBase) -> unicode
     if isinstance(t, BuiltinType):
         if t.category == BuiltinTypeCategory.void:
             raise RuntimeError('Invalid type: {}'.format(t))
@@ -211,7 +217,7 @@ def _to_boxed_type(t):
 
 
 # pylint: disable=too-many-return-statements
-def _to_java_type(t):
+def _to_java_type(t):  # type: (TypeBase) -> unicode
     if isinstance(t, BuiltinType):
         if t.category == BuiltinTypeCategory.void:
             return 'void'
@@ -232,7 +238,7 @@ def _to_java_type(t):
         raise RuntimeError('Not implemented (type: {})!'.format(t))
 
 
-def _to_type_descriptor(t):
+def _to_type_descriptor(t):  # type: (TypeBase) -> unicode
     if isinstance(t, BuiltinType):
         return 'BuiltinTypes.{}'.format(t.name.capitalize())
     elif isinstance(t, (Interface, Enum, Struct)):
@@ -243,7 +249,7 @@ def _to_type_descriptor(t):
         raise RuntimeError('Not implemented (type: {})!'.format(t))
 
 
-def _mangle_type(t):
+def _mangle_type(t):  # type: (TypeBase) -> unicode
     if isinstance(t, (Interface, Enum, Struct)):
         return '{}_{}'.format('_'.join(t.package_name_list), t.name)
     else:

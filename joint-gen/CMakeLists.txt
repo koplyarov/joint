@@ -1,8 +1,24 @@
 project(joint-gen)
 
+find_package(Mypy)
 find_package(Pylint)
 find_package(Pep8)
 find_package(PymoduleChecker)
+
+if (MYPY_FOUND)
+    message(STATUS "mypy version: ${MYPY_VERSION}")
+
+    set(MYPY_LOAD_PLUGINS "")
+
+    add_custom_target(joint-gen-mypy ALL
+        COMMAND ${MYPY_EXECUTABLE}
+            --py2
+            ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Running mypy on joint-gen sources"
+    )
+else()
+    message(WARNING "pylint not found!")
+endif()
 
 if (PYLINT_FOUND)
     message(STATUS "pylint version: ${PYLINT_VERSION}")

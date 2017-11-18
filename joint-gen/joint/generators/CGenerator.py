@@ -2,15 +2,21 @@
 C code generator
 """
 
-from ..SemanticGraph import BuiltinType, BuiltinTypeCategory, Interface, Enum, Struct, Array
+from .CodeGeneratorBase import CodeGeneratorBase
+from ..SemanticGraph import Array, BuiltinType, BuiltinTypeCategory, Enum, Interface, Method, Parameter, SemanticGraph, Struct, TypeBase
 from ..GeneratorHelpers import CodeWithInitialization
 
 
-class CGenerator(object):
-    def __init__(self, semantic_graph):
+MYPY = False
+if MYPY:
+    import typing
+
+
+class CGenerator(CodeGeneratorBase):
+    def __init__(self, semantic_graph):  # type: (SemanticGraph) -> None
         self.semantic_graph = semantic_graph
 
-    def generate(self):
+    def generate(self):  # type: () -> typing.Iterable[unicode]
         yield '#pragma once'
         yield ''
 
@@ -42,14 +48,17 @@ class CGenerator(object):
         yield ''
 
 
-def _generate_package_content(types, generator):
+def _generate_package_content(
+    types,  # type: typing.Iterable[TypeBase]
+    generator  # type: typing.Callable[..., typing.Iterable[unicode]]
+):  # type: (...) -> typing.Iterable[unicode]
     for t in types:
         for l in generator(t):
             yield '{}'.format(l)
     yield ''
 
 
-def _generate_enum(e):
+def _generate_enum(e):  # type: (Enum) -> typing.Iterable[unicode]
     me = _mangle_type(e)
     yield 'typedef enum'
     yield '{'
@@ -60,7 +69,7 @@ def _generate_enum(e):
     yield ''
 
 
-def _generate_enum_methods(e):
+def _generate_enum_methods(e):  # type: (Enum) -> typing.Iterable[unicode]
     me = _mangle_type(e)
     yield 'const char* {e}__ToString({e} value)'.format(e=me)
     yield '{'
@@ -74,7 +83,7 @@ def _generate_enum_methods(e):
     yield ''
 
 
-def _generate_struct(s):
+def _generate_struct(s):  # type: (Struct) -> typing.Iterable[unicode]
     yield 'typedef struct'
     yield '{'
     for m in s.members:
@@ -101,15 +110,15 @@ def _generate_struct(s):
     yield ''
 
 
-def _params_decl(params):
+def _params_decl(params):  # type: (typing.Iterable[Parameter]) -> unicode
     return ''.join(', {} {}'.format(_to_c_type(p.type), p.name) for p in params)
 
 
-def _ret_decl(ret_type):
+def _ret_decl(ret_type):  # type: (TypeBase) -> unicode
     return ', {}* _outResult'.format(_to_c_type(ret_type)) if ret_type.name != 'void' else ''
 
 
-def _generate_classes(ifc):
+def _generate_classes(ifc):  # type: (Interface) -> typing.Iterable[unicode]
     mangled_ifc = _mangle_type(ifc)
     yield 'JointCore_InterfaceChecksum {}__checksum = {};'.format(mangled_ifc, hex(ifc.checksum))
     yield 'const char* {}__id = "{}";'.format(mangled_ifc, ifc.fullname)
@@ -162,7 +171,7 @@ def _generate_classes(ifc):
     yield ''
 
 
-def _generate_methods(ifc):
+def _generate_methods(ifc):  # type: (Interface) -> typing.Iterable[unicode]
     for m in ifc.methods:
         for l in _generate_method_definition(ifc, m):
             yield '{}'.format(l)
@@ -171,7 +180,7 @@ def _generate_methods(ifc):
         yield '{}'.format(l)
 
 
-def _generate_method_definition(ifc, m):
+def _generate_method_definition(ifc, m):  # type: (Interface, Method) -> typing.Iterable[unicode]
     mangled_ifc = _mangle_type(ifc)
     yield 'JointCore_Error {n}_{m}({n} _obj{p}{r}, JointCore_Exception_Handle* _ex)'.format(n=mangled_ifc, m=m.name, p=_params_decl(m.params), r=_ret_decl(m.ret_type))
     yield '{'
@@ -212,7 +221,7 @@ def _generate_method_definition(ifc, m):
     yield ''
 
 
-def _generate_accessor_invoke_method(ifc):
+def _generate_accessor_invoke_method(ifc):  # type: (Interface) -> typing.Iterable[unicode]
     mangled_ifc = _mangle_type(ifc)
     yield '#define DETAIL_DEFINE_INVOKE_METHOD__{}(ComponentImpl, IfcPrefix) \\'.format(mangled_ifc)
     for b in ifc.bases:
@@ -262,7 +271,7 @@ def _generate_accessor_invoke_method(ifc):
 
 
 # pylint: disable=too-many-return-statements
-def _to_c_type(t):
+def _to_c_type(t):  # type: (TypeBase) -> unicode
     if isinstance(t, BuiltinType):
         if t.category == BuiltinTypeCategory.void:
             return 'void'
@@ -285,13 +294,13 @@ def _to_c_type(t):
         raise RuntimeError('Not implemented (type: {})!'.format(t))
 
 
-def _mangle_type(t):
+def _mangle_type(t):  # type: (TypeBase) -> unicode
     if isinstance(t, Array):
         return '{}__Array'.format(_mangle_type(t.element_type))
     return '{}'.format('_'.join(t.package_name_list + [t.name]))
 
 
-def _to_joint_param(t, c_value):
+def _to_joint_param(t, c_value):  # type: (TypeBase, unicode) -> CodeWithInitialization
     if isinstance(t, BuiltinType):
         return CodeWithInitialization(c_value)
     elif isinstance(t, Interface):
@@ -300,15 +309,15 @@ def _to_joint_param(t, c_value):
         return CodeWithInitialization('(int32_t){}'.format(c_value))
     elif isinstance(t, Struct):
         mangled_value = c_value.replace('.', '_')
-        initialization = []
+        initialization = []  # type: typing.List[unicode]
         member_values = []
         for m in t.members:
             member_val = _to_joint_param(m.type, '{}.{}'.format(c_value, m.name))
             initialization += member_val.initialization
             member_values.append(member_val.code)
         initialization.append('JointCore_Value {}_members[{}];'.format(mangled_value, len(t.members)))
-        for i, m in enumerate(member_values):
-            initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, t.members[i].type.variant_name, m))
+        for i, mv in enumerate(member_values):
+            initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, t.members[i].type.variant_name, mv))
         return CodeWithInitialization('{}_members'.format(mangled_value), initialization)
     elif isinstance(t, Array):
         return CodeWithInitialization('{}.handle'.format(c_value))
@@ -316,7 +325,7 @@ def _to_joint_param(t, c_value):
         raise RuntimeError('Not implemented (type: {})!'.format(t))
 
 
-def _to_joint_ret_value(t, c_value):
+def _to_joint_ret_value(t, c_value):  # type: (TypeBase, unicode) -> CodeWithInitialization
     if isinstance(t, BuiltinType):
         return CodeWithInitialization(c_value)
     elif isinstance(t, Interface):
@@ -325,15 +334,15 @@ def _to_joint_ret_value(t, c_value):
         return CodeWithInitialization('(int32_t)({})'.format(c_value))
     elif isinstance(t, Struct):
         mangled_value = c_value.replace('.', '_')
-        initialization = []
+        initialization = []  # type: typing.List[unicode]
         member_values = []
         for m in t.members:
             member_val = _to_joint_ret_value(m.type, '{}.{}'.format(c_value, m.name))
             initialization += member_val.initialization
             member_values.append(member_val.code)
         initialization.append('JointCore_Value* {}_members = (JointCore_Value*)malloc(sizeof(JointCore_Value) * {});'.format(mangled_value, len(t.members)))
-        for i, m in enumerate(member_values):
-            initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, t.members[i].type.variant_name, m))
+        for i, mv in enumerate(member_values):
+            initialization.append('{}_members[{}].{} = {};'.format(mangled_value, i, t.members[i].type.variant_name, mv))
         return CodeWithInitialization('{}_members'.format(mangled_value), initialization)
     elif isinstance(t, Array):
         return CodeWithInitialization('{}.handle'.format(c_value))
@@ -341,7 +350,7 @@ def _to_joint_ret_value(t, c_value):
         raise RuntimeError('Not implemented (type: {})!'.format(t))
 
 
-def _validate_joint_param(t, joint_type):
+def _validate_joint_param(t, joint_type):  # type: (TypeBase, unicode) -> typing.Iterable[unicode]
     if isinstance(t, (BuiltinType, Enum, Array)):
         return
     elif isinstance(t, Interface):
@@ -355,7 +364,7 @@ def _validate_joint_param(t, joint_type):
         raise RuntimeError('Not implemented (type: {})!'.format(t))
 
 
-def _from_joint_param(t, joint_value):
+def _from_joint_param(t, joint_value):  # type: (TypeBase, unicode) -> CodeWithInitialization
     if isinstance(t, BuiltinType):
         return CodeWithInitialization('{}.{}'.format(joint_value, t.variant_name))
     elif isinstance(t, Interface):
@@ -363,7 +372,7 @@ def _from_joint_param(t, joint_value):
     elif isinstance(t, Enum):
         return CodeWithInitialization('({})({}.{})'.format(_to_c_type(t), joint_value, t.variant_name))
     elif isinstance(t, Struct):
-        initialization = []
+        initialization = []  # type: typing.List[unicode]
         member_values = []
         for i, m in enumerate(t.members):
             member_code = _from_joint_param(m.type, '{}.members[{}]'.format(joint_value, i))
@@ -377,15 +386,15 @@ def _from_joint_param(t, joint_value):
 
 
 # pylint: disable=too-many-return-statements
-def _from_joint_ret_value(t, joint_value):
+def _from_joint_ret_value(t, joint_value):  # type: (TypeBase, unicode) -> CodeWithInitialization
     if isinstance(t, BuiltinType):
         if t.category == BuiltinTypeCategory.bool:
             return CodeWithInitialization('{}.{} != 0'.format(joint_value, t.variant_name))
         if t.category == BuiltinTypeCategory.string:
             mangled_value = joint_value.replace('.', '_').replace('[', '_').replace(']', '_')
             initialization = [
-                'char* _{}_copy = (char*)malloc(strlen({}.{}) + 1);'.format(mangled_value, joint_value, t.variant_name),
-                'strcpy(_{}_copy, {}.{});'.format(mangled_value, joint_value, t.variant_name)
+                u'char* _{}_copy = (char*)malloc(strlen({}.{}) + 1);'.format(mangled_value, joint_value, t.variant_name),
+                u'strcpy(_{}_copy, {}.{});'.format(mangled_value, joint_value, t.variant_name)
             ]
             return CodeWithInitialization('_{}_copy'.format(mangled_value), initialization)
         return CodeWithInitialization('{}.{}'.format(joint_value, t.variant_name))
