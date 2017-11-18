@@ -27,7 +27,7 @@ before_install:
   - test "0$RUN_BENCHMARKS" -eq 0 || sudo apt-get install -yq libboost-all-dev
   - sudo apt-get install -yq pep8 pylint python-coverage python-dev python-pip python3-pip swig
   - sudo pip install jinja2 pylint-quotes pyparsing
-  - sudo CC="" CXX="" pip3 install mypy
+  - sudo CC="gcc" CXX="g++" pip3 install mypy
 
 install:
   - sudo apt-get install lcov
