@@ -1,9 +1,10 @@
 [ "$COVERITY_BUILD" -ne 0 ] || exit 0
 
 ARCHIVE="joint.tgz"
+BUILD_DIR="$MAIN_DIR/build"
 
 WithMsg "Testing token" test "${COVERITY_SCAN_TOKEN}" &&
-Verbose cd build &&
+Verbose cd "$BUILD_DIR" &&
 Verbose tar czvf "$ARCHIVE" cov-int &&
 WithMsg "Uploading Coverity result" curl \
     --form token="${COVERITY_SCAN_TOKEN}" \
