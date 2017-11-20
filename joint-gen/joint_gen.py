@@ -15,7 +15,7 @@ import joint.generators
 
 MYPY = False
 if MYPY:
-    import typing  # pylint: disable=import-error, unused-import
+    import typing  # pylint: disable=locally-disabled, import-error, unused-import
 
 
 class CmdLineException(Exception):

@@ -2,7 +2,7 @@
 C++ code generator
 """
 
-from jinja2 import Environment, PackageLoader
+from jinja2 import Environment, PackageLoader  # type: ignore
 
 from .CodeGeneratorBase import CodeGeneratorBase
 from ..SemanticGraph import Array, BuiltinType, BuiltinTypeCategory, Enum, Interface, Parameter, SemanticGraph, Struct, TypeBase
