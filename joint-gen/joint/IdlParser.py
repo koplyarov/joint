@@ -34,7 +34,7 @@ class IdlParser(object):
         method = Group(self.locator + type_('ret_type') + identifier('name') + Suppress('(') + params_list('params') + Suppress(');'))
         method_list = Group(ZeroOrMore(method))
 
-        package = Group(identifier + ZeroOrMore(Suppress('.') + identifier))
+        package_name = Group(identifier + ZeroOrMore(Suppress('.') + identifier))
 
         bases_list = type_ + ZeroOrMore(Suppress(',') + type_)
         interface = Group(self.locator + Keyword('interface')('kind') - identifier('name') + Optional(Suppress(':') - bases_list)('bases') + Suppress('{') + method_list('methods') + Suppress('}'))
@@ -48,7 +48,7 @@ class IdlParser(object):
         struct_members_list = Group(ZeroOrMore(struct_member))
         struct = Group(self.locator + Keyword('struct')('kind') - identifier('name') + Suppress('{') + struct_members_list('members') + Suppress('}'))
 
-        package = Suppress(Keyword('package')) + package('package') + Suppress('{') + Group(ZeroOrMore(interface | enum | struct))('types') + Suppress('}')
+        package = Suppress(Keyword('package')) + package_name('package') + Suppress('{') + Group(ZeroOrMore(interface | enum | struct))('types') + Suppress('}')
 
         self.grammar = imports + package
         self.grammar.ignore(cppStyleComment)
