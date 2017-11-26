@@ -26,7 +26,7 @@ std::string g_benchmarksDir;
 #include <descriptors/swig.hpp>
 
 
-int main(int argc, char* argv[])
+int main(int argc, const char* argv[])
 {
     std::string executablePath(argv[0]);
     g_benchmarksDir = executablePath.substr(0, executablePath.find_last_of("/\\"));
@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
         s.RegisterBenchmarks<CastBenchmarks, descriptors::joint::Desc>();
         s.RegisterBenchmarks<ExceptionBenchmarks, descriptors::joint::Desc>();
 
-        return BenchmarkApp(s).Run(argc, argv);
+        return RunBenchmarkApp(s, argc, argv);
     }
     catch (const std::exception& ex)
     {
