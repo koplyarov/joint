@@ -27,36 +27,44 @@ REQUIRED_PACKAGES="
 
 ################################################################################
 
-LINUX_DISTRIB_ID=""
-GetLinuxDistributorId() {
-    if [ -z "$SHSTUFF_LINUX_DISTRIB_ID" ]; then
-        if uname | grep -qi "mingw"; then
-            LINUX_DISTRIB_ID="mingw"
-        else
-            which lsb_release >/dev/null 2>/dev/null || { Log Error "lsb_release utility not found!"; return 1; }
-            LINUX_DISTRIB_ID=`lsb_release -is`
-        fi
+if [ -z "$LINUX_DISTRIB_ID" ]; then
+    if uname | grep -qi "mingw"; then
+        LINUX_DISTRIB_ID="mingw"
+    else
+        which lsb_release >/dev/null 2>/dev/null || { Log Error "lsb_release utility not found!"; return 1; }
+        LINUX_DISTRIB_ID=`lsb_release -is`
     fi
-    echo "$LINUX_DISTRIB_ID"
-}
+fi
+if [ -z "$LINUX_DISTRIB_ID" ]; then
+    echo "Unknown linux distribution!" >&2
+    exit 1
+fi
 
 CheckLinuxPackage() {
-    case `GetLinuxDistributorId` in
-    "Ubuntu") dpkg -s $1 >/dev/null 2>/dev/null ;;
-    *)
-        echo "Unknown linux distribution!" >&2
-        return 1
-        ;;
+    local PACKAGE=$1
+
+    case "$LINUX_DISTRIB_ID" in
+    "Ubuntu") dpkg -s $PACKAGE >/dev/null 2>/dev/null ;;
+    *) echo "Unknown linux distribution!" >&2; return 1 ;;
     esac
 }
 
 CheckLinuxPackageInRepo() {
-    case `GetLinuxDistributorId` in
-    "Ubuntu") apt-cache show "$1" 2>/dev/null | grep "^Version:" >/dev/null 2>/dev/null ;;
-    *)
-        echo "Unknown linux distribution!" >&2
-        return 1
-        ;;
+    local PACKAGE=$1
+
+    case "$LINUX_DISTRIB_ID" in
+    "Ubuntu") apt-cache show "$PACKAGE" 2>/dev/null | grep "^Version:" >/dev/null 2>/dev/null ;;
+    *) echo "Unknown linux distribution!" >&2; return 1 ;;
+    esac
+}
+
+FindFileInPackage() {
+    local PACKAGE=$1
+    local FILE=$2
+
+    case "$LINUX_DISTRIB_ID" in
+    "Ubuntu") apt-file show "$PACKAGE" 2>/dev/null | grep "$FILE" 2>/dev/null | sed -n "s/^[^:]\+: //p" ;;
+    *) echo "Unknown linux distribution!" >&2; return 1 ;;
     esac
 }
 
@@ -66,6 +74,41 @@ CheckPymodule() {
         return 2
     fi
     python -c "import $1" >/dev/null 2>/dev/null
+}
+
+CheckEnvVariable() {
+    local VAR=$1
+    local CANDIDATE=$2
+
+    if eval "test -z \"\$$VAR\""; then
+        echo "You should set the $VAR environment variable"
+        if [ "$CANDIDATE" ]; then
+            echo "export $VAR=\"$CANDIDATE\""
+        fi
+    fi
+}
+
+SafeDirName() {
+    local SRC_PATH=$1
+    local COUNT=$2
+    local RESULT=$1
+    local I
+
+    [ "$COUNT" ] || COUNT=1
+
+    for ((I=0; I<$COUNT; ++I)); do
+        [ "$RESULT" ] && RESULT=$(dirname "$RESULT") || return
+    done
+
+    echo "$RESULT"
+}
+
+PackageHook() {
+    local PACKAGE=$1
+
+    case "$PACKAGE" in
+    *jdk*) JAVA_HOME_CANDIDATE=$(SafeDirName $(FindFileInPackage $PACKAGE jni.h) 2) ;;
+    esac
 }
 
 ################################################################################
@@ -80,6 +123,7 @@ for PACKAGES_LIST in $REQUIRED_PACKAGES; do
         PACKAGES_LIST_IS_OK=1
         if CheckLinuxPackage "$PACKAGE"; then
             NEW_MISSING_PACKAGE=""
+            PackageHook "$PACKAGE"
             break
         else
             NEW_MISSING_PACKAGE="$PACKAGE"
@@ -90,12 +134,15 @@ for PACKAGES_LIST in $REQUIRED_PACKAGES; do
         echo "WARNING: No packages from this list available in your system repo:"
         echo "$PACKAGES_LIST"
     fi
-    [ "$NEW_MISSING_PACKAGE" ] && MISSING_PACKAGES="$MISSING_PACKAGES$NEW_MISSING_PACKAGE "
+    if [ "$NEW_MISSING_PACKAGE" ]; then
+        MISSING_PACKAGES="$MISSING_PACKAGES$NEW_MISSING_PACKAGE "
+        PackageHook "$NEW_MISSING_PACKAGE"
+    fi
 done
 
 if [ "$MISSING_PACKAGES" ]; then
     echo "Some packages are missing, type the following to install them:"
-    case `GetLinuxDistributorId` in
+    case "$LINUX_DISTRIB_ID" in
     "Ubuntu") echo "sudo apt-get install $MISSING_PACKAGES" ;;
     *)
         echo "Unknown linux distribution, here are the packages"
@@ -113,7 +160,7 @@ done
 
 if [ "$MISSING_PYMODULES" ]; then
     echo "Some python modules are missing, type the following to install them:"
-    case `GetLinuxDistributorId` in
+    case "$LINUX_DISTRIB_ID" in
     "Ubuntu") echo "sudo pip install $MISSING_PYMODULES" ;;
     *)
         echo "Unknown linux distribution, here are the modules"
@@ -125,3 +172,5 @@ fi
 if [ -z "$MISSING_PACKAGES" -a -z "$MISSING_PYMODULES" ]; then
     echo "You have all the dependencies installed"
 fi
+
+CheckEnvVariable JAVA_HOME $JAVA_HOME_CANDIDATE
