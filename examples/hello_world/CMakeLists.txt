@@ -38,3 +38,5 @@ joint_add_module_content(example-hello-world-component-py
     DIRECTORY component
     FILES component/__init__.py ${CMAKE_CURRENT_BINARY_DIR}/component/adapters.py
 )
+
+auto_folder(example-hello-world example-hello-world-adapters-py example-hello-world-component-py)

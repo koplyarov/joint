@@ -35,3 +35,5 @@ joint_add_module_content(tests-component-c
     DIRECTORY .
     LIBRARIES tests-c
 )
+
+auto_folder(tests-c tests-component-c)

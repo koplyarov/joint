@@ -35,6 +35,30 @@ joint_generate_adapters(c++ Tests_adapters.hpp
     idl/IArrayTests.idl
 )
 
+set(SOURCES
+	tests/ArrayTests.hpp
+	tests/BasicTests.hpp
+	tests/CastTests.hpp
+	tests/EnumTests.hpp
+	tests/ExceptionTests.hpp
+	tests/InterfaceChecksumTests.hpp
+	tests/LifetimeTests.hpp
+	tests/ObjectTests.hpp
+	tests/StarterTests.hpp
+	tests/StructTests.hpp
+	tests/TestCtx.hpp
+    test.cpp
+)
+
+set(GENERATED_SOURCES
+    Tests_adapters.hpp
+)
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-add_executable(joint-test Tests_adapters.hpp test.cpp)
+add_executable(joint-test ${SOURCES} ${GENERATED_SOURCES})
 target_link_libraries(joint-test test-core ${JOINT_LIBRARIES})
+source_group(generated FILES ${GENERATED_SOURCES})
+auto_source_group(${SOURCES})
+auto_folder(joint-test)
+
+set_target_properties(test-core PROPERTIES FOLDER test/core)

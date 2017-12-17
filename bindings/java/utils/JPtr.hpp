@@ -120,7 +120,7 @@ namespace java
             return result;
         }
 
-        explicit operator bool() const { return _obj; }
+        explicit operator bool() const { return _obj != nullptr; }
         T_ Get() const { return _obj; }
         JNIEnv* GetEnv() const { return _env; }
 
@@ -197,7 +197,7 @@ namespace java
             std::swap(_obj, other._obj);
         }
 
-        explicit operator bool() const { return _obj; }
+        explicit operator bool() const { return _obj != nullptr; }
         T_ Get() const { return _obj; }
 
         JLocalRef<T_> Local() const

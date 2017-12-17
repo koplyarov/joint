@@ -86,7 +86,7 @@ namespace java
             JObjLocalRef Get(size_t index) const
             {
                 auto env = _array.GetEnv();
-                return JObjLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectArrayElement(_array.Get(), index)));
+                return JObjLocalRef::StealLocal(env, JAVA_CALL(env->GetObjectArrayElement(_array.Get(), (jsize)index)));
             }
         };
 

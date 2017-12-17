@@ -37,3 +37,5 @@ joint_add_module_content(tests-component-java
     DIRECTORY .
     FILES ${CMAKE_CURRENT_BINARY_DIR}/tests.jar
 )
+
+auto_folder(tests tests-component-java)

@@ -5,6 +5,11 @@
 #ifdef __cplusplus
 #   define JOINT_CORE_EXTERN_C_BEGIN extern "C" {
 #   define JOINT_CORE_EXTERN_C_END }
+#   if defined(_MSC_VER) && _MSC_VER >= 1800
+#       define JOINT_CORE_CPP_STANDARD 201100L
+#   else
+#       define JOINT_CORE_CPP_STANDARD __cplusplus
+#   endif
 #else
 #   define JOINT_CORE_EXTERN_C_BEGIN
 #   define JOINT_CORE_EXTERN_C_END
@@ -22,9 +27,6 @@
 #if defined(_MSC_VER)
 #   if !defined(JOINT_CORE_PLATFORM_WINDOWS)
 #       define JOINT_CORE_PLATFORM_WINDOWS 1
-#   endif
-#   if !defined JOINT_CORE_WARN_UNUSED_RESULT
-#       define JOINT_CORE_WARN_UNUSED_RESULT(Result_) _Check_return_ Result_
 #   endif
 #endif
 

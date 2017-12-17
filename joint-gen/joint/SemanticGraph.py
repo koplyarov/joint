@@ -17,6 +17,10 @@ else:
         return obj
 
 
+if not hasattr(__builtins__, 'xrange'):
+    xrange = range
+
+
 class TypeBase(object):
     # pylint: disable=too-many-arguments
     def __init__(
@@ -118,7 +122,7 @@ class Interface(TypeBase):
 
     def calculate_checksum(self):  # type: () -> None
         ifc_str = self._ifc_str()
-        self.checksum = int(binascii.crc32(ifc_str)) % (1 << 32)  # pylint: disable=attribute-defined-outside-init
+        self.checksum = int(binascii.crc32(ifc_str.encode('utf-8'))) % (1 << 32)  # pylint: disable=attribute-defined-outside-init
 
     def _ifc_str(self):  # type: () -> str
         # pylint: disable=protected-access

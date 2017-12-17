@@ -51,7 +51,7 @@ if (MSVC)
     endif()
 
     set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/Tests-noexcept.cpp PROPERTIES COMPILE_FLAGS
-        "/W4 /WX /D_HAS_EXCEPTIONS=0 ${UNCAUGHT_EXCEPTION_WORKAROUND}")
+        "/D_HAS_EXCEPTIONS=0 ${UNCAUGHT_EXCEPTION_WORKAROUND}")
 else()
     set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/Tests-noexcept.cpp PROPERTIES COMPILE_FLAGS
             "-fno-exceptions -fno-rtti")
@@ -69,3 +69,5 @@ joint_add_module_content(tests-component-cpp-noexcept
     DIRECTORY .
     LIBRARIES tests-cpp-noexcept
 )
+
+auto_folder(tests-cpp tests-component-cpp tests-cpp-noexcept tests-component-cpp-noexcept)

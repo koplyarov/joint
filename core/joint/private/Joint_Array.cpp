@@ -25,7 +25,7 @@ extern "C"
 
 
     JointCore_SizeT Joint_Array::GetSize() const
-    { return elements.size(); }
+    { return (JointCore_SizeT)elements.size(); }
 
 
     void Joint_Array::Set(JointCore_SizeT index, JointCore_Value value)

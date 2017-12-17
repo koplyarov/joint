@@ -52,7 +52,7 @@ namespace devkit
 
                 JointCore_Bool real_value;
                 DETAIL_JOINT_DEVKIT_JOINT_CALL( Joint_GetManifestNodeBooleanValue(node, &real_value) );
-                value = static_cast<bool>(real_value);
+                value = (real_value != 0);
             }
         };
 

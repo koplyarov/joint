@@ -77,10 +77,10 @@ def main():  # type: () -> None
         out_dir = os.path.dirname(args.output)
         if out_dir and not os.path.exists(out_dir):
             os.makedirs(out_dir)
-        out_file = open(args.output, 'w')
-        for l in code:
-            out_file.write(l.encode('utf-8'))
-            out_file.write('\n')
+        with open(args.output, 'wb') as out_file:
+            for l in code:
+                out_file.write(l.encode('utf-8'))
+                out_file.write('\n'.encode('utf-8'))
 
     except (joint.IdlParserException, joint.SemanticGraphException) as e:
         print_idl_processing_error(e)

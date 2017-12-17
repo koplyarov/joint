@@ -10,6 +10,9 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 if (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
     set(PLATFORM_LIBS "")
+    add_definitions(-DYY_NO_UNISTD_H)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-D__STDC_VERSION__=199901L)
 else()
     add_definitions(-Wall)
     add_definitions(-std=c++11)
@@ -40,32 +43,69 @@ if (FLEX_FOUND AND BISON_FOUND)
     )
 endif()
 
-set(JOINT_CORE_SRC
+set(SOURCES
+    joint/Joint.h
+    joint/JsonParser.l
+    joint/JsonParser.y
     joint/private/Joint_Array.cpp
+    joint/private/Joint_Array.hpp
     joint/private/JsonNode.cpp
+    joint/private/JsonNode.hpp
     joint/private/JsonObjectAssembler.cpp
+    joint/private/JsonObjectAssembler.hpp
     joint/private/JsonParser.cpp
+    joint/private/JsonParser.hpp
+    joint/public/AccessorUtils.h
     joint/public/Array.cpp
+    joint/public/Array.h
     joint/public/Assert.cpp
+    joint/public/Assert.h
+    joint/public/BasicTypes.h
+    joint/public/BindingAccessor.h
+    joint/public/BindingAccessorVTable.h
     joint/public/Error.cpp
+    joint/public/Error.h
     joint/public/Exception.cpp
+    joint/public/Exception.h
+    joint/public/JointConfig.h
+    joint/public/JointCoreApi.h
     joint/public/Log.cpp
+    joint/public/Log.h
     joint/public/Manifest.cpp
+    joint/public/Manifest.h
+    joint/public/ModuleAccessor.h
+    joint/public/ModuleAccessorVTable.h
+    joint/public/ObjectAccessor.h
+    joint/public/ObjectAccessorVTable.h
+    joint/public/Type.h
+    joint/public/Value.h
+)
+
+set(GENERATED_SOURCES
     ${CMAKE_CURRENT_BINARY_DIR}/joint/JsonParser.l.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/joint/JsonParser.y.cpp
 )
 
-add_library(joint SHARED ${JOINT_CORE_SRC})
+
+add_library(joint SHARED ${SOURCES} ${GENERATED_SOURCES})
 target_link_libraries(joint ${CMAKE_THREAD_LIBS_INIT})
+
+source_group(generated FILES ${GENERATED_SOURCES})
+auto_source_group(${SOURCES})
+auto_folder(joint)
+
 
 ################################################################################
 
-set(JOINT_SRC
+set(JOINT_LOADER_SOURCES
+    joint/JointLoader.h
     joint/JointLoader.cpp
 )
 
-add_library(joint-loader SHARED ${JOINT_SRC})
+add_library(joint-loader SHARED ${JOINT_LOADER_SOURCES})
 target_link_libraries(joint-loader joint joint-python joint-native joint-java ${CMAKE_THREAD_LIBS_INIT} ${PLATFORM_LIBS})
+auto_source_group(${JOINT_LOADER_SOURCES})
+auto_folder(joint-loader)
 
 ################################################################################
 
@@ -74,11 +114,13 @@ install(FILES
     joint/JointConfig.h
     joint/JointLoader.h
     DESTINATION include
-    COMPONENT dev)
+    COMPONENT dev
+)
 
 install(TARGETS
     joint
     joint-loader
     COMPONENT runtime
     ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib)
+    LIBRARY DESTINATION lib
+)

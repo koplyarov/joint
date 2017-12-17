@@ -44,7 +44,7 @@ namespace python
         PyObjectHolder py_tb_seq(PySequence_Fast((PyObject*)py_tb, "A sequence expected!"));
         PY_CHECK_IN_ERROR_HANDLING(py_tb_seq);
 
-        int py_tb_seq_len = PySequence_Size(py_tb_seq);
+        auto py_tb_seq_len = PySequence_Size(py_tb_seq);
         PY_CHECK_IN_ERROR_HANDLING(py_tb_seq_len >= 0);
 
         backtrace.clear();

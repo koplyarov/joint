@@ -54,6 +54,24 @@ if (SWIG_FOUND AND PYTHONLIBS_FOUND AND JNI_FOUND AND JAVA_FOUND)
 
     add_definitions(-DJOINT_CPP_CONFIG_NO_EXCEPTIONS=1)
 
-    add_executable(joint-benchmarks Benchmarks_adapters.hpp main.cpp)
+    set(BENCHMARKS_SOURCES
+        CallAdapter.hpp
+        benchmarks/Basic.hpp
+        benchmarks/BenchmarksBase.hpp
+        benchmarks/Cast.hpp
+        benchmarks/Enum.hpp
+        benchmarks/Exception.hpp
+        benchmarks/Object.hpp
+        benchmarks/Struct.hpp
+        descriptors/joint.hpp
+        descriptors/swig.hpp
+        main.cpp
+    )
+
+    add_executable(joint-benchmarks ${BENCHMARKS_SOURCES})
     target_link_libraries(joint-benchmarks swig_benchmarks_native benchmarks ${JOINT_LIBRARIES} ${PLATFORM_LIBS})
+    auto_source_group(${BENCHMARKS_SOURCES})
+    auto_folder(joint-benchmarks)
+
+    set_target_properties(benchmarks PROPERTIES FOLDER benchmarks/core)
 endif()

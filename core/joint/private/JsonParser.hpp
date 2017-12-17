@@ -34,7 +34,7 @@ namespace joint
                 _file.read(buf, maxSize);
                 if (_file.bad())
                     GetLogger().Error() << "I/O error!"; // TODO: is there a way to report an error to flex?
-                return _file.gcount();
+                return (int)_file.gcount();
             }
             std::stringstream& GetStringStream() { return _stringStream; }
         };

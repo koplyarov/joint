@@ -44,3 +44,10 @@ add_jar(benchmarks-java-swig
         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 )
 add_dependencies(benchmarks-java-swig swig_benchmarks_wrappers_java)
+
+auto_folder(
+    benchmarks-java-swig
+    swig_benchmarks_native
+    swig_benchmarks_wrappers_java
+    _swig_benchmarks_wrappers_py
+)

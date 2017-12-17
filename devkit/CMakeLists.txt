@@ -1,0 +1,38 @@
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+set(SOURCES
+    joint/devkit/accessors/Binding.hpp
+    joint/devkit/accessors/ImplBase.hpp
+    joint/devkit/accessors/MakeAccessor.hpp
+    joint/devkit/accessors/Module.hpp
+    joint/devkit/accessors/Object.hpp
+    joint/devkit/accessors/VTableStorage.hpp
+    joint/devkit/Config.hpp
+    joint/devkit/log/Logger.hpp
+    joint/devkit/manifest/ManifestReader.hpp
+    joint/devkit/marshalling/ExceptionInfo.hpp
+    joint/devkit/marshalling/InterfaceDescriptor.hpp
+    joint/devkit/marshalling/StackFrameData.hpp
+    joint/devkit/marshalling/ValueMarshaller.hpp
+    joint/devkit/system/CurrentLibraryPath.hpp
+    joint/devkit/util/ArrayHolder.hpp
+    joint/devkit/util/ArrayView.hpp
+    joint/devkit/util/CppWrappers.hpp
+    joint/devkit/util/Exceptions.hpp
+    joint/devkit/util/Holder.hpp
+    joint/devkit/util/IntrusiveRefCounter.hpp
+    joint/devkit/util/JointException.hpp
+    joint/devkit/util/MakeUnique.hpp
+    joint/devkit/util/ScopeExit.hpp
+    joint/devkit/util/Singleton.hpp
+    joint/devkit/util/StackStorage.hpp
+    joint/devkit/util/StorageFor.hpp
+    joint/devkit/util/StringBuilder.hpp
+    joint/devkit/util/Utils.hpp
+    dummy.cpp
+)
+
+add_library(devkit ${SOURCES})
+target_link_libraries(joint)
+auto_source_group(${SOURCES})
+auto_folder(devkit)

@@ -70,7 +70,7 @@ namespace devkit
                     _jointType.payload.structDescriptor = sd;
 
                     _membersCount = members.GetCount();
-                    sd->membersCount = _membersCount;
+                    sd->membersCount = (int32_t)_membersCount;
                     sd->memberTypes = new JointCore_Type[_membersCount];
                     _members.Reset(new MemberInfo[_membersCount]);
 

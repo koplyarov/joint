@@ -213,8 +213,8 @@ extern "C"
 
         switch (node->GetType())
         {
-        case JsonNode::Type::Array:  *outCount = node->AsArray().size(); break;
-        case JsonNode::Type::Object: *outCount = node->AsObject().size(); break;
+        case JsonNode::Type::Array:  *outCount = (JointCore_SizeT)node->AsArray().size(); break;
+        case JsonNode::Type::Object: *outCount = (JointCore_SizeT)node->AsObject().size(); break;
         default: JOINT_THROW(JOINT_CORE_ERROR_INVALID_PARAMETER);
         }
 

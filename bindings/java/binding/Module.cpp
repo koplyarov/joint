@@ -31,7 +31,7 @@ namespace binding
 
         auto jars = _manifest.GetJars();
         auto class_name_string = JStringLocalRef::StealLocal(env, JAVA_CALL(env->NewStringUTF(_manifest.GetClassName().c_str())));
-        auto urls = JObjArrayLocalRef::StealLocal(env, JAVA_CALL(env->NewObjectArray(jars.size(), jjc.URL_cls.Get(), nullptr)));
+        auto urls = JObjArrayLocalRef::StealLocal(env, JAVA_CALL(env->NewObjectArray((jsize)jars.size(), jjc.URL_cls.Get(), nullptr)));
 
         for (size_t i = 0; i < jars.size(); ++i)
         {
@@ -42,7 +42,7 @@ namespace binding
             auto uri = JObjLocalRef::StealLocal(env, JAVA_CALL(env->CallObjectMethod(file.Get(), jjc.File_toURI_id)));
             auto url = JObjLocalRef::StealLocal(env, JAVA_CALL(env->CallObjectMethod(uri.Get(), jjc.URI_toURL_id)));
 
-            JAVA_CALL_VOID(env->SetObjectArrayElement(urls.Get(), i, url.Get()));
+            JAVA_CALL_VOID(env->SetObjectArrayElement(urls.Get(), (jsize)i, url.Get()));
         }
 
         auto class_loader = JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(jjc.URLClassLoader_cls.Get(), jjc.URLClassLoader_ctor_id, urls.Get())));

@@ -169,8 +169,8 @@ namespace binding
     {
         PyObjectHolder bases(PyObject_GetAttrString(type, "__bases__"));
         PyObjectHolder seq(PySequence_Fast((PyObject*)bases, "A sequence expected!"));
-        int len = PySequence_Size(seq);
-        for (int i = 0; i < len; ++i)
+        size_t len = PySequence_Size(seq);
+        for (size_t i = 0; i < len; ++i)
         {
             PyObject* base = PY_OBJ_CHECK(PySequence_Fast_GET_ITEM(seq.Get(), i));
 

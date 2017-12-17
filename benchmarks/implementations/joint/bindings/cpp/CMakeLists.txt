@@ -11,7 +11,7 @@ else()
     add_definitions(-std=c++11)
 endif()
 
-joint_generate_adapters(c++ Benchmarks_adapters.hpp
+set(IDL_FILES
     ${BENCHMARKS_IDL_DIR}/IBasicBenchmarks.idl
     ${BENCHMARKS_IDL_DIR}/ICastBenchmarks.idl
     ${BENCHMARKS_IDL_DIR}/IEnumBenchmarks.idl
@@ -20,10 +20,25 @@ joint_generate_adapters(c++ Benchmarks_adapters.hpp
     ${BENCHMARKS_IDL_DIR}/IStructBenchmarks.idl
 )
 
+joint_generate_adapters(c++ Benchmarks_adapters.hpp ${IDL_FILES})
+
 ################################################################################
 
-add_library(benchmarks-cpp SHARED Benchmarks.cpp OtherTranslationUnit.cpp Benchmarks_adapters.hpp)
+set(SOURCES
+    Benchmarks.cpp
+    OtherTranslationUnit.cpp
+)
+
+set(GENERATED_SOURCES
+    Benchmarks_adapters.hpp
+)
+
+add_library(benchmarks-cpp SHARED ${SOURCES} ${GENERATED_SOURCES})
 target_link_libraries(benchmarks-cpp ${JOINT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+source_group(idl FILES ${IDL_FILES})
+source_group(generated FILES ${GENERATED_SOURCES})
+source_group(idl FILES ${IDL_FILES})
+auto_source_group(${SOURCES})
 
 joint_make_module_package(benchmarks-component-cpp
     PACKAGE_DIR ${JOINT_MODULE_OUTPUT_DIRECTORY}/cpp/Benchmarks
@@ -45,7 +60,7 @@ if (MSVC)
     endif()
 
     add_definitions(${UNCAUGHT_EXCEPTION_WORKAROUND})
-    add_compile_options(/W4 /WX /D_HAS_EXCEPTIONS=0)
+    add_compile_options(/D_HAS_EXCEPTIONS=0)
 else()
     add_compile_options(-fno-exceptions -fno-rtti)
 endif()
@@ -62,4 +77,6 @@ joint_add_module_content(benchmarks-component-cpp-noexcept
     DIRECTORY .
     LIBRARIES benchmarks-cpp-noexcept
 )
+
+auto_folder(benchmarks-cpp benchmarks-component-cpp benchmarks-cpp-noexcept benchmarks-component-cpp-noexcept)
 

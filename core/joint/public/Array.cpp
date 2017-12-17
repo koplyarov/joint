@@ -53,7 +53,7 @@ extern "C"
         JOINT_CPP_WRAP_BEGIN
         JOINT_CHECK(handle != JOINT_CORE_NULL_HANDLE, JOINT_CORE_ERROR_INVALID_PARAMETER);
         JOINT_CHECK(outSize, JOINT_CORE_ERROR_INVALID_PARAMETER);
-        *outSize = handle->elements.size();
+        *outSize = (JointCore_SizeT)handle->elements.size();
         JOINT_CPP_WRAP_END
     }
 

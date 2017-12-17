@@ -9,7 +9,7 @@ endif()
 
 ################################################################################
 
-joint_generate_adapters(c Benchmarks_adapters.h
+set(IDL_FILES
     ${BENCHMARKS_IDL_DIR}/IBasicBenchmarks.idl
     ${BENCHMARKS_IDL_DIR}/ICastBenchmarks.idl
     ${BENCHMARKS_IDL_DIR}/IEnumBenchmarks.idl
@@ -18,8 +18,22 @@ joint_generate_adapters(c Benchmarks_adapters.h
     ${BENCHMARKS_IDL_DIR}/IStructBenchmarks.idl
 )
 
-add_library(benchmarks-c SHARED Benchmarks.c OtherTranslationUnit.c Benchmarks_adapters.h)
+joint_generate_adapters(c Benchmarks_adapters.h ${IDL_FILES})
+
+set(SOURCES
+    Benchmarks.c
+    OtherTranslationUnit.c
+)
+
+set(GENERATED_SOURCES
+    Benchmarks_adapters.h
+)
+
+add_library(benchmarks-c SHARED ${SOURCES} ${GENERATED_SOURCES})
 target_link_libraries(benchmarks-c ${JOINT_LIBRARIES})
+source_group(generated FILES ${GENERATED_SOURCES})
+source_group(idl FILES ${IDL_FILES})
+auto_source_group(${SOURCES})
 
 joint_make_module_package(benchmarks-component-c
     PACKAGE_DIR ${JOINT_MODULE_OUTPUT_DIRECTORY}/c/Benchmarks
@@ -30,3 +44,5 @@ joint_add_module_content(benchmarks-component-c
     DIRECTORY .
     LIBRARIES benchmarks-c
 )
+
+auto_folder(benchmarks-c benchmarks-component-c)

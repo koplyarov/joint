@@ -51,14 +51,14 @@ namespace python
     {
     public:
         PyObjectHolder FromJointBool(JointCore_Bool val) const   { return PyObjectHolder(PY_OBJ_CHECK(PyBool_FromLong(val))); }
-        PyObjectHolder FromJointU8(uint8_t val) const        { return PyObjectHolder(PY_OBJ_CHECK(PyLong_FromLong(val))); }
+        PyObjectHolder FromJointU8(uint8_t val) const        { return PyObjectHolder(PY_OBJ_CHECK(PyLong_FromUnsignedLong(val))); }
         PyObjectHolder FromJointI8(int8_t val) const         { return PyObjectHolder(PY_OBJ_CHECK(PyLong_FromLong(val))); }
-        PyObjectHolder FromJointU16(uint16_t val) const      { return PyObjectHolder(PY_OBJ_CHECK(PyLong_FromLong(val))); }
+        PyObjectHolder FromJointU16(uint16_t val) const      { return PyObjectHolder(PY_OBJ_CHECK(PyLong_FromUnsignedLong(val))); }
         PyObjectHolder FromJointI16(int16_t val) const       { return PyObjectHolder(PY_OBJ_CHECK(PyLong_FromLong(val))); }
-        PyObjectHolder FromJointU32(uint32_t val) const      { return PyObjectHolder(PY_OBJ_CHECK(PyLong_FromLong(val))); }
+        PyObjectHolder FromJointU32(uint32_t val) const      { return PyObjectHolder(PY_OBJ_CHECK(PyLong_FromUnsignedLong(val))); }
         PyObjectHolder FromJointI32(int32_t val) const       { return PyObjectHolder(PY_OBJ_CHECK(PyLong_FromLong(val))); }
-        PyObjectHolder FromJointU64(uint64_t val) const      { return PyObjectHolder(PY_OBJ_CHECK(PyLong_FromLong(val))); }
-        PyObjectHolder FromJointI64(int64_t val) const       { return PyObjectHolder(PY_OBJ_CHECK(PyLong_FromLong(val))); }
+        PyObjectHolder FromJointU64(uint64_t val) const      { return PyObjectHolder(PY_OBJ_CHECK(PyLong_FromUnsignedLongLong(val))); }
+        PyObjectHolder FromJointI64(int64_t val) const       { return PyObjectHolder(PY_OBJ_CHECK(PyLong_FromLongLong(val))); }
         PyObjectHolder FromJointF32(float val) const         { return PyObjectHolder(PY_OBJ_CHECK(PyFloat_FromDouble(val))); }
         PyObjectHolder FromJointF64(double val) const        { return PyObjectHolder(PY_OBJ_CHECK(PyFloat_FromDouble(val))); }
         PyObjectHolder FromJointUtf8(const char* val) const  { return PyObjectHolder(PY_OBJ_CHECK(PyUnicode_FromString(val))); }

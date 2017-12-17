@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 2.8)
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 if (POLICY CMP0058 )
     cmake_policy(SET CMP0058 OLD)
 endif()
+
+include(cmake/Util.cmake)
 
 project(joint)
 
@@ -40,6 +44,7 @@ include_directories(${CMAKE_SOURCE_DIR}/devkit)
 
 add_subdirectory(joint-gen)
 add_subdirectory(core)
+add_subdirectory(devkit)
 add_subdirectory(bindings)
 add_subdirectory(test)
 add_subdirectory(examples)

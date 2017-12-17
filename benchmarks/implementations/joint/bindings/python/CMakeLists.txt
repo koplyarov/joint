@@ -8,6 +8,7 @@ joint_generate_adapters(python Benchmarks_adapters.py
 )
 
 add_custom_target(benchmarks-adapters-py ALL DEPENDS Benchmarks_adapters.py)
+auto_folder(benchmarks-adapters-py)
 
 joint_make_module_package(benchmarks-component-py
     PACKAGE_DIR ${JOINT_MODULE_OUTPUT_DIRECTORY}/python/Benchmarks
@@ -19,3 +20,5 @@ joint_add_module_content(benchmarks-component-py
     DIRECTORY Package
     FILES __init__.py Component.py ${CMAKE_CURRENT_BINARY_DIR}/Benchmarks_adapters.py
 )
+
+auto_folder(benchmarks-adapters-py benchmarks-component-py)

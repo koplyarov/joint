@@ -1,7 +1,10 @@
 #ifndef JOINT_CPP_DETAIL_CONFIG_HPP
 #define JOINT_CPP_DETAIL_CONFIG_HPP
 
-#if __cplusplus > 201100L
+#include <joint/public/JointConfig.h>
+
+
+#if JOINT_CORE_CPP_STANDARD > 201100L
 #   define DETAIL_JOINT_CPP_MOVE_SUPPORTED 1
 #   define DETAIL_JOINT_CPP_STATIC_ASSERT_SUPPORTED 1
 #else

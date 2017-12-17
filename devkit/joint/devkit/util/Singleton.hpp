@@ -1,6 +1,7 @@
 #ifndef JOINT_DEVKIT_SINGLETON_HPP
 #define JOINT_DEVKIT_SINGLETON_HPP
 
+#include <joint/public/JointConfig.h>
 
 #include <algorithm>
 #include <memory>
@@ -25,7 +26,7 @@ namespace devkit
     public:
         static T_& Instance()
         {
-#if __cplusplus < 201100L
+#if JOINT_CORE_CPP_STANDARD < 201100L
 #   error "local static variables are not thread-safe in older standards"
 #endif
             static T_ inst;

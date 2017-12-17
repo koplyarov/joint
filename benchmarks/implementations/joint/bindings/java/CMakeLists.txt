@@ -34,3 +34,5 @@ joint_add_module_content(benchmarks-component-java
     DIRECTORY .
     FILES ${CMAKE_CURRENT_BINARY_DIR}/benchmarks-java.jar
 )
+
+auto_folder(benchmarks-java benchmarks-component-java)

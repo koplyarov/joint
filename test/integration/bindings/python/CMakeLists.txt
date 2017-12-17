@@ -25,3 +25,5 @@ joint_add_module_content(tests-component-py
     DIRECTORY Package
     FILES __init__.py Component.py ${CMAKE_CURRENT_BINARY_DIR}/Tests_adapters.py
 )
+
+auto_folder(test-adapters-py tests-component-py)

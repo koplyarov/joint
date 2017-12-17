@@ -1,6 +1,10 @@
 %{
 #include <joint/private/JsonParser.hpp>
 
+#if _MSC_VER
+#    pragma warning(disable:4065)
+#endif
+
 #define YYLEX_PARAM ctx->GetYYScanner()
 
 void yyerror(YYLTYPE *loc, void *voidPtrCtx, const char *str)

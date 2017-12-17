@@ -133,7 +133,7 @@ extern "C"
         JOINT_CHECK(ex != JOINT_CORE_NULL_HANDLE, JOINT_CORE_ERROR_INVALID_PARAMETER);
         JOINT_CHECK(outSize != JOINT_CORE_NULL_HANDLE, JOINT_CORE_ERROR_INVALID_PARAMETER);
 
-        *outSize = ex->Backtrace().size();
+        *outSize = (JointCore_SizeT)ex->Backtrace().size();
 
         JOINT_CPP_WRAP_END
     }

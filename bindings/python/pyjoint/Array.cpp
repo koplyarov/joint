@@ -210,7 +210,7 @@ namespace pyjoint
         PYJOINT_CPP_WRAP_BEGIN
 
         JointCore_Value value;
-        JointCore_Error ret = Joint_ArrayGet(self->handle, i, &value);
+        JointCore_Error ret = Joint_ArrayGet(self->handle, (JointCore_SizeT)i, &value);
         if (ret == JOINT_CORE_ERROR_INDEX_OUT_OF_RANGE)
         {
             PyErr_SetString(PyExc_IndexError, "Array index out of range");
