@@ -68,8 +68,13 @@ if (SWIG_FOUND AND PYTHONLIBS_FOUND AND JNI_FOUND AND JAVA_FOUND)
         main.cpp
     )
 
-    add_executable(joint-benchmarks ${BENCHMARKS_SOURCES})
+    set(BENCHMARKS_GENERATED_SOURCES
+        Benchmarks_adapters.hpp
+    )
+
+    add_executable(joint-benchmarks ${BENCHMARKS_SOURCES} ${BENCHMARKS_GENERATED_SOURCES})
     target_link_libraries(joint-benchmarks swig_benchmarks_native benchmarks ${JOINT_LIBRARIES} ${PLATFORM_LIBS})
+    source_group(generated FILES ${CMAKE_CURRENT_BINARY_DIR}/Benchmarks_adapters.hpp)
     auto_source_group(${BENCHMARKS_SOURCES})
     auto_folder(joint-benchmarks)
 
