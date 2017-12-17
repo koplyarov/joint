@@ -17,7 +17,7 @@ else()
     add_definitions(-Wall)
     add_definitions(-std=c++11)
     set(PLATFORM_LIBS dl)
-    set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/joint/JsonParser.l.cpp" PROPERTIES COMPILE_FLAGS "-Wno-sign-compare -Wno-unneeded-internal-declaration -Wno-error")
+    set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/joint/JsonParser.l.cpp" PROPERTIES COMPILE_FLAGS "-Wno-sign-compare -Wno-unneeded-internal-declaration -Wno-error -Wno-deprecated-register")
 endif()
 
 ################################################################################
