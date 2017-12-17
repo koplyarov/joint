@@ -1,7 +1,6 @@
 #ifndef JOINT_DEVKIT_SYSTEM_CURRENTLIBRARYPATH_HPP
 #define JOINT_DEVKIT_SYSTEM_CURRENTLIBRARYPATH_HPP
 
-#include <codecvt>
 #include <string>
 
 #if JOINT_PLATFORM_POSIX
@@ -9,6 +8,7 @@
 #endif
 
 #if JOINT_CORE_PLATFORM_WINDOWS
+#   include <codecvt>
 #   include <Windows.h>
 #endif
 
