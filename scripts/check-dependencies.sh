@@ -63,7 +63,7 @@ FindFileInPackage() {
     local FILE=$2
 
     case "$LINUX_DISTRIB_ID" in
-    "Ubuntu") apt-file show "$PACKAGE" 2>/dev/null | grep "$FILE" 2>/dev/null | sed -n "s/^[^:]\+: //p" ;;
+    "Ubuntu") apt-file search "$FILE" 2>/dev/null | grep -F "$PACKAGE" 2>/dev/null | head -n1 | sed -n "s/^[^:]\+: //p" ;;
     *) echo "Unknown linux distribution!" >&2; return 1 ;;
     esac
 }
@@ -97,7 +97,9 @@ SafeDirName() {
     [ "$COUNT" ] || COUNT=1
 
     for ((I=0; I<$COUNT; ++I)); do
-        [ "$RESULT" ] && RESULT=$(dirname "$RESULT") || return
+        [ -z "$RESULT" ] && return
+        [ "$RESULT" == "$(basename "$RESULT")" ] && return
+        RESULT=$(dirname "$RESULT")
     done
 
     echo "$RESULT"
