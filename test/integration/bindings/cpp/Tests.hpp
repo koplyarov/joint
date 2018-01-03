@@ -76,6 +76,7 @@ public:
             IStarterTests,
             IBasicTests,
             IEnumTests,
+            IEnumCallbackTests,
             IObjectTests,
             ILifetimeTests,
             ICastTests,
@@ -148,6 +149,11 @@ public:
         default: JOINT_CPP_THROW(Exception("Unknown enum value!"));
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////////
+
+    JOINT_CPP_RET_TYPE(String) CallbackStringRepresentation(IEnumTests_Ref cb, Enum e) { return cb->StringRepresentation(e); }
+    JOINT_CPP_RET_TYPE(Enum) CallbackGetNextValueInRing(IEnumTests_Ref cb, Enum e) { return cb->GetNextValueInRing(e); }
 
     ////////////////////////////////////////////////////////////////////////////////
 

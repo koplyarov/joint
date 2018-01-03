@@ -15,4 +15,10 @@ package test
         Enum GetNextValueInRing(Enum e);
     }
 
+    interface IEnumCallbackTests
+    {
+        string CallbackStringRepresentation(IEnumTests cb, Enum e);
+        Enum CallbackGetNextValueInRing(IEnumTests cb, Enum e);
+    }
+
 }
