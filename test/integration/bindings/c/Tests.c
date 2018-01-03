@@ -224,6 +224,14 @@ JointCore_Error Tests_GetNextValueInRing(Tests* self, test_Enum e, test_Enum* re
     return JOINT_CORE_ERROR_NONE;
 }
 
+///// IEnumCallbackTests /////
+
+JointCore_Error Tests_CallbackStringRepresentation(Tests* self, test_IEnumTests cb, test_Enum e, const char** result, JointCore_Exception_Handle* ex)
+{ return test_IEnumTests_StringRepresentation(cb, e, result, ex); }
+
+JointCore_Error Tests_CallbackGetNextValueInRing(Tests* self, test_IEnumTests cb, test_Enum e, test_Enum* result, JointCore_Exception_Handle* ex)
+{ return test_IEnumTests_GetNextValueInRing(cb, e, result, ex); }
+
 ///// IObjectTests /////
 
 JointCore_Error Tests_ReturnNull(Tests* self, test_ISomeObject* result, JointCore_Exception_Handle* ex)
@@ -472,7 +480,18 @@ JointCore_Error Tests_GetI32Element(Tests* self, i32__Array array, int32_t index
 { return i32__Array_Get(array, index, result, ex); }
 
 
-JOINT_COMPONENT(Tests, test_IBasicTests, test_IEnumTests, test_IObjectTests, test_ILifetimeTests, test_ICastTests, test_IExceptionTests, test_IInterfaceChecksumTests, test_IStructTests, test_IArrayTests);
+JOINT_COMPONENT(
+    Tests,
+    test_IBasicTests,
+    test_IEnumTests,
+    test_IEnumCallbackTests,
+    test_IObjectTests,
+    test_ILifetimeTests,
+    test_ICastTests,
+    test_IExceptionTests,
+    test_IInterfaceChecksumTests,
+    test_IStructTests,
+    test_IArrayTests);
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -48,6 +48,7 @@ class Tests
             test_IBasicTests_impl, 
             test_IObjectTests_impl,
             test_IEnumTests_impl,
+            test_IEnumCallbackTests_impl,
             test_ICastTests_impl,
             test_IExceptionTests_impl,
             test_IStructTests_impl,
@@ -60,6 +61,7 @@ class Tests
             test_IBasicTests.registerAccessors(this);
             test_IObjectTests.registerAccessors(this);
             test_IEnumTests.registerAccessors(this);
+            test_IEnumCallbackTests.registerAccessors(this);
             test_ICastTests.registerAccessors(this);
             test_IExceptionTests.registerAccessors(this);
             test_IStructTests.registerAccessors(this);
@@ -119,6 +121,11 @@ class Tests
             default:        return null;
             }
         }
+
+        ///// IEnumCallbackTests /////
+
+        public String CallbackStringRepresentation(test_IEnumTests cb, test_Enum e) { return cb.StringRepresentation(e); }
+        public test_Enum CallbackGetNextValueInRing(test_IEnumTests cb, test_Enum e) { return cb.GetNextValueInRing(e); }
 
         ///// ICastTests /////
 

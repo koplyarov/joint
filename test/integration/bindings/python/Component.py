@@ -42,6 +42,7 @@ class Tests(test_IStarterTests,
             test_IBasicTests,
             test_IObjectTests,
             test_IEnumTests,
+            test_IEnumCallbackTests,
             test_ILifetimeTests,
             test_ICastTests,
             test_IExceptionTests,
@@ -103,6 +104,9 @@ class Tests(test_IStarterTests,
     def GetNextValueInRing(self, e):
         next_values = { test_Enum.Value1: test_Enum.Value2, test_Enum.Value2: test_Enum.Value3, test_Enum.Value3: test_Enum.Value4, test_Enum.Value4: test_Enum.Value1 }
         return next_values[e]
+
+    def CallbackStringRepresentation(self, cb, e): return cb.StringRepresentation(e)
+    def CallbackGetNextValueInRing(self, cb, e): return cb.GetNextValueInRing(e)
 
     ### ILifetimeTests ###
 
