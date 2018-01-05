@@ -14,6 +14,7 @@ set(SOURCES
     joint/devkit/marshalling/InterfaceDescriptor.hpp
     joint/devkit/marshalling/StackFrameData.hpp
     joint/devkit/marshalling/ValueMarshaller.hpp
+    joint/devkit/meta/IntToType.hpp
     joint/devkit/system/CurrentLibraryPath.hpp
     joint/devkit/util/ArrayHolder.hpp
     joint/devkit/util/ArrayView.hpp
@@ -22,6 +23,7 @@ set(SOURCES
     joint/devkit/util/Holder.hpp
     joint/devkit/util/IntrusiveRefCounter.hpp
     joint/devkit/util/JointException.hpp
+    joint/devkit/util/LifoAllocator.hpp
     joint/devkit/util/MakeUnique.hpp
     joint/devkit/util/ScopeExit.hpp
     joint/devkit/util/Singleton.hpp

@@ -13,15 +13,6 @@ namespace joint {
 namespace devkit
 {
 
-    template < typename T_ >
-    T_ AlignUp(T_ value, T_ alignment)
-    { return alignment * ((value + alignment - 1) / alignment); }
-
-    template < typename T_ >
-    T_ AlignDown(T_ value, T_ alignment)
-    { return alignment * (value / alignment); }
-
-
     template < typename T_, size_t BytesSize_ >
     class StackStorage
     {
