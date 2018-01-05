@@ -26,7 +26,7 @@ namespace joint
 #define JOINT_CHECK_NOTHROW(Expr_, ...) do { if (!(Expr_)) { GetLogger().Error() << "JOINT_CHECK failed: " #Expr_ " in function " << __func__ << " at " << JOINT_SOURCE_LOCATION << ", returning " << (__VA_ARGS__); return (__VA_ARGS__); } } while (false)
 
 #define JOINT_TERMINATE(Msg_) JOINT_TERMINATE_EX(LoggerName, Msg_)
-#define JOINT_TERMINATE_EX(LoggerName_, Msg_) do { Joint_Log(JOINT_CORE_LOGLEVEL_ERROR, LoggerName_, "JOINT_TERMINATE: %s in function %s at %s", #Msg_, __func__, JOINT_SOURCE_LOCATION); std::terminate(); } while (false)
+#define JOINT_TERMINATE_EX(LoggerName_, Msg_) do { Joint_Log(JOINT_CORE_LOGLEVEL_ERROR, LoggerName_, "JOINT_TERMINATE: %s in function %s at %s", Msg_, __func__, JOINT_SOURCE_LOCATION); std::terminate(); } while (false)
 
 #if JOINT_DEBUG
 #   define JOINT_ASSERT_EX(LoggerName_, ...) do { if (!(__VA_ARGS__)) JOINT_TERMINATE_EX(LoggerName_, "JOINT_ASSERT failed: " #__VA_ARGS__); } while (false)
