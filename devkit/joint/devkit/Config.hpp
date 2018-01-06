@@ -19,4 +19,10 @@
 #   define JOINT_DEVKIT_NOEXCEPT noexcept
 #endif
 
+#if defined(_MSC_VER)
+#   define JOINT_DEVKIT_CHAR16_T wchar_t
+#else
+#   define JOINT_DEVKIT_CHAR16_T char16_t
+#endif
+
 #endif
