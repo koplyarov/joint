@@ -36,17 +36,17 @@ joint_generate_adapters(c++ Tests_adapters.hpp
 )
 
 set(SOURCES
-	tests/ArrayTests.hpp
-	tests/BasicTests.hpp
-	tests/CastTests.hpp
-	tests/EnumTests.hpp
-	tests/ExceptionTests.hpp
-	tests/InterfaceChecksumTests.hpp
-	tests/LifetimeTests.hpp
-	tests/ObjectTests.hpp
-	tests/StarterTests.hpp
-	tests/StructTests.hpp
-	tests/TestCtx.hpp
+    tests/ArrayTests.hpp
+    tests/BasicTests.hpp
+    tests/CastTests.hpp
+    tests/EnumTests.hpp
+    tests/ExceptionTests.hpp
+    tests/InterfaceChecksumTests.hpp
+    tests/LifetimeTests.hpp
+    tests/ObjectTests.hpp
+    tests/StarterTests.hpp
+    tests/StructTests.hpp
+    tests/TestCtx.hpp
     test.cpp
 )
 
