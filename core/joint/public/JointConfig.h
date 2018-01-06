@@ -68,4 +68,7 @@
 #   endif
 #endif
 
+
+#define JOINT_CORE_UNUSED(Identifier_) (void)Identifier_
+
 #endif
