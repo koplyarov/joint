@@ -19,13 +19,16 @@ namespace java
 
     class ParamsAllocator
     {
+        using JStringData = joint::java::JStringData<devkit::DefaultLifoAllocator>;
+
     private:
-        devkit::StackStorage<JointCore_Value, 64>        _members;
-        devkit::StackStorage<StringDataHolder, 64>   _strParams;
+        devkit::DefaultLifoAllocator                 _alloc;
+        devkit::StackStorage<JointCore_Value, 64>    _members;
+        devkit::StackStorage<JStringData, 64>        _strParams;
 
     public:
         const char* AllocateUtf8(JNIEnv* env, const jstring& value)
-        { return _strParams.MakeSingle(JStringWeakRef(env, value)).GetData(); }
+        { return _strParams.MakeSingle(_alloc, JStringWeakRef(env, value)).GetData(); }
 
         JointCore_Value* AllocateMembers(size_t count)
         { return _members.Make(count); }
@@ -37,7 +40,8 @@ namespace java
     public:
         const char* AllocateUtf8(JNIEnv* env, const jstring& value)
         {
-            StringDataHolder str_data(JStringWeakRef(env, value));
+            devkit::DefaultLifoAllocator alloc;
+            auto str_data = GetJStringData(alloc, JStringWeakRef(env, value));
             std::unique_ptr<char[]> result_str(new char[strlen(str_data.GetData()) + 1]);
             strcpy(result_str.get(), str_data.GetData());
             return result_str.release();

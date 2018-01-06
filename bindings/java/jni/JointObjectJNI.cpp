@@ -30,8 +30,10 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doCast(JNIEnv* env, jclass 
 
     JointCore_ObjectAccessor accessor = ObjectAccessorFromJLongs(accessorVTableLong, accessorInstanceLong);
 
+    DefaultLifoAllocator alloc;
+
     JointCore_ObjectAccessor new_accessor;
-    JointCore_Error ret = accessor.VTable->CastObject(accessor.Instance, StringDataHolder(JStringWeakRef(env, interfaceId)).GetData(), interfaceChecksum, &new_accessor);
+    JointCore_Error ret = accessor.VTable->CastObject(accessor.Instance, GetJStringData(alloc, JStringWeakRef(env, interfaceId)).GetData(), interfaceChecksum, &new_accessor);
     JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE || JOINT_CORE_ERROR_CAST_FAILED, ret);
 
     JObjLocalRef result;

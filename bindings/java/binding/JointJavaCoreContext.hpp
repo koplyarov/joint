@@ -37,7 +37,7 @@ namespace java
         jmethodID StackTraceElement_getLineNumber_id;
         jmethodID StackTraceElement_getMethodName_id;
 
-        jfieldID JointException_nativeData_id;
+        jfieldID JointException_handle_id;
 
     private:
         JointJavaCoreContext();

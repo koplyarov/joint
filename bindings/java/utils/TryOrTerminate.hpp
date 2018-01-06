@@ -26,7 +26,7 @@ namespace Detail
 
 }}}
 
-#define JOINT_JAVA_TRY_OR_TERMINATE(...) Detail::TryOrTerminate(__VA_ARGS__, env, GetLogger().GetName(), #__VA_ARGS__ " failed")
+#define JOINT_JAVA_TRY_OR_TERMINATE(...) Detail::TryOrTerminate((__VA_ARGS__), env, GetLogger().GetName(), #__VA_ARGS__ " failed")
 
 
 #endif

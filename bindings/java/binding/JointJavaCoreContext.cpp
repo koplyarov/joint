@@ -55,7 +55,7 @@ namespace java
         StackTraceElement_getMethodName_id = JOINT_JAVA_TRY_OR_TERMINATE(env->GetMethodID(StackTraceElement_cls.Get(), "getMethodName", "()Ljava/lang/String;"));
 
         JointException_cls = JOINT_JAVA_TRY_OR_TERMINATE(JClassGlobalRef::StealLocal(env, env->FindClass("org/joint/JointException")));
-        JointException_nativeData_id = JOINT_JAVA_TRY_OR_TERMINATE(env->GetFieldID(JointException_cls.Get(), "nativeData", "J"));
+        JointException_handle_id = JOINT_JAVA_TRY_OR_TERMINATE(env->GetFieldID(JointException_cls.Get(), "handle", "J"));
     }
 
 }}

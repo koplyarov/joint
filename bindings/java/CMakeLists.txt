@@ -16,6 +16,7 @@ set(JAVA_SOURCES
     org/joint/Boxing.java
     org/joint/Component.java
     org/joint/ComponentProxy.java
+    org/joint/ExceptionUtils.java
     org/joint/InterfaceDescriptor.java
     org/joint/InterfaceId.java
     org/joint/JointException.java

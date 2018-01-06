@@ -48,6 +48,7 @@ namespace java
         InterfaceId_cls                      = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/InterfaceId")));
         JointException_cls                   = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/JointException")));
         Array_cls                            = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/Array")));
+        ExceptionUtils_cls                   = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->FindClass("org/joint/ExceptionUtils")));
 
         File_ctor_id                         = JAVA_CALL(env->GetMethodID(File_cls.Get(), "<init>", "(Ljava/lang/String;)V"));
         File_toURI_id                        = JAVA_CALL(env->GetMethodID(File_cls.Get(), "toURI", "()Ljava/net/URI;"));
@@ -96,6 +97,8 @@ namespace java
         Array_elementType                    = JAVA_CALL(env->GetFieldID(Array_cls.Get(), "elementType", "Lorg/joint/TypeDescriptor;"));
         Array_handle                         = JAVA_CALL(env->GetFieldID(Array_cls.Get(), "handle", "J"));
         Array_TypeDescriptor_long_ctor       = JAVA_CALL(env->GetMethodID(Array_cls.Get(), "<init>", "(Lorg/joint/TypeDescriptor;J)V"));
+
+        ExceptionUtils_toJointExceptionHandle = JAVA_CALL(env->GetStaticMethodID(ExceptionUtils_cls.Get(), "toJointExceptionHandle", "(Ljava/lang/Throwable;)J"));
     }
 
 

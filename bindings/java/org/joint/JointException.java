@@ -2,14 +2,23 @@ package org.joint;
 
 class JointException extends Exception
 {
-    long nativeData;
+    long handle;
 
-    JointException(long nativeData)
-    { this.nativeData = nativeData; }
+    JointException(long handle)
+    { this.handle = handle; }
 
     @Override
     public void finalize()
-    { deinitNative(nativeData); }
+    { deinitNative(handle); }
 
-    private static native void deinitNative(long nativeData);
+    long releaseHandle()
+    {
+        long result = handle;
+        handle = 0;
+        return result;
+    }
+
+    static native long createNative(String msg);
+    static native void deinitNative(long handle);
+    static native void appendBacktraceNative(long handle, String className, String fileName, int lineNum, String methodName);
 }

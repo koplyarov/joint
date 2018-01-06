@@ -130,7 +130,15 @@ namespace binding
         }
         else
         {
-            outRetValue->result.ex = GetJavaExceptionInfo(env).Release();
+            const auto& c = JointJavaContext::Instance();
+
+            jthrowable raw_throwable = env->ExceptionOccurred();
+            env->ExceptionClear();
+            auto ex = JThrowableLocalRef::StealLocal(env, raw_throwable);
+
+            jlong jointExLong = JAVA_CALL(env->CallStaticLongMethod(c.ExceptionUtils_cls.Get(), c.ExceptionUtils_toJointExceptionHandle, ex.Get()));
+            outRetValue->result.ex = reinterpret_cast<JointCore_Exception_Handle>(jointExLong);
+
             return JOINT_CORE_ERROR_EXCEPTION;
         }
 

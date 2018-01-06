@@ -149,6 +149,7 @@ namespace java
         JClassGlobalRef InterfaceId_cls;
         JClassGlobalRef JointException_cls;
         JClassGlobalRef Array_cls;
+        JClassGlobalRef ExceptionUtils_cls;
 
         jmethodID File_ctor_id;
         jmethodID File_toURI_id;
@@ -197,6 +198,8 @@ namespace java
         jfieldID Array_elementType;
         jfieldID Array_handle;
         jmethodID Array_TypeDescriptor_long_ctor;
+
+        jmethodID ExceptionUtils_toJointExceptionHandle;
 
     private:
         JointJavaContext();
