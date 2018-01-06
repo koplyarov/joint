@@ -30,7 +30,7 @@ function! GetCppNamespaceFromPath(path)
     if len(a:path) > 1 && a:path[0] == 'devkit'
         call add(res, 'joint')
         call add(res, 'devkit')
-        if len(a:path) > 4 && index(['detail', 'accessors', 'proxy'], a:path[3]) >= 0
+        if len(a:path) > 4 && index(['detail', 'accessors', 'proxy', 'meta'], a:path[3]) >= 0
             call add(res, a:path[3])
         endif
     endif
