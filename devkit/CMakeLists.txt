@@ -30,6 +30,7 @@ set(SOURCES
     joint/devkit/util/StackStorage.hpp
     joint/devkit/util/StorageFor.hpp
     joint/devkit/util/StringBuilder.hpp
+    joint/devkit/util/StringUtils.hpp
     joint/devkit/util/Utils.hpp
     dummy.cpp
 )
