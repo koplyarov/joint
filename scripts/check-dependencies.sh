@@ -1,7 +1,8 @@
 #!/bin/bash
 
 REQUIRED_PYMODULES="
-    pylint_quotes
+    pylint_quotes:pylint_quotes
+    python-magic:magic
 "
 
 REQUIRED_PACKAGES="
@@ -154,9 +155,11 @@ if [ "$MISSING_PACKAGES" ]; then
 fi
 
 MISSING_PYMODULES=""
-for PYMODULE in $REQUIRED_PYMODULES; do
+for PYMODULE_PAIR in $REQUIRED_PYMODULES; do
+    PIP_PACKAGE=${PYMODULE_PAIR%:*}
+    PYMODULE=${PYMODULE_PAIR#*:}
     if ! CheckPymodule "$PYMODULE"; then
-        MISSING_PYMODULES="$MISSING_PYMODULES$PYMODULE "
+        MISSING_PYMODULES="$MISSING_PYMODULES$PIP_PACKAGE "
     fi
 done
 
