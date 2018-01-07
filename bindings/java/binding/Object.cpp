@@ -74,6 +74,8 @@ namespace binding
                 jparams[i] = ValueMarshaller::FromJoint<jvalue>(ValueDirection::Parameter, m_desc.GetParamType(i), paramsPtr[i].value, m);
         }
 
+        JObjLocalRef retValueLocalGuard;
+
         jvalue j_res;
         jmethodID j_method = m_desc.GetUserData().Id;
         switch (m_desc.GetRetType().GetJointType().id)
@@ -112,6 +114,7 @@ namespace binding
         case JOINT_CORE_TYPE_STRUCT:
         case JOINT_CORE_TYPE_ARRAY:
             j_res.l = env->CallObjectMethodA(_obj.Get(), j_method, jparams);
+            retValueLocalGuard = JObjLocalRef::StealLocal(env, j_res.l);
             break;
         default:
             JOINT_THROW(JOINT_CORE_ERROR_NOT_IMPLEMENTED);
