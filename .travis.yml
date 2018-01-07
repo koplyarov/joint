@@ -25,7 +25,7 @@ matrix:
 
 before_install:
   - sudo apt-get install -yq pep8 pylint python-coverage python-dev python-pip python3-pip swig
-  - sudo pip install jinja2 pylint-quotes pyparsing
+  - sudo pip install jinja2 pylint-quotes pyparsing python-magic
   - sudo CC="gcc" CXX="g++" pip3 install mypy
 
 install:
