@@ -50,6 +50,11 @@ add_subdirectory(test)
 add_subdirectory(examples)
 add_subdirectory(benchmarks)
 
+add_custom_target(
+    check_whitespaces ALL
+    COMMAND "${CMAKE_SOURCE_DIR}/cmake/py_scripts/validate_whitespaces.py" --dir "${CMAKE_SOURCE_DIR}"
+)
+
 ################################################################################
 
 set(CPACK_GENERATOR "RPM;DEB")
