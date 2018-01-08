@@ -4,6 +4,7 @@ include(UseJava)
 set(CMAKE_JAVA_INCLUDE_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/joint.jar)
 
 joint_generate_adapters(java ${CMAKE_CURRENT_BINARY_DIR}/Adapters.java
+    ${BENCHMARKS_IDL_DIR}/IArrayBenchmarks.idl
     ${BENCHMARKS_IDL_DIR}/IBasicBenchmarks.idl
     ${BENCHMARKS_IDL_DIR}/ICastBenchmarks.idl
     ${BENCHMARKS_IDL_DIR}/IEnumBenchmarks.idl

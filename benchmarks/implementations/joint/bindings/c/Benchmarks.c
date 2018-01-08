@@ -28,6 +28,7 @@ JOINT_COMPONENT(Object, joint_IObject);
 typedef struct {
     Joint_ModuleContext moduleContext;
     joint_IObject obj;
+    i64__Array array;
 } Benchmarks;
 
 JointCore_Error Benchmarks_Init(Benchmarks* self, Joint_ModuleContext moduleContext)
@@ -35,6 +36,9 @@ JointCore_Error Benchmarks_Init(Benchmarks* self, Joint_ModuleContext moduleCont
     InitOtherTranslationUnit();
 
     self->moduleContext = moduleContext;
+
+    JointCore_Exception_Handle ex;
+    i64__Array_Create(100, &(self->array), &ex);
 
     Object* impl;
     JOINT_CREATE_COMPONENT(joint_IObject, Object, self->moduleContext, &self->obj, &impl);
@@ -47,6 +51,44 @@ JointCore_Error Benchmarks_Deinit(Benchmarks* self)
     DeinitOtherTranslationUnit();
     return JOINT_CORE_ERROR_NONE;
 }
+
+
+///// IArrayBenchmarks /////
+
+JointCore_Error Benchmarks_MeasureGetI64Element(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
+{
+    int64_t i;
+    int64_t result = 0;
+    int64_t retval = 0;
+
+    for (i = 0; i < n; ++i) {
+        retval = i64__Array_Get(self->array, 0, &result, ex);
+        if (retval != JOINT_CORE_ERROR_NONE)
+            return retval;
+    }
+
+    return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Benchmarks_MeasureSetI64Element(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
+{
+    int64_t i;
+    int64_t retval = 0;
+
+    for (i = 0; i < n; ++i) {
+        retval = i64__Array_Set(self->array, 0, 0, ex);
+        if (retval != JOINT_CORE_ERROR_NONE)
+            return retval;
+    }
+
+    return JOINT_CORE_ERROR_NONE;
+}
+
+JointCore_Error Benchmarks_MeasureNativeGetI64Element(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
+{ return JOINT_THROW("Not implemented", ex); }
+
+JointCore_Error Benchmarks_MeasureNativeSetI64Element(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
+{ return JOINT_THROW("Not implemented", ex); }
 
 
 ///// IBasicBenchmarks /////
@@ -502,6 +544,7 @@ JointCore_Error Benchmarks_MeasureProxySideThrow(Benchmarks* self, benchmarks_IT
 
 JOINT_COMPONENT(
     Benchmarks,
+    benchmarks_IArrayBenchmarks,
     benchmarks_IBasicBenchmarks,
     benchmarks_IEnumBenchmarks,
     benchmarks_IStructBenchmarks,
