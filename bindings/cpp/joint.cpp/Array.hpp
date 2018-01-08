@@ -219,7 +219,7 @@ namespace joint
         }
 
 
-        T_ operator[] (size_t index) const
+        JOINT_CPP_RET_TYPE(T_) operator[] (size_t index) const
         { return Get(index); }
 
         JointCore_ArrayHandle _GetArrayHandle() const
