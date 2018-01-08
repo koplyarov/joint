@@ -87,7 +87,7 @@ def main():  # type: () -> None
         exit(1)
 
     except CmdLineException as e:
-        print(e.message)
+        print(e.message)  # pylint: disable=no-member
         exit(1)
 
 
