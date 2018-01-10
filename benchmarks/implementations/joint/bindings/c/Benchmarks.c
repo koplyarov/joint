@@ -39,7 +39,7 @@ JointCore_Error Benchmarks_Init(Benchmarks* self, Joint_ModuleContext moduleCont
 
     JointCore_Exception_Handle ex;
 
-    int64_t retval = i64__Array_Create(100, &(self->array), &ex);
+    JointCore_Error retval = i64__Array_Create(100, &(self->array), &ex);
     if (retval != JOINT_CORE_ERROR_NONE)
         return retval;
 
@@ -62,7 +62,7 @@ JointCore_Error Benchmarks_MeasureGetI64Element(Benchmarks* self, int64_t n, Joi
 {
     int64_t i;
     int64_t result = 0;
-    int64_t retval = JOINT_CORE_ERROR_NONE;
+    JointCore_Error retval = JOINT_CORE_ERROR_NONE;
 
     for (i = 0; i < n; ++i) {
         retval = i64__Array_Get(self->array, 0, &result, ex);
@@ -76,7 +76,7 @@ JointCore_Error Benchmarks_MeasureGetI64Element(Benchmarks* self, int64_t n, Joi
 JointCore_Error Benchmarks_MeasureSetI64Element(Benchmarks* self, int64_t n, JointCore_Exception_Handle* ex)
 {
     int64_t i;
-    int64_t retval = JOINT_CORE_ERROR_NONE;
+    JointCore_Error retval = JOINT_CORE_ERROR_NONE;
 
     for (i = 0; i < n; ++i) {
         retval = i64__Array_Set(self->array, 0, 0, ex);
