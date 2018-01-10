@@ -1,4 +1,5 @@
 #include <Benchmarks_adapters.hpp>
+#include <joint.cpp/Array.hpp>
 
 #include "OtherTranslationUnit.hpp"
 
@@ -34,6 +35,7 @@ class Benchmarks
 {
 public:
     using JointInterfaces = TypeList<
+        IArrayBenchmarks,
         IBasicBenchmarks,
         IEnumBenchmarks,
         ICastBenchmarks,
@@ -44,6 +46,7 @@ public:
 
 private:
     ModuleContext   _moduleContext;
+    Array<int64_t>  _array;
     String          _string3;
     String          _string100;
     std::string     _nativeString3;
@@ -53,6 +56,7 @@ private:
 public:
     Benchmarks(const ModuleContext& moduleContext)
         : _moduleContext(moduleContext),
+          _array(JOINT_CPP_RET_VALUE(Array<int64_t>::Create(100))),
           _string3("abc"),
           _string100("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"),
           _nativeString3("abc"),
@@ -61,6 +65,22 @@ public:
     { }
 
     ~Benchmarks() { }
+
+
+    ///// IArrayBenchmarks /////
+
+
+    JOINT_CPP_RET_TYPE(void) MeasureGetI64Element(int64_t n)
+    { for (int64_t i = 0; i < n; ++i) _array[0]; JOINT_CPP_RETURN_VOID(); }
+
+    JOINT_CPP_RET_TYPE(void) MeasureSetI64Element(int64_t n)
+    { for (int64_t i = 0; i < n; ++i) _array.Set(0, 0); JOINT_CPP_RETURN_VOID(); }
+
+    JOINT_CPP_RET_TYPE(void) MeasureNativeGetI64Element(int64_t n)
+    { JOINT_CPP_THROW(Exception("Not implemented")); }
+
+    JOINT_CPP_RET_TYPE(void) MeasureNativeSetI64Element(int64_t n)
+    { JOINT_CPP_THROW(Exception("Not implemented")); }
 
 
     ///// IBasicBenchmarks /////

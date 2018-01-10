@@ -83,6 +83,7 @@ namespace joint
             JOINT_CPP_RET_TYPE(void) Throw() { JOINT_CPP_THROW(::joint::Exception("Requested exception")); }
         };
 
+        using ArrayBenchmarksPtr = benchmarks::IArrayBenchmarks_Ptr;
         using BenchmarksPtr = benchmarks::IBasicBenchmarks_Ptr;
         using CastBenchmarksPtr = benchmarks::ICastBenchmarks_Ptr;
         using ExceptionBenchmarksPtr = benchmarks::IExceptionBenchmarks_Ptr;
@@ -107,6 +108,9 @@ namespace joint
 
             BenchmarkCtx(const BenchmarkCtx&) = delete;
             BenchmarkCtx& operator = (const BenchmarkCtx&) = delete;
+
+            benchmarks::IArrayBenchmarks_Ptr CreateArrayBenchmarks() const
+            { return CALL( _module.GetRootObject<benchmarks::IArrayBenchmarks>("GetBenchmarks") ); }
 
             benchmarks::IBasicBenchmarks_Ptr CreateBenchmarks() const
             { return CALL( _module.GetRootObject<benchmarks::IBasicBenchmarks>("GetBenchmarks") ); }

@@ -38,6 +38,7 @@ if (SWIG_FOUND AND PYTHONLIBS_FOUND AND JNI_FOUND AND JAVA_FOUND)
     include_directories(${JOINT_CPP_INCLUDE_DIRECTORIES})
 
     joint_generate_adapters(c++ Benchmarks_adapters.hpp
+        implementations/joint/idl/IArrayBenchmarks.idl
         implementations/joint/idl/IBasicBenchmarks.idl
         implementations/joint/idl/ICastBenchmarks.idl
         implementations/joint/idl/IEnumBenchmarks.idl

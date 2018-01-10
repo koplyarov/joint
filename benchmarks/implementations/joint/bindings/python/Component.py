@@ -1,5 +1,6 @@
 import pyjoint
 from .Benchmarks_adapters import *
+from builtins import range
 
 
 class CastComponent(benchmarks_ICastInterface1, benchmarks_ICastInterface2):
@@ -52,6 +53,7 @@ class NestedStruct4(object):
 
 
 class Benchmarks(
+        benchmarks_IArrayBenchmarks,
         benchmarks_IBasicBenchmarks,
         benchmarks_IEnumBenchmarks,
         benchmarks_IStructBenchmarks,
@@ -62,7 +64,27 @@ class Benchmarks(
     def __init__(self, jointModule):
         super(Benchmarks, self).__init__()
         self.jointModule = jointModule
+        self.arr = pyjoint.Array(pyjoint.TypeDescriptor((9,)), 100)
+        self.nativeArr = [0] * 100
         self.obj = self.jointModule.CreateComponent(joint_IObject, Object)
+
+    ### IArrayBenchmarks ###
+
+    def MeasureGetI64Element(self, n):
+        for i in range(n):
+            x = self.arr[0]
+
+    def MeasureSetI64Element(self, n):
+        for i in range(n):
+            self.arr[0] = 0
+
+    def MeasureNativeGetI64Element(self, n):
+        for i in range(n):
+            x = self.nativeArr[0]
+
+    def MeasureNativeSetI64Element(self, n):
+        for i in range(n):
+            self.nativeArr[0] = 0
 
     ### IBasicBenchmarks ###
 

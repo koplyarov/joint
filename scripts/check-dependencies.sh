@@ -1,6 +1,7 @@
 #!/bin/bash
 
 REQUIRED_PYMODULES="
+    future:builtins
     pylint_quotes:pylint_quotes
     python-magic:magic
 "

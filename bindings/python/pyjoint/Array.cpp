@@ -224,22 +224,15 @@ namespace pyjoint
     }
 
 
-    static int Array_SetItem(Array *self, Py_ssize_t i, PyObject *v)
+    static int Array_SetItem(Array *self, Py_ssize_t i, PyObject *pyvalue)
     {
         PYJOINT_CPP_WRAP_BEGIN
 
-        //PyObject *old_value;
-        //if (i < 0 || i >= Py_SIZE(self)) {
-            //PyErr_SetString(PyExc_IndexError,
-                            //"list assignment index out of range");
-            //return -1;
-        //}
-        //if (v == NULL)
-            //return list_ass_slice(self, i, i+1, v);
-        //Py_INCREF(v);
-        //old_value = self->ob_item[i];
-        //self->ob_item[i] = v;
-        //Py_DECREF(old_value);
+        ParamsAllocator alloc;
+        const auto& elementTypeDesc = reinterpret_cast<TypeDescriptor*>(self->elementTypeDesc)->GetDescriptor();
+        JointCore_Value value = ValueMarshaller::ToJoint(ValueDirection::Parameter, elementTypeDesc, pyvalue, PythonMarshaller(), alloc);
+        JointCore_Error ret = Joint_ArraySet(self->handle, (JointCore_SizeT)i, value);
+        JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
 
         PYJOINT_CPP_WRAP_END(0, -1)
     }

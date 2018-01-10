@@ -10,6 +10,7 @@ endif()
 ################################################################################
 
 set(IDL_FILES
+    ${BENCHMARKS_IDL_DIR}/IArrayBenchmarks.idl
     ${BENCHMARKS_IDL_DIR}/IBasicBenchmarks.idl
     ${BENCHMARKS_IDL_DIR}/ICastBenchmarks.idl
     ${BENCHMARKS_IDL_DIR}/IEnumBenchmarks.idl

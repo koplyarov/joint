@@ -1,0 +1,12 @@
+package benchmarks
+{
+
+    interface IArrayBenchmarks
+    {
+        void MeasureGetI64Element(i64 n);
+        void MeasureSetI64Element(i64 n);
+        void MeasureNativeGetI64Element(i64 n);
+        void MeasureNativeSetI64Element(i64 n);
+    }
+
+}

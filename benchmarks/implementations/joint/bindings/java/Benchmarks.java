@@ -39,6 +39,7 @@ class Benchmarks
         extends
             AccessorsContainer
         implements
+            benchmarks_IArrayBenchmarks_impl,
             benchmarks_IBasicBenchmarks_impl,
             benchmarks_IEnumBenchmarks_impl,
             benchmarks_IStructBenchmarks_impl,
@@ -50,9 +51,11 @@ class Benchmarks
         private ModuleContext module;
         public int dummyInt = 0;
         private joint_IObject obj;
+        private Array<Boxing.Integer> array;
 
         Component(ModuleContext module)
         {
+            benchmarks_IArrayBenchmarks.registerAccessors(this);
             benchmarks_IBasicBenchmarks.registerAccessors(this);
             benchmarks_IEnumBenchmarks.registerAccessors(this);
             benchmarks_IStructBenchmarks.registerAccessors(this);
@@ -62,7 +65,25 @@ class Benchmarks
 
             this.module = module;
             this.obj = joint_IObject.makeComponent(module, new Object());
+            this.array = Array.<Boxing.Integer>create(BuiltinTypes.I64, 100);
         }
+
+        ///// IArrayBenchmarks /////
+
+        public void MeasureGetI64Element(long n)
+        { for (long i = 0; i < n; ++i) this.array.get(0); }
+
+        public void MeasureSetI64Element(long n)
+        {
+            Boxing.Integer val = new Boxing.Integer(0);
+            for (long i = 0; i < n; ++i) this.array.set(0, val);
+        }
+
+        public void MeasureNativeGetI64Element(long n)
+        { throw new RuntimeException("Not implemented"); }
+
+        public void MeasureNativeSetI64Element(long n)
+        { throw new RuntimeException("Not implemented"); }
 
         ///// IBasicBenchmarks /////
 

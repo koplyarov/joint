@@ -479,6 +479,9 @@ JointCore_Error Tests_MakeI32Array(Tests* self, int32_t len, i32__Array* result,
 JointCore_Error Tests_GetI32Element(Tests* self, i32__Array array, int32_t index, int32_t* result, JointCore_Exception_Handle* ex)
 { return i32__Array_Get(array, index, result, ex); }
 
+JointCore_Error Tests_SetI32Element(Tests* self, i32__Array array, int32_t index, int32_t value, JointCore_Exception_Handle* ex)
+{ return i32__Array_Set(array, index, value, ex); }
+
 
 JOINT_COMPONENT(
     Tests,

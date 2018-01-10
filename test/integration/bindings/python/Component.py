@@ -182,6 +182,7 @@ class Tests(test_IStarterTests,
 
     def MakeI32Array(self, len): return pyjoint.Array(pyjoint.TypeDescriptor((7,)), len)
     def GetI32Element(self, array, index): return array[index]
+    def SetI32Element(self, array, index, value): array[index] = value
 
 
 def GetTests(jointModule):
