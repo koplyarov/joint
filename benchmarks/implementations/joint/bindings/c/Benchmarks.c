@@ -38,7 +38,10 @@ JointCore_Error Benchmarks_Init(Benchmarks* self, Joint_ModuleContext moduleCont
     self->moduleContext = moduleContext;
 
     JointCore_Exception_Handle ex;
-    i64__Array_Create(100, &(self->array), &ex);
+
+    int64_t retval = i64__Array_Create(100, &(self->array), &ex);
+    if (retval != JOINT_CORE_ERROR_NONE)
+        return retval;
 
     Object* impl;
     JOINT_CREATE_COMPONENT(joint_IObject, Object, self->moduleContext, &self->obj, &impl);
