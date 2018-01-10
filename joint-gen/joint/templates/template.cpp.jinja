@@ -105,7 +105,7 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
         void _FillMembers(JointCore_Value* members) const
         {
             {% for m in s.members -%}
-            members[{{loop.index - 1}}].{{m.type.variant_name}} =
+            members[{{loop.index0}}].{{m.type.variant_name}} =
             {%- if type_name(m.type) == 'BuiltinType' -%}
             {{m.name}}{{'.Utf8Bytes().data()' if m.type.fullname == 'string'}}
             {%- elif type_name(m.type) == 'Enum' -%}
@@ -114,13 +114,13 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
             {{m.name}}._GetObjectAccessor()
             {%- elif type_name(m.type) == 'Struct' -%}
             members + _MembersCount
-            {%- for m in s.members[:loop.index - 1] if type_name(m.type) == 'Struct' %} + {{mangle_type(m.type)}}::_RecursiveMembersCount {% endfor -%}
+            {%- for m in s.members[:loop.index0] if type_name(m.type) == 'Struct' %} + {{mangle_type(m.type)}}::_RecursiveMembersCount {% endfor -%}
             {%- endif -%}
             ;
             {% endfor -%}
             {% for m in s.members -%}
             {% if type_name(m.type) == 'Struct' -%}
-            {{m.name}}._FillMembers(members[{{loop.index - 1}}].members);
+            {{m.name}}._FillMembers(members[{{loop.index0}}].members);
             {% endif -%}
             {% endfor -%}
         }
@@ -129,11 +129,11 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
         {
             static JointCore_Type member_types[{{s.members | length}}];
             {% for m in s.members -%}
-            member_types[{{loop.index - 1}}].id = (JointCore_TypeId){{m.type.index}};
+            member_types[{{loop.index0}}].id = (JointCore_TypeId){{m.type.index}};
             {% if type_name(m.type) == 'Interface' -%}
-            member_types[{{loop.index - 1}}].payload.interfaceChecksum = {{mangle_type(m.type)}}::_GetInterfaceChecksum();
+            member_types[{{loop.index0}}].payload.interfaceChecksum = {{mangle_type(m.type)}}::_GetInterfaceChecksum();
             {% elif type_name(m.type) == 'Struct' -%}
-            member_types[{{loop.index - 1}}].payload.structDescriptor = {{mangle_type(m.type)}}::_GetStructDescriptor();
+            member_types[{{loop.index0}}].payload.structDescriptor = {{mangle_type(m.type)}}::_GetStructDescriptor();
             {% endif -%}
             {% endfor -%}
             static JointCore_StructDescriptor desc = { {{s.members | length}}, member_types };

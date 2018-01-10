@@ -1,0 +1,245 @@
+#pragma once
+
+#include <joint.c/detail/GeneratedCodePrologue.h>
+
+{{delimiter_comment('#')}}
+
+{%  for p in packages -%}
+{{delimiter_comment('=', '{} enum declarations'.format(p.fullname))}}
+{%      for e in p.enums -%}
+{%          set mangled_type = mangle_type(e) %}
+typedef enum
+{
+{%-         for v in e.values %}
+    {{mangled_type}}_{{v.name}} = {{v.value}}{{',' if not loop.last}}
+{%-         endfor %}
+} {{mangled_type}};
+const char* {{mangled_type}}__ToString({{mangled_type}} value);
+{%      endfor %}
+{%  endfor -%}
+
+{{delimiter_comment('#')}}
+
+{%  for p in packages -%}
+{{delimiter_comment('=', '{} struct declarations'.format(p.fullname))}}
+{%      for s in p.structs -%}
+{%          set mangled_type = mangle_type(s) %}
+{{delimiter_comment('-', s.fullname)}}
+typedef struct
+{
+{%-         for m in s.members %}
+    {{c_type(m.type)}} {{m.name}};
+{%-         endfor %}
+} {{mangled_type}};
+
+JointCore_StructDescriptor* {{mangled_type}}__GetStructDescriptor()
+{
+    static JointCore_Type member_types[{{s.members | length}}];
+{%          for m in s.members -%}
+{%-             set mangled_member_type = mangle_type(m.type) -%}
+    member_types[{{loop.index0}}].id = (JointCore_TypeId){{m.type.index}};
+{%-             if type_name(m.type) == 'Interface' -%}
+    member_types[{{loop.index0}}].payload.interfaceChecksum = {{mangled_member_type}}__checksum;
+{%-             elif type_name(m.type) == 'Struct' -%}
+    member_types[{{loop.index0}}].payload.structDescriptor = {{mangled_member_type}}__GetStructDescriptor();
+{%-             endif %}
+{%          endfor -%}
+    static JointCore_StructDescriptor desc = { {{s.members | length}}, member_types };
+    return &desc;
+}
+{%      endfor %}
+{%  endfor -%}
+
+{{delimiter_comment('#')}}
+
+{%  for p in packages -%}
+{{delimiter_comment('=', '{} interface declarations'.format(p.fullname))}}
+{%      for ifc in p.interfaces -%}
+{%          set mangled_type = mangle_type(ifc) %}
+{{delimiter_comment('-', ifc.fullname)}}
+JointCore_InterfaceChecksum {{mangled_type}}__checksum = {{hex(ifc.checksum)}};
+const char* {{mangled_type}}__id = "{{ifc.fullname}}";
+
+typedef struct {{mangled_type}}_s {
+    JointCore_ObjectAccessor Accessor;
+} {{mangled_type}};
+{%          for m in ifc.methods %}
+JointCore_Error {{mangled_type}}_{{m.name}}({{mangled_type}} _obj{{params_decl(m.params)}}{{ret_decl(m.ret_type)}}, JointCore_Exception_Handle* _ex);
+{%-         endfor %}
+
+typedef struct {
+{%-         if not ifc.bases %}
+    JointCore_ObjectAccessor Accessor;
+{%          endif -%}
+{%-         for b in ifc.bases %}
+{%-             set mangled_base_type = mangle_type(b) %}
+    {{mangled_base_type}}__Accessors {{mangled_base_type}}__accessors;
+{%-         endfor %}
+} {{mangled_type}}__Accessors;
+
+#define DETAIL_DEFINE_ACCESSOR_VTABLE__{{mangled_type}}(ComponentImpl, IfcPrefix) \
+{%-         for b in ifc.bases %}
+{%-             set mangled_base_type = mangle_type(b) %}
+    DETAIL_DEFINE_ACCESSOR_VTABLE__{{mangled_base_type}}(ComponentImpl, IfcPrefix##__##{{mangled_type}}) \
+{%-         endfor %}
+    JointCore_ObjectAccessorVTable Detail__##ComponentImpl##__accessor_vtable##IfcPrefix##__{{mangled_type}} = \
+        { \
+            &Detail__##ComponentImpl##__AddRef, \
+            &Detail__##ComponentImpl##__Release, \
+            &Detail__##ComponentImpl##__Cast, \
+            &Detail__##ComponentImpl##IfcPrefix##__{{mangled_type}}__InvokeMethod \
+        };
+
+#define DETAIL_ACCESSOR__{{mangled_type}}(Accessors) \
+{%-         if not ifc.bases %}
+    ((Accessors).Accessor)
+{%-         else -%}
+{%              set mangled_first_base = mangle_type(ifc.bases[0]) %}
+    DETAIL_ACCESSOR__{{mangled_first_base}}((Accessors).{{mangled_first_base}}__accessors)
+{%-         endif %}
+
+#define DETAIL_INIT_ACCESSOR__{{mangled_type}}(ComponentImpl, ComponentWrapper, Accessors, IfcPrefix) \
+{%-         if ifc.bases %}
+    DETAIL_INIT_ACCESSOR__{{mangled_first_base}}(ComponentImpl, (ComponentWrapper), (Accessors).{{mangled_first_base}}__accessors, IfcPrefix##__##{{mangled_type}}) \
+{%-         endif %}
+    DETAIL_ACCESSOR__{{mangled_type}}(Accessors).Instance = (ComponentWrapper); \
+    DETAIL_ACCESSOR__{{mangled_type}}(Accessors).VTable = &Detail__##ComponentImpl##__accessor_vtable##IfcPrefix##__{{mangled_type}};
+{%-         for b in ifc.bases[1:] %} \
+{%-             set mangled_base_type = mangle_type(b) %}
+    DETAIL_INIT_ACCESSOR__{{mangled_base_type}}(ComponentImpl, (ComponentWrapper), (Accessors).{{mangled_base_type}}__accessors, IfcPrefix##__##{{mangled_type}})
+{%-         endfor %}
+
+#define DETAIL_TRY_CAST__{{mangled_type}}(Accessors) \
+    else if (strcmp(interfaceId, {{mangled_type}}__id) == 0) \
+    { \
+        if (checksum != {{mangled_type}}__checksum) \
+            return JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM; \
+        *outAccessor = DETAIL_ACCESSOR__{{mangled_type}}(Accessors); \
+    }
+{%-         for b in ifc.bases %} \
+{%-             set mangled_base_type = mangle_type(b) %}
+    DETAIL_TRY_CAST__{{mangled_base_type}}((Accessors).{{mangled_base_type}}__accessors)
+{%-         endfor %}
+{%      endfor %}
+{%  endfor -%}
+
+{{delimiter_comment('#')}}
+
+{%  for p in packages -%}
+{{delimiter_comment('=', '{} enum methods'.format(p.fullname))}}
+{%      for e in p.enums %}
+{%-         set mangled_type = mangle_type(e) %}
+const char* {{mangled_type}}__ToString({{mangled_type}} value)
+{
+    switch (value)
+    {
+{%-         for v in e.values %}
+    case {{mangled_type}}_{{v.name}}: return "{{v.name}}";
+{%-         endfor %}
+    default: return "<Unknown {{e.name}} value>";
+    }
+}
+{%      endfor %}
+{%  endfor -%}
+
+{{delimiter_comment('#')}}
+
+{%  for p in packages -%}
+{{delimiter_comment('=', '{} proxy/accessor methods'.format(p.fullname))}}
+{%      for ifc in p.interfaces -%}
+{%          set mangled_type = mangle_type(ifc) %}
+{{delimiter_comment('-', ifc.fullname)}}
+{%          for m in ifc.methods -%}
+{%              set mangled_ret_type = mangle_type(m.ret_type) %}
+JointCore_Error {{mangled_type}}_{{m.name}}({{mangled_type}} _obj{{params_decl(m.params)}}{{ret_decl(m.ret_type)}}, JointCore_Exception_Handle* _ex)
+{
+    JointCore_RetValue _ret_val;
+{%-             if m.ret_type.need_release: %}
+    JointCore_Type _ret_val_type;
+    _ret_val_type.id = (JointCore_TypeId){{m.ret_type.index}};
+{%-                 if type_name(m.ret_type) == 'Interface' %}
+    _ret_val_type.payload.interfaceChecksum = {{mangled_ret_type}}__checksum;
+{%-                 elif type_name(m.ret_type) == 'Struct' %}
+    _ret_val_type.payload.structDescriptor = {{mangled_ret_type}}__GetStructDescriptor();
+{%-                 endif %}
+{%-             endif %}
+{%-             if m.params %}
+    JointCore_Parameter params[{{m.params | length}}];
+{%-                 for p in m.params %}
+{%-                     set param_val = to_joint_param(p.type, p.name) %}
+    {{param_val.initialization | join('\n') | indent(4)}}
+    params[{{p.index}}].value.{{p.type.variant_name}} = {{param_val.code}};
+{%-                 endfor %}
+{%-             endif %}
+    JointCore_Error _ret = _obj.Accessor.VTable->InvokeMethod(_obj.Accessor.Instance, {{m.index}}, {{'params' if m.params else 'NULL'}}, {{m.params | length}}, &_ret_val);
+    if (_ret != JOINT_CORE_ERROR_NONE)
+    {
+        if (_ret == JOINT_CORE_ERROR_EXCEPTION)
+            *_ex = _ret_val.result.ex;
+        return _ret;
+    }
+{%-             if m.ret_type.name != 'void' %}
+{%-                 set ret_val = from_joint_retval(m.ret_type, '_ret_val.result.value') %}
+    {{ret_val.initialization | join('\n') | indent(4)}}
+{%-                 if type_name(m.ret_type) == 'Interface' %}
+    _outResult->Accessor = {{ret_val.code}};
+{%-                 else %}
+    *_outResult = {{ret_val.code}};
+{%-                 endif %}
+{%-                 if m.ret_type.need_release: %}
+    _ret_val.releaseValue(_ret_val_type, _ret_val.result.value);
+{%-                 endif %}
+{%-             endif %}
+    return _ret;
+}
+{%          endfor %}
+#define DETAIL_DEFINE_INVOKE_METHOD__{{mangled_type}}(ComponentImpl, IfcPrefix) \
+{%-         for b in ifc.bases %}
+{%-             set mangled_base_type = mangle_type(b) %}
+    DETAIL_DEFINE_INVOKE_METHOD__{{mangled_base_type}}(ComponentImpl, IfcPrefix##__##{{mangled_type}}) \
+{%-         endfor %}
+    JointCore_Error Detail__##ComponentImpl##IfcPrefix##__{{mangled_type}}__InvokeMethod( \
+        void* componentWrapper, JointCore_SizeT methodId, const JointCore_Parameter* params, JointCore_SizeT paramsCount, JointCore_RetValue* outRetValue) \
+    { \
+        ComponentImpl##__wrapper* w = (ComponentImpl##__wrapper*)componentWrapper; \
+        (void)w; \
+        JointCore_Error ret; \
+        switch(methodId) \
+        { \
+{%-         for m in ifc.methods %}
+        case {{m.index}}: \
+            { \
+{%-             if m.ret_type.fullname != 'void' %}
+                {{c_type(m.ret_type)}} result; \
+{%-             endif %}
+{%-             for p in m.params %}
+{%-                 set param_val = from_joint_param(p.type, 'params[{}].value'.format(p.index)) -%}
+                {{param_val.initialization | map_format('{} \\') | join('\n') | indent(20)}}
+                {{c_type(p.type)}} p{{p.index}} = {{param_val.code}}; \
+{%-             endfor %}
+{%-             set ret_param = ', &result' if m.ret_type.fullname != 'void' else '' %}
+                ret = ComponentImpl##_{{m.name}}(&w->impl{% for p in m.params %}, p{{p.index}}{% endfor %}{{ret_param}}, &outRetValue->result.ex); \
+{%-             if m.ret_type.fullname == 'void' %}
+                DETAIL_JOINT_C_SET_RET_VALUE("{{ifc.fullname}}.{{m.name}}", ret) \
+{%-             else %}
+{%-                 set ret_val = to_joint_retval(m.ret_type, 'result') %}
+                {{ret_val.initialization | join(' \\\n') | indent(16)}} \
+                DETAIL_JOINT_C_SET_RET_VALUE("{{ifc.fullname}}.{{m.name}}", ret, outRetValue->result.value.{{m.ret_type.variant_name}} = {{ret_val.code}};) \
+{%-             endif %}
+            } \
+            break; \
+{%-         endfor %}
+        default: \
+            Joint_Log(JOINT_CORE_LOGLEVEL_ERROR, "Joint.C", "Invalid {{ifc.fullname}} method id: %d", methodId); \
+            return JOINT_CORE_ERROR_GENERIC; \
+        } \
+        outRetValue->releaseValue = &JointC_ReleaseRetValue; \
+        return ret; \
+    }
+{%      endfor %}
+{%  endfor -%}
+
+{{delimiter_comment('#')}}
+
+#include <joint.c/detail/GeneratedCodeEpilogue.h>
+

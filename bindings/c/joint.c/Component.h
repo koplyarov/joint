@@ -37,7 +37,7 @@
 
 #define JOINT_COMPONENT(C, ...) \
     JOINT_C_PP_FOREACH(DETAIL_JOINT_C_VALIDATE_IFC, ~, __VA_ARGS__) \
-    typedef struct  \
+    typedef struct \
     { \
         int                   refCount; \
         JOINT_C_PP_FOREACH(DETAIL_JOINT_C_ACCESSOR, ~, __VA_ARGS__) \
