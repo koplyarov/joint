@@ -28,6 +28,16 @@ TEST_DEFINE_TEST(TestCtx, ArrayTests)
     TEST_EQUALS(t->GetI32Element(i32_array, 1), (int32_t)2);
     TEST_EQUALS(t->GetI32Element(i32_array, 2), (int32_t)4);
     TEST_EQUALS(t->GetI32Element(i32_array, 3), (int32_t)8);
+
+    t->SetI32Element(i32_array, 0, 2);
+    t->SetI32Element(i32_array, 1, 3);
+    t->SetI32Element(i32_array, 2, 5);
+    t->SetI32Element(i32_array, 3, 9);
+    //ToDo: uncomment this after issue #42 will be fixed
+//    TEST_EQUALS(t->GetI32Element(i32_array, 0), (int32_t)2);
+//    TEST_EQUALS(t->GetI32Element(i32_array, 1), (int32_t)3);
+//    TEST_EQUALS(t->GetI32Element(i32_array, 2), (int32_t)5);
+//    TEST_EQUALS(t->GetI32Element(i32_array, 3), (int32_t)9);
 }
 
 #endif

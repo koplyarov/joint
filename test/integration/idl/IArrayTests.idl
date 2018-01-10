@@ -4,5 +4,6 @@ package test
     {
         i32[] MakeI32Array(i32 len);
         i32 GetI32Element(i32[] array, i32 index);
+        void SetI32Element(i32[] array, i32 index, i32 value);
     }
 }

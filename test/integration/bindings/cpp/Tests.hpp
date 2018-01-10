@@ -259,6 +259,7 @@ public:
 
     JOINT_CPP_RET_TYPE(Array<int32_t>) MakeI32Array(int32_t len) { return Array<int32_t>::Create(len); }
     JOINT_CPP_RET_TYPE(int32_t) GetI32Element(const Array<int32_t>& array, int32_t index) { return array.Get(index); }
+    JOINT_CPP_RET_TYPE(void) SetI32Element(Array<int32_t>& array, int32_t index, int32_t value) { array.Set(index, value); JOINT_CPP_RETURN_VOID(); }
 };
 
 

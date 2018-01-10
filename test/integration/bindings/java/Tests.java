@@ -186,6 +186,10 @@ class Tests
 
         public Array<Boxing.Integer> MakeI32Array(int len) { return Array.<Boxing.Integer>create(BuiltinTypes.I32, len); }
         public int GetI32Element(Array<Boxing.Integer> array, int index) { return array.get(index).value; }
+        public void SetI32Element(Array<Boxing.Integer> array, int index, int value) {
+            Boxing.Integer val = new Boxing.Integer(0);
+            array.set(index, val);
+        }
     }
 
     public static JointObject GetTests(ModuleContext module)
