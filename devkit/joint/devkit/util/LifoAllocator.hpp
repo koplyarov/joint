@@ -56,9 +56,9 @@ namespace devkit
             {
                 const auto& LoggerName = GetLogger().GetName();
 
-                JOINT_DEVKIT_ASSERT(ptr >= _begin && ptr + oldSize <= _end);
+                JOINT_DEVKIT_ASSERT((char*)(ptr) >= _begin && (char*)(ptr) + oldSize <= _end);
                 JOINT_DEVKIT_ASSERT(oldSize >= newSize);
-                JOINT_DEVKIT_ASSERT(reinterpret_cast<char*>(ptr) + oldSize == _freeSpacePtr); // The last allocated block
+                JOINT_DEVKIT_ASSERT((char*)(ptr) + oldSize == _freeSpacePtr); // The last allocated block
 
                 _freeSpacePtr -= oldSize - newSize;
 
@@ -69,8 +69,8 @@ namespace devkit
             {
                 const auto& LoggerName = GetLogger().GetName();
 
-                JOINT_DEVKIT_ASSERT(ptr >= _begin && ptr + oldSize <= _end);
-                JOINT_DEVKIT_ASSERT(reinterpret_cast<char*>(ptr) + size == _freeSpacePtr); // The last allocated block
+                JOINT_DEVKIT_ASSERT((char*)ptr >= _begin && (char*)ptr + size <= _end);
+                JOINT_DEVKIT_ASSERT((char*)(ptr) + size == _freeSpacePtr); // The last allocated block
 
                 _freeSpacePtr -= size;
             }
