@@ -232,7 +232,7 @@ namespace pyjoint
         const auto& elementTypeDesc = reinterpret_cast<TypeDescriptor*>(self->elementTypeDesc)->GetDescriptor();
         JointCore_Value value = ValueMarshaller::ToJoint(ValueDirection::Parameter, elementTypeDesc, pyvalue, PythonMarshaller(), alloc);
         JointCore_Error ret = Joint_ArraySet(self->handle, (JointCore_SizeT)i, value);
-        JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
+        JOINT_DEVKIT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
 
         PYJOINT_CPP_WRAP_END(0, -1)
     }

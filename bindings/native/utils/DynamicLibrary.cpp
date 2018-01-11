@@ -27,7 +27,7 @@ namespace native
         {
             // TODO: add unicode support
             _handle = LoadLibraryA((searchPath + "/" + name + ".dll").c_str());
-            JOINT_CHECK(_handle != nullptr, devkit::StringBuilder() % "dlopen failed: " % GetWinErrorMessage(GetLastError()));
+            JOINT_DEVKIT_CHECK(_handle != nullptr, devkit::StringBuilder() % "dlopen failed: " % GetWinErrorMessage(GetLastError()));
         }
 
         ~Impl()
@@ -70,7 +70,7 @@ namespace native
         Impl(const std::string& searchPath, const std::string& name)
         {
             _handle = dlopen((searchPath + "/lib" + name + ".so").c_str(), RTLD_NOW | RTLD_DEEPBIND);
-            JOINT_CHECK(_handle != nullptr, devkit::StringBuilder() % "dlopen failed: " % dlerror());
+            JOINT_DEVKIT_CHECK(_handle != nullptr, devkit::StringBuilder() % "dlopen failed: " % dlerror());
         }
 
         ~Impl()

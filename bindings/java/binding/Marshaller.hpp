@@ -251,7 +251,7 @@ namespace java
                 res.l = env->GetObjectField(val.l, memberInfo.GetMemberId().Id);
                 break;
             default:
-                JOINT_THROW(JOINT_CORE_ERROR_NOT_IMPLEMENTED);
+                JOINT_DEVKIT_THROW(JOINT_CORE_ERROR_NOT_IMPLEMENTED);
             }
 
             return res;

@@ -128,7 +128,7 @@ namespace pyjoint
 
         JointCore_Type ret_type = method_desc.GetRetType().GetJointType();
         JointCore_RetValue ret_value;
-        JOINT_CHECK(!JOINT_CORE_IS_NULL(self->obj), JOINT_CORE_ERROR_INVALID_PARAMETER);
+        JOINT_DEVKIT_CHECK(!JOINT_CORE_IS_NULL(self->obj), JOINT_CORE_ERROR_INVALID_PARAMETER);
         JointCore_Error ret = self->obj.VTable->InvokeMethod(self->obj.Instance, method_id, params, (JointCore_SizeT)params_count, &ret_value);
         NATIVE_CHECK(ret == JOINT_CORE_ERROR_NONE || ret == JOINT_CORE_ERROR_EXCEPTION, (std::string("Joint_InvokeMethod failed: ") + JointCore_ErrorToString(ret)).c_str());
 

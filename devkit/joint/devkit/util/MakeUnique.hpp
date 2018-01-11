@@ -5,13 +5,14 @@
 #include <memory>
 
 
-namespace joint
+namespace joint {
+namespace devkit
 {
 
     template < typename T_, typename... Args_ >
     std::unique_ptr<T_> MakeUnique(Args_&&... args)
     { return std::unique_ptr<T_>(new T_(std::forward<Args_>(args)...)); }
 
-}
+}}
 
 #endif

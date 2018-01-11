@@ -20,23 +20,23 @@
 #define JNI_WRAP_CPP_END(OkRetVal_, FailRetVal_) \
         return (OkRetVal_); \
     } catch (const std::exception& ex) { \
-        GetLogger().Error() << JOINT_SOURCE_LOCATION ": " << ex; \
+        GetLogger().Error() << JOINT_DEVKIT_SOURCE_LOCATION ": " << ex; \
         ::joint::java::ThrowJavaException(env, ex.what()); \
         return (FailRetVal_); \
     }
 
 #define JNI_WRAP_CPP_END_VOID() \
     } catch (const std::exception& ex) { \
-        GetLogger().Error() << JOINT_SOURCE_LOCATION ": " << ex; \
+        GetLogger().Error() << JOINT_DEVKIT_SOURCE_LOCATION ": " << ex; \
         ::joint::java::ThrowJavaException(env, ex.what()); \
     }
 
 
 #define JAVA_CALL(...) JAVA_CALL_EX(env, __VA_ARGS__)
-#define JAVA_CALL_EX(Env_, ...) ::joint::java::JavaCallImpl(Env_, (__VA_ARGS__), JOINT_SOURCE_LOCATION)
+#define JAVA_CALL_EX(Env_, ...) ::joint::java::JavaCallImpl(Env_, (__VA_ARGS__), JOINT_DEVKIT_SOURCE_LOCATION)
 
 #define JAVA_CALL_VOID(...) JAVA_CALL_VOID_EX(env, __VA_ARGS__)
-#define JAVA_CALL_VOID_EX(Env_, ...) do { __VA_ARGS__; ::joint::java::JavaCallImpl(Env_, 0, JOINT_SOURCE_LOCATION); } while (false)
+#define JAVA_CALL_VOID_EX(Env_, ...) do { __VA_ARGS__; ::joint::java::JavaCallImpl(Env_, 0, JOINT_DEVKIT_SOURCE_LOCATION); } while (false)
 
 
 namespace joint {
@@ -122,7 +122,7 @@ namespace java
 
         auto ex = JThrowableLocalRef::StealLocal(env, reinterpret_cast<jthrowable>(env->NewObject(c.RuntimeException_cls.Get(), c.RuntimeException_ctor_id, jmsg.Get())));
         if (!ex)
-            JOINT_TERMINATE("Could not create java.lang.RuntimeException object");
+            JOINT_DEVKIT_TERMINATE("Could not create java.lang.RuntimeException object");
 
         env->Throw(ex.Get());
     }

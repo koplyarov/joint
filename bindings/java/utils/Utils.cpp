@@ -23,7 +23,7 @@ namespace java
         const auto& c = JointJavaCoreContext::Instance();
 
         if (!env->ExceptionCheck())
-            JOINT_TERMINATE_EX("Joint.Java.Utils", "ThrowExceptionFromJava failed: no active java exception");
+            JOINT_DEVKIT_TERMINATE_EX("Joint.Java.Utils", "ThrowExceptionFromJava failed: no active java exception");
 
         jthrowable raw_throwable = env->ExceptionOccurred();
         env->ExceptionClear();

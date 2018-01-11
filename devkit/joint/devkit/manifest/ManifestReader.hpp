@@ -48,7 +48,7 @@ namespace devkit
             {
                 JointCore_ManifestNodeType type;
                 DETAIL_JOINT_DEVKIT_JOINT_CALL( Joint_GetManifestNodeType(node, &type) );
-                JOINT_CHECK(type == JOINT_CORE_MANIFEST_NODE_BOOLEAN, JOINT_CORE_ERROR_INVALID_MANIFEST);
+                JOINT_DEVKIT_CHECK(type == JOINT_CORE_MANIFEST_NODE_BOOLEAN, JOINT_CORE_ERROR_INVALID_MANIFEST);
 
                 JointCore_Bool real_value;
                 DETAIL_JOINT_DEVKIT_JOINT_CALL( Joint_GetManifestNodeBooleanValue(node, &real_value) );
@@ -64,7 +64,7 @@ namespace devkit
             {
                 JointCore_ManifestNodeType type;
                 DETAIL_JOINT_DEVKIT_JOINT_CALL( Joint_GetManifestNodeType(node, &type) );
-                JOINT_CHECK(type == JOINT_CORE_MANIFEST_NODE_INTEGER, JOINT_CORE_ERROR_INVALID_MANIFEST);
+                JOINT_DEVKIT_CHECK(type == JOINT_CORE_MANIFEST_NODE_INTEGER, JOINT_CORE_ERROR_INVALID_MANIFEST);
 
                 int64_t real_value;
                 DETAIL_JOINT_DEVKIT_JOINT_CALL( Joint_GetManifestNodeIntegerValue(node, &real_value) );
@@ -80,7 +80,7 @@ namespace devkit
             {
                 JointCore_ManifestNodeType type;
                 DETAIL_JOINT_DEVKIT_JOINT_CALL( Joint_GetManifestNodeType(node, &type) );
-                JOINT_CHECK(type == JOINT_CORE_MANIFEST_NODE_INTEGER || type == JOINT_CORE_MANIFEST_NODE_FLOAT, JOINT_CORE_ERROR_INVALID_MANIFEST);
+                JOINT_DEVKIT_CHECK(type == JOINT_CORE_MANIFEST_NODE_INTEGER || type == JOINT_CORE_MANIFEST_NODE_FLOAT, JOINT_CORE_ERROR_INVALID_MANIFEST);
 
                 double real_value;
                 DETAIL_JOINT_DEVKIT_JOINT_CALL( Joint_GetManifestNodeFloatValue(node, &real_value) );
@@ -96,7 +96,7 @@ namespace devkit
             {
                 JointCore_ManifestNodeType type;
                 DETAIL_JOINT_DEVKIT_JOINT_CALL( Joint_GetManifestNodeType(node, &type) );
-                JOINT_CHECK(type == JOINT_CORE_MANIFEST_NODE_STRING, JOINT_CORE_ERROR_INVALID_MANIFEST);
+                JOINT_DEVKIT_CHECK(type == JOINT_CORE_MANIFEST_NODE_STRING, JOINT_CORE_ERROR_INVALID_MANIFEST);
 
                 const char* real_value;
                 DETAIL_JOINT_DEVKIT_JOINT_CALL( Joint_GetManifestNodeStringValue(node, &real_value) );
@@ -112,7 +112,7 @@ namespace devkit
             {
                 JointCore_ManifestNodeType type;
                 DETAIL_JOINT_DEVKIT_JOINT_CALL( Joint_GetManifestNodeType(node, &type) );
-                JOINT_CHECK(type == JOINT_CORE_MANIFEST_NODE_ARRAY, JOINT_CORE_ERROR_INVALID_MANIFEST);
+                JOINT_DEVKIT_CHECK(type == JOINT_CORE_MANIFEST_NODE_ARRAY, JOINT_CORE_ERROR_INVALID_MANIFEST);
 
                 JointCore_SizeT count;
                 DETAIL_JOINT_DEVKIT_JOINT_CALL( Joint_GetManifestNodeChildrenCount(node, &count) );
@@ -137,7 +137,7 @@ namespace devkit
             {
                 JointCore_ManifestNodeType type;
                 DETAIL_JOINT_DEVKIT_JOINT_CALL( Joint_GetManifestNodeType(node, &type) );
-                JOINT_CHECK(type == JOINT_CORE_MANIFEST_NODE_OBJECT, JOINT_CORE_ERROR_INVALID_MANIFEST);
+                JOINT_DEVKIT_CHECK(type == JOINT_CORE_MANIFEST_NODE_OBJECT, JOINT_CORE_ERROR_INVALID_MANIFEST);
 
                 value.Deserialize(Archive(node));
             }
@@ -187,7 +187,7 @@ namespace devkit
 
             const char* location = nullptr;
             DETAIL_JOINT_DEVKIT_JOINT_CALL( Joint_GetManifestLocation(manifest, &location) );
-            JOINT_CHECK(location, JOINT_CORE_ERROR_INVALID_MANIFEST);
+            JOINT_DEVKIT_CHECK(location, JOINT_CORE_ERROR_INVALID_MANIFEST);
             return location;
         }
     };

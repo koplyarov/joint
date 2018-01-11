@@ -25,4 +25,12 @@
 #   define JOINT_DEVKIT_CHAR16_T char16_t
 #endif
 
+#if !defined(JOINT_DEVKIT_DEBUG)
+#   if defined(NDEBUG)
+#       define JOINT_DEVKIT_DEBUG 0
+#   else
+#       define JOINT_DEVKIT_DEBUG 1
+#   endif
+#endif
+
 #endif

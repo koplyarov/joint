@@ -18,7 +18,7 @@ namespace java
     JavaBindingInfo::ArrayUserData JavaBindingInfo::GetArrayUserData(JObjTempRef typeNode) const
     {
         auto element_type = JointJavaContext::TypeDescriptor(typeNode.Weak()).GetElementType().Global();
-        JOINT_CHECK(element_type, "Invalid TypeDescriptor for array");
+        JOINT_DEVKIT_CHECK(element_type, "Invalid TypeDescriptor for array");
 
         return ArrayUserData{std::move(element_type)};
     }
@@ -29,7 +29,7 @@ namespace java
         auto env = typeNode.GetEnv();
 
         auto proxy_class = JointJavaContext::TypeDescriptor(typeNode.Weak()).GetProxyClass().Global();
-        JOINT_CHECK(proxy_class, "Invalid TypeDescriptor for interface");
+        JOINT_DEVKIT_CHECK(proxy_class, "Invalid TypeDescriptor for interface");
 
         jmethodID proxy_ctor_id = JAVA_CALL(env->GetMethodID(proxy_class.Get(), "<init>", "(Lorg/joint/JointObject;)V"));
 
@@ -44,7 +44,7 @@ namespace java
         JointJavaContext::TypeDescriptor td(typeNode.Weak());
 
         auto enum_class = td.GetProxyClass().Global();
-        JOINT_CHECK(enum_class, "Invalid TypeDescriptor for enum");
+        JOINT_DEVKIT_CHECK(enum_class, "Invalid TypeDescriptor for enum");
 
         jmethodID enum_creator_id = JAVA_CALL(env->GetStaticMethodID(enum_class.Get(), "fromInt", ("(I)" + td.GetMangledTypeName()).c_str()));
 
@@ -59,7 +59,7 @@ namespace java
         JointJavaContext::TypeDescriptor td(typeNode.Weak());
 
         auto struct_class = td.GetProxyClass().Global();
-        JOINT_CHECK(struct_class, "Invalid TypeDescriptor for struct");
+        JOINT_DEVKIT_CHECK(struct_class, "Invalid TypeDescriptor for struct");
 
         jmethodID struct_ctor_id = JAVA_CALL(env->GetMethodID(struct_class.Get(), "<init>", td.GetStructCtorSignature().c_str()));
 

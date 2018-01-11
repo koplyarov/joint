@@ -34,7 +34,7 @@ JNIEXPORT jobject JNICALL Java_org_joint_JointObject_doCast(JNIEnv* env, jclass 
 
     JointCore_ObjectAccessor new_accessor;
     JointCore_Error ret = accessor.VTable->CastObject(accessor.Instance, GetJStringData(alloc, JStringWeakRef(env, interfaceId)).GetData(), interfaceChecksum, &new_accessor);
-    JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE || JOINT_CORE_ERROR_CAST_FAILED, ret);
+    JOINT_DEVKIT_CHECK(ret == JOINT_CORE_ERROR_NONE || JOINT_CORE_ERROR_CAST_FAILED, ret);
 
     JObjLocalRef result;
     if (ret == JOINT_CORE_ERROR_NONE)
@@ -73,7 +73,7 @@ namespace
             return JObjLocalRef();
         }
         else
-            JOINT_THROW((std::string("Joint_InvokeMethod failed: ") + JointCore_ErrorToString(ret)).c_str());
+            JOINT_DEVKIT_THROW((std::string("Joint_InvokeMethod failed: ") + JointCore_ErrorToString(ret)).c_str());
     }
 
     template < typename Marshaller_, typename TypeDesc_, typename ParamsAllocator_ >
@@ -90,7 +90,7 @@ namespace
     \
     auto obj = ObjectAccessorFromJLongs(accessorVTableLong, accessorInstanceLong); \
     auto ifc_desc = reinterpret_cast<JavaInterfaceDescriptor*>(nativeInterfaceDescriptor); \
-    JOINT_ASSERT(!JOINT_CORE_IS_NULL(obj) && ifc_desc); \
+    JOINT_DEVKIT_ASSERT(!JOINT_CORE_IS_NULL(obj) && ifc_desc); \
     \
     const auto& method_desc = ifc_desc->GetMethod(methodId); \
     \

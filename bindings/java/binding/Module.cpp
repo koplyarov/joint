@@ -48,7 +48,7 @@ namespace binding
         auto class_loader = JObjLocalRef::StealLocal(env, JAVA_CALL(env->NewObject(jjc.URLClassLoader_cls.Get(), jjc.URLClassLoader_ctor_id, urls.Get())));
 
         _cls = JClassGlobalRef::StealLocal(env, JAVA_CALL(env->CallObjectMethod(class_loader.Get(), jjc.URLClassLoader_loadClass_id, class_name_string.Get())));
-        JOINT_CHECK(_cls, StringBuilder() % "Class " % _manifest.GetClassName() % " not found");
+        JOINT_DEVKIT_CHECK(_cls, StringBuilder() % "Class " % _manifest.GetClassName() % " not found");
     }
 
 
@@ -58,7 +58,7 @@ namespace binding
 
     JointCore_Error Module::GetRootObject(const char* getterName, JointCore_ObjectAccessor* outObject) JOINT_DEVKIT_NOEXCEPT
     {
-        JOINT_CPP_WRAP_BEGIN
+        JOINT_DEVKIT_CPP_WRAP_BEGIN
 
         auto jvm = JointJavaCoreContext::GetJvm();
         auto env = GetJavaEnv(jvm);
@@ -73,7 +73,7 @@ namespace binding
         *outObject = jo.GetAccessor();
         JOINT_CORE_INCREF_ACCESSOR(*outObject);
 
-        JOINT_CPP_WRAP_END
+        JOINT_DEVKIT_CPP_WRAP_END
     }
 
 }}}

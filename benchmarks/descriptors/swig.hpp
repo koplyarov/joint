@@ -40,7 +40,7 @@ namespace swig
         }
     }
 
-#define SWIG_JAVA_CALL(...) ::descriptors::swig::detail::SwigJavaCallImpl(env, (__VA_ARGS__), #__VA_ARGS__ " failed at " JOINT_SOURCE_LOCATION)
+#define SWIG_JAVA_CALL(...) ::descriptors::swig::detail::SwigJavaCallImpl(env, (__VA_ARGS__), #__VA_ARGS__ " failed at " JOINT_DEVKIT_SOURCE_LOCATION)
 
     struct Desc
     {
@@ -77,10 +77,10 @@ namespace swig
                 static Jvm& Instance(const std::string& jar, const std::string& className)
                 {
                     static std::string jar_static = jar;
-                    JOINT_CHECK(jar_static == jar, "Java configuration mismatch!");
+                    JOINT_DEVKIT_CHECK(jar_static == jar, "Java configuration mismatch!");
 
                     static std::string class_name_static = className;
-                    JOINT_CHECK(class_name_static == className, "Java configuration mismatch!");
+                    JOINT_DEVKIT_CHECK(class_name_static == className, "Java configuration mismatch!");
 
                     static Jvm inst(jar, className);
                     return inst;
@@ -90,7 +90,7 @@ namespace swig
                 {
                     JNIEnv* env = nullptr;
                     int retcode = jvm->GetEnv((void**)&env, JNI_VERSION_1_6);
-                    JOINT_CHECK(retcode == JNI_OK, ::joint::devkit::StringBuilder() % "jvm->GetEnv failed: " % retcode);
+                    JOINT_DEVKIT_CHECK(retcode == JNI_OK, ::joint::devkit::StringBuilder() % "jvm->GetEnv failed: " % retcode);
                     return env;
                 }
 
@@ -113,14 +113,14 @@ namespace swig
                     JavaVMInitArgs vm_args = { };
                     vm_args.version = 0x00010006;
                     jint ret = JNI_GetDefaultJavaVMInitArgs(&vm_args);
-                    JOINT_CHECK(ret == 0, StringBuilder() % "JNI_GetDefaultJavaVMInitArgs failed: " % ret);
+                    JOINT_DEVKIT_CHECK(ret == 0, StringBuilder() % "JNI_GetDefaultJavaVMInitArgs failed: " % ret);
                     vm_args.options = opt;
                     vm_args.nOptions = sizeof(opt) / sizeof(opt[0]);
 
                     JNIEnv* env = nullptr;
                     ret = JNI_CreateJavaVM(&jvm, reinterpret_cast<void**>(&env), &vm_args);
-                    JOINT_CHECK(ret == 0, StringBuilder() % "JNI_CreateJavaVM failed: " % ret);
-                    JOINT_CHECK(jvm, "JNI_CreateJavaVM failed!");
+                    JOINT_DEVKIT_CHECK(ret == 0, StringBuilder() % "JNI_CreateJavaVM failed: " % ret);
+                    JOINT_DEVKIT_CHECK(jvm, "JNI_CreateJavaVM failed!");
 
                     auto s = SWIG_JAVA_CALL(env->FindClass(className.c_str()));
                     SwigBenchmarks_cls = SWIG_JAVA_CALL((jclass)env->NewGlobalRef((jobject)s));
@@ -168,7 +168,7 @@ namespace swig
 
                 JointCore_ManifestHandle m;
                 JointCore_Error err = Joint_ReadManifestFromFile(module_manifest_path.c_str(), &m);
-                JOINT_CHECK(err == JOINT_CORE_ERROR_NONE, err);
+                JOINT_DEVKIT_CHECK(err == JOINT_CORE_ERROR_NONE, err);
 
                 auto sg = ScopeExit([&]{ Joint_DecRefManifest(m); });
 

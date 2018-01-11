@@ -40,7 +40,7 @@ namespace devkit
             {
                 const auto& LoggerName = GetLogger().GetName();
 
-                JOINT_ASSERT(alignment > 0);
+                JOINT_DEVKIT_ASSERT(alignment > 0);
 
                 char* beginPtr = AlignDown(_freeSpacePtr, alignment);
                 char* endPtr = beginPtr + size;
@@ -56,9 +56,9 @@ namespace devkit
             {
                 const auto& LoggerName = GetLogger().GetName();
 
-                JOINT_ASSERT(ptr >= _begin && ptr + oldSize <= _end);
-                JOINT_ASSERT(oldSize >= newSize);
-                JOINT_ASSERT(reinterpret_cast<char*>(ptr) + oldSize == _freeSpacePtr); // The last allocated block
+                JOINT_DEVKIT_ASSERT(ptr >= _begin && ptr + oldSize <= _end);
+                JOINT_DEVKIT_ASSERT(oldSize >= newSize);
+                JOINT_DEVKIT_ASSERT(reinterpret_cast<char*>(ptr) + oldSize == _freeSpacePtr); // The last allocated block
 
                 _freeSpacePtr -= oldSize - newSize;
 
@@ -69,8 +69,8 @@ namespace devkit
             {
                 const auto& LoggerName = GetLogger().GetName();
 
-                JOINT_ASSERT(ptr >= _begin && ptr + oldSize <= _end);
-                JOINT_ASSERT(reinterpret_cast<char*>(ptr) + size == _freeSpacePtr); // The last allocated block
+                JOINT_DEVKIT_ASSERT(ptr >= _begin && ptr + oldSize <= _end);
+                JOINT_DEVKIT_ASSERT(reinterpret_cast<char*>(ptr) + size == _freeSpacePtr); // The last allocated block
 
                 _freeSpacePtr -= size;
             }
@@ -230,7 +230,7 @@ namespace devkit
                 JOINT_CORE_UNUSED(oldSize);
                 JOINT_CORE_UNUSED(newSize);
                 JOINT_CORE_UNUSED(alignment);
-                JOINT_ASSERT(false);
+                JOINT_DEVKIT_ASSERT(false);
                 return nullptr;
             }
 
@@ -241,7 +241,7 @@ namespace devkit
                 JOINT_CORE_UNUSED(allocators);
                 JOINT_CORE_UNUSED(ptr);
                 JOINT_CORE_UNUSED(size);
-                JOINT_ASSERT(false);
+                JOINT_DEVKIT_ASSERT(false);
             }
         };
     }
@@ -287,7 +287,7 @@ namespace devkit
         {
             void* result = _wrapped.Allocate(size, alignment);
             if (!result)
-                JOINT_THROW(std::bad_alloc());
+                JOINT_DEVKIT_THROW(std::bad_alloc());
             return result;
         }
 
@@ -295,7 +295,7 @@ namespace devkit
         {
             void* result = _wrapped.Shrink(ptr, oldSize, newSize, alignment);
             if (!result)
-                JOINT_THROW(std::bad_alloc());
+                JOINT_DEVKIT_THROW(std::bad_alloc());
             return result;
         }
 

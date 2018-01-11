@@ -22,7 +22,7 @@ namespace devkit
         JOINT_DEVKIT_FUNCTION_LOCAL_LOGGER("Joint.Devkit.Utils");
 
         Dst_ result = static_cast<Dst_>(val);
-        JOINT_CHECK(static_cast<Src_>(result) == val, "Integer type overflow");
+        JOINT_DEVKIT_CHECK(static_cast<Src_>(result) == val, "Integer type overflow");
         return result; // TODO: also check signedness issues
     }
 

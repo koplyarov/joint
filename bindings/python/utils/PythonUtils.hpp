@@ -32,8 +32,8 @@
 #define NATIVE_THROW(Message_) do { throw std::runtime_error(Message_); } while (false)
 #define NATIVE_CHECK(Expr_, Message_) do { if (!(Expr_)) NATIVE_THROW(Message_); } while (false)
 
-#define PY_OBJ_CHECK(...) ::joint::python::CheckPyObject(__VA_ARGS__, []{ return #__VA_ARGS__ " failed"; }, JOINT_SOURCE_LOCATION)
-#define PY_OBJ_CHECK_MSG(Expr_, Msg_) ::joint::python::CheckPyObject(Expr_, [&]() -> std::string { return ::joint::devkit::StringBuilder() % (Msg_); }, JOINT_SOURCE_LOCATION)
+#define PY_OBJ_CHECK(...) ::joint::python::CheckPyObject(__VA_ARGS__, []{ return #__VA_ARGS__ " failed"; }, JOINT_DEVKIT_SOURCE_LOCATION)
+#define PY_OBJ_CHECK_MSG(Expr_, Msg_) ::joint::python::CheckPyObject(Expr_, [&]() -> std::string { return ::joint::devkit::StringBuilder() % (Msg_); }, JOINT_DEVKIT_SOURCE_LOCATION)
 
 namespace joint {
 namespace python

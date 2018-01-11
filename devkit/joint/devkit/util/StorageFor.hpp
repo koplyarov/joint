@@ -16,9 +16,9 @@
 
 
 #if defined(_MSC_VER) && _MSC_VER < 1900
-#   define DETAIL_JOINT_ALIGNOF __alignof
+#   define DETAIL_JOINT_DEVKIT_ALIGNOF __alignof
 #else
-#   define DETAIL_JOINT_ALIGNOF alignof
+#   define DETAIL_JOINT_DEVKIT_ALIGNOF alignof
 #endif
 
 
@@ -33,7 +33,7 @@ namespace devkit
         struct NoConstructTag { };
 
     private:
-        using Storage = typename std::aligned_storage<sizeof(T_), DETAIL_JOINT_ALIGNOF(T_)>::type;
+        using Storage = typename std::aligned_storage<sizeof(T_), DETAIL_JOINT_DEVKIT_ALIGNOF(T_)>::type;
 
     private:
         Storage     obj;

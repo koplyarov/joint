@@ -18,7 +18,7 @@ namespace Detail
         if (env->ExceptionCheck())
         {
             env->ExceptionDescribe();
-            JOINT_TERMINATE(msg);
+            JOINT_DEVKIT_TERMINATE(msg);
         }
 
         return val;

@@ -5,13 +5,13 @@
 #include <joint/devkit/util/JointException.hpp>
 
 
-#define JOINT_CPP_WRAP_BEGIN \
+#define JOINT_DEVKIT_CPP_WRAP_BEGIN \
             try { \
 
-#define JOINT_CPP_WRAP_END \
+#define JOINT_DEVKIT_CPP_WRAP_END \
                 return JOINT_CORE_ERROR_NONE; \
             } \
-            catch (const joint::JointException& ex) { \
+            catch (const joint::devkit::JointException& ex) { \
                 GetLogger().Error() << __func__ << " failed: " << ex.GetError(); \
                 return ex.GetError(); \
             } \
@@ -20,7 +20,7 @@
                 return JOINT_CORE_ERROR_GENERIC; \
             }
 
-#define JOINT_CPP_WRAP_END_VOID \
+#define JOINT_DEVKIT_CPP_WRAP_END_VOID \
             } \
             catch (const std::exception& ex) { \
                 GetLogger().Error() << __func__ << " failed: " << ex; \

@@ -37,9 +37,9 @@ namespace binding
 
     JointCore_Error Binding::LoadModule(JointCore_ManifestHandle moduleManifest, JointCore_ModuleAccessor* outModule) JOINT_DEVKIT_NOEXCEPT
     {
-        JOINT_CPP_WRAP_BEGIN
+        JOINT_DEVKIT_CPP_WRAP_BEGIN
         *outModule = accessors::MakeAccessor<Module>(moduleManifest);
-        JOINT_CPP_WRAP_END
+        JOINT_DEVKIT_CPP_WRAP_END
     }
 
 }}}

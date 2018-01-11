@@ -14,7 +14,7 @@ namespace python
 #define PY_CHECK_IN_ERROR_HANDLING(Expr_) \
             if (!(Expr_)) \
             { \
-                GetLogger().Warning() << #Expr_ << " evaluated to false at " << JOINT_SOURCE_LOCATION; \
+                GetLogger().Warning() << #Expr_ << " evaluated to false at " << JOINT_DEVKIT_SOURCE_LOCATION; \
                 return false; \
             }
 

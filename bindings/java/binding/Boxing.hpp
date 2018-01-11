@@ -61,7 +61,7 @@ namespace java
                 result.l = boxed.Get();
                 break;
             default:
-                JOINT_THROW(JOINT_CORE_ERROR_NOT_IMPLEMENTED);
+                JOINT_DEVKIT_THROW(JOINT_CORE_ERROR_NOT_IMPLEMENTED);
             }
 
             return result;
@@ -95,7 +95,7 @@ namespace java
             case JOINT_CORE_TYPE_STRUCT:
                 return JObjLocalRef::StealLocal(env, unboxed.l);
             default:
-                JOINT_THROW(JOINT_CORE_ERROR_NOT_IMPLEMENTED);
+                JOINT_DEVKIT_THROW(JOINT_CORE_ERROR_NOT_IMPLEMENTED);
             }
         }
 
@@ -113,7 +113,7 @@ namespace java
                 if (res) \
                     env->Set##FieldAccess_(res.Get(), jctx.TypeName_##_value, val); \
                 if (env->ExceptionCheck()) \
-                    ThrowExceptionFromJava(env, JOINT_SOURCE_LOCATION); \
+                    ThrowExceptionFromJava(env, JOINT_DEVKIT_SOURCE_LOCATION); \
                 return res; \
             }
 

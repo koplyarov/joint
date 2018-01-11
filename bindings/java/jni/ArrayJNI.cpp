@@ -22,7 +22,7 @@ JNIEXPORT jlong JNICALL Java_org_joint_Array_initNative(JNIEnv* env, jclass cls,
 
     JointCore_ArrayHandle handle = JOINT_CORE_NULL_HANDLE;
     JointCore_Error ret = Joint_MakeArray(td.GetJointType(), NoOverflowCast<JointCore_SizeT>(size), &handle);
-    JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
+    JOINT_DEVKIT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
 
     JNI_WRAP_CPP_END(reinterpret_cast<jlong>(handle), 0)
 }
@@ -47,7 +47,7 @@ JNIEXPORT jobject JNICALL Java_org_joint_Array_doGet(JNIEnv* env, jclass cls, jo
 
     JointCore_Value value;
     JointCore_Error ret = Joint_ArrayGet(handle, NoOverflowCast<JointCore_SizeT>(index), &value);
-    JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
+    JOINT_DEVKIT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
 
     TypeDescriptor<JavaBindingInfo> td(JObjTempRef(env, typeDescriptor), JavaBindingInfo());
     jvalue v = ValueMarshaller::FromJoint<jvalue>(ValueDirection::Return, td, value, JavaMarshaller(env));
@@ -78,7 +78,7 @@ JNIEXPORT void JNICALL Java_org_joint_Array_doSet(JNIEnv* env, jclass cls, jobje
     );
 
     JointCore_Error ret = Joint_ArraySet(handle, NoOverflowCast<JointCore_SizeT>(index), value);
-    JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
+    JOINT_DEVKIT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
 
     JNI_WRAP_CPP_END_VOID()
 }

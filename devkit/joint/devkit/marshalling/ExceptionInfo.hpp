@@ -81,7 +81,7 @@ namespace devkit
 
             JointCore_Exception_Handle joint_ex;
             JointCore_Error ret = JointCore_Exception_Create(_msg.c_str(), c_bt.data(), c_bt.size(), &joint_ex);
-            JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, std::string("JointCore_Exception_Create failed: ") + JointCore_ErrorToString(ret));
+            JOINT_DEVKIT_CHECK(ret == JOINT_CORE_ERROR_NONE, std::string("JointCore_Exception_Create failed: ") + JointCore_ErrorToString(ret));
             return JointExceptionHolder(joint_ex, JointExceptionReleaser());
         }
 

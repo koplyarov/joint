@@ -68,14 +68,14 @@ namespace joint
 
     JsonNode::Array& JsonNode::Builder::AsArray()
     {
-        JOINT_CHECK(_node._type == Type::Array, "Invalid json node type");
+        JOINT_DEVKIT_CHECK(_node._type == Type::Array, "Invalid json node type");
         return *_node._value.a;
     }
 
 
     JsonNode::Object& JsonNode::Builder::AsObject()
     {
-        JOINT_CHECK(_node._type == Type::Object, "Invalid json node type");
+        JOINT_DEVKIT_CHECK(_node._type == Type::Object, "Invalid json node type");
         return *_node._value.o;
     }
 
@@ -120,42 +120,42 @@ namespace joint
 
     bool JsonNode::AsBoolean() const
     {
-        JOINT_CHECK(_type == Type::Boolean, "Invalid json node type");
+        JOINT_DEVKIT_CHECK(_type == Type::Boolean, "Invalid json node type");
         return _value.b;
     }
 
 
     int64_t JsonNode::AsInteger() const
     {
-        JOINT_CHECK(_type == Type::Integer, "Invalid json node type");
+        JOINT_DEVKIT_CHECK(_type == Type::Integer, "Invalid json node type");
         return _value.i;
     }
 
 
     double JsonNode::AsFloat() const
     {
-        JOINT_CHECK(_type == Type::Float || _type == Type::Integer, "Invalid json node type");
+        JOINT_DEVKIT_CHECK(_type == Type::Float || _type == Type::Integer, "Invalid json node type");
         return _type == Type::Float ? _value.f : (double)_value.i;
     }
 
 
     const JsonNode::String& JsonNode::AsString() const
     {
-        JOINT_CHECK(_type == Type::String, "Invalid json node type");
+        JOINT_DEVKIT_CHECK(_type == Type::String, "Invalid json node type");
         return *_value.s;
     }
 
 
     const JsonNode::Array& JsonNode::AsArray() const
     {
-        JOINT_CHECK(_type == Type::Array, "Invalid json node type");
+        JOINT_DEVKIT_CHECK(_type == Type::Array, "Invalid json node type");
         return *_value.a;
     }
 
 
     const JsonNode::Object& JsonNode::AsObject() const
     {
-        JOINT_CHECK(_type == Type::Object, "Invalid json node type");
+        JOINT_DEVKIT_CHECK(_type == Type::Object, "Invalid json node type");
         return *_value.o;
     }
 

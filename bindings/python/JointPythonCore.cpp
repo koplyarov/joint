@@ -25,9 +25,9 @@ extern "C"
     {
         using namespace joint::devkit::accessors;
 
-        JOINT_CPP_WRAP_BEGIN
+        JOINT_DEVKIT_CPP_WRAP_BEGIN
         *outBinding = MakeAccessor<joint::python::binding::Binding>();
-        JOINT_CPP_WRAP_END
+        JOINT_DEVKIT_CPP_WRAP_END
     }
 
 }

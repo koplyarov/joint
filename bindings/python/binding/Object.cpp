@@ -30,7 +30,7 @@ namespace binding
 
     JointCore_Error Object::CastObject(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, JointCore_ObjectAccessor* outAccessor) JOINT_DEVKIT_NOEXCEPT
     {
-        JOINT_CPP_WRAP_BEGIN
+        JOINT_DEVKIT_CPP_WRAP_BEGIN
 
         PyObjectHolder py_obj(PY_OBJ_CHECK(PyObject_GetAttrString(_obj, "obj")));
         PyObjectHolder py_obj_type(PyObject_Type(py_obj));
@@ -48,12 +48,12 @@ namespace binding
         PyObjectHolder new_accessor(PY_OBJ_CHECK(PyObject_CallObject(base_accessor_type, py_params)));
         *outAccessor = accessors::MakeAccessor<Object>(new_accessor);
 
-        JOINT_CPP_WRAP_END
+        JOINT_DEVKIT_CPP_WRAP_END
     }
 
     JointCore_Error Object::InvokeMethod(JointCore_SizeT methodId, const JointCore_Parameter* paramsPtr, JointCore_SizeT paramsCount, JointCore_RetValue* outRetValue) JOINT_DEVKIT_NOEXCEPT
     {
-        JOINT_CPP_WRAP_BEGIN
+        JOINT_DEVKIT_CPP_WRAP_BEGIN
 
         joint::ArrayView<const JointCore_Parameter> params(paramsPtr, paramsCount);
 
@@ -114,7 +114,7 @@ namespace binding
                     msg = type_str + " " + msg;
 
                 JointCore_Error ret = JointCore_Exception_Create(msg.c_str(), nullptr, 0, &joint_ex);
-                JOINT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
+                JOINT_DEVKIT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
             } while (false);
 
 
@@ -142,13 +142,13 @@ namespace binding
         outRetValue->releaseValue = &Object::ReleaseRetValue;
         return JOINT_CORE_ERROR_NONE;
 
-        JOINT_CPP_WRAP_END
+        JOINT_DEVKIT_CPP_WRAP_END
     }
 
 
     JointCore_Error Object::ReleaseRetValue(JointCore_Type type, JointCore_Value value)
     {
-        JOINT_CPP_WRAP_BEGIN
+        JOINT_DEVKIT_CPP_WRAP_BEGIN
         switch(type.id)
         {
         case JOINT_CORE_TYPE_UTF8:
@@ -162,7 +162,7 @@ namespace binding
         default:
             break;
         }
-        JOINT_CPP_WRAP_END
+        JOINT_DEVKIT_CPP_WRAP_END
     }
 
     PyObjectHolder Object::FindBaseById(PyObject* type, const char* interfaceId)

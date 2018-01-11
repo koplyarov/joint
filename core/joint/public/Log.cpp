@@ -78,19 +78,19 @@ extern "C"
 
     JointCore_Error Joint_SetLogCallback(JointCore_LogCallback_Func* logCallback)
     {
-        JOINT_CPP_WRAP_BEGIN
+        JOINT_DEVKIT_CPP_WRAP_BEGIN
         std::lock_guard<std::mutex> l(g_mutex);
         g_logCallback = (logCallback == nullptr) ? &DefaultLogCallback : logCallback;
-        JOINT_CPP_WRAP_END
+        JOINT_DEVKIT_CPP_WRAP_END
     }
 
 
     JointCore_Error Joint_SetLogLevel(JointCore_LogLevel logLevel)
     {
-        JOINT_CPP_WRAP_BEGIN
-        JOINT_CHECK(logLevel >= JOINT_CORE_LOGLEVEL_DEBUG && logLevel <= JOINT_CORE_LOGLEVEL_ERROR, JOINT_CORE_ERROR_INVALID_PARAMETER);
+        JOINT_DEVKIT_CPP_WRAP_BEGIN
+        JOINT_DEVKIT_CHECK(logLevel >= JOINT_CORE_LOGLEVEL_DEBUG && logLevel <= JOINT_CORE_LOGLEVEL_ERROR, JOINT_CORE_ERROR_INVALID_PARAMETER);
         g_logLevel = logLevel;
-        JOINT_CPP_WRAP_END
+        JOINT_DEVKIT_CPP_WRAP_END
     }
 
 

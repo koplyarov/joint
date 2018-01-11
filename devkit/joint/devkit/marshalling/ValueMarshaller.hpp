@@ -96,7 +96,7 @@ namespace devkit
                 res.array = unwrapper.ToJointArray(dir, value, *type._arrayUserData);
                 break;
             default:
-                JOINT_THROW(std::runtime_error("Unknown type"));
+                JOINT_DEVKIT_THROW(std::runtime_error("Unknown type"));
             }
 
             return res;

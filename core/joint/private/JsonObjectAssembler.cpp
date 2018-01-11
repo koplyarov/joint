@@ -12,12 +12,12 @@ namespace joint
             NodeBuilder.AsArray().emplace_back(std::move(node));
             break;
         case JsonNode::Type::Object:
-            JOINT_CHECK(!NextPropertyName.empty(), JOINT_CORE_ERROR_IMPLEMENTATION_ERROR);
+            JOINT_DEVKIT_CHECK(!NextPropertyName.empty(), JOINT_CORE_ERROR_IMPLEMENTATION_ERROR);
             NodeBuilder.AsObject().emplace(NextPropertyName, std::move(node));
             NextPropertyName.clear();
             break;
         default:
-            JOINT_THROW(JOINT_CORE_ERROR_IMPLEMENTATION_ERROR);
+            JOINT_DEVKIT_THROW(JOINT_CORE_ERROR_IMPLEMENTATION_ERROR);
         }
     }
 
@@ -74,8 +74,8 @@ namespace joint
 
     void JsonObjectAssembler::SetObjectKey(const std::string& name)
     {
-        JOINT_CHECK(!_nodesStack.empty(), JOINT_CORE_ERROR_IMPLEMENTATION_ERROR);
-        JOINT_CHECK(_nodesStack.top().NextPropertyName.empty(), JOINT_CORE_ERROR_IMPLEMENTATION_ERROR);
+        JOINT_DEVKIT_CHECK(!_nodesStack.empty(), JOINT_CORE_ERROR_IMPLEMENTATION_ERROR);
+        JOINT_DEVKIT_CHECK(_nodesStack.top().NextPropertyName.empty(), JOINT_CORE_ERROR_IMPLEMENTATION_ERROR);
         _nodesStack.top().NextPropertyName = name;
     }
 

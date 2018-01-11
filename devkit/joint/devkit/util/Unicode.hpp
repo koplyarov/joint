@@ -15,7 +15,7 @@ namespace devkit
     template < typename OutputIt_ >
     OutputIt_ WriteCharToUtf8Iterator(char32_t c, OutputIt_ it)
     {
-        JOINT_ASSERT_EX("Joint.DevKit.WriteCharToUtf8Iterator", c < 0x10FFFF);
+        JOINT_DEVKIT_ASSERT_EX("Joint.DevKit.WriteCharToUtf8Iterator", c < 0x10FFFF);
 
         if (JOINT_CORE_LIKELY(c < 0x80))
         {
@@ -47,7 +47,7 @@ namespace devkit
     template < typename InputIt_ >
     InputIt_ ReadCharFromUtf16Range(InputIt_ begin, InputIt_ end, char32_t& outChar)
     {
-        JOINT_ASSERT_EX("Joint.DevKit.ReadCharFromUtf16Range", begin != end);
+        JOINT_DEVKIT_ASSERT_EX("Joint.DevKit.ReadCharFromUtf16Range", begin != end);
 
         uint16_t c1 = *begin++;
         if (JOINT_CORE_LIKELY(c1 < 0xD800 || c1 > 0xDFFF))

@@ -15,7 +15,7 @@ namespace joint
 
 
     void JsonParser::ParserContext::CheckError() const
-    { if (!_errorMessage.empty()) JOINT_THROW(StringBuilder() % "JsonParser parsing error: " % _errorMessage); }
+    { if (!_errorMessage.empty()) JOINT_DEVKIT_THROW(StringBuilder() % "JsonParser parsing error: " % _errorMessage); }
 
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ namespace joint
         void* yy_scanner = NULL;
 
         std::ifstream file(path);
-        JOINT_CHECK(file, StringBuilder() % "Could not open file '" % path % "'");
+        JOINT_DEVKIT_CHECK(file, StringBuilder() % "Could not open file '" % path % "'");
 
         LexerContext lexer_ctx(file);
         ::Detail_Joint_JsonParser_lex_init_extra(&lexer_ctx, &yy_scanner);

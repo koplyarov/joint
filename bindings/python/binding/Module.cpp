@@ -4,7 +4,6 @@
 #include <joint/devkit/manifest/ManifestReader.hpp>
 #include <joint/devkit/util/ArrayView.hpp>
 #include <joint/devkit/util/CppWrappers.hpp>
-#include <joint/devkit/util/MakeUnique.hpp>
 
 #include <array>
 #include <iostream>
@@ -64,7 +63,7 @@ namespace binding
 
     JointCore_Error Module::GetRootObject(const char* getterName, JointCore_ObjectAccessor* outObject) JOINT_DEVKIT_NOEXCEPT
     {
-        JOINT_CPP_WRAP_BEGIN
+        JOINT_DEVKIT_CPP_WRAP_BEGIN
 
         PyObjectHolder pyjoint_module(PY_OBJ_CHECK(pyjoint::MakeModule(AccessorFromSelf())));
 
@@ -73,7 +72,7 @@ namespace binding
         *outObject = proxy->obj;
         JOINT_CORE_INCREF_ACCESSOR(*outObject);
 
-        JOINT_CPP_WRAP_END
+        JOINT_DEVKIT_CPP_WRAP_END
     }
 
 

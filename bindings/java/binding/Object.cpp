@@ -35,7 +35,7 @@ namespace binding
 
     JointCore_Error Object::CastObject(JointCore_InterfaceId interfaceId, JointCore_InterfaceChecksum checksum, JointCore_ObjectAccessor* outAccessor) JOINT_DEVKIT_NOEXCEPT
     {
-        JOINT_CPP_WRAP_BEGIN
+        JOINT_DEVKIT_CPP_WRAP_BEGIN
 
         auto jvm = JointJavaCoreContext::GetJvm();
         auto env = GetJavaEnv(jvm);
@@ -49,13 +49,13 @@ namespace binding
 
         *outAccessor = accessors::MakeAccessor<Object>(env, new_jaccessor.Global());
 
-        JOINT_CPP_WRAP_END
+        JOINT_DEVKIT_CPP_WRAP_END
     }
 
 
     JointCore_Error Object::InvokeMethod(JointCore_SizeT methodId, const JointCore_Parameter* paramsPtr, JointCore_SizeT paramsCount, JointCore_RetValue* outRetValue) JOINT_DEVKIT_NOEXCEPT
     {
-        JOINT_CPP_WRAP_BEGIN
+        JOINT_DEVKIT_CPP_WRAP_BEGIN
 
         const auto& m_desc = _nativeInterfaceDesc->GetMethod(methodId);
 
@@ -117,7 +117,7 @@ namespace binding
             retValueLocalGuard = JObjLocalRef::StealLocal(env, j_res.l);
             break;
         default:
-            JOINT_THROW(JOINT_CORE_ERROR_NOT_IMPLEMENTED);
+            JOINT_DEVKIT_THROW(JOINT_CORE_ERROR_NOT_IMPLEMENTED);
         }
 
         outRetValue->releaseValue = &Object::ReleaseRetValue;
@@ -145,13 +145,13 @@ namespace binding
             return JOINT_CORE_ERROR_EXCEPTION;
         }
 
-        JOINT_CPP_WRAP_END
+        JOINT_DEVKIT_CPP_WRAP_END
     }
 
 
     JointCore_Error Object::ReleaseRetValue(JointCore_Type type, JointCore_Value value)
     {
-        JOINT_CPP_WRAP_BEGIN
+        JOINT_DEVKIT_CPP_WRAP_BEGIN
         switch(type.id)
         {
         case JOINT_CORE_TYPE_UTF8:
@@ -165,7 +165,7 @@ namespace binding
         default:
             break;
         }
-        JOINT_CPP_WRAP_END
+        JOINT_DEVKIT_CPP_WRAP_END
     }
 
 }}}

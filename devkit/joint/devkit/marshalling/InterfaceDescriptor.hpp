@@ -117,7 +117,7 @@ namespace devkit
         const MemberInfo& GetMemberInfo(size_t index) const
         {
             if (index >= _membersCount)
-                JOINT_THROW("Member index out of range");
+                JOINT_DEVKIT_THROW("Member index out of range");
 
             return _members[index];
         }
@@ -125,7 +125,7 @@ namespace devkit
         const TypeDescriptor& GetArrayElementType() const
         {
             if (!_arrayElementType)
-                JOINT_THROW("Array element type is not initialized");
+                JOINT_DEVKIT_THROW("Array element type is not initialized");
             return *_arrayElementType;
         }
     };
@@ -189,7 +189,7 @@ namespace devkit
 
         const TypeDescriptor& GetParamType(size_t index) const
         {
-            JOINT_ASSERT_EX(GetLogger().GetName(), index < _paramsCount);
+            JOINT_DEVKIT_ASSERT_EX(GetLogger().GetName(), index < _paramsCount);
             return _paramTypes[index];
         }
     };
@@ -221,7 +221,7 @@ namespace devkit
 
         const MethodDescriptor& GetMethod(size_t index) const
         {
-            JOINT_ASSERT_EX(GetLogger().GetName(), index < _methodsCount);
+            JOINT_DEVKIT_ASSERT_EX(GetLogger().GetName(), index < _methodsCount);
             return _methods[index];
         }
     };

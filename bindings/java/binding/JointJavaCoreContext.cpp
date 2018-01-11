@@ -29,15 +29,15 @@ namespace java
         JavaVMInitArgs vm_args = { };
         vm_args.version = 0x00010006;
         jint ret = JNI_GetDefaultJavaVMInitArgs(&vm_args);
-        JOINT_CHECK(ret == 0, StringBuilder() % "JNI_GetDefaultJavaVMInitArgs failed: " % JniErrorToString(ret));
+        JOINT_DEVKIT_CHECK(ret == 0, StringBuilder() % "JNI_GetDefaultJavaVMInitArgs failed: " % JniErrorToString(ret));
         vm_args.options = opt;
         vm_args.nOptions = sizeof(opt) / sizeof(opt[0]);
 
         JavaVM* jvm = nullptr;
         JNIEnv* env = nullptr;
         ret = JNI_CreateJavaVM(&jvm, reinterpret_cast<void**>(&env), &vm_args);
-        JOINT_CHECK(ret == 0, StringBuilder() % "JNI_CreateJavaVM failed: " % JniErrorToString(ret));
-        JOINT_CHECK(jvm, "JNI_CreateJavaVM failed!");
+        JOINT_DEVKIT_CHECK(ret == 0, StringBuilder() % "JNI_CreateJavaVM failed: " % JniErrorToString(ret));
+        JOINT_DEVKIT_CHECK(jvm, "JNI_CreateJavaVM failed!");
 
         _jvm = Holder<JavaVM*>(jvm, [](JavaVM* jvm) { jvm->DestroyJavaVM(); });
 
