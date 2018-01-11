@@ -74,8 +74,8 @@ BYTE            [[:xdigit:]]{2}
 {FALSE}                                     { LVAL->b = 0; return TBOOL; }
 {NULL}                                      { return TNULL; }
 
-{INTEGER}({FRAC}|{EXP}|{FRAC}{EXP})         { std::istringstream s(yytext); s >> LVAL->f; if (s.fail()) JOINT_THROW(joint::devkit::StringBuilder() % "Could not read float: " % yytext); return TFLOAT; }
-{INTEGER}                                   { std::istringstream s(yytext); s >> LVAL->i; if (s.fail()) JOINT_THROW(joint::devkit::StringBuilder() % "Could not read int: " % yytext); return TINTEGER; }
+{INTEGER}({FRAC}|{EXP}|{FRAC}{EXP})         { std::istringstream s(yytext); s >> LVAL->f; if (s.fail()) JOINT_DEVKIT_THROW(joint::devkit::StringBuilder() % "Could not read float: " % yytext); return TFLOAT; }
+{INTEGER}                                   { std::istringstream s(yytext); s >> LVAL->i; if (s.fail()) JOINT_DEVKIT_THROW(joint::devkit::StringBuilder() % "Could not read int: " % yytext); return TINTEGER; }
 {HEX}                                       { LVAL->i = handle_hex(yytext + 2); return TINTEGER; }
 {PROPERTY}                                  { LVAL->s = new std::string(yytext); return TPROPERTY; }
 
