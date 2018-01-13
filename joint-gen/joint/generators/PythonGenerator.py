@@ -5,6 +5,7 @@ Python code generator
 from jinja2 import Environment, PackageLoader  # type: ignore
 
 from .CodeGeneratorBase import CodeGeneratorBase
+from ..GeneratorHelpers import make_delimiter_comment_func, make_jinja2_filter, map_format_filter
 from ..SemanticGraph import Array, BuiltinType, BuiltinTypeCategory, Enum, Interface, Method, Package, Parameter, SemanticGraph, Struct, TypeBase
 
 
@@ -18,45 +19,20 @@ def _names(values):
         yield value.name
 
 
-def _make_jinja2_filter(func):
-    def _filter(values):
-        for value in values:
-            yield func(value)
-    return _filter
-
-
-def _map_format(values, pattern):
-    for value in values:
-        yield pattern.format(value)
-
-
-def _delimiter_comment(delimiter_symbol, msg=None):
-    assert len(delimiter_symbol) == 1
-
-    leading_delimiter_len = 3
-    total_delimiter_len = 70
-
-    if msg is not None:
-        leading_part = '#{} {} '.format(delimiter_symbol * leading_delimiter_len, msg)
-    else:
-        leading_part = '#'
-    return leading_part + delimiter_symbol * (total_delimiter_len - len(leading_part))
-
-
 class PythonGenerator(CodeGeneratorBase):
     def __init__(self, semantic_graph):  # type: (SemanticGraph) -> None
         self.semantic_graph = semantic_graph
 
     def generate(self):  # type: () -> typing.Iterable[unicode]
         env = Environment(loader=PackageLoader('joint', 'templates'))
-        env.filters['map_format'] = _map_format
+        env.filters['map_format'] = map_format_filter
         env.filters['names'] = _names
-        env.filters['mangle_type'] = _make_jinja2_filter(_mangle_type)
+        env.filters['mangle_type'] = make_jinja2_filter(_mangle_type)
         result = env.get_template("template.py.jinja").render(
             hex=hex,
             packages=self.semantic_graph.packages,
             type_name=lambda x: type(x).__name__,
-            delimiter_comment=_delimiter_comment,
+            delimiter_comment=make_delimiter_comment_func('#'),
             mangle_type=_mangle_type,
             interface_descriptor=_make_interface_descriptor,
             default_member_value=_default_member_value

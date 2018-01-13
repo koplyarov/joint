@@ -6,30 +6,12 @@ from jinja2 import Environment, PackageLoader  # type: ignore
 
 from .CodeGeneratorBase import CodeGeneratorBase
 from ..SemanticGraph import Array, BuiltinType, BuiltinTypeCategory, Enum, Interface, Method, Parameter, SemanticGraph, Struct, TypeBase
-from ..GeneratorHelpers import CodeWithInitialization
+from ..GeneratorHelpers import CodeWithInitialization, make_delimiter_comment_func, map_format_filter
 
 
 MYPY = False
 if MYPY:
     import typing
-
-
-def _map_format(values, pattern):
-    for value in values:
-        yield pattern.format(value)
-
-
-def _delimiter_comment(delimiter_symbol, msg=None):
-    assert len(delimiter_symbol) == 1
-
-    leading_delimiter_len = 3
-    total_delimiter_len = 70
-
-    if msg is not None:
-        leading_part = '//{} {} '.format(delimiter_symbol * leading_delimiter_len, msg)
-    else:
-        leading_part = '//'
-    return leading_part + delimiter_symbol * (total_delimiter_len - len(leading_part))
 
 
 class CGenerator(CodeGeneratorBase):
@@ -38,12 +20,12 @@ class CGenerator(CodeGeneratorBase):
 
     def generate(self):  # type: () -> typing.Iterable[unicode]
         env = Environment(loader=PackageLoader('joint', 'templates'))
-        env.filters['map_format'] = _map_format
+        env.filters['map_format'] = map_format_filter
         result = env.get_template("template.c.jinja").render(
             hex=hex,
             packages=self.semantic_graph.packages,
             type_name=lambda x: type(x).__name__,
-            delimiter_comment=_delimiter_comment,
+            delimiter_comment=make_delimiter_comment_func('//'),
             c_type=_to_c_type,
             mangle_type=_mangle_type,
             to_joint_param=_to_joint_param,
