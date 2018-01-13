@@ -1,0 +1,137 @@
+import atexit
+import pyjoint
+import sys
+
+{{delimiter_comment('#')}}
+
+if sys.version_info >= (3, 0):
+    import enum
+else:
+    class _EnumMeta(type):
+        def __init__(self, name, bases, body):
+            static_block = body.pop("__setup_enum__", None)
+            if static_block:
+                static_block(self)
+        def __len__(self):
+            return len(self.__values_to_names__)
+        def __iter__(self): return self.__values__.__iter__()
+        def __reversed__(self): return self.__values__.__reversed__()
+
+    class _Enum(object):
+        __metaclass__ = _EnumMeta
+        __slots__ = ['name', 'value']
+        def __init__(self, value):
+            self.name = self.__values_to_names__[value]
+            self.value = value
+        def __repr__(self): return '<{}: {}>'.format(self.name, self.value)
+        def __str__(self): return str(self.name)
+        def __eq__(self, other): return self.value == other.value
+        def __ne__(self, other): return self.value != other.value
+        def __lt__(self, other): raise TypeError("unorderable types: %s() < %s()" % (self.__class__.__name__, other.__class__.__name__))
+        def __gt__(self, other): raise TypeError("unorderable types: %s() > %s()" % (self.__class__.__name__, other.__class__.__name__))
+        def __le__(self, other): raise TypeError("unorderable types: %s() <= %s()" % (self.__class__.__name__, other.__class__.__name__))
+        def __ge__(self, other): raise TypeError("unorderable types: %s() >= %s()" % (self.__class__.__name__, other.__class__.__name__))
+        def __hash__(self): return hash(self.name)
+
+{{delimiter_comment('#')}}
+
+{%  for p in packages -%}
+{{delimiter_comment('=', '{} enum declarations'.format(p.fullname))}}
+{%      for e in p.enums -%}
+{%          set mangled_type = mangle_type(e) %}
+if sys.version_info >= (3, 0):
+    class {{mangled_type}}(enum.Enum):
+{%-         for v in e.values %}
+        {{v.name}} = {{v.value}}
+{%-         endfor %}
+else:
+    class {{mangled_type}}(_Enum):
+        __slots__ = []
+        __values_to_names__ = {}
+        __values__ = []
+        def __setup_enum__(cls):
+{%-         for v in e.values %}
+            cls.__values_to_names__[{{v.value}}] = '{{v.name}}'
+            cls.{{v.name}} = cls({{v.value}})
+{%-         endfor %}
+{%      endfor %}
+{%  endfor -%}
+
+{{delimiter_comment('#')}}
+
+{%  for p in packages -%}
+{{delimiter_comment('=', '{} struct declarations'.format(p.fullname))}}
+{%      for s in p.structs -%}
+{%          set mangled_type = mangle_type(s) %}
+{{delimiter_comment('-', s.fullname)}}
+class {{mangled_type}}(object):
+    __slots__ = [{{s.members | names | map_format("'{}'") | join(', ')}}]
+    def __init__(self{% for m in s.members %}, {{m.name}}={{default_member_value(m.type)}}{% endfor %}):
+{%-         if not s.members %}
+        pass
+{%-         else %}
+{%-             for m in s.members %}
+        self.{{m.name}} = {{m.name}}
+{%-             endfor %}
+{%-         endif %}
+{%      endfor %}
+{%  endfor -%}
+
+{{delimiter_comment('#')}}
+
+{%  for p in packages -%}
+{{delimiter_comment('=', '{} interface declarations'.format(p.fullname))}}
+{%      for ifc in p.interfaces -%}
+{%          set mangled_type = mangle_type(ifc) %}
+{{delimiter_comment('-', ifc.fullname)}}
+class {{mangled_type}}_accessor(object):
+    __slots__ = ['obj', 'methods', 'descriptor']
+
+    def __init__(self, obj):
+        self.obj = obj
+        self.descriptor = {{mangled_type}}.descriptor
+        self.methods = ({{ifc.methods | names | map_format('obj.{}, ') | join('')}})
+
+class {{mangled_type}}_proxy(pyjoint.ProxyBase):
+    __slots__ = []
+    interfaceChecksum = {{hex(ifc.checksum)}}
+
+    def __init__(self):
+        super({{mangled_type}}_proxy, self).__init__({{mangled_type}}.descriptor)
+{%-         for m in ifc.methods %}
+
+    def {{m.name}}(self{{m.params | names | map_format(', {}') | join()}}):
+        return self({{m.index}}{{m.params | names | map_format(', {}') | join()}})
+{%-         endfor %}
+{% set bases = ['object'] if mangled_type == 'joint_IObject' else ifc.bases | mangle_type%}
+class {{mangled_type}}({{bases | join(', ')}}):
+    __slots__ = []
+    interfaceChecksum = {{hex(ifc.checksum)}}
+    interfaceId = '{{ifc.fullname}}'
+    accessor = {{mangled_type}}_accessor
+    proxy = {{mangled_type}}_proxy
+{%      endfor %}
+{%  endfor -%}
+
+{{delimiter_comment('#')}}
+
+{%  for p in packages -%}
+{{delimiter_comment('=', '{} interface descriptors'.format(p.fullname))}}
+{%      for ifc in p.interfaces -%}
+{%          set mangled_type = mangle_type(ifc) -%}
+    {{mangled_type}}.descriptor = {{interface_descriptor(ifc)}}
+{%     endfor %}
+{%  endfor -%}
+
+{{delimiter_comment('#')}}
+
+@atexit.register
+def _clearDescriptors():
+{%-  for p in packages %}
+{{delimiter_comment('=', '{} interface descriptors cleanup'.format(p.fullname))}}
+{%-     for ifc in p.interfaces -%}
+{%          set mangled_type = mangle_type(ifc) %}
+    {{mangled_type}}.descriptor = None
+{%-     endfor %}
+{%-  endfor %}
+    pass
