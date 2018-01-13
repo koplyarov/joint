@@ -1,5 +1,7 @@
 {
     "cpp": [
+        "array.proxy_array_get_i64.joint",
+        "array.proxy_array_set_i64.joint",
         "basic.component_i32_void.joint",
         "basic.component_string100_void.joint",
         "basic.component_string3_void.joint",
@@ -22,6 +24,8 @@
         "exception.proxy_throw.joint"
     ],
     "c": [
+        "array.proxy_array_get_i64.joint",
+        "array.proxy_array_set_i64.joint",
         "basic.component_i32_void.joint",
         "basic.component_string100_void.joint",
         "basic.component_string3_void.joint",
@@ -44,6 +48,8 @@
         "exception.proxy_throw.joint"
     ],
     "python": [
+        "array.proxy_array_get_i64.joint",
+        "array.proxy_array_set_i64.joint",
         "basic.component_i32_void.joint",
         "basic.component_string100_void.joint",
         "basic.component_string3_void.joint",
@@ -66,6 +72,8 @@
         "exception.proxy_throw.joint"
     ],
     "java": [
+        "array.proxy_array_get_i64.joint",
+        "array.proxy_array_set_i64.joint",
         "basic.component_i32_void.joint",
         "basic.component_string100_void.joint",
         "basic.component_string3_void.joint",
