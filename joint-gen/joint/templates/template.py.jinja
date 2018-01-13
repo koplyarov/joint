@@ -103,7 +103,7 @@ class {{mangled_type}}_proxy(pyjoint.ProxyBase):
     def {{m.name}}(self{{m.params | names | map_format(', {}') | join()}}):
         return self({{m.index}}{{m.params | names | map_format(', {}') | join()}})
 {%-         endfor %}
-{% set bases = ['object'] if mangled_type == 'joint_IObject' else ifc.bases | mangle_type%}
+{%          set bases = ['object'] if mangled_type == 'joint_IObject' else ifc.bases | mangle_type %}
 class {{mangled_type}}({{bases | join(', ')}}):
     __slots__ = []
     interfaceChecksum = {{hex(ifc.checksum)}}

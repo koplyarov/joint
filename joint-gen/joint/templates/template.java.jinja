@@ -1,0 +1,193 @@
+package adapters;
+
+import org.joint.*;
+
+public class Adapters {
+{{delimiter_comment('#')}}
+
+{%  for p in packages -%}
+{{delimiter_comment('=', '{} enum declarations'.format(p.fullname))}}
+{%      for e in p.enums -%}
+{%          set mangled_type = mangle_type(e) %}
+    public static enum {{mangled_type}} {
+{%-         for v in e.values %}
+        {{v.name}}({{v.value}}){{';' if loop.last else ','}}
+{%-         endfor %}
+
+        public final int value;
+
+        {{mangled_type}}(int value) { this.value = value; }
+
+        public static {{mangled_type}} fromInt(int value) {
+            switch (value)
+            {
+{%-         for v in e.values %}
+            case {{v.value}}: return {{v.name}};
+{%-         endfor %}
+            default: return null;
+            }
+        }
+
+        public static TypeDescriptor typeDescriptor = TypeDescriptor.enumType("Ladapters/Adapters${{mangled_type}};", {{mangled_type}}.class);
+    }
+{%      endfor %}
+{%  endfor -%}
+
+{{delimiter_comment('#')}}
+
+{%  for p in packages -%}
+{{delimiter_comment('=', '{} struct declarations'.format(p.fullname))}}
+{%      for s in p.structs -%}
+{%          set mangled_type = mangle_type(s) %}
+{{delimiter_comment('-', s.fullname)}}
+    public static class {{mangled_type}} {
+{%-         for m in s.members %}
+        public {{java_type(m.type)}} {{m.name}};
+{%-         endfor %}
+
+        public {{mangled_type}}() { }
+
+        public {{mangled_type}}(
+{%-         for m in s.members -%}
+            {{java_type(m.type)}} {{m.name}}{{', ' if not loop.last}}
+{%-         endfor -%}
+        ) {
+{%-         for m in s.members %}
+            this.{{m.name}} = {{m.name}};
+{%-         endfor %}
+        }
+
+        public static TypeDescriptor typeDescriptor = TypeDescriptor.structType(
+            "Ladapters/Adapters${{mangled_type}};",
+            {{mangled_type}}.class,
+            new TypeDescriptor.MemberInfo[] {
+{%-         for m in s.members %}
+                new TypeDescriptor.MemberInfo("{{m.name}}", {{type_descriptor(m.type)}}){{',' if not loop.last}}
+{%-         endfor %}
+            }
+        );
+    }
+{%      endfor %}
+{%  endfor -%}
+
+{{delimiter_comment('#')}}
+
+{%  for p in packages -%}
+{{delimiter_comment('=', '{} interface proxies'.format(p.fullname))}}
+{%      for ifc in p.interfaces -%}
+{%          set mangled_type = mangle_type(ifc) %}
+{{delimiter_comment('-', ifc.fullname)}}
+    public static class {{mangled_type}} implements ComponentProxy {
+        public static <T extends AccessorsContainer & {{mangled_type}}_impl> void registerAccessors(T component) {
+            component.addAccessor(new {{mangled_type}}_accessor(component));
+{%-         for b in ifc.bases %}
+            {{mangle_type(b)}}.registerAccessors(component);
+{%-         endfor %}
+        }
+
+        public static {{mangled_type}} makeComponent(ModuleContext module, AccessorsContainer accessorsContainer)
+        { return new {{mangled_type}}(module.register(accessorsContainer.cast(id))); }
+
+        public static {{mangled_type}} cast(ComponentProxy component) {
+            JointObject casted = (component != null) ? component.getJointObject().cast(id, checksum) : null;
+            return (casted != null) ? new {{mangled_type}}(casted) : null;
+        }
+
+        private JointObject _obj;
+
+        {{mangled_type}}(JointObject obj) { this._obj = obj; }
+
+        public JointObject getJointObject() { return _obj; }
+
+{%-         for m in ifc.methods %}
+
+        public {{java_type(m.ret_type)}} {{m.name}}(
+{%-             for p in m.params -%}
+            {{java_type(p.type)}} {{p.name}}{{', ' if not loop.last}}
+{%-             endfor -%}
+        ) {
+{%-             if m.ret_type.fullname != 'void' %}
+            return (({{boxed_type(m.ret_type)}})(
+                _obj.invokeMethod(desc.getNative(), {{m.index}}{{m.params | boxing | map_format(', {}') | join()}})
+            )){{'.value' if isinstance(m.ret_type, BuiltinType) and (m.ret_type.category in [BuiltinTypeCategory.int, BuiltinTypeCategory.bool, BuiltinTypeCategory.float])}};
+{%-             else %}
+            _obj.invokeMethod(desc.getNative(), {{m.index}}{{m.params | boxing | map_format(', {}') | join()}});
+{%-             endif %}
+        }
+{%-         endfor %}
+
+        public static InterfaceId id = new InterfaceId("{{ifc.fullname}}");
+        public static int checksum = {{hex(ifc.checksum)}};
+        public static TypeDescriptor typeDescriptor = TypeDescriptor.interfaceType("Ladapters/Adapters${{mangled_type}};", {{mangled_type}}.class, checksum);
+        public static InterfaceDescriptor desc = new InterfaceDescriptor(
+{%-         for m in ifc.methods %}
+            new MethodDescriptor(
+                {{mangled_type}}_impl.class,
+                "{{m.name}}",
+                {{type_descriptor(m.ret_type)}},
+                new TypeDescriptor[]{
+{%-             for p in m.params -%}
+                    {{type_descriptor(p.type)}}{{', ' if not loop.last}}
+{%-             endfor -%}
+                }
+            ){{',' if not loop.last}}
+{%-         endfor %}
+        );
+    }
+{%      endfor %}
+{%  endfor -%}
+
+{{delimiter_comment('#')}}
+
+{%  for p in packages -%}
+{{delimiter_comment('=', '{} interface accessors'.format(p.fullname))}}
+{%      for ifc in p.interfaces -%}
+{%          set mangled_type = mangle_type(ifc) %}
+{{delimiter_comment('-', ifc.fullname)}}
+    public static class {{mangled_type}}_accessor extends AccessorBase implements Accessor {
+        private {{mangled_type}}_impl obj;
+
+        public <T extends AccessorsContainer & {{mangled_type}}_impl> {{mangled_type}}_accessor(T component) {
+            this(component, component);
+        }
+
+        public {{mangled_type}}_accessor({{mangled_type}}_impl obj, AccessorsContainer accessorsContainer) {
+            super(accessorsContainer);
+            this.obj = obj;
+        }
+
+        public Object getObj() {
+            return obj;
+        }
+
+        public boolean implementsInterface(InterfaceId id) {
+            return {{mangled_type}}.id.equals(id) || joint_IObject.id.equals(id);
+        }
+
+        public InterfaceDescriptor getInterfaceDescriptor() {
+            return {{mangled_type}}.desc;
+        }
+    }
+{%      endfor %}
+{%  endfor -%}
+
+{{delimiter_comment('#')}}
+
+{%  for p in packages -%}
+{{delimiter_comment('=', '{} interfaces'.format(p.fullname))}}
+{%      for ifc in p.interfaces -%}
+{%          set mangled_type = mangle_type(ifc) %}
+{%          set bases = [] if mangled_type == 'joint_IObject' else ifc.bases | mangle_type | map_format('{}_impl') %}
+{{delimiter_comment('-', ifc.fullname)}}
+    public static interface {{mangled_type}}_impl{{' extends ' if bases}}{{bases | join(', ')}} {
+{%-         for m in ifc.methods %}
+        {{java_type(m.ret_type)}} {{m.name}}(
+{%-             for p in m.params -%}
+            {{java_type(p.type)}} {{p.name}}{{',' if not loop.last}}
+{%-             endfor -%}
+        );
+{%-         endfor %}
+    }
+{%      endfor %}
+{%  endfor -%}
+}
