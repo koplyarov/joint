@@ -3,6 +3,7 @@
 
 
 #include <algorithm>
+#include <string.h>
 
 #include <joint.cpp/BytesView.hpp>
 #include <joint.cpp/detail/Iterator.hpp>
