@@ -36,11 +36,11 @@ if (JOINT_NATIVE_FUNCTIONS_ALIGNMENT)
     endif()
 endif()
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/buildsystems/cmake/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/buildsystems/cmake/")
 
-include_directories(${CMAKE_SOURCE_DIR}/core)
-include_directories(${CMAKE_SOURCE_DIR}/devkit)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/core)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/devkit)
 
 add_subdirectory(joint-gen)
 add_subdirectory(core)
@@ -52,7 +52,7 @@ add_subdirectory(benchmarks)
 
 add_custom_target(
     check_whitespaces ALL
-    COMMAND "${CMAKE_SOURCE_DIR}/cmake/py_scripts/validate_whitespaces.py" --dir "${CMAKE_SOURCE_DIR}"
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/cmake/py_scripts/validate_whitespaces.py" --dir "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
 ################################################################################

@@ -6,6 +6,7 @@
 #include <joint/devkit/manifest/ManifestReader.hpp>
 #include <joint/devkit/system/CurrentLibraryPath.hpp>
 #include <joint/devkit/util/JointException.hpp>
+#include <joint/devkit/util/ScopeExit.hpp>
 #include <joint/devkit/util/StringBuilder.hpp>
 
 #include <implementations/swig/ISwigBenchmarks.hpp>

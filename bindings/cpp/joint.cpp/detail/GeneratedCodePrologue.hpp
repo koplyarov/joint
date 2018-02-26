@@ -2,8 +2,6 @@
 #define BINDINGS_CPP_JOINT_CPP_DETAIL_GENERATEDCODEPROLOGUE_HPP
 
 
-#include <joint/devkit/util/ScopeExit.hpp>
-
 #include <algorithm>
 #include <iterator>
 #include <sstream>
@@ -24,28 +22,9 @@
 #include <joint.cpp/detail/RetValueGuard.hpp>
 
 
-#if defined(__GNUC__) || defined(__clang__)
-#   include <cxxabi.h>
-#endif
-
-
 namespace joint {
 namespace detail
 {
-
-#if !defined(__GNUC__) && !defined(__clang__)
-    inline std::string Demangle(const std::string& s)
-    { return s; }
-#else
-    inline std::string Demangle(const std::string& s)
-    {
-        int status = 0;
-        char * result = abi::__cxa_demangle(s.c_str(), 0, 0, &status);
-        auto sg = devkit::ScopeExit([&] { free(result); });
-        return (status != 0) ? s : std::string(result);
-    }
-#endif
-
 
     inline JointCore_Error _ReleaseRetValue(JointCore_Type type, JointCore_Value value)
     {

@@ -35,7 +35,7 @@ if (PYLINT_FOUND)
             ${PYLINT_LOAD_PLUGINS}
             --reports=n
             --msg-template=\"{path}:{line}: {msg_id} {symbol}, {obj} {msg}\"
-            --rcfile=${CMAKE_SOURCE_DIR}/etc/pylintrc
+            --rcfile=${CMAKE_CURRENT_SOURCE_DIR}/../etc/pylintrc
             ${CMAKE_CURRENT_SOURCE_DIR}/joint_gen.py
         COMMENT "Running pylint on joint-gen sources"
     )
