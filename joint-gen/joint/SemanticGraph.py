@@ -291,6 +291,12 @@ class SemanticGraphBuilder(object):
                     elif ifc.fullname != 'joint.IObject':
                         iobject_ifc = cast(Interface, semantic_graph.find_type(['joint'], 'IObject'))  # type: Interface
                         ifc.bases.append(iobject_ifc)
+                elif t_ast['kind'] == 'enum':
+                    e = Enum(t_ast['name'], pkg.name_list, t_ast['location'])
+                    pkg.enums.append(e)
+                elif t_ast['kind'] == 'struct':
+                    s = Struct(t_ast['name'], pkg.name_list, t_ast['location'])
+                    pkg.structs.append(s)
 
         for ast in parsed_files:
             package_name_list = list(ast['package'])
@@ -308,8 +314,7 @@ class SemanticGraphBuilder(object):
                             method.params.append(p)
                         ifc.methods.append(method)
                 elif t_ast['kind'] == 'enum':
-                    e = Enum(t_ast['name'], pkg.name_list, t_ast['location'])
-                    pkg.enums.append(e)
+                    e = cast(Enum, pkg.find_type(t_ast['name']))
                     value = 0
                     if not t_ast['values']:
                         raise SemanticGraphException(t_ast['location'], 'Empty enum type: {}'.format(e.fullname))
@@ -318,8 +323,7 @@ class SemanticGraphBuilder(object):
                         value = v.value + 1
                         e.values.append(v)
                 elif t_ast['kind'] == 'struct':
-                    s = Struct(t_ast['name'], pkg.name_list, t_ast['location'])
-                    pkg.structs.append(s)
+                    s = cast(Struct, pkg.find_type(t_ast['name']))
                     for m_ast in t_ast['members']:
                         member = StructMember(m_ast['name'], semantic_graph.make_type(pkg, m_ast['type']), m_ast['location'])
                         s.members.append(member)
