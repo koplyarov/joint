@@ -2,8 +2,10 @@
 
 #include <joint/JointLoader.h>
 #include <joint/devkit/log/Logger.hpp>
+#include <joint/devkit/util/ScopeExit.hpp>
 
 #include <pyjoint/Common.hpp>
+#include <pyjoint/Module.hpp>
 #include <utils/PythonUtils.hpp>
 
 
@@ -12,32 +14,31 @@ namespace python {
 namespace pyjoint_loader
 {
 
-    //JOINT_DEVKIT_LOGGER("Joint.Python.PyJointLoader")
+    using namespace joint::devkit;
+
+    JOINT_DEVKIT_LOGGER("Joint.Python.PyJointLoader")
 
     PyObject* LoadModule(PyObject* self, PyObject* args, PyObject* kwds)
     {
-        return NULL;
+        PYJOINT_CPP_WRAP_BEGIN
 
-        //PYJOINT_CPP_WRAP_BEGIN
+        const char* location = nullptr;
+        PYTHON_CHECK(PyArg_ParseTuple(args, "s", &location), "Cannot parse LoadModule args");
 
-        //const char* binding_name;
-        //const char* joint_module_name;
-        //PYTHON_CHECK(PyArg_ParseTuple(args, "ss", &binding_name, &joint_module_name), "Could not parse arguments");
+        JointCore_ManifestHandle manifest;
+        JointCore_Error ret = Joint_ReadManifestFromFile(location, &manifest);
+        NATIVE_CHECK(ret == JOINT_CORE_ERROR_NONE, (std::string("Joint_ReadManifestFromFile failed: ") + JointCore_ErrorToString(ret)).c_str());
+        auto manifest_sg = ScopeExit([&]{Joint_DecRefManifest(manifest);});
 
-        //PyObjectHolder py_module_name(PY_OBJ_CHECK(PyUnicode_FromString("pyjoint")));
-        //PyObjectHolder py_module(PY_OBJ_CHECK_MSG(PyImport_Import(py_module_name), "Could not import python module pyjoint"));
+        JointCore_ModuleAccessor accessor;
+        ret = JointCore_LoadModule(manifest, &accessor);
+        NATIVE_CHECK(ret == JOINT_CORE_ERROR_NONE, (std::string("JointCore_LoadModule failed: ") + JointCore_ErrorToString(ret)).c_str());
+        auto module_sg = ScopeExit([&]{JOINT_CORE_DECREF_ACCESSOR(accessor);});
 
-        //PyObjectHolder py_joint_module_type(PY_OBJ_CHECK(PyObject_GetAttrString(py_module, "Module")));
+        PyObject* result = pyjoint::MakeModule(accessor);
+        module_sg.Cancel();
 
-        //JointCore_ModuleHandle module_handle = JOINT_CORE_NULL_HANDLE;
-        //JointCore_Error ret = JOINT_CORE_ERROR_NOT_IMPLEMENTED; // Joint_LoadModuleByName(binding_name, joint_module_name, &module_handle);
-        //NATIVE_CHECK(ret == JOINT_CORE_ERROR_NONE, (std::string("Joint_LoadModuleByName failed: ") + JointCore_ErrorToString(ret)).c_str());
-
-        //PyObjectHolder py_module_handle(PY_OBJ_CHECK(PyCapsule_New(module_handle, "Joint.Module", NULL)));
-        //PyObjectHolder py_params(PY_OBJ_CHECK(Py_BuildValue("(O)", py_module_handle.Get())));
-        //PyObjectHolder py_joint_module(PY_OBJ_CHECK(PyObject_CallObject(py_joint_module_type, py_params)));
-
-        //PYJOINT_CPP_WRAP_END(py_joint_module.Release(), NULL)
+        PYJOINT_CPP_WRAP_END(result, NULL)
     }
 
 }}}

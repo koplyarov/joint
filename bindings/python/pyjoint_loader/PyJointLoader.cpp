@@ -28,10 +28,10 @@ static struct PyModuleDef g_module = {
         NULL, /* m_copy */
     },
 # endif
-   "pyjoint_loader",
-   NULL,
-   -1,
-   g_methods
+    "pyjoint_loader",
+    NULL,
+    -1,
+    g_methods
 };
 #endif
 

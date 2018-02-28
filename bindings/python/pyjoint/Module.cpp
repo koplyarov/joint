@@ -1,6 +1,7 @@
 #include <pyjoint/Module.hpp>
 
 #include <joint/devkit/log/Logger.hpp>
+#include <joint/devkit/util/ScopeExit.hpp>
 #include <joint/devkit/accessors/MakeAccessor.hpp>
 
 #include <binding/Object.hpp>
@@ -132,20 +133,42 @@ namespace pyjoint
         auto m = reinterpret_cast<Module*>(self);
         NATIVE_CHECK(m && !JOINT_CORE_IS_NULL(m->accessor), "Uninitialized module object");
 
+        PyObject* py_interface;
         const char* getter_name;
-        PYTHON_CHECK(PyArg_ParseTuple(args, "s", &getter_name), "Could not parse arguments");
+        PYTHON_CHECK(PyArg_ParseTuple(args, "Os", &py_interface, &getter_name), "Could not parse arguments");
 
-        JointCore_ObjectAccessor obj;
-        JointCore_Error ret = m->accessor.VTable->GetRootObject(m->accessor.Instance, getter_name, &obj);
+#if PY_VERSION_HEX >= 0x03000000
+        PyObjectHolder py_interface_id(PY_OBJ_CHECK(PyObject_GetAttrString(py_interface, "interfaceId")));
+#else
+        PyObjectHolder py_interface_id_attr(PY_OBJ_CHECK(PyObject_GetAttrString(py_interface, "interfaceId")));
+        PyObjectHolder py_interface_id(PY_OBJ_CHECK(PyObject_Unicode(py_interface_id_attr)));
+#endif
+        PyObjectHolder py_checksum(PY_OBJ_CHECK(PyObject_GetAttrString(py_interface, "interfaceChecksum")));
+        JointCore_InterfaceChecksum checksum = FromPyLong<JointCore_InterfaceChecksum>(py_checksum);
+        auto interface_id = Utf8FromPyUnicode(py_interface_id);
+
+        JointCore_ObjectAccessor base_obj = {NULL, NULL};
+        JointCore_Error ret = m->accessor.VTable->GetRootObject(m->accessor.Instance, getter_name, &base_obj);
         NATIVE_CHECK(ret == JOINT_CORE_ERROR_NONE, (std::string("Joint_GetRootObject failed: ") + JointCore_ErrorToString(ret)).c_str());
+        auto base_obj_sg = ScopeExit([&]{ JOINT_CORE_DECREF_ACCESSOR(base_obj); });
 
-        NATIVE_THROW("Not implemented!");
-        PyObjectHolder py_obj;
-        //PyObjectHolder py_obj(PY_OBJ_CHECK(PyObject_CallObject((PyObject*)&Object_type, NULL)));
+        JointCore_ObjectAccessor casted_obj = {NULL, NULL};
+        if (!JOINT_CORE_IS_NULL(base_obj))
+        {
+            JointCore_Error ret = base_obj.VTable->CastObject(base_obj.Instance, interface_id.GetContent(), checksum, &casted_obj);
+            NATIVE_CHECK(ret == JOINT_CORE_ERROR_NONE || ret == JOINT_CORE_ERROR_CAST_FAILED, (std::string("Joint_CastObject failed: ") + JointCore_ErrorToString(ret)).c_str());
+        }
 
-        //reinterpret_cast<Object*>(py_obj.Get())->handle = obj;
+        PyObjectHolder proxy;
+        if (!JOINT_CORE_IS_NULL(casted_obj))
+        {
+            PyObjectHolder proxy_type(PY_OBJ_CHECK(PyObject_GetAttrString(py_interface, "proxy")));
+            proxy = PyObjectHolder(PY_OBJ_CHECK(PyObject_CallObject(proxy_type, nullptr)));
+            reinterpret_cast<ProxyBase*>(proxy.Get())->obj = casted_obj;
+            reinterpret_cast<ProxyBase*>(proxy.Get())->checksum = checksum;
+        }
 
-        PYJOINT_CPP_WRAP_END(py_obj.Release(), Py_None, Py_INCREF(Py_None);)
+        PYJOINT_CPP_WRAP_END(proxy.Release(), Py_None, Py_INCREF(Py_None);)
     }
 
 
@@ -154,7 +177,7 @@ namespace pyjoint
         PYJOINT_CPP_WRAP_BEGIN
 
         auto m = reinterpret_cast<Module*>(self);
-        NATIVE_CHECK(m && !JOINT_CORE_IS_NULL(m->accessor), "Uninitialized module object");
+        NATIVE_CHECK(m, "Uninitialized module object");
 
         auto tuple_size = PyTuple_Size(args);
         NATIVE_CHECK(tuple_size >= 2, "Could not parse arguments");

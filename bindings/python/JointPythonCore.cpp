@@ -50,10 +50,10 @@ static struct PyModuleDef g_module = {
         NULL, /* m_copy */
     },
 # endif
-   "pyjoint",
-   NULL,
-   -1,
-   g_methods
+    "pyjoint",
+    NULL,
+    -1,
+    g_methods
 };
 #endif
 
