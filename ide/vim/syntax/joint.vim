@@ -2,6 +2,9 @@ if exists("b:current_syntax")
     finish
 endif
 
+syn region onelineComment start=#//# end=#$# containedin=ALL keepend
+syn region multilineComment start=#\/\*# end=#\*\/# containedin=ALL keepend
+
 syn match importPackage /.*/ contained
 syn keyword importStatement import nextgroup=importPackage skipwhite
 
@@ -54,6 +57,9 @@ syn region enumDecl start=/\<enum\>/ end=/}/ contains=enumDeclBegin,enumDeclBody
 syn match enumElementName /\<[A-Za-z]\i*\>/ contained
 syn match enumElementValue /\<\d\+\>/ contained
 
+
+hi def link onelineComment Comment
+hi def link multilineComment Comment
 
 hi def link importStatement Statement
 hi def link importPackage String
