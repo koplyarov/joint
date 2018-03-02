@@ -2,9 +2,11 @@
 Joint IDL semantic graph
 """
 
+from collections import deque
 import binascii
 import copy
 import os
+
 from .IdlParser import IdlParser
 
 
@@ -282,15 +284,6 @@ class SemanticGraphBuilder(object):
                 if t_ast['kind'] == 'interface':
                     ifc = Interface(t_ast['name'], pkg.name_list, t_ast['location'])
                     pkg.interfaces.append(ifc)
-                    if 'bases' in t_ast:
-                        for b_ast in t_ast['bases']:
-                            base = semantic_graph.make_type(pkg, b_ast)
-                            if not isinstance(base, Interface):
-                                raise SemanticGraphException(b_ast['location'], '{} is not an interface'.format(base.name))
-                            ifc.bases.append(base)
-                    elif ifc.fullname != 'joint.IObject':
-                        iobject_ifc = cast(Interface, semantic_graph.find_type(['joint'], 'IObject'))  # type: Interface
-                        ifc.bases.append(iobject_ifc)
                 elif t_ast['kind'] == 'enum':
                     e = Enum(t_ast['name'], pkg.name_list, t_ast['location'])
                     pkg.enums.append(e)
@@ -304,6 +297,15 @@ class SemanticGraphBuilder(object):
             for t_ast in ast['types']:
                 if t_ast['kind'] == 'interface':
                     ifc = cast(Interface, pkg.find_type(t_ast['name']))
+                    if 'bases' in t_ast:
+                        for b_ast in t_ast['bases']:
+                            base = semantic_graph.make_type(pkg, b_ast)
+                            if not isinstance(base, Interface):
+                                raise SemanticGraphException(b_ast['location'], '{} is not an interface'.format(base.name))
+                            ifc.bases.append(base)
+                    elif ifc.fullname != 'joint.IObject':
+                        iobject_ifc = cast(Interface, semantic_graph.find_type(['joint'], 'IObject'))  # type: Interface
+                        ifc.bases.append(iobject_ifc)
                     self._add_base_methods(ifc, ifc.bases, set())
                     for m_ast in t_ast['methods']:
                         method = Method(len(ifc.methods), m_ast['name'], semantic_graph.make_type(pkg, m_ast['ret_type']), m_ast['location'])
@@ -344,25 +346,34 @@ class SemanticGraphBuilder(object):
                 if not m.inherited:
                     ifc.methods.append(m.copy_from_base(len(ifc.methods)))
 
-    def _get_dependencies(self, idl_file):  # type: (dict) -> typing.Iterable[str]
-        idl_file_path = self._find_idl_file(idl_file)
-        yield idl_file_path
+    def _get_dependencies(self, idl_file_path):  # type: (str) -> typing.Iterable[str]
         ast = self._idl_parser.parse_file(idl_file_path)
         if 'imports' in ast:
-            for idl in ast['imports']:
-                yield self._find_idl_file(idl)
+            for import_ast_entry in ast['imports']:
+                yield self._resolve_import(import_ast_entry)
 
-    def _find_idl_file(self, import_entry):  # type: (dict) -> str
-        path = import_entry['path']
+    def _resolve_import(self, import_ast_entry):  # type: (dict) -> str
+        path = import_ast_entry['path']
         for import_dir in [''] + ['{}/'.format(d) for d in self._import_directories]:
             idl_file = '{}{}'.format(import_dir, path)
             if os.path.isfile(idl_file):
                 return idl_file
-        raise SemanticGraphException(import_entry['location'], 'Cannot find idl file: {}'.format(path))
+        raise SemanticGraphException(import_ast_entry['location'], 'Cannot find idl file: {}'.format(path))
 
     def _get_files(self, filenames):  # type: (typing.List[str]) -> typing.List[str]
         idl_files = []  # type: typing.List[str]
-        for idl in [idl for f in [{'path': p, 'location': None} for p in self._predefined_imports + filenames] for idl in self._get_dependencies(f)]:
-            if idl not in idl_files:
-                idl_files.append(idl)
+        visited_filenames = set()  # type: typing.Set[str]
+        predefined_import_paths = [self._resolve_import({'path': p, 'location': None}) for p in self._predefined_imports]
+        input_filenames = deque(predefined_import_paths + filenames)
+
+        while input_filenames:
+            filename = input_filenames.popleft()
+            if filename in visited_filenames:
+                continue
+
+            idl_files.append(filename)
+            visited_filenames.add(filename)
+            for dependency in self._get_dependencies(filename):
+                input_filenames.append(dependency)
+
         return idl_files
