@@ -5,6 +5,7 @@ Joint IDL semantic graph
 from collections import deque
 import binascii
 import copy
+import itertools
 import os
 
 from .IdlParser import IdlParser
@@ -209,6 +210,7 @@ class BuiltinType(TypeBase):
 class SemanticGraph(object):
     def __init__(self):  # type: () -> None
         self.packages = []  # type: typing.List[Package]
+        self.flat_interfaces = []  # type: typing.List[Interface]
         self.builtin_types = {
             'void': BuiltinType('void', 'void', 1, BuiltinTypeCategory.void),
             'bool': BuiltinType('bool', 'b', 2, BuiltinTypeCategory.bool),
@@ -334,7 +336,28 @@ class SemanticGraphBuilder(object):
             for ifc in pkg.interfaces:
                 ifc.calculate_checksum()
 
+        semantic_graph.flat_interfaces = self._topologically_sort_interfaces(
+            list(itertools.chain.from_iterable(pkg.interfaces for pkg in semantic_graph.packages))
+        )
+
         return semantic_graph
+
+    def _topologically_sort_interfaces(self, interfaces):
+        new_interfaces = {ifc.fullname: ifc for ifc in interfaces}
+        result = []  # type: typing.List[Interface]
+
+        def visit(ifc):
+            if ifc.fullname in new_interfaces:
+                new_interfaces.pop(ifc.fullname)
+                for b in ifc.bases:
+                    visit(b)
+                result.append(ifc)
+
+        while new_interfaces:
+            ifc_name = next(iter(new_interfaces))
+            visit(new_interfaces[ifc_name])
+
+        return result
 
     def _add_base_methods(self, ifc, bases, visited_interfaces):  # type: (Interface, typing.Sequence[Interface], typing.Set[str]) -> None
         for b in bases:

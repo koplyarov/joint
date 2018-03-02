@@ -31,6 +31,7 @@ class PythonGenerator(CodeGeneratorBase):
         result = env.get_template("template.py.jinja").render(
             hex=hex,
             packages=self.semantic_graph.packages,
+            flat_interfaces=self.semantic_graph.flat_interfaces,
             type_name=lambda x: type(x).__name__,
             delimiter_comment=make_delimiter_comment_func('#'),
             mangle_type=_mangle_type,
