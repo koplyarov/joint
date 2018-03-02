@@ -188,7 +188,7 @@ const char* method_names[] = { {% for m in interface.methods %}"{{interface.full
             {% for b in [ i ] recursive %}
             {%- if loop.first -%}
             if (strcmp(interfaceId, "{{b.fullname}}") == 0)
-                return (checksum == {{mangle_type(b)}}::_GetInterfaceChecksum()) ? JOINT_CORE_ERROR_NONE : JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM;
+                return (checksum == {{hex(b.checksum)}}) ? JOINT_CORE_ERROR_NONE : JOINT_CORE_ERROR_INVALID_INTERFACE_CHECKSUM;
             {% if b.bases -%} {{ loop(b.bases) }} {%- endif -%}
             {%- endif -%}
             {% endfor -%}
