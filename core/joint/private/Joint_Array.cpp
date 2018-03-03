@@ -92,7 +92,7 @@ extern "C"
             Joint_IncRefArray(result.array);
             break;
         case JOINT_CORE_TYPE_OBJ:
-            JOINT_CORE_DECREF_ACCESSOR(result.obj);
+            JOINT_CORE_INCREF_ACCESSOR(result.obj);
             break;
         default:
             break;

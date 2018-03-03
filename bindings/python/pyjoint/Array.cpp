@@ -218,7 +218,7 @@ namespace pyjoint
         }
 
         const auto& element_type_desc = reinterpret_cast<TypeDescriptor*>(self->elementTypeDesc)->GetDescriptor();
-        PyObjectHolder result(ValueMarshaller::FromJoint<PyObjectHolder>(ValueDirection::Return, element_type_desc, value, PythonMarshaller()));
+        PyObjectHolder result(ValueMarshaller::FromJoint<PyObjectHolder>(ValueDirection::Parameter, element_type_desc, value, PythonMarshaller()));
 
         PYJOINT_CPP_WRAP_END(result.Release(), NULL)
     }
@@ -312,7 +312,7 @@ namespace pyjoint
         ++self->index;
 
         const auto& element_type_desc = reinterpret_cast<TypeDescriptor*>(self->elementTypeDesc)->GetDescriptor();
-        PyObjectHolder result(ValueMarshaller::FromJoint<PyObjectHolder>(ValueDirection::Return, element_type_desc, value, PythonMarshaller()));
+        PyObjectHolder result(ValueMarshaller::FromJoint<PyObjectHolder>(ValueDirection::Parameter, element_type_desc, value, PythonMarshaller()));
 
         PYJOINT_CPP_WRAP_END(result.Release(), NULL)
     }

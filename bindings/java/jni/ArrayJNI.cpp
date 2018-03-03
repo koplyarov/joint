@@ -50,7 +50,7 @@ JNIEXPORT jobject JNICALL Java_org_joint_Array_doGet(JNIEnv* env, jclass cls, jo
     JOINT_DEVKIT_CHECK(ret == JOINT_CORE_ERROR_NONE, ret);
 
     TypeDescriptor<JavaBindingInfo> td(JObjTempRef(env, typeDescriptor), JavaBindingInfo());
-    jvalue v = ValueMarshaller::FromJoint<jvalue>(ValueDirection::Return, td, value, JavaMarshaller(env));
+    jvalue v = ValueMarshaller::FromJoint<jvalue>(ValueDirection::Parameter, td, value, JavaMarshaller(env));
     auto result = Boxing(env).Box(td.GetJointType(), v);
 
     JNI_WRAP_CPP_END(result.Release(), nullptr)
