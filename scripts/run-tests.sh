@@ -9,8 +9,10 @@ VG() {
 
 export PYTHONPATH="$ROOT_DIR/build/bin"
 clear
-VG $ROOT_DIR/build/bin/cpp/Tests/Tests.jm
-VG $ROOT_DIR/build/bin/cpp/Tests/Tests-noexcept.jm
-VG $ROOT_DIR/build/bin/c/Tests/Tests.jm
-VG $ROOT_DIR/build/bin/python/Tests/Tests.jm
-$ROOT_DIR/build/bin/joint-test $ROOT_DIR/build/bin/java/Tests/Tests.jm
+# VG $ROOT_DIR/build/bin/cpp/Tests/Tests.jm
+# VG $ROOT_DIR/build/bin/cpp/Tests/Tests-noexcept.jm
+# VG $ROOT_DIR/build/bin/c/Tests/Tests.jm
+# VG $ROOT_DIR/build/bin/python/Tests/Tests.jm
+# $ROOT_DIR/build/bin/joint-test $ROOT_DIR/build/bin/java/Tests/Tests.jm
+$ROOT_DIR/build/bin/joint-test $ROOT_DIR/build/bin/go/Tests/Tests.jm
+#VG $ROOT_DIR/build/bin/go/Tests/Tests.jm

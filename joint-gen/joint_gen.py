@@ -52,6 +52,7 @@ def make_generator(language_id, semantic_graph):  # type: (str, joint.SemanticGr
         'python': joint.generators.PythonGenerator,
         'c++': joint.generators.CppGenerator,
         'c': joint.generators.CGenerator,
+        'go': joint.generators.GoGenerator,
         'java': joint.generators.JavaGenerator
     }
 

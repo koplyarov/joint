@@ -1,0 +1,192 @@
+package main
+
+/*
+{%  for p in packages -%}
+{%      for ifc in p.interfaces -%}
+{%-         set mangled_type = mangle_type(ifc) %}
+static const char* Get_{{mangled_type}}_interfaceId() { return "{{ifc.fullname}}"; }
+{%-      endfor -%}
+{%- endfor %}
+*/
+import "C"
+
+import "joint"
+import "sync/atomic"
+import "unsafe"
+
+{{delimiter_comment('#')}}
+
+{%  for p in packages -%}
+{{delimiter_comment('=', '{} enum declarations'.format(p.fullname))}}
+{%      for e in p.enums -%}
+{%          set mangled_type = mangle_type(e) %}
+type {{mangled_type}} int32
+
+const (
+{%-         for v in e.values %}
+    {{mangled_type}}_{{v.name}} {{mangled_type}} = {{v.value}}
+{%-         endfor %}
+)
+
+func (self {{mangled_type}}) String() string {
+    switch self {
+{%-         for v in e.values %}
+    case {{mangled_type}}_{{v.name}}: return "{{e.fullname}}.{{v.name}}";
+{%-         endfor %}
+    default: return "<Unknown {{e.fullname}} value>";
+    }
+}
+{%      endfor %}
+{%  endfor -%}
+
+{{delimiter_comment('#')}}
+
+{%  for p in packages -%}
+{{delimiter_comment('=', '{} struct declarations'.format(p.fullname))}}
+{%      for s in p.structs -%}
+{%          set mangled_type = mangle_type(s) %}
+{{delimiter_comment('-', s.fullname)}}
+type {{mangled_type}} struct
+{
+{%-         for m in s.members %}
+    {{m.name}} {{go_type(m.type)}}
+{%-         endfor %}
+}
+{%      endfor %}
+{%  endfor -%}
+
+{{delimiter_comment('#')}}
+
+{%  for p in packages -%}
+{{delimiter_comment('=', '{} interface declarations'.format(p.fullname))}}
+{%      for ifc in p.interfaces -%}
+{%          set mangled_type = mangle_type(ifc) %}
+{{delimiter_comment('-', ifc.fullname)}}
+
+const {{mangled_type}}_interfaceId = "{{ifc.fullname}}"
+const _{{mangled_type}}_interfaceChecksum = {{hex(ifc.checksum)}}
+
+type {{mangled_type}}_methods interface {
+{%-         for m in ifc.methods %}
+    {{m.name}}({%- for p in m.params -%}{{p.name}} {{go_type(p.type)}}{{', ' if not loop.last}}{%- endfor -%}) {{go_type(m.ret_type)}}
+{%-         endfor %}
+}
+
+type {{mangled_type}}_impl interface {
+    joint.Internal_Castable
+    {{mangled_type}}_methods
+}
+
+type {{mangled_type}} interface {
+    joint.Internal_Proxy
+    {{mangled_type}}_methods
+}
+
+type {{mangled_type}}_accessor struct {
+    component {{mangled_type}}_impl
+    refCount int32
+}
+
+func (self *{{mangled_type}}_accessor) IncRef() {
+    atomic.AddInt32(&self.refCount, 1)
+}
+
+func (self *{{mangled_type}}_accessor) DecRef() int32 {
+    return atomic.AddInt32(&self.refCount, -1)
+}
+
+func (self *{{mangled_type}}_accessor) GetCastable() joint.Internal_Castable {
+    return self.component
+}
+
+func (self *{{mangled_type}}_accessor) InvokeMethod(
+    methodId joint.Internal_Size,
+    params *joint.Internal_ValueStorage,
+    paramsCount joint.Internal_Size,
+    outRetValue *joint.Internal_RetValueStorage,
+) joint.Internal_ErrorCode {
+    switch (methodId) {
+{%-         for m in ifc.methods %}
+    case {{m.index}}:
+{%-             for p in m.params %}
+{%-                 set param_val = from_joint_param(p.type, 'params, {}'.format(p.index)) %}
+        {{param_val.initialization | join('\n') | indent(8) }}
+        var p{{p.index}} {{go_type(p.type)}} = {{param_val.code}}
+{%-             endfor %}
+{%             if m.ret_type.fullname != 'void' %}
+        var result = 
+{%-             endif -%}
+        self.component.{{m.name}}({{m.params | map_format('p{x.index}') | join(', ')}})
+{%-             if m.ret_type.fullname != 'void' %}
+{%-                 set ret_val = to_joint_retval(m.ret_type, 'result', 'outRetValue') %}
+        {{ret_val.initialization | join('\n') | indent(8)}}
+{%-             endif %}
+        return joint.Internal_ErrorCode_None
+{%-         endfor %}
+    default:
+        panic("Unknown methodId")
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type {{mangled_type}}_proxy struct {
+    accessor joint.Internal_AccessorNative
+}
+
+func (self *{{mangled_type}}_proxy) GetAccessor() joint.Internal_AccessorNative {
+    return self.accessor
+}
+
+{%-         for m in ifc.methods %}
+func (self *{{mangled_type}}_proxy) {{m.name}}({%- for p in m.params -%}{{p.name}} {{go_type(p.type)}}{{', ' if not loop.last}}{%- endfor -%}) {{go_type(m.ret_type)}} {
+    var rv joint.Internal_RetValueStorage
+{%-             if m.params %}
+    var params [{{m.params | length}}]joint.Internal_ValueStorage
+{%-             endif %}
+{%-             for p in m.params -%}
+{%-                 set param_val = to_joint_param(p.type, p.name, 'params[{}]'.format(loop.index0)) %}
+    {{param_val.initialization | join('\n') | indent(4)}}
+{%-             endfor %}
+    var ret = joint.Internal_Accessor_InvokeMethod(self.accessor, {{m.index}}, {{'&params[0]' if m.params else 'nil'}}, {{m.params | length}}, &rv)
+    if (ret != 0) {
+        panic("Accessor_InvokeMethod failed!")
+    }
+{%-             if m.ret_type.fullname != 'void' %}
+{%-                 set ret_val = from_joint_retval(m.ret_type, '&rv, 0') %}
+    {{ret_val.initialization | join('\n') | indent(4)}}
+    return {{ret_val.code}}
+{%-             endif %}
+}
+{%-         endfor %}
+
+func CastTo_{{mangled_type}}(obj joint.Internal_Proxy) {{mangled_type}} {
+    if obj == nil {
+        return nil
+    }
+    var accessor = obj.GetAccessor()
+    var outAccessor joint.Internal_AccessorNative
+    var err = joint.Internal_Accessor_CastObject(
+        accessor,
+        joint.Internal_InterfaceId(unsafe.Pointer(C.Get_{{mangled_type}}_interfaceId())),
+        _{{mangled_type}}_interfaceChecksum,
+        &outAccessor,
+    )
+    if err == joint.Internal_ErrorCode_CastFailed {
+        return nil
+    }
+    return &{{mangled_type}}_proxy{outAccessor}
+}
+
+func Make_{{mangled_type}}(component {{mangled_type}}_impl) {{mangled_type}} {
+    var accessor joint.Internal_AccessorNative
+    var objectId = joint.Internal_RegisterObject(&{{mangled_type}}_accessor{component, 1})
+    joint.Internal_Accessor_Init(joint.Internal_ComponentHandle(objectId), &accessor)
+    return &{{mangled_type}}_proxy{accessor}
+}
+
+func Delete_{{mangled_type}}(proxy {{mangled_type}}) {
+    joint.Internal_Accessor_DecRef(proxy.GetAccessor())
+}
+{%      endfor %}
+{%  endfor -%}

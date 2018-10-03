@@ -11,12 +11,12 @@
 #include <tests/BasicTests.hpp>
 #include <tests/CastTests.hpp>
 #include <tests/EnumTests.hpp>
-#include <tests/ExceptionTests.hpp>
+//#include <tests/ExceptionTests.hpp>
 //#include <tests/InterfaceChecksumTests.hpp>
 #include <tests/LifetimeTests.hpp>
 #include <tests/ObjectTests.hpp>
-#include <tests/StructTests.hpp>
-#include <tests/ArrayTests.hpp>
+//#include <tests/StructTests.hpp>
+//#include <tests/ArrayTests.hpp>
 
 
 int main(int argc, const char* argv[])

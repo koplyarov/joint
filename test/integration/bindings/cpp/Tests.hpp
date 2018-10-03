@@ -178,6 +178,7 @@ public:
     JOINT_CPP_RET_TYPE(ISomeObject_Ptr) ReturnNewObject()
     { return _moduleContext.MakeComponent<ISomeObject, SomeObject>(); }
 
+    ////////////////////////////////////////////////////////////////////////////////
 
     JOINT_CPP_RET_TYPE(ILifetimeListenable_Ptr) CreateListenable()
     { return _moduleContext.MakeComponent<ILifetimeListenable, LifetimeListenable>(); }

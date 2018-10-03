@@ -14,6 +14,10 @@ class CodeWithInitialization(object):
         self.initialization = initialization or []
 
 
+def raise_exc(msg):
+    raise RuntimeError(msg)
+
+
 def map_format_filter(values, pattern):
     for value in values:
         yield pattern.format(value, x=value)

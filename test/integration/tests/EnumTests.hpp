@@ -47,12 +47,12 @@ TEST_DEFINE_TEST(TestCtx, EnumTests)
 
     e = test::Enum::Value3;
     auto tcb = Module.GetRootObject<test::IEnumCallbackTests>("GetTests");
-    auto cb = Ctx.MakeComponent<joint::IObject, EnumTestsCallback>();
-    TEST_EQUALS(tcb->CallbackStringRepresentation(joint::Cast<test::IEnumTests>(cb), e), joint::String("Value3"));
-    TEST_EQUALS(tcb->CallbackGetNextValueInRing(joint::Cast<test::IEnumTests>(cb), test::Enum::Value1)._RawValue(), test::Enum::Value2);
-    TEST_EQUALS(tcb->CallbackGetNextValueInRing(joint::Cast<test::IEnumTests>(cb), test::Enum::Value2)._RawValue(), test::Enum::Value3);
-    TEST_EQUALS(tcb->CallbackGetNextValueInRing(joint::Cast<test::IEnumTests>(cb), test::Enum::Value3)._RawValue(), test::Enum::Value4);
-    TEST_EQUALS(tcb->CallbackGetNextValueInRing(joint::Cast<test::IEnumTests>(cb), test::Enum::Value4)._RawValue(), test::Enum::Value1);
+    auto cb = Ctx.MakeComponent<test::IEnumTests, EnumTestsCallback>();
+    TEST_EQUALS(tcb->CallbackStringRepresentation(cb, e), joint::String("Value3"));
+    TEST_EQUALS(tcb->CallbackGetNextValueInRing(cb, test::Enum::Value1)._RawValue(), test::Enum::Value2);
+    TEST_EQUALS(tcb->CallbackGetNextValueInRing(cb, test::Enum::Value2)._RawValue(), test::Enum::Value3);
+    TEST_EQUALS(tcb->CallbackGetNextValueInRing(cb, test::Enum::Value3)._RawValue(), test::Enum::Value4);
+    TEST_EQUALS(tcb->CallbackGetNextValueInRing(cb, test::Enum::Value4)._RawValue(), test::Enum::Value1);
 }
 
 #endif

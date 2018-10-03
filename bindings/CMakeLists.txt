@@ -8,6 +8,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 add_subdirectory(c)
 add_subdirectory(cpp)
+add_subdirectory(go)
 add_subdirectory(java)
 add_subdirectory(native)
 add_subdirectory(python)

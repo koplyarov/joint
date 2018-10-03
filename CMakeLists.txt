@@ -47,8 +47,8 @@ add_subdirectory(core)
 add_subdirectory(devkit)
 add_subdirectory(bindings)
 add_subdirectory(test)
-add_subdirectory(examples)
-add_subdirectory(benchmarks)
+#add_subdirectory(examples)
+#add_subdirectory(benchmarks)
 
 add_custom_target(
     check_whitespaces ALL
