@@ -16,6 +16,7 @@ namespace pyjoint
     static PyObject* JointException_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
     static int JointException_init(PyObject* self, PyObject* args, PyObject* kwds);
     static void JointException_del(PyObject* self);
+    static PyObject* JointException_repr(PyObject* self);
 
     static PyMethodDef JointException_methods[] = {
         {NULL}
@@ -31,13 +32,13 @@ namespace pyjoint
         0,                         // tp_getattr
         0,                         // tp_setattr
         0,                         // tp_reserved
-        0,                         // tp_repr
+        JointException_repr,       // tp_repr
         0,                         // tp_as_number
         0,                         // tp_as_sequence
         0,                         // tp_as_mapping
         0,                         // tp_hash
         0,                         // tp_call
-        0,                         // tp_str
+        JointException_repr,       // tp_str
         0,                         // tp_getattro
         0,                         // tp_setattro
         0,                         // tp_as_buffer
@@ -107,6 +108,70 @@ namespace pyjoint
         Py_TYPE(self)->tp_free(self);
 
         PYJOINT_CPP_WRAP_END_VOID()
+    }
+
+
+#define DETAIL_JOINT_PY_EXCEPTION_TRY(...) \
+        do { \
+            JointCore_Error __ret__ = (__VA_ARGS__); \
+            NATIVE_CHECK(__ret__ == JOINT_CORE_ERROR_NONE, (std::string(#__VA_ARGS__ " failed: ") + JointCore_ErrorToString(__ret__)).c_str()); \
+        } while (false);
+
+    static PyObject* JointException_repr(PyObject* self)
+    {
+        PYJOINT_CPP_WRAP_BEGIN
+
+        auto ex = reinterpret_cast<JointException*>(self);
+        JointCore_Exception_DecRef(ex->ex);
+
+        std::stringstream ss;
+
+        const char* msg;
+        DETAIL_JOINT_PY_EXCEPTION_TRY(JointCore_Exception_GetMessage(ex->ex, &msg));
+        ss << msg;
+
+        JointCore_SizeT bt_size;
+        DETAIL_JOINT_PY_EXCEPTION_TRY(JointCore_Exception_GetBacktraceSize(ex->ex, &bt_size));
+
+        for (JointCore_SizeT i = 0; i < bt_size; ++i)
+        {
+            JointCore_Exception_BacktraceEntry e;
+            DETAIL_JOINT_PY_EXCEPTION_TRY(JointCore_Exception_GetBacktraceEntry(ex->ex, i, &e));
+
+            ss << "\n\tat ";
+            if (e.function[0])
+                ss << e.function;
+
+            if (e.module[0] || e.filename[0])
+            {
+                if (e.function[0])
+                    ss << "(";
+
+                if (e.module[0])
+                    ss << e.module;
+                if (e.filename[0])
+                {
+                    ss << (e.module[0] ? "" : ", ") << e.filename;
+                    if (e.line != JOINT_CORE_EXCEPTION_INVALID_LINE)
+                        ss << ":" << e.line;
+                }
+
+                if (e.function[0])
+                    ss << ")";
+            }
+
+            if (e.code[0])
+            {
+                if (e.module[0] || e.function[0] || e.filename[0])
+                    ss << ": ";
+                ss << "'" << e.code << "'";
+            }
+        }
+
+        auto s = ss.str();
+        PyObjectHolder result(PY_OBJ_CHECK(PyUnicode_FromString(s.c_str())));
+
+        PYJOINT_CPP_WRAP_END(result.Release(), NULL)
     }
 
 }}}
