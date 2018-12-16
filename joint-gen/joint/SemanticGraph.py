@@ -30,7 +30,7 @@ class TypeBase(object):
         self,
         name,  # type: str
         package_name_list,  # type: typing.List[str]
-        location,  # type: dict
+        location,  # type: typing.Optional[dict]
         variant_name,  # type: str
         index,  # type: int
         need_release  # type: bool
@@ -162,7 +162,7 @@ class Package(object):
         return '.'.join(self.name_list)
 
     def find_type(self, name):  # type: (str) -> TypeBase
-        result = next((t for t in self.interfaces if t.name == name), None)  # type: TypeBase
+        result = next((t for t in self.interfaces if t.name == name), None)  # type: typing.Optional[TypeBase]
         if not result:
             result = next((t for t in self.enums if t.name == name), None)
         if not result:

@@ -67,4 +67,4 @@ class IdlParser(object):
         except (ParseException, ParseSyntaxException) as e:
             raise IdlParserException(str(e), {'lineno': e.lineno, 'file': file_, 'col': e.col})
         finally:
-            self._file = None
+            self._file = ''
